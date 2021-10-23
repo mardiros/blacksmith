@@ -1,23 +1,23 @@
 from __future__ import absolute_import, unicode_literals
+from typing import Mapping
 
-from typing import Mapping, Tuple
-
+from ...typing import Service, ServiceName, Version
 from .. import UnregisteredServiceException
 from ..base import AbtractServiceDiscovery, Url
 
-Endpoint = Mapping[Tuple[str, str], Url]
+Endpoints = Mapping[Service, Url]
 
 
 class StaticDiscovery(AbtractServiceDiscovery):
     """
     A discovery instance based on a static dictionary.
     """
-    endpoints: Endpoint
+    endpoints: Endpoints
 
-    def __init__(self, endpoints: Endpoint):
+    def __init__(self, endpoints: Endpoints) -> None:
         self.endpoints = endpoints
 
-    async def get_endpoint(self, service: str, version: str) -> Url:
+    async def get_endpoint(self, service: ServiceName, version: Version) -> Url:
         """
         Retrieve endpoint using the given parameters from `endpoints`.
         """

@@ -11,3 +11,4 @@ This is usefull for contributing to aioli.
    :caption: Contents:
 
    sd/index
+   domain/index
