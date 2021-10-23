@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "aioli"
+version = "0.1.0"
+description = "Json HTTP Client"
+authors = ["Guillaume Gauvrit <guillaume@gauvr.it>"]
+license = "BSD-derived"
+
+[tool.poetry.dependencies]
+python = "^3.7"
+httpx = "^0.20.0"
+pydantic = "^1.8.2"
+
+[tool.poetry.dev-dependencies]
+pytest = "^6.2.5"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
