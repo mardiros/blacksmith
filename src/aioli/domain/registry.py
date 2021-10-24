@@ -2,7 +2,7 @@
 
 
 from collections import defaultdict
-from typing import Mapping, MutableMapping, Optional, Tuple, Type
+from typing import Mapping, MutableMapping, Optional, Tuple, Type, cast
 
 from aioli.typing import (
     ClientName,
@@ -13,19 +13,12 @@ from aioli.typing import (
     ServiceName,
     Version,
 )
+
+from .exceptions import ConfigurationError, UnregisteredClientException
 from .model import Params, Response
 
-Contract = Mapping[HttpMethod, Tuple[Type[Params], Optional[Type[Response]]]]
-
-
-class ConfigurationError(Exception):
-    """Raised if there is a conflict for client and service."""
-
-    def __init__(self, client: ClientName, service: Service, other: Service) -> None:
-        super().__init__(
-            f"Client {client} has been registered twice with "
-            f"{service[0]}/{service[1]} and {other[0]}/{other[1]}"
-        )
+Schemas = Tuple[Type[Params], Optional[Type[Response]]]
+Contract = Mapping[HttpMethod, Schemas]
 
 
 class HttpResource:
@@ -71,6 +64,9 @@ class ApiRoutes:
             if collection_path
             else None
         )
+
+
+Resources = Mapping[ResourceName, ApiRoutes]
 
 
 class Registry:
@@ -123,8 +119,20 @@ class Registry:
             collection_contract,
         )
 
+    def get_service(self, client_name: ClientName) -> Tuple[Service, Resources]:
+        """
+        Get the service associated for the client.
+
+        This method is used to find the endpoint of the service.
+        """
+        try:
+            return self.client_service[client_name], self.clients[client_name]
+        except KeyError as k:
+            raise UnregisteredClientException(client_name)
+
 
 registry = Registry()
+"""Detault registry."""
 
 def register(
     client_name: ClientName,
@@ -136,6 +144,11 @@ def register(
     collection_path: Optional[Path] = None,
     collection_contract: Optional[Contract] = None,
 ):
+    """
+    Register a resource in a client in the default registry.
+    
+    See :func:`aioli.domain.registry.Registry.register` for the signature.
+    """
     registry.register(
         client_name,
         resource,

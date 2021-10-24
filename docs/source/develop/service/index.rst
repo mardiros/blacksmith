@@ -1,9 +1,10 @@
-Service Discovery
-=================
+Domain
+======
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
    base
-   static
+   client
+   adapters/httpx

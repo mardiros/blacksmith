@@ -11,3 +11,4 @@ from .domain.model import (
     Response,
 )
 from .domain.registry import register
+from .service.client import ClientFactory

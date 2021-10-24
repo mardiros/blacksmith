@@ -12,3 +12,4 @@ This is usefull for contributing to aioli.
 
    sd/index
    domain/index
+   service/index

@@ -1,8 +1,10 @@
 from __future__ import absolute_import, unicode_literals
+
 from typing import Mapping
 
-from ...typing import Service, ServiceName, Version
-from .. import UnregisteredServiceException
+from aioli.domain.exceptions import UnregisteredServiceException
+from aioli.typing import Service, ServiceName, Version
+
 from ..base import AbtractServiceDiscovery, Url
 
 Endpoints = Mapping[Service, Url]
@@ -12,6 +14,7 @@ class StaticDiscovery(AbtractServiceDiscovery):
     """
     A discovery instance based on a static dictionary.
     """
+
     endpoints: Endpoints
 
     def __init__(self, endpoints: Endpoints) -> None:

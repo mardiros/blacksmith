@@ -1,7 +1,6 @@
 import pytest
 
-from aioli.sd import UnregisteredServiceException
-from aioli.sd.adapters import StaticDiscovery
+from aioli.domain.exceptions import UnregisteredServiceException
 
 
 @pytest.mark.asyncio
@@ -14,4 +13,4 @@ async def test_static_discovery(static_sd):
 async def test_static_discovery_raise(static_sd):
     with pytest.raises(UnregisteredServiceException) as ctx:
         await static_sd.get_endpoint("dummy", "v2")
-    assert str(ctx.value) == "Unregistered service dummy/v2"
+    assert str(ctx.value) == "Unregistered service 'dummy/v2'"

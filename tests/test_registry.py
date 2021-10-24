@@ -1,5 +1,8 @@
-from aioli.domain.registry import Registry
+import pytest
+from aioli.domain.exceptions import UnregisteredClientException, UnregisteredServiceException
+
 from aioli.domain.model import Params, PathInfoField, PostBodyField, Response
+from aioli.domain.registry import Registry
 
 
 def test_registry_without_collection():
@@ -32,6 +35,7 @@ def test_registry_without_collection():
     assert api["dummies"].resource.contract["GET"][0] == DummyParams
     assert api["dummies"].resource.contract["GET"][1] == Dummy
     assert api["dummies"].collection is None
+
 
 def test_registry_without_response():
     class DummyParams(Params):
@@ -93,9 +97,7 @@ def test_registry_only_collection():
     assert api["dummies"].resource is None
 
 
-
 def test_registry_complete():
-
     class CreateDummyParams(Params):
         name = PostBodyField(str)
 
@@ -142,3 +144,32 @@ def test_registry_complete():
     assert api["dummies"].resource.contract["GET"][1] == Dummy
     assert api["dummies"].resource.contract["DELETE"][0] == DummyParams
     assert api["dummies"].resource.contract["DELETE"][1] is None
+
+
+def test_get_service():
+    class DummyParams(Params):
+        pass
+
+    class Dummy(Response):
+        name = str
+
+    registry = Registry()
+    registry.register(
+        "dummies_api",
+        "dummies",
+        "api",
+        "v5",
+        collection_path="/dummies",
+        collection_contract={
+            "GET": (DummyParams, Dummy),
+        },
+    )
+
+    srv, resources = registry.get_service("dummies_api")
+    assert srv == registry.client_service["dummies_api"]
+    assert resources == registry.clients["dummies_api"]
+
+    with pytest.raises(UnregisteredClientException) as ctx:
+        registry.get_service("DUMMIES_API")
+
+    assert str(ctx.value) == "Unregistered client 'DUMMIES_API'"

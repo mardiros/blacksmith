@@ -7,3 +7,4 @@ Domain
 
    model
    registry
+   exceptions
