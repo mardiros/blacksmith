@@ -34,6 +34,11 @@ release = aioli.__version__
 # ones.
 extensions = ["sphinx.ext.autodoc"]
 
+autodoc_default_options = {
+    'member-order': 'bysource',
+    'undoc-members': True,
+}
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
 

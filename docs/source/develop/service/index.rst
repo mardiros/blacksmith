@@ -1,5 +1,5 @@
-Domain
-======
+Service
+=======
 
 .. toctree::
    :maxdepth: 2
