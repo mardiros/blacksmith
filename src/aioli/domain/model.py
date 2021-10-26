@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from functools import partial
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
+from attr.setters import frozen
 
 from pydantic import BaseModel, Field
 
@@ -29,11 +30,21 @@ PostBodyField = partial(Field, location=BODY)
 simpletypes = Union[str, int, float, bool]
 
 
-@dataclass
+@dataclass(frozen=True)
 class HTTPAuthentication:
-    """Authentication Mechanism"""
+    """Authentication Mechanism."""
 
     headers: Dict[str, str] = field(default_factory=dict)
+
+
+class HTTPUnauthenticated(HTTPAuthentication):
+    """
+    Empty Authentication Mechanism.
+    
+    This is the default value for every call.
+    """
+    def __init__(self):
+        return super().__init__(headers={})
 
 
 class AuthorizationHttpAuthentication(HTTPAuthentication):

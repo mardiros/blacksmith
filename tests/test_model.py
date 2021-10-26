@@ -4,6 +4,7 @@ from typing import Optional
 from aioli.domain.model import (
     AuthorizationHttpAuthentication,
     HTTPResponse,
+    HTTPUnauthenticated,
     HeaderField,
     HTTPAuthentication,
     HTTPRequest,
@@ -18,6 +19,11 @@ from aioli.domain.model import (
 def test_authotization_header():
     auth = AuthorizationHttpAuthentication("Bearer", "abc")
     assert auth.headers == {"Authorization": "Bearer abc"}
+
+
+def test_authotization_http_unauthenticated():
+    auth = HTTPUnauthenticated()
+    assert auth.headers == {}
 
 
 def test_merge_authorization_in_request():

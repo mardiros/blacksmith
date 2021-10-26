@@ -1,6 +1,8 @@
+import sys
 import aioli
-from aioli import Params, PathInfoField
-from aioli.domain.model import Response
+import os
+
+from aioli import Params, PathInfoField, Response, AuthorizationHttpAuthentication
 from aioli.service.client import ClientFactory
 
 
@@ -37,15 +39,15 @@ from aioli.sd.adapters import StaticDiscovery
 from aioli.service.adapters.httpx import HttpxTransport
 
 
-
 async def main():
-    sd = StaticDiscovery(
-        {
-            ("gandi", "v5"): "https://api.gandi.net/v5/"
-        }
-    )
+    if "GANDIV5_API_KEY" not in os.environ:
+        print("Missing environment var GANDIV5_API_KEY", file=sys.stderr)
+        sys.exit(-1)
+    apikey = os.environ["GANDIV5_API_KEY"]
+    sd = StaticDiscovery({("gandi", "v5"): "https://api.gandi.net/v5/"})
     tp = HttpxTransport()
-    cli = ClientFactory(sd, tp)
+    auth = AuthorizationHttpAuthentication("Apikey", apikey)
+    cli = ClientFactory(sd, tp, auth)
     api = await cli("gandi")
     tld = await api.tld.get(TLDInfoGetParam(name="eu"))
     print(tld)

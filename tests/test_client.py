@@ -7,11 +7,17 @@ from aioli.domain.exceptions import (
     UnregisteredRouteException,
     WrongParamsTypeException,
 )
-from aioli.domain.model import HTTPRequest, HTTPResponse, PostBodyField
-from aioli.domain.registry import ApiRoutes
+from aioli.domain.model import (
+    AuthorizationHttpAuthentication,
+    HTTPRequest,
+    HTTPResponse,
+    PostBodyField,
+    HTTPUnauthenticated,
+)
+from aioli.domain.registry import ApiRoutes, Registry
 from aioli.service.base import AbstractTransport
 from aioli.typing import HttpMethod
-from aioli.service.client import Client
+from aioli.service.client import Client, ClientFactory
 
 
 class FakeTransport(AbstractTransport):
@@ -37,6 +43,17 @@ class GetResponse(Response):
     age: int
 
 
+dummy_registry = Registry()
+dummy_registry.register(
+    "api",
+    "dummies",
+    "dummy",
+    "v1",
+    "/dummies/{name}",
+    {"GET": (GetParam, GetResponse)},
+)
+
+
 @pytest.mark.asyncio
 async def test_client(static_sd):
 
@@ -52,7 +69,11 @@ async def test_client(static_sd):
     routes = ApiRoutes("/dummies/{name}", {"GET": (GetParam, GetResponse)}, None, None)
 
     client = Client(
-        "api", "https://dummies.v1", {"dummies": routes}, FakeTransport(resp)
+        "api",
+        "https://dummies.v1",
+        {"dummies": routes},
+        FakeTransport(resp),
+        auth=HTTPUnauthenticated(),
     )
 
     resp = await client.dummies.get({"name": "barbie"})
@@ -88,3 +109,18 @@ async def test_client(static_sd):
         str(ctx.value) == "Invalid type 'tests.test_client.PostParam' for route 'GET' "
         "in resource 'dummies' in client 'api'"
     )
+
+
+@pytest.mark.asyncio
+async def test_client_factory(static_sd):
+    resp = HTTPResponse(200, {})
+    tp = FakeTransport(resp)
+    auth = AuthorizationHttpAuthentication("Bearer", "abc")
+    client = ClientFactory(static_sd, tp, registry=dummy_registry, auth=auth)
+    cli = await client("api")
+
+    assert cli.name == "api"
+    assert cli.endpoint == "https://dummy.v1/"
+    assert set(cli.resources.keys()) == {"dummies"}
+    assert cli.transport == tp
+    assert cli.auth == auth
