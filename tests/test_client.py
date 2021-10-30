@@ -72,7 +72,7 @@ async def test_client(static_sd):
         "api",
         "https://dummies.v1",
         {"dummies": routes},
-        FakeTransport(resp),
+        transport=FakeTransport(resp),
         auth=HTTPUnauthenticated(),
     )
 
@@ -116,7 +116,7 @@ async def test_client_factory(static_sd):
     resp = HTTPResponse(200, {})
     tp = FakeTransport(resp)
     auth = AuthorizationHttpAuthentication("Bearer", "abc")
-    client = ClientFactory(static_sd, tp, registry=dummy_registry, auth=auth)
+    client = ClientFactory(static_sd, auth, tp, registry=dummy_registry)
     cli = await client("api")
 
     assert cli.name == "api"

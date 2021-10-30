@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional, Tuple, Type, Union
+from typing import Any, Dict, Generator, Optional, Tuple, Type, Union
 
 from aioli.service.adapters.httpx import HttpxTransport
 
@@ -87,14 +87,36 @@ class RouteProxy:
 
     def _prepare_response(
         self, response: HTTPResponse, response_schema: Optional[Type[Response]]
-    ):
+    ) -> ResourceResponse:
         if response_schema:
             resp = response_schema.from_http_response(response)
         else:
             resp = response.json
         return resp
 
-    async def collection_request(
+    def _prepare_collection_response(
+        self, response: HTTPResponse, response_schema: Optional[Type[Response]]
+    ) -> Generator[ResourceResponse, None, None]:
+        if response_schema:
+            resp = response_schema.from_http_collection(response)
+        else:
+            resp = response.json or []
+        for ret in resp:
+            yield ret
+
+    async def _yield_collection_request(
+        self,
+        method: HttpMethod,
+        params: Union[Params, Dict[Any, Any]],
+        auth: HTTPAuthentication,
+    ) -> Generator[ResourceResponse, None, None]:
+        req, resp_schema = self._prepare_request(
+            method, params, self.routes.collection, auth
+        )
+        resp = await self.transport.request(method, req)
+        return self._prepare_collection_response(resp, resp_schema)
+
+    async def _collection_request(
         self,
         method: HttpMethod,
         params: Union[Params, Dict[Any, Any]],
@@ -106,7 +128,7 @@ class RouteProxy:
         resp = await self.transport.request(method, req)
         return self._prepare_response(resp, resp_schema)
 
-    async def request(
+    async def _request(
         self,
         method: HttpMethod,
         params: Union[Params, Dict[Any, Any]],
@@ -118,67 +140,71 @@ class RouteProxy:
         resp = await self.transport.request(method, req)
         return self._prepare_response(resp, resp_schema)
 
-    """
-    async def collection_get(self, params: Params) -> Generator[ResourceResponse, None, None]:
-        pass
-    """
+    async def collection_get(
+        self, params: Optional[Params] = None, auth: Optional[HTTPAuthentication] = None
+    ) -> Generator[ResourceResponse, None, None]:
+        return await self._yield_collection_request(
+            "GET",
+            params or Params(),
+            auth or self.auth,
+        )
 
     async def collection_post(
         self, params: Params, auth: Optional[HTTPAuthentication] = None
     ) -> ResourceResponse:
-        return await self.collection_request("POST", params, auth or self.auth)
+        return await self._collection_request("POST", params, auth or self.auth)
 
     async def collection_put(
         self, params: Params, auth: Optional[HTTPAuthentication] = None
     ) -> ResourceResponse:
-        return await self.collection_request("PUT", params, auth or self.auth)
+        return await self._request("PUT", params, auth or self.auth)
 
     async def collection_patch(
         self, params: Params, auth: Optional[HTTPAuthentication] = None
     ) -> ResourceResponse:
-        return await self.collection_request("PATCH", params, auth or self.auth)
+        return await self._request("PATCH", params, auth or self.auth)
 
     async def collection_delete(
         self, params: Params, auth: Optional[HTTPAuthentication] = None
     ) -> ResourceResponse:
-        return await self.collection_request("DELETE", params, auth or self.auth)
+        return await self._request("DELETE", params, auth or self.auth)
 
     async def collection_options(
         self, params: Params, auth: Optional[HTTPAuthentication] = None
     ) -> ResourceResponse:
-        return await self.collection_request("OPTIONS", params, auth or self.auth)
+        return await self._request("OPTIONS", params, auth or self.auth)
 
     async def get(
         self,
         params: Union[Params, Dict[Any, Any]],
         auth: Optional[HTTPAuthentication] = None,
     ) -> ResourceResponse:
-        return await self.request("GET", params, auth or self.auth)
+        return await self._request("GET", params, auth or self.auth)
 
     async def post(
         self, params: Params, auth: Optional[HTTPAuthentication] = None
     ) -> ResourceResponse:
-        return await self.request("POST", params, auth or self.auth)
+        return await self._request("POST", params, auth or self.auth)
 
     async def put(
         self, params: Params, auth: Optional[HTTPAuthentication] = None
     ) -> ResourceResponse:
-        return await self.request("PUT", params, auth or self.auth)
+        return await self._request("PUT", params, auth or self.auth)
 
     async def patch(
         self, params: Params, auth: Optional[HTTPAuthentication] = None
     ) -> ResourceResponse:
-        return await self.request("PATCH", params, auth or self.auth)
+        return await self._request("PATCH", params, auth or self.auth)
 
     async def delete(
         self, params: Params, auth: Optional[HTTPAuthentication] = None
     ) -> ResourceResponse:
-        return await self.request("DELETE", params, auth or self.auth)
+        return await self._request("DELETE", params, auth or self.auth)
 
     async def options(
         self, params: Params, auth: Optional[HTTPAuthentication] = None
     ) -> ResourceResponse:
-        return await self.request("OPTIONS", params, auth or self.auth)
+        return await self._request("OPTIONS", params, auth or self.auth)
 
 
 class Client:
@@ -242,8 +268,8 @@ class ClientFactory:
     def __init__(
         self,
         sd: AbtractServiceDiscovery,
-        transport: AbstractTransport = None,
         auth: HTTPAuthentication = HTTPUnauthenticated(),
+        transport: AbstractTransport = None,
         registry: Registry = default_registry,
     ) -> None:
         self.sd = sd

@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from functools import partial
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
+from typing import Generator, TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
 from attr.setters import frozen
 
 from pydantic import BaseModel, Field
@@ -145,3 +145,10 @@ class Response(BaseModel):
         """Build the response from the given HTTPResponse."""
         if response.json:
             return cls(**response.json)
+
+    @classmethod
+    def from_http_collection(cls, response: HTTPResponse) -> Generator["Response", None, None]:
+        """Yield responses from the given HTTPResponse."""
+        if response.json:
+            for item in response.json:
+                yield cls(**item)
