@@ -106,7 +106,7 @@ async def test_client(static_sd):
     with pytest.raises(WrongParamsTypeException) as ctx:
         await client.dummies.get(PostParam(name="barbie", age=42))
     assert (
-        str(ctx.value) == "Invalid type 'tests.test_client.PostParam' for route 'GET' "
+        str(ctx.value) == "Invalid type 'tests.unittests.test_client.PostParam' for route 'GET' "
         "in resource 'dummies' in client 'api'"
     )
 

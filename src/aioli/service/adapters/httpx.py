@@ -26,4 +26,5 @@ class HttpxTransport(AbstractTransport):
                 headers=headers,
                 content=request.body,
             )
-        return HTTPResponse(r.status_code, json=r.json())
+        json = "" if r.status_code == 204 else r.json()
+        return HTTPResponse(r.status_code, json=json)

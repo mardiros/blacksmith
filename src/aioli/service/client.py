@@ -60,7 +60,7 @@ class RouteProxy:
     def _prepare_request(
         self,
         method: HttpMethod,
-        params: Union[Params, Dict[Any, Any]],
+        params: Union[Optional[Params], Dict[Any, Any]],
         resource: Optional[HttpResource],
         auth: HTTPAuthentication,
     ) -> Tuple[HTTPRequest, Optional[Type[Response]]]:
@@ -74,6 +74,8 @@ class RouteProxy:
         return_schema = resource.contract[method][1]
         if isinstance(params, dict):
             params = param_schema(**params)
+        elif params is None:
+            params = param_schema()
         elif not isinstance(params, param_schema):
             raise WrongParamsTypeException(
                 params.__class__, method, self.name, self.client_name
@@ -107,7 +109,7 @@ class RouteProxy:
     async def _yield_collection_request(
         self,
         method: HttpMethod,
-        params: Union[Params, Dict[Any, Any]],
+        params: Union[Optional[Params], Dict[Any, Any]],
         auth: HTTPAuthentication,
     ) -> Generator[ResourceResponse, None, None]:
         req, resp_schema = self._prepare_request(
@@ -141,36 +143,48 @@ class RouteProxy:
         return self._prepare_response(resp, resp_schema)
 
     async def collection_get(
-        self, params: Optional[Params] = None, auth: Optional[HTTPAuthentication] = None
+        self,
+        params: Union[Optional[Params], Dict[Any, Any]] = None,
+        auth: Optional[HTTPAuthentication] = None,
     ) -> Generator[ResourceResponse, None, None]:
         return await self._yield_collection_request(
             "GET",
-            params or Params(),
+            params,
             auth or self.auth,
         )
 
     async def collection_post(
-        self, params: Params, auth: Optional[HTTPAuthentication] = None
+        self,
+        params: Union[Params, Dict[Any, Any]],
+        auth: Optional[HTTPAuthentication] = None,
     ) -> ResourceResponse:
         return await self._collection_request("POST", params, auth or self.auth)
 
     async def collection_put(
-        self, params: Params, auth: Optional[HTTPAuthentication] = None
+        self,
+        params: Union[Params, Dict[Any, Any]],
+        auth: Optional[HTTPAuthentication] = None,
     ) -> ResourceResponse:
         return await self._request("PUT", params, auth or self.auth)
 
     async def collection_patch(
-        self, params: Params, auth: Optional[HTTPAuthentication] = None
+        self,
+        params: Union[Params, Dict[Any, Any]],
+        auth: Optional[HTTPAuthentication] = None,
     ) -> ResourceResponse:
         return await self._request("PATCH", params, auth or self.auth)
 
     async def collection_delete(
-        self, params: Params, auth: Optional[HTTPAuthentication] = None
+        self,
+        params: Union[Params, Dict[Any, Any]],
+        auth: Optional[HTTPAuthentication] = None,
     ) -> ResourceResponse:
         return await self._request("DELETE", params, auth or self.auth)
 
     async def collection_options(
-        self, params: Params, auth: Optional[HTTPAuthentication] = None
+        self,
+        params: Union[Params, Dict[Any, Any]],
+        auth: Optional[HTTPAuthentication] = None,
     ) -> ResourceResponse:
         return await self._request("OPTIONS", params, auth or self.auth)
 
@@ -182,27 +196,37 @@ class RouteProxy:
         return await self._request("GET", params, auth or self.auth)
 
     async def post(
-        self, params: Params, auth: Optional[HTTPAuthentication] = None
+        self,
+        params: Union[Params, Dict[Any, Any]],
+        auth: Optional[HTTPAuthentication] = None,
     ) -> ResourceResponse:
         return await self._request("POST", params, auth or self.auth)
 
     async def put(
-        self, params: Params, auth: Optional[HTTPAuthentication] = None
+        self,
+        params: Union[Params, Dict[Any, Any]],
+        auth: Optional[HTTPAuthentication] = None,
     ) -> ResourceResponse:
         return await self._request("PUT", params, auth or self.auth)
 
     async def patch(
-        self, params: Params, auth: Optional[HTTPAuthentication] = None
+        self,
+        params: Union[Params, Dict[Any, Any]],
+        auth: Optional[HTTPAuthentication] = None,
     ) -> ResourceResponse:
         return await self._request("PATCH", params, auth or self.auth)
 
     async def delete(
-        self, params: Params, auth: Optional[HTTPAuthentication] = None
+        self,
+        params: Union[Params, Dict[Any, Any]],
+        auth: Optional[HTTPAuthentication] = None,
     ) -> ResourceResponse:
         return await self._request("DELETE", params, auth or self.auth)
 
     async def options(
-        self, params: Params, auth: Optional[HTTPAuthentication] = None
+        self,
+        params: Union[Params, Dict[Any, Any]],
+        auth: Optional[HTTPAuthentication] = None,
     ) -> ResourceResponse:
         return await self._request("OPTIONS", params, auth or self.auth)
 
