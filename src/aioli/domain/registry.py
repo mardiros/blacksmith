@@ -15,9 +15,9 @@ from aioli.typing import (
 )
 
 from .exceptions import ConfigurationError, UnregisteredClientException
-from .model import Params, Response
+from .model import Request, Response
 
-Schemas = Tuple[Type[Params], Optional[Type[Response]]]
+Schemas = Tuple[Type[Request], Optional[Type[Response]]]
 Contract = Mapping[HttpMethod, Schemas]
 
 

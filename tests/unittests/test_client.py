@@ -1,11 +1,11 @@
 import pytest
 
-from aioli import Params, PathInfoField, Response
+from aioli import Request, PathInfoField, Response
 from aioli.domain.exceptions import (
     NoContractException,
     UnregisteredResourceException,
     UnregisteredRouteException,
-    WrongParamsTypeException,
+    WrongRequestTypeException,
 )
 from aioli.domain.model import (
     AuthorizationHttpAuthentication,
@@ -29,11 +29,11 @@ class FakeTransport(AbstractTransport):
         return self.resp
 
 
-class GetParam(Params):
+class GetParam(Request):
     name: str = PathInfoField(str)
 
 
-class PostParam(Params):
+class PostParam(Request):
     name: str = PostBodyField(str)
     age: int = PostBodyField(int)
 
@@ -103,7 +103,7 @@ async def test_client(static_sd):
         == "Unregistered route 'POST' in resource 'dummies' in client 'api'"
     )
 
-    with pytest.raises(WrongParamsTypeException) as ctx:
+    with pytest.raises(WrongRequestTypeException) as ctx:
         await client.dummies.get(PostParam(name="barbie", age=42))
     assert (
         str(ctx.value) == "Invalid type 'tests.unittests.test_client.PostParam' for route 'GET' "

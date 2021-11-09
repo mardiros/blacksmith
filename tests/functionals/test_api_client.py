@@ -2,11 +2,10 @@ from enum import Enum
 from typing import Optional
 
 import pytest
-from pydantic import BaseModel
 
 import aioli
-from aioli import Params, Response
-from aioli.domain.model import PathInfoField, PostBodyField, QueryStringField
+from aioli import Request, Response
+from aioli.domain.model import HTTPError, PathInfoField, PostBodyField, QueryStringField
 from aioli.sd.adapters.static import StaticDiscovery
 from aioli.service.client import ClientFactory
 
@@ -22,25 +21,20 @@ class Item(Response):
     size: SizeEnum = SizeEnum.m
 
 
-class PatchItem(BaseModel):
-    name: Optional[str] = None
-    size: Optional[SizeEnum] = None
-
-
-class CreateItem(Params):
+class CreateItem(Request):
     name: str = PostBodyField()
     size: SizeEnum = PostBodyField(SizeEnum.m)
 
 
-class ListItem(Params):
+class ListItem(Request):
     name: Optional[str] = QueryStringField(None)
 
 
-class GetItem(Params):
+class GetItem(Request):
     item_name: str = PathInfoField()
 
 
-class PatchItem(GetItem):
+class UpdateItem(GetItem):
     name: Optional[str] = PostBodyField(None)
     size: Optional[SizeEnum] = PostBodyField(None)
 
@@ -61,7 +55,7 @@ aioli.register(
     path="/items/{item_name}",
     contract={
         "GET": (GetItem, Item),
-        "PATCH": (PatchItem, None),
+        "PATCH": (UpdateItem, None),
         "DELETE": (DeleteItem, None),
     },
 )
@@ -92,9 +86,15 @@ async def test_crud(dummy_api_endpoint):
         Item(name="dummy1", size=SizeEnum.m),
     ]
 
-    await api.item.collection_post({"name": "zdummy", "size": "L"})
+    # Test http error
+    with pytest.raises(HTTPError) as exc:
+        await api.item.collection_post(CreateItem(name="dummy0", size=SizeEnum.s))
+    assert exc.value.status_code == 409
+    assert exc.value.json == {"detail": "Already Exists"}
+    assert str(exc.value) == "409 Conflict"
 
     # Test the filter parameter in query string
+    await api.item.collection_post({"name": "zdummy", "size": "L"})
     items = await api.item.collection_get(ListItem(name="z"))
     items = list(items)
     assert items == [
@@ -114,6 +114,11 @@ async def test_crud(dummy_api_endpoint):
 
     item = await api.item.get({"item_name": "zdummy"})
     assert item == Item(name="zdummy", size=SizeEnum.l)
+
+    with pytest.raises(HTTPError) as exc:
+        item = await api.item.get({"item_name": "nonono"})
+    assert exc.value.status_code == 404
+    assert exc.value.json == {'detail': 'Item not found'}
 
     # Test delete
     await api.item.delete({"item_name": "zdummy"})

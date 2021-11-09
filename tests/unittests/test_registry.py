@@ -1,12 +1,14 @@
 import pytest
-from aioli.domain.exceptions import UnregisteredClientException, UnregisteredServiceException
+from aioli.domain.exceptions import (
+    UnregisteredClientException,
+)
 
-from aioli.domain.model import Params, PathInfoField, PostBodyField, Response
+from aioli.domain.model import Request, PathInfoField, PostBodyField, Response
 from aioli.domain.registry import Registry
 
 
 def test_registry_without_collection():
-    class DummyParams(Params):
+    class DummyRequest(Request):
         name = PathInfoField(str)
 
     class Dummy(Response):
@@ -20,7 +22,7 @@ def test_registry_without_collection():
         "v5",
         path="/dummies/{name}",
         contract={
-            "GET": (DummyParams, Dummy),
+            "GET": (DummyRequest, Dummy),
         },
     )
 
@@ -32,13 +34,13 @@ def test_registry_without_collection():
     api = registry.clients["dummies_api"]
     assert api["dummies"].resource.path == "/dummies/{name}"
     assert set(api["dummies"].resource.contract.keys()) == {"GET"}
-    assert api["dummies"].resource.contract["GET"][0] == DummyParams
+    assert api["dummies"].resource.contract["GET"][0] == DummyRequest
     assert api["dummies"].resource.contract["GET"][1] == Dummy
     assert api["dummies"].collection is None
 
 
 def test_registry_without_response():
-    class DummyParams(Params):
+    class DummyRequest(Request):
         name = PathInfoField(str)
 
     registry = Registry()
@@ -49,7 +51,7 @@ def test_registry_without_response():
         "v5",
         path="/dummies/{name}",
         contract={
-            "GET": (DummyParams, None),
+            "GET": (DummyRequest, None),
         },
     )
 
@@ -61,12 +63,12 @@ def test_registry_without_response():
     api = registry.clients["dummies_api"]
     assert api["dummies"].resource.path == "/dummies/{name}"
     assert set(api["dummies"].resource.contract.keys()) == {"GET"}
-    assert api["dummies"].resource.contract["GET"][0] == DummyParams
+    assert api["dummies"].resource.contract["GET"][0] == DummyRequest
     assert api["dummies"].resource.contract["GET"][1] == None
 
 
 def test_registry_only_collection():
-    class DummyParams(Params):
+    class DummyRequest(Request):
         pass
 
     class Dummy(Response):
@@ -80,7 +82,7 @@ def test_registry_only_collection():
         "v5",
         collection_path="/dummies",
         collection_contract={
-            "GET": (DummyParams, Dummy),
+            "GET": (DummyRequest, Dummy),
         },
     )
 
@@ -92,16 +94,16 @@ def test_registry_only_collection():
     api = registry.clients["dummies_api"]
     assert api["dummies"].collection.path == "/dummies"
     assert set(api["dummies"].collection.contract.keys()) == {"GET"}
-    assert api["dummies"].collection.contract["GET"][0] == DummyParams
+    assert api["dummies"].collection.contract["GET"][0] == DummyRequest
     assert api["dummies"].collection.contract["GET"][1] == Dummy
     assert api["dummies"].resource is None
 
 
 def test_registry_complete():
-    class CreateDummyParams(Params):
+    class CreateDummyRequest(Request):
         name = PostBodyField(str)
 
-    class DummyParams(Params):
+    class DummyRequest(Request):
         name = PathInfoField(str)
 
     class Dummy(Response):
@@ -115,13 +117,13 @@ def test_registry_complete():
         "v5",
         path="/dummies/{name}",
         contract={
-            "GET": (DummyParams, Dummy),
-            "DELETE": (DummyParams, None),
+            "GET": (DummyRequest, Dummy),
+            "DELETE": (DummyRequest, None),
         },
         collection_path="/dummies",
         collection_contract={
-            "POST": (CreateDummyParams, None),
-            "GET": (Params, Dummy),
+            "POST": (CreateDummyRequest, None),
+            "GET": (Request, Dummy),
         },
     )
 
@@ -133,21 +135,21 @@ def test_registry_complete():
     api = registry.clients["dummies_api"]
     assert api["dummies"].collection.path == "/dummies"
     assert set(api["dummies"].collection.contract.keys()) == {"GET", "POST"}
-    assert api["dummies"].collection.contract["GET"][0] == Params
+    assert api["dummies"].collection.contract["GET"][0] == Request
     assert api["dummies"].collection.contract["GET"][1] == Dummy
-    assert api["dummies"].collection.contract["POST"][0] == CreateDummyParams
+    assert api["dummies"].collection.contract["POST"][0] == CreateDummyRequest
     assert api["dummies"].collection.contract["POST"][1] == None
 
     assert api["dummies"].resource.path == "/dummies/{name}"
     assert set(api["dummies"].resource.contract.keys()) == {"GET", "DELETE"}
-    assert api["dummies"].resource.contract["GET"][0] == DummyParams
+    assert api["dummies"].resource.contract["GET"][0] == DummyRequest
     assert api["dummies"].resource.contract["GET"][1] == Dummy
-    assert api["dummies"].resource.contract["DELETE"][0] == DummyParams
+    assert api["dummies"].resource.contract["DELETE"][0] == DummyRequest
     assert api["dummies"].resource.contract["DELETE"][1] is None
 
 
 def test_get_service():
-    class DummyParams(Params):
+    class DummyRequest(Request):
         pass
 
     class Dummy(Response):
@@ -161,7 +163,7 @@ def test_get_service():
         "v5",
         collection_path="/dummies",
         collection_contract={
-            "GET": (DummyParams, Dummy),
+            "GET": (DummyRequest, Dummy),
         },
     )
 

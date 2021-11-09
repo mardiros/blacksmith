@@ -5,7 +5,7 @@ __version__ = pkg_resources.get_distribution("aioli").version
 from .domain.model import (
     AuthorizationHttpAuthentication,
     HeaderField,
-    Params,
+    Request,
     PathInfoField,
     PostBodyField,
     QueryStringField,

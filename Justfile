@@ -1,6 +1,9 @@
 doc:
     cd docs && poetry run make html
 
+cleandoc:
+    cd docs && poetry run make clean
+
 test: unittests functionaltests
 
 unittests:

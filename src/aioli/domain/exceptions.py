@@ -63,7 +63,7 @@ class NoContractException(RuntimeError):
         )
 
 
-class WrongParamsTypeException(TypeError):
+class WrongRequestTypeException(TypeError):
     def __init__(
         self, type: Type, route: HttpMethod, resource: ResourceName, client: ClientName
     ) -> None:

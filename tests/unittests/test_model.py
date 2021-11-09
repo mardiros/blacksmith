@@ -8,7 +8,7 @@ from aioli.domain.model import (
     HeaderField,
     HTTPAuthentication,
     HTTPRequest,
-    Params,
+    Request,
     PathInfoField,
     PostBodyField,
     QueryStringField,
@@ -46,7 +46,7 @@ def test_request_url():
 
 
 def test_param_to_req():
-    class Dummy(Params):
+    class Dummy(Request):
         x_message_id: int = HeaderField(default=123, alias="X-Message-Id")
         x_sub_id: Optional[int] = HeaderField(alias="X-Sub-Id")
         name: str = PathInfoField()

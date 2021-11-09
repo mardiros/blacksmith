@@ -9,7 +9,9 @@
    :maxdepth: 2
    :caption: Contents:
 
+   user/index
    develop/index
+   glossary
 
 Indices and tables
 ==================

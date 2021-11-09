@@ -2,12 +2,13 @@ import asyncio
 import os
 import sys
 import datetime
+from typing import Iterable, cast
 from pydantic.fields import Field
 
 from pydantic.main import BaseModel
 
 import aioli
-from aioli import AuthorizationHttpAuthentication, Params, PathInfoField, Response
+from aioli import AuthorizationHttpAuthentication, Request, PathInfoField, Response
 from aioli.sd.adapters import StaticDiscovery
 from aioli.service.client import ClientFactory
 
@@ -29,7 +30,7 @@ class ListDomainResponse(Response):
     dates: Dates
 
 
-class DomainParam(Params):
+class DomainParam(Request):
     name: str = PathInfoField(str)
 
 
@@ -50,11 +51,11 @@ aioli.register(
     contract={
         # In this example we don't provide the response model,
         # so we receive a dict for the json response
-        "GET": (Params, None),
+        "GET": (DomainParam, None),
     },
     collection_path="/domain/domains",
     collection_contract={
-        "GET": (Params, ListDomainResponse),
+        "GET": (Request, ListDomainResponse),
     },
 )
 
@@ -73,9 +74,12 @@ async def main():
         domain = await api.domain.get(DomainParam(name=domain))
         print(domain)
     else:
-        domains = await api.domain.collection_get(auth=auth)
+        domains = cast(
+            Iterable[ListDomainResponse], await api.domain.collection_get(auth=auth)
+        )
         for domain in domains:
             print(domain)
+            print(domain.name)
 
 
 asyncio.run(main())

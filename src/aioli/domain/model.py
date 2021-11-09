@@ -40,9 +40,10 @@ class HTTPAuthentication:
 class HTTPUnauthenticated(HTTPAuthentication):
     """
     Empty Authentication Mechanism.
-    
+
     This is the default value for every call.
     """
+
     def __init__(self):
         return super().__init__(headers={})
 
@@ -67,7 +68,7 @@ class HTTPRequest:
     Note that the HTTP method is not present, because the method is
     the funcion called.
 
-    The HTTP Request is filled out using the :class:`.Params` schema.
+    The HTTP Request is filled out using the :class:`.Request` schema.
     """
 
     url_pattern: Url
@@ -106,7 +107,24 @@ class HTTPResponse:
     """Json Body of the response."""
 
 
-class Params(BaseModel):
+class HTTPError(Exception):
+    """Represent the http error."""
+
+    def __init__(self, message: str, request: HTTPRequest, response: HTTPResponse):
+        super().__init__(message)
+        self.request = request
+        self.response = response
+
+    @property
+    def status_code(self):
+        return self.response.status_code
+
+    @property
+    def json(self):
+        return self.response.json
+
+
+class Request(BaseModel):
     """
     Request Params Model.
 
@@ -115,25 +133,33 @@ class Params(BaseModel):
     """
 
     def to_http_request(self, url_pattern: Url) -> HTTPRequest:
-        """Convert the Params to an http request in order to serialize
+        """Convert the request params to an http request in order to serialize
         the http request for the client.
         """
         req = HTTPRequest(url_pattern)
         fields_by_loc: Dict[HttpLocation, Dict[IntStr, Any]] = {
             HEADER: {},
-            PATH : {},
-            QUERY : {},
-            BODY : {},
+            PATH: {},
+            QUERY: {},
+            BODY: {},
         }
         for key, field in self.__fields__.items():
             loc = cast(HttpLocation, field.field_info.extra["location"])
             fields_by_loc[loc].update({field.name: ...})
 
-        headers = self.dict(include=fields_by_loc[HEADER], by_alias=True, exclude_none=True)
-        req.headers = {key:str(val) for key, val in headers.items()}
-        req.path = self.dict(include=fields_by_loc[PATH], by_alias=True, exclude_none=False)
-        req.querystring = self.dict(include=fields_by_loc[QUERY], by_alias=True, exclude_none=True)
-        req.body = self.json(include=fields_by_loc[BODY], by_alias=True, exclude_none=False)
+        headers = self.dict(
+            include=fields_by_loc[HEADER], by_alias=True, exclude_none=True
+        )
+        req.headers = {key: str(val) for key, val in headers.items()}
+        req.path = self.dict(
+            include=fields_by_loc[PATH], by_alias=True, exclude_none=False
+        )
+        req.querystring = self.dict(
+            include=fields_by_loc[QUERY], by_alias=True, exclude_none=True
+        )
+        req.body = self.json(
+            include=fields_by_loc[BODY], by_alias=True, exclude_none=False
+        )
         return req
 
 
@@ -147,7 +173,9 @@ class Response(BaseModel):
             return cls(**response.json)
 
     @classmethod
-    def from_http_collection(cls, response: HTTPResponse) -> Generator["Response", None, None]:
+    def from_http_collection(
+        cls, response: HTTPResponse
+    ) -> Generator["Response", None, None]:
         """Yield responses from the given HTTPResponse."""
         if response.json:
             for item in response.json:

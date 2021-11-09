@@ -6,14 +6,14 @@ from ..domain.exceptions import (
     NoContractException,
     UnregisteredResourceException,
     UnregisteredRouteException,
-    WrongParamsTypeException,
+    WrongRequestTypeException,
 )
 from ..domain.model import (
     HTTPAuthentication,
     HTTPRequest,
     HTTPResponse,
     HTTPUnauthenticated,
-    Params,
+    Request,
     Response,
 )
 from ..domain.registry import (
@@ -60,7 +60,7 @@ class RouteProxy:
     def _prepare_request(
         self,
         method: HttpMethod,
-        params: Union[Optional[Params], Dict[Any, Any]],
+        params: Union[Optional[Request], Dict[Any, Any]],
         resource: Optional[HttpResource],
         auth: HTTPAuthentication,
     ) -> Tuple[HTTPRequest, Optional[Type[Response]]]:
@@ -77,7 +77,7 @@ class RouteProxy:
         elif params is None:
             params = param_schema()
         elif not isinstance(params, param_schema):
-            raise WrongParamsTypeException(
+            raise WrongRequestTypeException(
                 params.__class__, method, self.name, self.client_name
             )
         return (
@@ -109,7 +109,7 @@ class RouteProxy:
     async def _yield_collection_request(
         self,
         method: HttpMethod,
-        params: Union[Optional[Params], Dict[Any, Any]],
+        params: Union[Optional[Request], Dict[Any, Any]],
         auth: HTTPAuthentication,
     ) -> Generator[ResourceResponse, None, None]:
         req, resp_schema = self._prepare_request(
@@ -121,7 +121,7 @@ class RouteProxy:
     async def _collection_request(
         self,
         method: HttpMethod,
-        params: Union[Params, Dict[Any, Any]],
+        params: Union[Request, Dict[Any, Any]],
         auth: HTTPAuthentication,
     ) -> ResourceResponse:
         req, resp_schema = self._prepare_request(
@@ -133,7 +133,7 @@ class RouteProxy:
     async def _request(
         self,
         method: HttpMethod,
-        params: Union[Params, Dict[Any, Any]],
+        params: Union[Request, Dict[Any, Any]],
         auth: HTTPAuthentication,
     ) -> ResourceResponse:
         req, resp_schema = self._prepare_request(
@@ -144,7 +144,7 @@ class RouteProxy:
 
     async def collection_get(
         self,
-        params: Union[Optional[Params], Dict[Any, Any]] = None,
+        params: Union[Optional[Request], Dict[Any, Any]] = None,
         auth: Optional[HTTPAuthentication] = None,
     ) -> Generator[ResourceResponse, None, None]:
         return await self._yield_collection_request(
@@ -155,77 +155,77 @@ class RouteProxy:
 
     async def collection_post(
         self,
-        params: Union[Params, Dict[Any, Any]],
+        params: Union[Request, Dict[Any, Any]],
         auth: Optional[HTTPAuthentication] = None,
     ) -> ResourceResponse:
         return await self._collection_request("POST", params, auth or self.auth)
 
     async def collection_put(
         self,
-        params: Union[Params, Dict[Any, Any]],
+        params: Union[Request, Dict[Any, Any]],
         auth: Optional[HTTPAuthentication] = None,
     ) -> ResourceResponse:
         return await self._request("PUT", params, auth or self.auth)
 
     async def collection_patch(
         self,
-        params: Union[Params, Dict[Any, Any]],
+        params: Union[Request, Dict[Any, Any]],
         auth: Optional[HTTPAuthentication] = None,
     ) -> ResourceResponse:
         return await self._request("PATCH", params, auth or self.auth)
 
     async def collection_delete(
         self,
-        params: Union[Params, Dict[Any, Any]],
+        params: Union[Request, Dict[Any, Any]],
         auth: Optional[HTTPAuthentication] = None,
     ) -> ResourceResponse:
         return await self._request("DELETE", params, auth or self.auth)
 
     async def collection_options(
         self,
-        params: Union[Params, Dict[Any, Any]],
+        params: Union[Request, Dict[Any, Any]],
         auth: Optional[HTTPAuthentication] = None,
     ) -> ResourceResponse:
         return await self._request("OPTIONS", params, auth or self.auth)
 
     async def get(
         self,
-        params: Union[Params, Dict[Any, Any]],
+        params: Union[Request, Dict[Any, Any]],
         auth: Optional[HTTPAuthentication] = None,
     ) -> ResourceResponse:
         return await self._request("GET", params, auth or self.auth)
 
     async def post(
         self,
-        params: Union[Params, Dict[Any, Any]],
+        params: Union[Request, Dict[Any, Any]],
         auth: Optional[HTTPAuthentication] = None,
     ) -> ResourceResponse:
         return await self._request("POST", params, auth or self.auth)
 
     async def put(
         self,
-        params: Union[Params, Dict[Any, Any]],
+        params: Union[Request, Dict[Any, Any]],
         auth: Optional[HTTPAuthentication] = None,
     ) -> ResourceResponse:
         return await self._request("PUT", params, auth or self.auth)
 
     async def patch(
         self,
-        params: Union[Params, Dict[Any, Any]],
+        params: Union[Request, Dict[Any, Any]],
         auth: Optional[HTTPAuthentication] = None,
     ) -> ResourceResponse:
         return await self._request("PATCH", params, auth or self.auth)
 
     async def delete(
         self,
-        params: Union[Params, Dict[Any, Any]],
+        params: Union[Request, Dict[Any, Any]],
         auth: Optional[HTTPAuthentication] = None,
     ) -> ResourceResponse:
         return await self._request("DELETE", params, auth or self.auth)
 
     async def options(
         self,
-        params: Union[Params, Dict[Any, Any]],
+        params: Union[Request, Dict[Any, Any]],
         auth: Optional[HTTPAuthentication] = None,
     ) -> ResourceResponse:
         return await self._request("OPTIONS", params, auth or self.auth)

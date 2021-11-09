@@ -3,12 +3,12 @@ import os
 import sys
 
 import aioli
-from aioli import AuthorizationHttpAuthentication, Params, PathInfoField, Response
+from aioli import AuthorizationHttpAuthentication, Request, PathInfoField, Response
 from aioli.sd.adapters import StaticDiscovery
 from aioli.service.client import ClientFactory
 
 
-class TLDInfoGetParam(Params):
+class TLDInfoGetParam(Request):
     name: str = PathInfoField(str)
 
 
