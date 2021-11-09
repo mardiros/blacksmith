@@ -107,23 +107,6 @@ class HTTPResponse:
     """Json Body of the response."""
 
 
-class HTTPError(Exception):
-    """Represent the http error."""
-
-    def __init__(self, message: str, request: HTTPRequest, response: HTTPResponse):
-        super().__init__(message)
-        self.request = request
-        self.response = response
-
-    @property
-    def status_code(self):
-        return self.response.status_code
-
-    @property
-    def json(self):
-        return self.response.json
-
-
 class Request(BaseModel):
     """
     Request Params Model.

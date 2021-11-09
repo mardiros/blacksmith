@@ -134,6 +134,7 @@ class Registry:
 registry = Registry()
 """Detault registry."""
 
+
 def register(
     client_name: ClientName,
     resource: ResourceName,
@@ -146,7 +147,7 @@ def register(
 ):
     """
     Register a resource in a client in the default registry.
-    
+
     See :func:`aioli.domain.registry.Registry.register` for the signature.
     """
     registry.register(

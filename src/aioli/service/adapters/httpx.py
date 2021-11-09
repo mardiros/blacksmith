@@ -1,8 +1,9 @@
-from httpx import AsyncClient, Response as HttpxRepsonse
+from httpx import AsyncClient
+from httpx import Response as HttpxRepsonse
 
-from aioli.domain.model import HTTPError, HTTPRequest, HTTPResponse
+from aioli.domain.exceptions import HTTPError
+from aioli.domain.model import HTTPRequest, HTTPResponse
 from aioli.typing import HttpMethod
-
 
 from ..base import AbstractTransport
 

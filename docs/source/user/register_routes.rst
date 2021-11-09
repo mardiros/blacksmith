@@ -9,8 +9,7 @@ how to register a resource.
 ::
 
    import aioli
-   from aioli import Request, Response
-   from aioli.domain.model import HTTPError, PathInfoField, PostBodyField, QueryStringField
+   from aioli import Request, Response, PathInfoField, PostBodyField, QueryStringField
 
    class SizeEnum(str, Enum):
       s = "S"
@@ -104,16 +103,16 @@ When no schema is passed (explicitly None), then, the raw response is returned.
 Registration
 ------------
 
-The :term:`client_name` is the name to access to the resource using the client factory.
+The :term:`client_name` is the name to access to the :term:`resource` using the client factory.
 Everytime the `client_name` is used, it must always match the same (:term:`service`, :term:`version`).
+The resource will be a python property of that client that will be manipulable using methods.
 
 This is a design decision to avoid to register client with service and version,
 then resources. But the client name reprent an internal name for a service.
 
-This may be usefull to register the same route of a service under different
+This may be usefull to register the same :term:`resource` of a service under different
 client name by registering different parameter. The idea here is to register
 a client for a specific usage and you may have different schema for that.
-
 
 ::
 
@@ -134,3 +133,42 @@ a client for a specific usage and you may have different schema for that.
          "DELETE": (DeleteItem, None),
       },
    )
+
+
+Not that you can only declare the path and collection_path consumed.
+
+This is completely valid to register only a single route.
+
+::
+
+   aioli.register(
+      client_name="api",
+      resource="item",
+      service="api",
+      version="v1",
+      path="/item",
+      contract={
+         "GET": (GetItem, Item),
+      },
+   )
+
+or event a collection to bind an api that return a list.
+
+::
+
+   aioli.register(
+      client_name="api",
+      resource="item",
+      service="datastore",
+      version="v1",
+      path="/search",
+      collection_contract={
+         "GET": (SearchItem, Item),
+      },
+   )
+
+
+.. note::
+
+   An exception will be raised if a path or an http method has not
+   been declared. No http request will be made.

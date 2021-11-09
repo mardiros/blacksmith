@@ -7,6 +7,7 @@ from aioli.typing import (
     ServiceName,
     Version,
 )
+from .model import HTTPRequest, HTTPResponse
 
 
 class ConfigurationError(Exception):
@@ -71,3 +72,20 @@ class WrongRequestTypeException(TypeError):
             f"Invalid type '{type.__module__}.{type.__name__}' for route '{route}' "
             f"in resource '{resource}' in client '{client}'"
         )
+
+
+class HTTPError(Exception):
+    """Represent the http error."""
+
+    def __init__(self, message: str, request: HTTPRequest, response: HTTPResponse):
+        super().__init__(message)
+        self.request = request
+        self.response = response
+
+    @property
+    def status_code(self):
+        return self.response.status_code
+
+    @property
+    def json(self):
+        return self.response.json

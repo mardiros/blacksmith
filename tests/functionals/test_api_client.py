@@ -4,10 +4,16 @@ from typing import Optional
 import pytest
 
 import aioli
-from aioli import Request, Response
-from aioli.domain.model import HTTPError, PathInfoField, PostBodyField, QueryStringField
-from aioli.sd.adapters.static import StaticDiscovery
-from aioli.service.client import ClientFactory
+from aioli import (
+    ClientFactory,
+    PathInfoField,
+    PostBodyField,
+    QueryStringField,
+    Request,
+    Response,
+    StaticDiscovery,
+)
+from aioli.domain.exceptions import HTTPError, NoContractException
 
 
 class SizeEnum(str, Enum):
@@ -118,7 +124,7 @@ async def test_crud(dummy_api_endpoint):
     with pytest.raises(HTTPError) as exc:
         item = await api.item.get({"item_name": "nonono"})
     assert exc.value.status_code == 404
-    assert exc.value.json == {'detail': 'Item not found'}
+    assert exc.value.json == {"detail": "Item not found"}
 
     # Test delete
     await api.item.delete({"item_name": "zdummy"})
@@ -145,3 +151,9 @@ async def test_crud(dummy_api_endpoint):
         Item(name="dummy0", size=SizeEnum.s),
         Item(name="dummy2", size=SizeEnum.l),
     ]
+
+    with pytest.raises(NoContractException) as exc:
+        items = await api.item.put({})
+    assert (
+        str(exc.value) == "Unregistered route 'PUT' in resource 'item' in client 'api'"
+    )
