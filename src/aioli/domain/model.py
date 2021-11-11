@@ -1,7 +1,6 @@
 from dataclasses import dataclass, field
 from functools import partial
 from typing import Generator, TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
-from attr.setters import frozen
 
 from pydantic import BaseModel, Field
 
