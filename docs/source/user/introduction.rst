@@ -1,10 +1,10 @@
 Introduction
 ============
 
-Aioli is a high level HTTP Client to consume REST API in json.
+Aioli is a high level HTTP Client to consume REST APIs in json.
 
 The aim of this library is to improve the design of application that
-consume REST API in application. Every services are bound in client,
+consume REST APIs in application. Every services are bound in client,
 identified by a `client_name`, and every resources are named under
 that client, and every routes are bound using contracts.
 

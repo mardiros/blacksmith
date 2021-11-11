@@ -1,5 +1,10 @@
-from __future__ import absolute_import, unicode_literals
+"""
+The discovery to start simple.
 
+The static discovery strategy is a good start when you don't need a strategy.
+
+For instance, a short list of services with static endpoint.
+"""
 from typing import Mapping
 
 from aioli.domain.exceptions import UnregisteredServiceException

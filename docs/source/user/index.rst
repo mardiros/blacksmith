@@ -11,3 +11,4 @@ User manual of Aioli.
    introduction
    register_routes
    instanciating_client
+   service_discovery

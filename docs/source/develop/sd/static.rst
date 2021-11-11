@@ -1,7 +1,5 @@
 Static Discovery
 ================
 
-.. module:: aioli.sd.adapters
-
-.. autoclass:: aioli.sd.adapters.StaticDiscovery
+.. automodule:: aioli.sd.adapters.static
    :members:
