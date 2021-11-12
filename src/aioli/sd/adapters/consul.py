@@ -1,6 +1,7 @@
 """
-The discovery based on Consul.
+The discovery based on :term:`Consul`.
 
+This driver implement a client side service discovery.
 """
 import random
 from typing import Callable, cast
@@ -65,13 +66,13 @@ def aioli_cli(endpoint: Url, consul_token: str) -> ClientFactory:
 
 class ConsulDiscovery(AbtractServiceDiscovery):
     """
-    A discovery instance based on a `consul`_ server.
+    A discovery instance based on a :term:`Consul` server.
 
     :param service_name_fmt: pattern for name of versionned service
     :param service_url_fmt: pattern for url of versionned service 
     :param unversioned_service_name_fmt: pattern for name of unversioned service
     :param unversioned_service_url_fmt: pattern for url of unversioned service
-    .. _consul: https://www.consul.io/
+
     """
     service_name_fmt: str
     service_url_fmt: str
