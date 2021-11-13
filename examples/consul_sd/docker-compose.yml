@@ -49,6 +49,8 @@ services:
   registrator:
     image: "gliderlabs/registrator"
     command: -internal consul://consul:8500
+    networks:
+      - "internal"
     volumes:
       - /var/run/docker.sock:/tmp/docker.sock
     depends_on:
@@ -80,3 +82,16 @@ services:
     volumes:
       - "./notif:/srv/notif"
       - "../../src/aioli:/home/notif/.cache/pypoetry/virtualenvs/notif-E5XGZiq1-py3.10/lib/python3.10/site-packages/aioli"
+
+  mailhog:
+    image: mailhog/mailhog
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.mailhog.entrypoints=web"
+      - "traefik.http.routers.mailhog.rule=Host(`mailhog.${DOMAIN_NAME}`)"
+      - "traefik.http.services.mailhog.loadbalancer.server.port=8025"
+    networks:
+      - internal
+    environment:
+      - "SERVICE_1025_NAME=smtp"
+      - "SERVICE_8025_IGNORE=true"

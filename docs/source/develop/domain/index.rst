@@ -8,3 +8,4 @@ Domain
    model
    registry
    exceptions
+   scanner

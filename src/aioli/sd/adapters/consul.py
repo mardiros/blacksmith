@@ -38,7 +38,7 @@ class ServiceRequest(Request):
 
 
 class Service(Response):
-    """Response fields consumed."""
+    """Consul Service response."""
     address: str = Field(alias="ServiceAddress")
     """IP Address of an instance that host the service."""
     port: int = Field(alias="ServicePort")
@@ -115,9 +115,9 @@ class ConsulDiscovery(AbstractServiceDiscovery):
             )
         return endpoint
 
-    async def get_endpoint(self, service: ServiceName, version: Version) -> Url:
+    async def resolve(self, service: ServiceName, version: Version) -> Service:
         """
-        Retrieve endpoint using the given parameters from `endpoints`.
+        Get the :class:`Service` from the consul registry.
 
         If many instances host the service, the host is choosen randomly.
         """
@@ -131,5 +131,13 @@ class ConsulDiscovery(AbstractServiceDiscovery):
             resp = list(resp)
             if not resp:
                 raise UnregisteredServiceException(service, version)
-            resp = cast(Service, random.choice(resp))
-            return self.format_endoint(version, resp.address, resp.port)
+            return cast(Service, random.choice(resp))
+
+    async def get_endpoint(self, service: ServiceName, version: Version) -> Url:
+        """
+        Get the endpoint from the consul registry
+
+        If many instances host the service, the host is choosen randomly.
+        """
+        srv = await self.resolve(service, version)
+        return self.format_endoint(version, srv.address, srv.port)
