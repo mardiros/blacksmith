@@ -12,6 +12,7 @@ from .domain.model import (
     Response,
 )
 from .domain.registry import register
+from .domain.scanner import scan
 from .sd.adapters.static import StaticDiscovery
 from .sd.adapters.consul import ConsulDiscovery
 from .sd.adapters.router import RouterDiscovery
