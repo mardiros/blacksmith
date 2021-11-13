@@ -2,11 +2,12 @@ import pytest
 
 from aioli.sd.adapters.static import StaticDiscovery
 from aioli.sd.adapters.consul import ConsulDiscovery
+from aioli.sd.adapters.router import RouterDiscovery
 from aioli.domain.exceptions import UnregisteredServiceException
 
 
 @pytest.mark.asyncio
-async def test_static_discovery(static_sd):
+async def test_static_discovery(static_sd: StaticDiscovery):
     endpoint = await static_sd.get_endpoint("dummy", "v1")
     assert endpoint == "https://dummy.v1/"
 
@@ -50,3 +51,13 @@ async def test_consul_discovery_get_endpoint_unregistered(consul_sd: ConsulDisco
     with pytest.raises(UnregisteredServiceException) as ctx:
         await consul_sd.get_endpoint("dummy", "v2")
     assert str(ctx.value) == "Unregistered service 'dummy/v2'"
+
+@pytest.mark.asyncio
+async def test_router_sd_get_endpoint_versionned(router_sd: RouterDiscovery):
+    endpoint = await router_sd.get_endpoint("dummy", "v1")
+    assert endpoint == "http://router/dummy/v1"
+
+@pytest.mark.asyncio
+async def test_router_sd_get_endpoint_unversionned(router_sd: RouterDiscovery):
+    endpoint = await router_sd.get_endpoint("dummy", None)
+    assert endpoint == "http://router/dummy"

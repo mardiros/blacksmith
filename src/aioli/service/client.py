@@ -23,7 +23,7 @@ from ..domain.registry import (
     Resources,
     registry as default_registry,
 )
-from ..sd.base import AbtractServiceDiscovery
+from ..sd.base import AbstractServiceDiscovery
 from ..typing import ClientName, HttpMethod, ResourceName, Url
 from .base import AbstractTransport
 
@@ -284,14 +284,14 @@ class ClientFactory:
         default use :data:`aioli.domain.registry.registry`
     """
 
-    sd: AbtractServiceDiscovery
+    sd: AbstractServiceDiscovery
     registry: Registry
     transport: AbstractTransport
     auth: HTTPAuthentication
 
     def __init__(
         self,
-        sd: AbtractServiceDiscovery,
+        sd: AbstractServiceDiscovery,
         auth: HTTPAuthentication = HTTPUnauthenticated(),
         transport: AbstractTransport = None,
         registry: Registry = default_registry,

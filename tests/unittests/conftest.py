@@ -7,6 +7,7 @@ from aioli.domain.model import (
 
 from aioli.sd.adapters.static import StaticDiscovery, Endpoints
 from aioli.sd.adapters.consul import ConsulDiscovery, _registry
+from aioli.sd.adapters.router import RouterDiscovery
 from aioli.service.base import AbstractTransport
 from aioli.service.client import ClientFactory
 from aioli.typing import HttpMethod
@@ -45,3 +46,8 @@ def consul_sd():
         )
 
     return ConsulDiscovery(_client_factory=cli)
+
+
+@pytest.fixture
+def router_sd():
+    return RouterDiscovery()

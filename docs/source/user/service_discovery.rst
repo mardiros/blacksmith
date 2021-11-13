@@ -41,8 +41,11 @@ In that case we have a registry of public service.
    this example is not really usefull.
 
 
+Client Side Service Discovery
+-----------------------------
+
 Consul
-------
+~~~~~~
 
 ConsulDiscovery is consuming the Consul API to fetch host that are
 registered client side, this is a :term:`client-side service discovery`.
@@ -69,3 +72,29 @@ registered client side, this is a :term:`client-side service discovery`.
    endoint must match pattern to build the rest endpoint. So every endpoint
    must follow the same pattern here.
 
+
+Server Side Service Discovery
+-----------------------------
+
+Router
+~~~~~~
+
+RouterDiscovery is calling every service behind a service gateway, a proxy,
+that is connected to the :term:`service registry` to update is configuration.
+
+
+::
+
+   from aioli import RouterDiscovery
+
+   sd = RouterDiscovery(
+        service_url_fmt = "http://router/{service}/{version}",
+        unversioned_service_url_fmt = "http://router/{service}",
+   )
+
+.. note::
+
+   Every endpoint must follow the same pattern here, it works well if the
+   router configuration is based on a :term:`service registry`, but if the
+   configuration of the router is maded by humans, inconcistency may exists,
+   and the `Static Discovery` should be used instead.

@@ -14,4 +14,5 @@ from .domain.model import (
 from .domain.registry import register
 from .sd.adapters.static import StaticDiscovery
 from .sd.adapters.consul import ConsulDiscovery
+from .sd.adapters.router import RouterDiscovery
 from .service.client import ClientFactory

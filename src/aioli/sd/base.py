@@ -3,7 +3,7 @@ import abc
 from ..typing import ServiceName, Url, Version
 
 
-class AbtractServiceDiscovery(abc.ABC):
+class AbstractServiceDiscovery(abc.ABC):
     """Define the Service Discovery interface."""
 
     @abc.abstractmethod

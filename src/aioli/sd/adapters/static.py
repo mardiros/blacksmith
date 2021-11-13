@@ -10,12 +10,12 @@ from typing import Mapping
 from aioli.domain.exceptions import UnregisteredServiceException
 from aioli.typing import Service, ServiceName, Version
 
-from ..base import AbtractServiceDiscovery, Url
+from ..base import AbstractServiceDiscovery, Url
 
 Endpoints = Mapping[Service, Url]
 
 
-class StaticDiscovery(AbtractServiceDiscovery):
+class StaticDiscovery(AbstractServiceDiscovery):
     """
     A discovery instance based on a static dictionary.
     """

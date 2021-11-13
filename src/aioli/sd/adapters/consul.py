@@ -20,7 +20,7 @@ from aioli.domain.model import (
 )
 from aioli.domain.registry import Registry
 from aioli.sd.adapters.static import StaticDiscovery
-from aioli.sd.base import AbtractServiceDiscovery, Url
+from aioli.sd.base import AbstractServiceDiscovery, Url
 from aioli.service.client import ClientFactory
 from aioli.typing import Service, ServiceName, Version
 
@@ -64,7 +64,7 @@ def aioli_cli(endpoint: Url, consul_token: str) -> ClientFactory:
     return ClientFactory(sd, registry=_registry, **kwargs)
 
 
-class ConsulDiscovery(AbtractServiceDiscovery):
+class ConsulDiscovery(AbstractServiceDiscovery):
     """
     A discovery instance based on a :term:`Consul` server.
 

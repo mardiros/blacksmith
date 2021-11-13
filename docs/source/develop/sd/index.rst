@@ -8,3 +8,4 @@ Service Discovery
    base
    static
    consul
+   router
