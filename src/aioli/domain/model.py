@@ -1,6 +1,7 @@
+import re
 from dataclasses import dataclass, field
 from functools import partial
-from typing import Generator, TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
 
 from pydantic import BaseModel, Field
 
@@ -61,6 +62,7 @@ class HTTPAuthorization(HTTPAuthentication):
 
 class HTTPTimeout:
     """Request timeout."""
+
     request: float
     connect: float
 
@@ -107,6 +109,47 @@ class HTTPRequest:
         )
 
 
+# Stolen code from httpx _utils.py (private method)
+def parse_header_links(value: str) -> List[Dict[str, str]]:
+    """
+    Returns a list of parsed link headers, for more info see:
+    https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Link
+    The generic syntax of those is:
+    Link: < uri-reference >; param1=value1; param2="value2"
+    So for instance:
+    Link; '<http:/.../front.jpeg>; type="image/jpeg",<http://.../back.jpeg>;'
+    would return
+        [
+            {"url": "http:/.../front.jpeg", "type": "image/jpeg"},
+            {"url": "http://.../back.jpeg"},
+        ]
+    :param value: HTTP Link entity-header field
+    :return: list of parsed link headers
+    """
+    links: List[Dict[str, str]] = []
+    replace_chars = " '\""
+    value = value.strip(replace_chars)
+    if not value:
+        return links
+    for val in re.split(", *<", value):
+        try:
+            url, params = val.split(";", 1)
+        except ValueError:
+            url, params = val, ""
+        link = {"url": url.strip("<> '\"")}
+        for param in params.split(";"):
+            try:
+                key, value = param.split("=")
+            except ValueError:
+                break
+            link[key.strip(replace_chars)] = value.strip(replace_chars)
+        links.append(link)
+    return links
+
+
+Links = Dict[Optional[str], Dict[str, str]]
+
+
 @dataclass
 class HTTPResponse:
     """
@@ -115,8 +158,21 @@ class HTTPResponse:
 
     status_code: int
     """HTTP Status code."""
+    headers: Dict[str, str]
+    """Header of the response."""
     json: Optional[Any]
     """Json Body of the response."""
+
+    @property
+    def links(self) -> Links:
+        header = self.headers.get("link")
+        ldict = {}
+        if header:
+            links = parse_header_links(header)
+            for link in links:
+                key = link.get("rel") or link.get("url")
+                ldict[key] = link
+        return ldict
 
 
 class Request(BaseModel):
@@ -167,11 +223,37 @@ class Response(BaseModel):
         if response.json:
             return cls(**response.json)
 
-    @classmethod
-    def from_http_collection(
-        cls, response: HTTPResponse
-    ) -> Generator["Response", None, None]:
-        """Yield responses from the given HTTPResponse."""
-        if response.json:
-            for item in response.json:
-                yield cls(**item)
+
+@dataclass
+class Metadata:
+    """Metadata of a collection response."""
+
+    count: int
+    total_count: Optional[int]
+    links: Links
+
+
+class CollectionParser:
+    """
+    Handle the rest collection metadata parser.
+
+    Deserialize how a collection is wrapped.
+    """
+
+    total_count_header: str = "Total-Count"
+
+    def __init__(self, resp: HTTPResponse):
+        self.resp = resp
+
+    @property
+    def meta(self):
+        total_count = self.resp.headers.get(self.total_count_header)
+        return Metadata(
+            count=len(self.json),
+            total_count=None if total_count is None else int(total_count),
+            links=self.resp.links,
+        )
+
+    @property
+    def json(self):
+        return self.resp.json or []

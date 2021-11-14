@@ -1,16 +1,16 @@
 import asyncio
+import datetime
 import os
 import sys
-import datetime
 from typing import Iterable, cast
-from pydantic.fields import Field
 
+from pydantic.fields import Field
 from pydantic.main import BaseModel
 
 import aioli
-from aioli import HTTPAuthorization, Request, PathInfoField, Response
+from aioli import HTTPAuthorization, PathInfoField, QueryStringField, Request, Response
 from aioli.sd.adapters import StaticDiscovery
-from aioli.service.client import ClientFactory
+from aioli.service.client import ClientFactory, CollectionIterator
 
 
 class Dates(BaseModel):
@@ -34,6 +34,10 @@ class DomainParam(Request):
     name: str = PathInfoField(str)
 
 
+class CollectionDomainParam(Request):
+    per_page: int = QueryStringField(2)
+
+
 class GetDomainResponse(Response):
     name: str = Field(str, alias="fqdn_unicode")
 
@@ -55,7 +59,7 @@ aioli.register(
     },
     collection_path="/domain/domains",
     collection_contract={
-        "GET": (Request, ListDomainResponse),
+        "GET": (CollectionDomainParam, ListDomainResponse),
     },
 )
 
@@ -74,9 +78,12 @@ async def main():
         domain = await api.domain.get(DomainParam(name=domain))
         print(domain)
     else:
-        domains = cast(
-            Iterable[ListDomainResponse], await api.domain.collection_get(auth=auth)
-        )
+        domains: CollectionIterator[
+            ListDomainResponse
+        ] = await api.domain.collection_get(auth=auth)
+
+        print(domains.meta)
+        print()
         for domain in domains:
             print(domain)
             print(domain.name)

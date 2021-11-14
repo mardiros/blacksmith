@@ -40,10 +40,12 @@ class HttpxTransport(AbstractTransport):
                     timeout=HttpxTimeout(timeout.request, connect=timeout.connect),
                 )
             except httpx.TimeoutException as exc:
-                raise TimeoutError(f"{exc.__class__.__name__} while calling {method} {request.url}")
+                raise TimeoutError(
+                    f"{exc.__class__.__name__} while calling {method} {request.url}"
+                )
 
         json = "" if r.status_code == 204 else safe_json(r)
-        resp = HTTPResponse(r.status_code, json=json)
+        resp = HTTPResponse(r.status_code, r.headers, json=json)
         if not r.is_success:
             raise HTTPError(f"{r.status_code} {r.reason_phrase}", request, resp)
         return resp

@@ -25,10 +25,11 @@ class FakeConsulTransport(AbstractTransport):
         self, method: HttpMethod, request: HTTPRequest, timeout: HTTPTimeout
     ) -> HTTPResponse:
         if request.path["name"] == "dummy-v2":
-            return HTTPResponse(200, [])
+            return HTTPResponse(200, {}, [])
 
         return HTTPResponse(
             200,
+            {},
             [
                 {
                     "ServiceAddress": "8.8.8.8",

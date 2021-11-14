@@ -2,6 +2,7 @@ from datetime import datetime
 import json
 from typing import Optional
 from aioli.domain.model import (
+    CollectionParser,
     HTTPAuthorization,
     HTTPResponse,
     HTTPUnauthenticated,
@@ -13,6 +14,7 @@ from aioli.domain.model import (
     PostBodyField,
     QueryStringField,
     Response,
+    parse_header_links,
 )
 
 
@@ -67,7 +69,35 @@ def test_response_from_http_response():
     class Dummy(Response):
         name: str
 
-    resp = HTTPResponse(200, {"name": "Jane", "age": 23})
+    resp = HTTPResponse(200, {}, {"name": "Jane", "age": 23})
     dummy = Dummy.from_http_response(resp)
 
     assert dummy == Dummy(name="Jane")
+
+
+def test_parse_header_links():
+    links = parse_header_links(
+        '<https://ne.xt/>; rel="next", <https://la.st/>; rel="last"'
+    )
+    assert links == [
+        {"rel": "next", "url": "https://ne.xt/"},
+        {"rel": "last", "url": "https://la.st/"},
+    ]
+
+
+def test_collection_parser():
+    resp = HTTPResponse(
+        200,
+        {
+            "Total-Count": "20",
+            "link": '<https://dummy/?page=2>; rel="next", <https://dummy/?page=4>; rel="last"',
+        },
+        [{"id": 1}, {"id": 1}],
+    )
+    resp = CollectionParser(resp)
+    assert resp.meta.count == 2
+    assert resp.meta.total_count == 20
+    assert resp.meta.links == {
+        "last": {"rel": "last", "url": "https://dummy/?page=4"},
+        "next": {"rel": "next", "url": "https://dummy/?page=2"},
+    }

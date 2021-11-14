@@ -9,6 +9,7 @@ from aioli.domain.exceptions import (
     WrongRequestTypeException,
 )
 from aioli.domain.model import (
+    CollectionParser,
     HTTPAuthorization,
     HTTPRequest,
     HTTPResponse,
@@ -18,7 +19,13 @@ from aioli.domain.model import (
 )
 from aioli.domain.registry import ApiRoutes, Registry
 from aioli.service.base import AbstractTransport
-from aioli.service.client import Client, ClientFactory, RouteProxy, build_timeout
+from aioli.service.client import (
+    Client,
+    ClientFactory,
+    CollectionIterator,
+    RouteProxy,
+    build_timeout,
+)
 from aioli.typing import HttpMethod
 
 
@@ -74,11 +81,47 @@ def test_build_timeout():
     assert timeout == HTTPTimeout(5.0, 2.0)
 
 
+def test_collection_iterator():
+    collec = CollectionIterator(
+        HTTPResponse(
+            200,
+            {"Total-Count": "5"},
+            [
+                {
+                    "name": "Alice",
+                    "age": 24,
+                    "useless": True,
+                },
+                {
+                    "name": "Bob",
+                    "age": 42,
+                },
+            ],
+        ),
+        GetResponse,
+        CollectionParser,
+    )
+    assert collec.meta.count == 2
+    assert collec.meta.total_count == 5
+    list_collec = list(collec)
+    assert list_collec == [
+        {
+            "name": "Alice",
+            "age": 24,
+        },
+        {
+            "name": "Bob",
+            "age": 42,
+        },
+    ]
+
+
 @pytest.mark.asyncio
 async def test_client(static_sd):
 
     resp = HTTPResponse(
         200,
+        {},
         {
             "name": "Barbie",
             "age": 42,
@@ -95,6 +138,7 @@ async def test_client(static_sd):
         transport=FakeTransport(resp),
         auth=HTTPUnauthenticated(),
         timeout=HTTPTimeout(),
+        collection_parser=CollectionParser,
     )
 
     resp = await client.dummies.get({"name": "barbie"})
@@ -138,6 +182,7 @@ async def test_client_timeout(static_sd):
 
     resp = HTTPResponse(
         200,
+        {},
         {
             "name": "timeout",
             "age": 42,
@@ -153,6 +198,7 @@ async def test_client_timeout(static_sd):
         transport=FakeTimeoutTransport(),
         auth=HTTPUnauthenticated(),
         timeout=HTTPTimeout(),
+        collection_parser=CollectionParser,
     )
     with pytest.raises(TimeoutError) as exc:
         await client.dummies.get({"name": "barbie"})
@@ -178,7 +224,7 @@ async def test_client_factory(static_sd):
 
 @pytest.mark.asyncio
 async def test_route_proxy_prepare_unregistered_method_resource():
-    resp = HTTPResponse(200, "")
+    resp = HTTPResponse(200, {}, "")
     tp = FakeTransport(resp)
 
     proxy = RouteProxy(
@@ -191,9 +237,10 @@ async def test_route_proxy_prepare_unregistered_method_resource():
             None,
             None,
         ),
-        tp,
-        HTTPAuthorization("Bearer", "abc"),
-        HTTPTimeout(),
+        transport=tp,
+        auth=HTTPAuthorization("Bearer", "abc"),
+        timeout=HTTPTimeout(),
+        collection_parser=CollectionParser,
     )
     with pytest.raises(NoContractException) as exc:
         resp = proxy._prepare_request(
@@ -207,7 +254,7 @@ async def test_route_proxy_prepare_unregistered_method_resource():
 
 @pytest.mark.asyncio
 async def test_route_proxy_prepare_unregistered_method_collection():
-    resp = HTTPResponse(200, "")
+    resp = HTTPResponse(200, {}, "")
     tp = FakeTransport(resp)
 
     proxy = RouteProxy(
@@ -220,9 +267,10 @@ async def test_route_proxy_prepare_unregistered_method_collection():
             "/",
             {},
         ),
-        tp,
-        HTTPAuthorization("Bearer", "abc"),
-        HTTPTimeout(),
+        transport=tp,
+        auth=HTTPAuthorization("Bearer", "abc"),
+        timeout=HTTPTimeout(),
+        collection_parser=CollectionParser,
     )
     with pytest.raises(NoContractException) as exc:
         resp = proxy._prepare_request(
@@ -236,7 +284,7 @@ async def test_route_proxy_prepare_unregistered_method_collection():
 
 @pytest.mark.asyncio
 async def test_route_proxy_prepare_unregistered_resource():
-    resp = HTTPResponse(200, "")
+    resp = HTTPResponse(200, {}, "")
     tp = FakeTransport(resp)
 
     proxy = RouteProxy(
@@ -249,9 +297,10 @@ async def test_route_proxy_prepare_unregistered_resource():
             "/",
             {},
         ),
-        tp,
-        HTTPAuthorization("Bearer", "abc"),
-        HTTPTimeout(),
+        transport=tp,
+        auth=HTTPAuthorization("Bearer", "abc"),
+        timeout=HTTPTimeout(),
+        collection_parser=CollectionParser,
     )
     with pytest.raises(UnregisteredRouteException) as exc:
         resp = proxy._prepare_request(
@@ -265,7 +314,7 @@ async def test_route_proxy_prepare_unregistered_resource():
 
 @pytest.mark.asyncio
 async def test_route_proxy_prepare_unregistered_collection():
-    resp = HTTPResponse(200, "")
+    resp = HTTPResponse(200, {}, "")
     tp = FakeTransport(resp)
 
     proxy = RouteProxy(
@@ -278,9 +327,10 @@ async def test_route_proxy_prepare_unregistered_collection():
             None,
             None,
         ),
-        tp,
-        HTTPAuthorization("Bearer", "abc"),
-        HTTPTimeout(),
+        transport=tp,
+        auth=HTTPAuthorization("Bearer", "abc"),
+        timeout=HTTPTimeout(),
+        collection_parser=CollectionParser,
     )
     with pytest.raises(UnregisteredRouteException) as exc:
         resp = proxy._prepare_request(
@@ -294,7 +344,7 @@ async def test_route_proxy_prepare_unregistered_collection():
 
 @pytest.mark.asyncio
 async def test_route_proxy_collection_head():
-    resp = HTTPResponse(200, "")
+    resp = HTTPResponse(200, {}, "")
     tp = FakeTransport(resp)
     proxy = RouteProxy(
         "dummy",
@@ -306,9 +356,10 @@ async def test_route_proxy_collection_head():
             collection_path="/",
             collection_contract={"HEAD": (Request, None)},
         ),
-        tp,
-        HTTPAuthorization("Bearer", "abc"),
-        HTTPTimeout(),
+        transport=tp,
+        auth=HTTPAuthorization("Bearer", "abc"),
+        timeout=HTTPTimeout(),
+        collection_parser=CollectionParser,
     )
     resp = await proxy.collection_head({"name": "baby"})
     assert resp == ""
@@ -316,7 +367,9 @@ async def test_route_proxy_collection_head():
 
 @pytest.mark.asyncio
 async def test_route_proxy_collection_get():
-    resp = HTTPResponse(200, [{"name": "alice"}, {"name": "bob"}])
+    resp = HTTPResponse(
+        200, {"Total-Count": "10"}, [{"name": "alice"}, {"name": "bob"}]
+    )
     tp = FakeTransport(resp)
 
     proxy = RouteProxy(
@@ -329,18 +382,21 @@ async def test_route_proxy_collection_get():
             collection_path="/",
             collection_contract={"GET": (Request, None)},
         ),
-        tp,
-        HTTPAuthorization("Bearer", "abc"),
-        HTTPTimeout(),
+        transport=tp,
+        auth=HTTPAuthorization("Bearer", "abc"),
+        timeout=HTTPTimeout(),
+        collection_parser=CollectionParser,
     )
     resp = await proxy.collection_get()
+    assert resp.meta.total_count == 10
+    assert resp.meta.count == 2
     resp = list(resp)
     assert resp == [{"name": "alice"}, {"name": "bob"}]
 
 
 @pytest.mark.asyncio
 async def test_route_proxy_collection_post():
-    resp = HTTPResponse(202, {"detail": "accepted"})
+    resp = HTTPResponse(202, {}, {"detail": "accepted"})
     tp = FakeTransport(resp)
 
     proxy = RouteProxy(
@@ -353,9 +409,10 @@ async def test_route_proxy_collection_post():
             collection_path="/",
             collection_contract={"POST": (Request, None)},
         ),
-        tp,
-        HTTPAuthorization("Bearer", "abc"),
-        HTTPTimeout(),
+        transport=tp,
+        auth=HTTPAuthorization("Bearer", "abc"),
+        timeout=HTTPTimeout(),
+        collection_parser=CollectionParser,
     )
     resp = await proxy.collection_post({})
     assert resp == {"detail": "accepted"}
@@ -363,7 +420,7 @@ async def test_route_proxy_collection_post():
 
 @pytest.mark.asyncio
 async def test_route_proxy_collection_put():
-    resp = HTTPResponse(202, {"detail": "accepted"})
+    resp = HTTPResponse(202, {}, {"detail": "accepted"})
     tp = FakeTransport(resp)
 
     proxy = RouteProxy(
@@ -376,9 +433,10 @@ async def test_route_proxy_collection_put():
             collection_path="/",
             collection_contract={"PUT": (Request, None)},
         ),
-        tp,
-        HTTPAuthorization("Bearer", "abc"),
-        HTTPTimeout(),
+        transport=tp,
+        auth=HTTPAuthorization("Bearer", "abc"),
+        timeout=HTTPTimeout(),
+        collection_parser=CollectionParser,
     )
     resp = await proxy.collection_put({})
     assert resp == {"detail": "accepted"}
@@ -386,7 +444,7 @@ async def test_route_proxy_collection_put():
 
 @pytest.mark.asyncio
 async def test_route_proxy_collection_patch():
-    resp = HTTPResponse(202, {"detail": "accepted"})
+    resp = HTTPResponse(202, {}, {"detail": "accepted"})
     tp = FakeTransport(resp)
 
     proxy = RouteProxy(
@@ -399,9 +457,10 @@ async def test_route_proxy_collection_patch():
             collection_path="/",
             collection_contract={"PATCH": (Request, None)},
         ),
-        tp,
-        HTTPAuthorization("Bearer", "abc"),
-        HTTPTimeout(),
+        transport=tp,
+        auth=HTTPAuthorization("Bearer", "abc"),
+        timeout=HTTPTimeout(),
+        collection_parser=CollectionParser,
     )
     resp = await proxy.collection_patch({})
     assert resp == {"detail": "accepted"}
@@ -409,7 +468,7 @@ async def test_route_proxy_collection_patch():
 
 @pytest.mark.asyncio
 async def test_route_proxy_collection_delete():
-    resp = HTTPResponse(202, {"detail": "accepted"})
+    resp = HTTPResponse(202, {}, {"detail": "accepted"})
     tp = FakeTransport(resp)
 
     proxy = RouteProxy(
@@ -422,9 +481,10 @@ async def test_route_proxy_collection_delete():
             collection_path="/",
             collection_contract={"DELETE": (Request, None)},
         ),
-        tp,
-        HTTPAuthorization("Bearer", "abc"),
-        HTTPTimeout(),
+        transport=tp,
+        auth=HTTPAuthorization("Bearer", "abc"),
+        timeout=HTTPTimeout(),
+        collection_parser=CollectionParser,
     )
     resp = await proxy.collection_delete({})
     assert resp == {"detail": "accepted"}
@@ -432,7 +492,7 @@ async def test_route_proxy_collection_delete():
 
 @pytest.mark.asyncio
 async def test_route_proxy_collection_options():
-    resp = HTTPResponse(202, {"detail": "accepted"})
+    resp = HTTPResponse(202, {}, {"detail": "accepted"})
     tp = FakeTransport(resp)
 
     proxy = RouteProxy(
@@ -445,9 +505,10 @@ async def test_route_proxy_collection_options():
             collection_path="/",
             collection_contract={"OPTIONS": (Request, None)},
         ),
-        tp,
-        HTTPAuthorization("Bearer", "abc"),
-        HTTPTimeout(),
+        transport=tp,
+        auth=HTTPAuthorization("Bearer", "abc"),
+        timeout=HTTPTimeout(),
+        collection_parser=CollectionParser,
     )
     resp = await proxy.collection_options({})
     assert resp == {"detail": "accepted"}
@@ -455,7 +516,7 @@ async def test_route_proxy_collection_options():
 
 @pytest.mark.asyncio
 async def test_route_proxy_head():
-    resp = HTTPResponse(200, "")
+    resp = HTTPResponse(200, {}, "")
     tp = FakeTransport(resp)
     proxy = RouteProxy(
         "dummy",
@@ -467,9 +528,10 @@ async def test_route_proxy_head():
             collection_contract=None,
             collection_path=None,
         ),
-        tp,
-        HTTPAuthorization("Bearer", "abc"),
-        HTTPTimeout(),
+        transport=tp,
+        auth=HTTPAuthorization("Bearer", "abc"),
+        timeout=HTTPTimeout(),
+        collection_parser=CollectionParser,
     )
     resp = await proxy.head({"name": "baby"})
     assert resp == ""
@@ -477,7 +539,7 @@ async def test_route_proxy_head():
 
 @pytest.mark.asyncio
 async def test_route_proxy_get():
-    resp = HTTPResponse(200, [{"name": "alice"}, {"name": "bob"}])
+    resp = HTTPResponse(200, {}, [{"name": "alice"}, {"name": "bob"}])
     tp = FakeTransport(resp)
 
     proxy = RouteProxy(
@@ -490,9 +552,10 @@ async def test_route_proxy_get():
             collection_contract=None,
             collection_path=None,
         ),
-        tp,
-        HTTPAuthorization("Bearer", "abc"),
-        HTTPTimeout(),
+        transport=tp,
+        auth=HTTPAuthorization("Bearer", "abc"),
+        timeout=HTTPTimeout(),
+        collection_parser=CollectionParser,
     )
     resp = await proxy.get({})
     assert resp == [{"name": "alice"}, {"name": "bob"}]
@@ -500,7 +563,7 @@ async def test_route_proxy_get():
 
 @pytest.mark.asyncio
 async def test_route_proxy_post():
-    resp = HTTPResponse(202, {"detail": "accepted"})
+    resp = HTTPResponse(202, {}, {"detail": "accepted"})
     tp = FakeTransport(resp)
 
     proxy = RouteProxy(
@@ -513,9 +576,10 @@ async def test_route_proxy_post():
             collection_contract=None,
             collection_path=None,
         ),
-        tp,
-        HTTPAuthorization("Bearer", "abc"),
-        HTTPTimeout(),
+        transport=tp,
+        auth=HTTPAuthorization("Bearer", "abc"),
+        timeout=HTTPTimeout(),
+        collection_parser=CollectionParser,
     )
     resp = await proxy.post({})
     assert resp == {"detail": "accepted"}
@@ -523,7 +587,7 @@ async def test_route_proxy_post():
 
 @pytest.mark.asyncio
 async def test_route_proxy_put():
-    resp = HTTPResponse(202, {"detail": "accepted"})
+    resp = HTTPResponse(202, {}, {"detail": "accepted"})
     tp = FakeTransport(resp)
 
     proxy = RouteProxy(
@@ -536,9 +600,10 @@ async def test_route_proxy_put():
             collection_contract=None,
             collection_path=None,
         ),
-        tp,
-        HTTPAuthorization("Bearer", "abc"),
-        HTTPTimeout(),
+        transport=tp,
+        auth=HTTPAuthorization("Bearer", "abc"),
+        timeout=HTTPTimeout(),
+        collection_parser=CollectionParser,
     )
     resp = await proxy.put({})
     assert resp == {"detail": "accepted"}
@@ -546,7 +611,7 @@ async def test_route_proxy_put():
 
 @pytest.mark.asyncio
 async def test_route_proxy_patch():
-    resp = HTTPResponse(202, {"detail": "accepted"})
+    resp = HTTPResponse(202, {}, {"detail": "accepted"})
     tp = FakeTransport(resp)
 
     proxy = RouteProxy(
@@ -559,9 +624,10 @@ async def test_route_proxy_patch():
             collection_contract=None,
             collection_path=None,
         ),
-        tp,
-        HTTPAuthorization("Bearer", "abc"),
-        HTTPTimeout(),
+        transport=tp,
+        auth=HTTPAuthorization("Bearer", "abc"),
+        timeout=HTTPTimeout(),
+        collection_parser=CollectionParser,
     )
     resp = await proxy.patch({})
     assert resp == {"detail": "accepted"}
@@ -569,7 +635,7 @@ async def test_route_proxy_patch():
 
 @pytest.mark.asyncio
 async def test_route_proxy_delete():
-    resp = HTTPResponse(202, {"detail": "accepted"})
+    resp = HTTPResponse(202, {}, {"detail": "accepted"})
     tp = FakeTransport(resp)
 
     proxy = RouteProxy(
@@ -582,9 +648,10 @@ async def test_route_proxy_delete():
             collection_contract=None,
             collection_path=None,
         ),
-        tp,
-        HTTPAuthorization("Bearer", "abc"),
-        HTTPTimeout(),
+        transport=tp,
+        auth=HTTPAuthorization("Bearer", "abc"),
+        timeout=HTTPTimeout(),
+        collection_parser=CollectionParser,
     )
     resp = await proxy.delete({})
     assert resp == {"detail": "accepted"}
@@ -592,7 +659,7 @@ async def test_route_proxy_delete():
 
 @pytest.mark.asyncio
 async def test_route_proxy_options():
-    resp = HTTPResponse(202, {"detail": "accepted"})
+    resp = HTTPResponse(202, {}, {"detail": "accepted"})
     tp = FakeTransport(resp)
 
     proxy = RouteProxy(
@@ -605,9 +672,10 @@ async def test_route_proxy_options():
             collection_contract=None,
             collection_path=None,
         ),
-        tp,
-        HTTPAuthorization("Bearer", "abc"),
-        HTTPTimeout(),
+        transport=tp,
+        auth=HTTPAuthorization("Bearer", "abc"),
+        timeout=HTTPTimeout(),
+        collection_parser=CollectionParser,
     )
     resp = await proxy.options({})
     assert resp == {"detail": "accepted"}

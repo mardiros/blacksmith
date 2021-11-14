@@ -1,4 +1,17 @@
-from typing import Any, Dict, Generator, Optional, Tuple, Type, Union
+from typing import (
+    Any,
+    Dict,
+    Generator,
+    Generic,
+    Iterator,
+    List,
+    Optional,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+    cast,
+)
 
 from aioli.service.adapters.httpx import HttpxTransport
 
@@ -14,6 +27,7 @@ from ..domain.model import (
     HTTPResponse,
     HTTPTimeout,
     HTTPUnauthenticated,
+    CollectionParser,
     Request,
     Response,
 )
@@ -34,6 +48,7 @@ ClientTimeout = Union[HTTPTimeout, float, Tuple[float, float]]
 
 
 def build_timeout(timeout: ClientTimeout) -> HTTPTimeout:
+    """Build the timeout from the convenient timeout."""
     if isinstance(timeout, float):
         timeout = HTTPTimeout(timeout)
     elif isinstance(timeout, tuple):
@@ -41,9 +56,40 @@ def build_timeout(timeout: ClientTimeout) -> HTTPTimeout:
     return timeout
 
 
+T = TypeVar("T")
 
-class CollectionGenerator(Generator):
-    pass
+
+class CollectionIterator(Generic[T], Iterator[ResourceResponse]):
+    response: CollectionParser
+
+    def __init__(
+        self,
+        response: HTTPResponse,
+        response_schema: Optional[Type[Response]],
+        collection_parser: Type[CollectionParser],
+    ) -> None:
+        self.pos = 0
+        self.response_schema = response_schema
+        self.response = collection_parser(response)
+        self.json_resp = self.response.json
+
+    @property
+    def meta(self):
+        return self.response.meta
+
+    def __next__(self) -> T:
+        try:
+            resp = self.json_resp[self.pos]
+            if self.response_schema:
+                resp = self.response_schema(**resp)
+        except IndexError:
+            raise StopIteration()
+
+        self.pos += 1
+        return cast(T, resp)
+
+    def __iter__(self):
+        return self
 
 
 class RouteProxy:
@@ -56,6 +102,7 @@ class RouteProxy:
     transport: AbstractTransport
     auth: HTTPAuthentication
     timeout: HTTPTimeout
+    collection_parser: Type[CollectionParser]
 
     def __init__(
         self,
@@ -66,6 +113,7 @@ class RouteProxy:
         transport: AbstractTransport,
         auth: HTTPAuthentication,
         timeout: HTTPTimeout,
+        collection_parser: Type[CollectionParser],
     ) -> None:
         self.client_name = client_name
         self.name = name
@@ -74,6 +122,7 @@ class RouteProxy:
         self.transport = transport
         self.auth = auth
         self.timeout = timeout
+        self.collection_parser = collection_parser
 
     def _prepare_request(
         self,
@@ -116,13 +165,8 @@ class RouteProxy:
 
     def _prepare_collection_response(
         self, response: HTTPResponse, response_schema: Optional[Type[Response]]
-    ) -> Generator[ResourceResponse, None, None]:
-        if response_schema:
-            resp = response_schema.from_http_collection(response)
-        else:
-            resp = response.json or []
-        for ret in resp:
-            yield ret
+    ) -> CollectionIterator:
+        return CollectionIterator(response, response_schema, self.collection_parser)
 
     async def _yield_collection_request(
         self,
@@ -130,7 +174,7 @@ class RouteProxy:
         params: Union[Optional[Request], Dict[Any, Any]],
         auth: HTTPAuthentication,
         timeout: HTTPTimeout,
-    ) -> Generator[ResourceResponse, None, None]:
+    ) -> CollectionIterator:
         req, resp_schema = self._prepare_request(
             method, params, self.routes.collection, auth
         )
@@ -178,7 +222,7 @@ class RouteProxy:
         params: Union[Optional[Request], Dict[Any, Any]] = None,
         auth: Optional[HTTPAuthentication] = None,
         timeout: Optional[ClientTimeout] = None,
-    ) -> Generator[ResourceResponse, None, None]:
+    ) -> CollectionIterator:
         return await self._yield_collection_request(
             "GET", params, auth or self.auth, build_timeout(timeout or self.timeout)
         )
@@ -313,6 +357,7 @@ class Client:
     transport: AbstractTransport
     auth: HTTPAuthentication
     timeout: HTTPTimeout
+    collection_parser: Type[CollectionParser]
 
     def __init__(
         self,
@@ -322,6 +367,7 @@ class Client:
         transport: AbstractTransport,
         auth: HTTPAuthentication,
         timeout: HTTPTimeout,
+        collection_parser: Type[CollectionParser],
     ) -> None:
         self.name = name
         self.endpoint = endpoint
@@ -329,6 +375,7 @@ class Client:
         self.transport = transport
         self.auth = auth
         self.timeout = timeout
+        self.collection_parser = collection_parser
 
     def __getattr__(self, name: ResourceName) -> RouteProxy:
         """
@@ -345,6 +392,7 @@ class Client:
                 self.transport,
                 self.auth,
                 self.timeout,
+                self.collection_parser,
             )
         except KeyError:
             raise UnregisteredResourceException(name, self.name)
@@ -366,6 +414,7 @@ class ClientFactory:
     transport: AbstractTransport
     auth: HTTPAuthentication
     timeout: HTTPTimeout
+    collection_parser: Type[CollectionParser]
 
     def __init__(
         self,
@@ -374,12 +423,14 @@ class ClientFactory:
         transport: AbstractTransport = None,
         registry: Registry = default_registry,
         timeout: ClientTimeout = HTTPTimeout(),
+        collection_parser: Type[CollectionParser] = CollectionParser,
     ) -> None:
         self.sd = sd
         self.registry = registry
         self.transport = transport or HttpxTransport()
         self.auth = auth
         self.timeout = build_timeout(timeout)
+        self.collection_parser = collection_parser
 
     async def __call__(
         self, client_name: ClientName, auth: Optional[HTTPAuthentication] = None
@@ -393,4 +444,5 @@ class ClientFactory:
             self.transport,
             auth or self.auth,
             self.timeout,
+            self.collection_parser,
         )
