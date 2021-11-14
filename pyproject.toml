@@ -1,9 +1,12 @@
 [tool.poetry]
-name = "aioli"
+name = "aioli-client"
 version = "0.1.0"
-description = "Json HTTP Client"
+description = "REST API Client"
 authors = ["Guillaume Gauvrit <guillaume@gauvr.it>"]
 license = "BSD-derived"
+packages = [
+    { include = "aioli", from = "src" },
+]
 
 [tool.poetry.dependencies]
 python = "^3.7"
