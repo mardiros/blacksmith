@@ -13,7 +13,7 @@ from aioli.domain.exceptions import (
     UnregisteredServiceException,
 )
 from aioli.domain.model import (
-    AuthorizationHttpAuthentication,
+    HTTPAuthorization,
     PathInfoField,
     Request,
     Response,
@@ -60,7 +60,7 @@ def aioli_cli(endpoint: Url, consul_token: str) -> ClientFactory:
     sd = StaticDiscovery({("consul", "v1"): endpoint})
     kwargs = {}
     if consul_token:
-        kwargs["auth"] = AuthorizationHttpAuthentication("Bearer", consul_token)
+        kwargs["auth"] = HTTPAuthorization("Bearer", consul_token)
     return ClientFactory(sd, registry=_registry, **kwargs)
 
 

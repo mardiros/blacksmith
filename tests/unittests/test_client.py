@@ -8,7 +8,7 @@ from aioli.domain.exceptions import (
     WrongRequestTypeException,
 )
 from aioli.domain.model import (
-    AuthorizationHttpAuthentication,
+    HTTPAuthorization,
     HTTPRequest,
     HTTPResponse,
     PostBodyField,
@@ -115,7 +115,7 @@ async def test_client(static_sd):
 async def test_client_factory(static_sd):
     resp = HTTPResponse(200, {})
     tp = FakeTransport(resp)
-    auth = AuthorizationHttpAuthentication("Bearer", "abc")
+    auth = HTTPAuthorization("Bearer", "abc")
     client = ClientFactory(static_sd, auth, tp, registry=dummy_registry)
     cli = await client("api")
 

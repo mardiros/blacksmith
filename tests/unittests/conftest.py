@@ -1,6 +1,6 @@
 import pytest
 from aioli.domain.model import (
-    AuthorizationHttpAuthentication,
+    HTTPAuthorization,
     HTTPRequest,
     HTTPResponse,
 )
@@ -41,7 +41,7 @@ def consul_sd():
         return ClientFactory(
             sd=StaticDiscovery({("consul", "v1"): url}),
             registry=_registry,
-            auth=AuthorizationHttpAuthentication("Bearer", tok),
+            auth=HTTPAuthorization("Bearer", tok),
             transport=FakeConsulTransport(),
         )
 

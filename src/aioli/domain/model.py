@@ -47,7 +47,7 @@ class HTTPUnauthenticated(HTTPAuthentication):
         return super().__init__(headers={})
 
 
-class AuthorizationHttpAuthentication(HTTPAuthentication):
+class HTTPAuthorization(HTTPAuthentication):
     """
     Authentication Mechanism based on the header `Authorization`.
 

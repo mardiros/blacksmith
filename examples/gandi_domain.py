@@ -8,7 +8,7 @@ from pydantic.fields import Field
 from pydantic.main import BaseModel
 
 import aioli
-from aioli import AuthorizationHttpAuthentication, Request, PathInfoField, Response
+from aioli import HTTPAuthorization, Request, PathInfoField, Response
 from aioli.sd.adapters import StaticDiscovery
 from aioli.service.client import ClientFactory
 
@@ -66,7 +66,7 @@ async def main():
         sys.exit(-1)
     apikey = os.environ["GANDIV5_API_KEY"]
     sd = StaticDiscovery({("gandi", "v5"): "https://api.gandi.net/v5/"})
-    auth = AuthorizationHttpAuthentication("Apikey", apikey)
+    auth = HTTPAuthorization("Apikey", apikey)
     cli = ClientFactory(sd, auth)
     api = await cli("gandi")
     if len(sys.argv) == 2:

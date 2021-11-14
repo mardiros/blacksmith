@@ -2,7 +2,7 @@ from datetime import datetime
 import json
 from typing import Optional
 from aioli.domain.model import (
-    AuthorizationHttpAuthentication,
+    HTTPAuthorization,
     HTTPResponse,
     HTTPUnauthenticated,
     HeaderField,
@@ -17,7 +17,7 @@ from aioli.domain.model import (
 
 
 def test_authotization_header():
-    auth = AuthorizationHttpAuthentication("Bearer", "abc")
+    auth = HTTPAuthorization("Bearer", "abc")
     assert auth.headers == {"Authorization": "Bearer abc"}
 
 

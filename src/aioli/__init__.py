@@ -3,7 +3,8 @@ import pkg_resources
 __version__ = pkg_resources.get_distribution("aioli").version
 
 from .domain.model import (
-    AuthorizationHttpAuthentication,
+    HTTPUnauthenticated,
+    HTTPAuthorization,
     HeaderField,
     PathInfoField,
     PostBodyField,
