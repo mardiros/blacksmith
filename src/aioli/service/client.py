@@ -142,6 +142,13 @@ class RouteProxy:
         resp = await self.transport.request(method, req)
         return self._prepare_response(resp, resp_schema)
 
+    async def collection_head(
+        self,
+        params: Union[Request, Dict[Any, Any]],
+        auth: Optional[HTTPAuthentication] = None,
+    ) -> ResourceResponse:
+        return await self._collection_request("HEAD", params, auth or self.auth)
+
     async def collection_get(
         self,
         params: Union[Optional[Request], Dict[Any, Any]] = None,
@@ -165,28 +172,35 @@ class RouteProxy:
         params: Union[Request, Dict[Any, Any]],
         auth: Optional[HTTPAuthentication] = None,
     ) -> ResourceResponse:
-        return await self._request("PUT", params, auth or self.auth)
+        return await self._collection_request("PUT", params, auth or self.auth)
 
     async def collection_patch(
         self,
         params: Union[Request, Dict[Any, Any]],
         auth: Optional[HTTPAuthentication] = None,
     ) -> ResourceResponse:
-        return await self._request("PATCH", params, auth or self.auth)
+        return await self._collection_request("PATCH", params, auth or self.auth)
 
     async def collection_delete(
         self,
         params: Union[Request, Dict[Any, Any]],
         auth: Optional[HTTPAuthentication] = None,
     ) -> ResourceResponse:
-        return await self._request("DELETE", params, auth or self.auth)
+        return await self._collection_request("DELETE", params, auth or self.auth)
 
     async def collection_options(
         self,
         params: Union[Request, Dict[Any, Any]],
         auth: Optional[HTTPAuthentication] = None,
     ) -> ResourceResponse:
-        return await self._request("OPTIONS", params, auth or self.auth)
+        return await self._collection_request("OPTIONS", params, auth or self.auth)
+
+    async def head(
+        self,
+        params: Union[Request, Dict[Any, Any]],
+        auth: Optional[HTTPAuthentication] = None,
+    ) -> ResourceResponse:
+        return await self._request("HEAD", params, auth or self.auth)
 
     async def get(
         self,

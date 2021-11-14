@@ -11,4 +11,4 @@ Service = Tuple[str, Version]
 
 Path = str
 HttpLocation = Literal["path", "headers", "querystring", "body"]
-HttpMethod = Literal["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
+HttpMethod = Literal["HEAD", "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
