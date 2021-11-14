@@ -27,7 +27,7 @@ class RouterDiscovery(AbstractServiceDiscovery):
 
     def __init__(
         self,
-        service_url_fmt: str = "http://router/{service}/{version}",
+        service_url_fmt: str = "http://router/{service}-{version}/{version}",
         unversioned_service_url_fmt: str = "http://router/{service}",
     ) -> None:
         self.service_url_fmt = service_url_fmt

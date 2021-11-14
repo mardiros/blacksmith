@@ -49,34 +49,56 @@ services:
   registrator:
     image: "gliderlabs/registrator"
     command: -internal consul://consul:8500
+    networks:
+      - "internal"
     volumes:
       - /var/run/docker.sock:/tmp/docker.sock
     depends_on:
       - consul
 
-  api_user:
-    build: ./user
+  router:
+    build: ./router
+    env_file: .env
+    environment:
+      SERVICE_NAME: router
+    links:
+      - consul
+    networks:
+      - "internal"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.api_user.entrypoints=web"
-      - "traefik.http.routers.api_user.rule=Host(`user.${DOMAIN_NAME}`)"
-      - "traefik.http.services.api_user.loadbalancer.server.port=8000"
+      - "traefik.http.routers.router.entrypoints=web"
+      - "traefik.http.routers.router.rule=Host(`router.${DOMAIN_NAME}`)"
+      - "traefik.http.services.router.loadbalancer.server.port=80"
+  
+  api_user:
+    build: ./user
     environment:
       - "SERVICE_NAME=user-v1"
+      - "SERVICE_TAGS=api"
     networks:
       - "internal"
 
   api_notif:
     build: ./notif
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.api_notif.entrypoints=web"
-      - "traefik.http.routers.api_notif.rule=Host(`notif.${DOMAIN_NAME}`)"
-      - "traefik.http.services.api_notif.loadbalancer.server.port=8000"
     environment:
       - "SERVICE_NAME=notif-v1"
+      - "SERVICE_TAGS=api"
     networks:
       - "internal"
     volumes:
       - "./notif:/srv/notif"
       - "../../src/aioli:/home/notif/.cache/pypoetry/virtualenvs/notif-E5XGZiq1-py3.10/lib/python3.10/site-packages/aioli"
+
+  mailhog:
+    image: mailhog/mailhog
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.mailhog.entrypoints=web"
+      - "traefik.http.routers.mailhog.rule=Host(`mailhog.${DOMAIN_NAME}`)"
+      - "traefik.http.services.mailhog.loadbalancer.server.port=8025"
+    networks:
+      - internal
+    environment:
+      - "SERVICE_1025_NAME=smtp"
+      - "SERVICE_8025_IGNORE=true"

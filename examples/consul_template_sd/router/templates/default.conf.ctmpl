@@ -1,0 +1,32 @@
+{{ range services }}{{ if .Tags | contains "api" }}
+## Service: {{.Name}}
+upstream {{.Name}} {
+  least_conn;
+  {{range service .Name "passing" }}server {{.Address}}:{{.Port}} max_fails=3 fail_timeout=60 weight=1;
+  {{else}}server 127.0.0.1:65535; # force a 502{{end}}
+}
+{{ end }}{{ end }}
+
+
+server {
+  listen 80;
+  server_name router;
+
+  location / {
+    root /srv;
+  }
+
+  proxy_set_header Host $host;
+  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+  proxy_set_header X-Forwarded-Host $host;
+  proxy_set_header X-Forwarded-Server $host;
+  proxy_set_header X-Real-IP $remote_addr;
+
+  {{ range services }}{{ if .Tags | contains "api" }}
+  location /{{.Name}} {
+    proxy_pass http://{{.Name}};
+    rewrite /{{.Name}}/(.*) /$1  break;
+  }
+  {{ end }}{{ end }}
+
+}

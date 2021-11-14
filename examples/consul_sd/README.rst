@@ -33,3 +33,10 @@ Call the service
    curl -H "Content-Type: application/json" \
       --data '{"username": "naruto", "message": "Datte Bayo"}' \
       -X POST http://notif.localhost/v1/notification
+
+
+Check result
+------------
+
+The mailbox is available in a web application http://mailhog.localhost/
+to view the email has been properly received.

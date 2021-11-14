@@ -9,14 +9,14 @@ from starlette.applications import Starlette
 from starlette.responses import JSONResponse
 
 import aioli
-from aioli import ClientFactory, ConsulDiscovery
+from aioli import ClientFactory, ConsulDiscovery, RouterDiscovery
 
 from notif.resources.user import User
 
 app = Starlette(debug=True)
 
 aioli.scan("notif.resources")
-sd = ConsulDiscovery()
+sd = RouterDiscovery()
 cli = ClientFactory(sd)
 
 
