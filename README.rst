@@ -1,7 +1,10 @@
 Aioli
 =====
 
-Aioli is an http client for consuming API.
+Aioli is REST API client designed for microservices.
+
+The goal of this http client is to create consumer driven contracts.
+
 
 
 Contributing
