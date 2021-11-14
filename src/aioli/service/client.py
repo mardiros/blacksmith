@@ -164,9 +164,14 @@ class RouteProxy:
         return resp
 
     def _prepare_collection_response(
-        self, response: HTTPResponse, response_schema: Optional[Type[Response]]
+        self,
+        response: HTTPResponse,
+        response_schema: Optional[Type[Response]],
+        collection_parser: Optional[Type[CollectionParser]],
     ) -> CollectionIterator:
-        return CollectionIterator(response, response_schema, self.collection_parser)
+        return CollectionIterator(
+            response, response_schema, collection_parser or self.collection_parser
+        )
 
     async def _yield_collection_request(
         self,
@@ -179,7 +184,9 @@ class RouteProxy:
             method, params, self.routes.collection, auth
         )
         resp = await self.transport.request(method, req, timeout)
-        return self._prepare_collection_response(resp, resp_schema)
+        return self._prepare_collection_response(
+            resp, resp_schema, self.routes.collection.collection_parser
+        )
 
     async def _collection_request(
         self,

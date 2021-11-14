@@ -4,10 +4,16 @@ doc:
 cleandoc:
     cd docs && poetry run make clean
 
-test: unittests functionaltests
+test: unittest functest
 
-unittests:
+lf:
+    poetry run pytest -sxvvv --lf
+
+unittest:
     poetry run pytest -sxv tests/unittests
 
-functionaltests:
+functest:
     poetry run pytest -sxv tests/functionals
+
+black:
+    poetry run black **/*.py

@@ -2,6 +2,7 @@
 
 
 from collections import defaultdict
+from dataclasses import dataclass
 from typing import Mapping, MutableMapping, Optional, Tuple, Type, cast
 
 from aioli.typing import (
@@ -15,12 +16,13 @@ from aioli.typing import (
 )
 
 from .exceptions import ConfigurationError, UnregisteredClientException
-from .model import Request, Response
+from .model import CollectionParser, Request, Response
 
 Schemas = Tuple[Type[Request], Optional[Type[Response]]]
 Contract = Mapping[HttpMethod, Schemas]
 
 
+@dataclass(frozen=True)
 class HttpResource:
     """Represent a resource endpoint."""
 
@@ -29,13 +31,11 @@ class HttpResource:
     contract: Optional[Contract]
     """A contract is a serialization schema for the request and there response."""
 
-    def __init__(
-        self,
-        path: Path,
-        contract: Optional[Contract],
-    ) -> None:
-        self.path = path
-        self.contract = contract
+
+@dataclass(frozen=True)
+class HttpCollection(HttpResource):
+    collection_parser: Optional[Type[CollectionParser]]
+    """Override the default collection parlser for a given resource."""
 
 
 class ApiRoutes:
@@ -48,7 +48,7 @@ class ApiRoutes:
 
     resource: Optional[HttpResource]
     """Resource endpoint"""
-    collection: Optional[HttpResource]
+    collection: Optional[HttpCollection]
     """Collection endpoint."""
 
     def __init__(
@@ -57,10 +57,11 @@ class ApiRoutes:
         contract: Optional[Contract],
         collection_path: Optional[Path],
         collection_contract: Optional[Contract],
+        collection_parser: Optional[Type[CollectionParser]],
     ) -> None:
         self.resource = HttpResource(path, contract) if path else None
         self.collection = (
-            HttpResource(collection_path, collection_contract)
+            HttpCollection(collection_path, collection_contract, collection_parser)
             if collection_path
             else None
         )
@@ -89,6 +90,7 @@ class Registry:
         contract: Optional[Contract] = None,
         collection_path: Optional[Path] = None,
         collection_contract: Optional[Contract] = None,
+        collection_parser: Optional[Type[CollectionParser]] = None,
     ):
         """
         Register the resource in the registry.
@@ -117,6 +119,7 @@ class Registry:
             contract,
             collection_path,
             collection_contract,
+            collection_parser,
         )
 
     def get_service(self, client_name: ClientName) -> Tuple[Service, Resources]:
@@ -144,6 +147,7 @@ def register(
     contract: Optional[Contract] = None,
     collection_path: Optional[Path] = None,
     collection_contract: Optional[Contract] = None,
+    collection_parser: Optional[Type[CollectionParser]] = None,
 ):
     """
     Register a resource in a client in the default registry.
@@ -159,4 +163,5 @@ def register(
         contract,
         collection_path,
         collection_contract,
+        collection_parser,
     )

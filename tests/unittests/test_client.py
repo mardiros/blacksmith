@@ -129,7 +129,9 @@ async def test_client(static_sd):
         },
     )
 
-    routes = ApiRoutes("/dummies/{name}", {"GET": (GetParam, GetResponse)}, None, None)
+    routes = ApiRoutes(
+        "/dummies/{name}", {"GET": (GetParam, GetResponse)}, None, None, None
+    )
 
     client = Client(
         "api",
@@ -189,7 +191,9 @@ async def test_client_timeout(static_sd):
         },
     )
 
-    routes = ApiRoutes("/dummies/{name}", {"GET": (GetParam, GetResponse)}, None, None)
+    routes = ApiRoutes(
+        "/dummies/{name}", {"GET": (GetParam, GetResponse)}, None, None, None
+    )
 
     client = Client(
         "api",
@@ -236,6 +240,7 @@ async def test_route_proxy_prepare_unregistered_method_resource():
             {},
             None,
             None,
+            collection_parser=None,
         ),
         transport=tp,
         auth=HTTPAuthorization("Bearer", "abc"),
@@ -266,6 +271,7 @@ async def test_route_proxy_prepare_unregistered_method_collection():
             None,
             "/",
             {},
+            collection_parser=None,
         ),
         transport=tp,
         auth=HTTPAuthorization("Bearer", "abc"),
@@ -296,6 +302,7 @@ async def test_route_proxy_prepare_unregistered_resource():
             None,
             "/",
             {},
+            collection_parser=None,
         ),
         transport=tp,
         auth=HTTPAuthorization("Bearer", "abc"),
@@ -326,6 +333,7 @@ async def test_route_proxy_prepare_unregistered_collection():
             {},
             None,
             None,
+            collection_parser=None,
         ),
         transport=tp,
         auth=HTTPAuthorization("Bearer", "abc"),
@@ -355,6 +363,7 @@ async def test_route_proxy_collection_head():
             None,
             collection_path="/",
             collection_contract={"HEAD": (Request, None)},
+            collection_parser=None,
         ),
         transport=tp,
         auth=HTTPAuthorization("Bearer", "abc"),
@@ -381,6 +390,40 @@ async def test_route_proxy_collection_get():
             None,
             collection_path="/",
             collection_contract={"GET": (Request, None)},
+            collection_parser=None,
+        ),
+        transport=tp,
+        auth=HTTPAuthorization("Bearer", "abc"),
+        timeout=HTTPTimeout(),
+        collection_parser=CollectionParser,
+    )
+    resp = await proxy.collection_get()
+    assert resp.meta.total_count == 10
+    assert resp.meta.count == 2
+    resp = list(resp)
+    assert resp == [{"name": "alice"}, {"name": "bob"}]
+
+
+@pytest.mark.asyncio
+async def test_route_proxy_collection_get_with_parser():
+    class MyCollectionParser(CollectionParser):
+        total_count_header: str = "X-Total-Count"
+
+    resp = HTTPResponse(
+        200, {"X-Total-Count": "10"}, [{"name": "alice"}, {"name": "bob"}]
+    )
+    tp = FakeTransport(resp)
+
+    proxy = RouteProxy(
+        "dummy",
+        "dummies",
+        "http://dummy/",
+        ApiRoutes(
+            None,
+            None,
+            collection_path="/",
+            collection_contract={"GET": (Request, None)},
+            collection_parser=MyCollectionParser,
         ),
         transport=tp,
         auth=HTTPAuthorization("Bearer", "abc"),
@@ -408,6 +451,7 @@ async def test_route_proxy_collection_post():
             None,
             collection_path="/",
             collection_contract={"POST": (Request, None)},
+            collection_parser=None,
         ),
         transport=tp,
         auth=HTTPAuthorization("Bearer", "abc"),
@@ -432,6 +476,7 @@ async def test_route_proxy_collection_put():
             None,
             collection_path="/",
             collection_contract={"PUT": (Request, None)},
+            collection_parser=None,
         ),
         transport=tp,
         auth=HTTPAuthorization("Bearer", "abc"),
@@ -456,6 +501,7 @@ async def test_route_proxy_collection_patch():
             None,
             collection_path="/",
             collection_contract={"PATCH": (Request, None)},
+            collection_parser=None,
         ),
         transport=tp,
         auth=HTTPAuthorization("Bearer", "abc"),
@@ -480,6 +526,7 @@ async def test_route_proxy_collection_delete():
             None,
             collection_path="/",
             collection_contract={"DELETE": (Request, None)},
+            collection_parser=None,
         ),
         transport=tp,
         auth=HTTPAuthorization("Bearer", "abc"),
@@ -504,6 +551,7 @@ async def test_route_proxy_collection_options():
             None,
             collection_path="/",
             collection_contract={"OPTIONS": (Request, None)},
+            collection_parser=None,
         ),
         transport=tp,
         auth=HTTPAuthorization("Bearer", "abc"),
@@ -527,6 +575,7 @@ async def test_route_proxy_head():
             contract={"HEAD": (Request, None)},
             collection_contract=None,
             collection_path=None,
+            collection_parser=None,
         ),
         transport=tp,
         auth=HTTPAuthorization("Bearer", "abc"),
@@ -551,6 +600,7 @@ async def test_route_proxy_get():
             contract={"GET": (Request, None)},
             collection_contract=None,
             collection_path=None,
+            collection_parser=None,
         ),
         transport=tp,
         auth=HTTPAuthorization("Bearer", "abc"),
@@ -575,6 +625,7 @@ async def test_route_proxy_post():
             contract={"POST": (Request, None)},
             collection_contract=None,
             collection_path=None,
+            collection_parser=None,
         ),
         transport=tp,
         auth=HTTPAuthorization("Bearer", "abc"),
@@ -599,6 +650,7 @@ async def test_route_proxy_put():
             contract={"PUT": (Request, None)},
             collection_contract=None,
             collection_path=None,
+            collection_parser=None,
         ),
         transport=tp,
         auth=HTTPAuthorization("Bearer", "abc"),
@@ -623,6 +675,7 @@ async def test_route_proxy_patch():
             contract={"PATCH": (Request, None)},
             collection_contract=None,
             collection_path=None,
+            collection_parser=None,
         ),
         transport=tp,
         auth=HTTPAuthorization("Bearer", "abc"),
@@ -647,6 +700,7 @@ async def test_route_proxy_delete():
             contract={"DELETE": (Request, None)},
             collection_contract=None,
             collection_path=None,
+            collection_parser=None,
         ),
         transport=tp,
         auth=HTTPAuthorization("Bearer", "abc"),
@@ -671,6 +725,7 @@ async def test_route_proxy_options():
             contract={"OPTIONS": (Request, None)},
             collection_contract=None,
             collection_path=None,
+            collection_parser=None,
         ),
         transport=tp,
         auth=HTTPAuthorization("Bearer", "abc"),
