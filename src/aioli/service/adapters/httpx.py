@@ -1,8 +1,8 @@
-from httpx import AsyncClient
-from httpx import Response as HttpxRepsonse
+import httpx
+from httpx import AsyncClient, Response as HttpxRepsonse, Timeout as HttpxTimeout
 
 from aioli.domain.exceptions import HTTPError
-from aioli.domain.model import HTTPRequest, HTTPResponse
+from aioli.domain.model import HTTPRequest, HTTPResponse, HTTPTimeout
 from aioli.typing import HttpMethod
 
 from ..base import AbstractTransport
@@ -23,18 +23,25 @@ class HttpxTransport(AbstractTransport):
 
     """
 
-    async def request(self, method: HttpMethod, request: HTTPRequest) -> HTTPResponse:
+    async def request(
+        self, method: HttpMethod, request: HTTPRequest, timeout: HTTPTimeout
+    ) -> HTTPResponse:
         headers = request.headers.copy()
         if request.body:
             headers["Content-Type"] = "application/json"
         async with AsyncClient() as client:
-            r = await client.request(
-                method,
-                request.url,
-                params=request.querystring,
-                headers=headers,
-                content=request.body,
-            )
+            try:
+                r = await client.request(
+                    method,
+                    request.url,
+                    params=request.querystring,
+                    headers=headers,
+                    content=request.body,
+                    timeout=HttpxTimeout(timeout.request, connect=timeout.connect),
+                )
+            except httpx.TimeoutException as exc:
+                raise TimeoutError(f"{exc.__class__.__name__} while calling {method} {request.url}")
+
         json = "" if r.status_code == 204 else safe_json(r)
         resp = HTTPResponse(r.status_code, json=json)
         if not r.is_success:

@@ -6,11 +6,13 @@ from aioli.domain.exceptions import (
     UnregisteredResourceException,
     UnregisteredRouteException,
     WrongRequestTypeException,
+    TimeoutError,
 )
 from aioli.domain.model import (
     HTTPAuthorization,
     HTTPRequest,
     HTTPResponse,
+    HTTPTimeout,
     PostBodyField,
     HTTPUnauthenticated,
 )
@@ -25,8 +27,13 @@ class FakeTransport(AbstractTransport):
         super().__init__()
         self.resp = resp
 
-    async def request(self, method: HttpMethod, request: HTTPRequest) -> HTTPResponse:
+    async def request(self, method: HttpMethod, request: HTTPRequest, timeout: HTTPTimeout) -> HTTPResponse:
         return self.resp
+
+class FakeTimeoutTransport(AbstractTransport):
+
+    async def request(self, method: HttpMethod, request: HTTPRequest, timeout: HTTPTimeout) -> HTTPResponse:
+        raise TimeoutError(f"ReadTimeout while calling {method} {request.url}")
 
 
 class GetParam(Request):
@@ -74,6 +81,7 @@ async def test_client(static_sd):
         {"dummies": routes},
         transport=FakeTransport(resp),
         auth=HTTPUnauthenticated(),
+        timeout=HTTPTimeout(),
     )
 
     resp = await client.dummies.get({"name": "barbie"})
@@ -111,11 +119,35 @@ async def test_client(static_sd):
         "in resource 'dummies' in client 'api'"
     )
 
+@pytest.mark.asyncio
+async def test_client_timeout(static_sd):
+
+    resp = HTTPResponse(
+        200,
+        {
+            "name": "timeout",
+            "age": 42,
+        },
+    )
+
+    routes = ApiRoutes("/dummies/{name}", {"GET": (GetParam, GetResponse)}, None, None)
+
+    client = Client(
+        "api",
+        "http://dummies.v1",
+        {"dummies": routes},
+        transport=FakeTimeoutTransport(),
+        auth=HTTPUnauthenticated(),
+        timeout=HTTPTimeout(),
+    )  
+    with pytest.raises(TimeoutError) as exc:
+        await client.dummies.get({"name": "barbie"})
+    assert str(exc.value) == "ReadTimeout while calling GET http://dummies.v1/dummies/barbie"
+
 
 @pytest.mark.asyncio
 async def test_client_factory(static_sd):
-    resp = HTTPResponse(200, {})
-    tp = FakeTransport(resp)
+    tp = FakeTimeoutTransport()
     auth = HTTPAuthorization("Bearer", "abc")
     client = ClientFactory(static_sd, auth, tp, registry=dummy_registry)
     cli = await client("api")
@@ -144,6 +176,7 @@ async def test_route_proxy_prepare_unregistered_method_resource():
         ),
         tp,
         HTTPAuthorization("Bearer", "abc"),
+        HTTPTimeout(),
     )
     with pytest.raises(NoContractException) as exc:
         resp = proxy._prepare_request(
@@ -172,6 +205,7 @@ async def test_route_proxy_prepare_unregistered_method_collection():
         ),
         tp,
         HTTPAuthorization("Bearer", "abc"),
+        HTTPTimeout(),
     )
     with pytest.raises(NoContractException) as exc:
         resp = proxy._prepare_request(
@@ -200,6 +234,7 @@ async def test_route_proxy_prepare_unregistered_resource():
         ),
         tp,
         HTTPAuthorization("Bearer", "abc"),
+        HTTPTimeout(),
     )
     with pytest.raises(UnregisteredRouteException) as exc:
         resp = proxy._prepare_request(
@@ -228,6 +263,7 @@ async def test_route_proxy_prepare_unregistered_collection():
         ),
         tp,
         HTTPAuthorization("Bearer", "abc"),
+        HTTPTimeout(),
     )
     with pytest.raises(UnregisteredRouteException) as exc:
         resp = proxy._prepare_request(
@@ -255,6 +291,7 @@ async def test_route_proxy_collection_head():
         ),
         tp,
         HTTPAuthorization("Bearer", "abc"),
+        HTTPTimeout(),
     )
     resp = await proxy.collection_head({"name": "baby"})
     assert resp == ""
@@ -277,6 +314,7 @@ async def test_route_proxy_collection_get():
         ),
         tp,
         HTTPAuthorization("Bearer", "abc"),
+        HTTPTimeout(),
     )
     resp = await proxy.collection_get()
     resp = list(resp)
@@ -300,6 +338,7 @@ async def test_route_proxy_collection_post():
         ),
         tp,
         HTTPAuthorization("Bearer", "abc"),
+        HTTPTimeout(),
     )
     resp = await proxy.collection_post({})
     assert resp == {"detail": "accepted"}
@@ -322,6 +361,7 @@ async def test_route_proxy_collection_put():
         ),
         tp,
         HTTPAuthorization("Bearer", "abc"),
+        HTTPTimeout(),
     )
     resp = await proxy.collection_put({})
     assert resp == {"detail": "accepted"}
@@ -344,6 +384,7 @@ async def test_route_proxy_collection_patch():
         ),
         tp,
         HTTPAuthorization("Bearer", "abc"),
+        HTTPTimeout(),
     )
     resp = await proxy.collection_patch({})
     assert resp == {"detail": "accepted"}
@@ -366,6 +407,7 @@ async def test_route_proxy_collection_delete():
         ),
         tp,
         HTTPAuthorization("Bearer", "abc"),
+        HTTPTimeout(),
     )
     resp = await proxy.collection_delete({})
     assert resp == {"detail": "accepted"}
@@ -388,6 +430,7 @@ async def test_route_proxy_collection_options():
         ),
         tp,
         HTTPAuthorization("Bearer", "abc"),
+        HTTPTimeout(),
     )
     resp = await proxy.collection_options({})
     assert resp == {"detail": "accepted"}
@@ -409,6 +452,7 @@ async def test_route_proxy_head():
         ),
         tp,
         HTTPAuthorization("Bearer", "abc"),
+        HTTPTimeout(),
     )
     resp = await proxy.head({"name": "baby"})
     assert resp == ""
@@ -431,6 +475,7 @@ async def test_route_proxy_get():
         ),
         tp,
         HTTPAuthorization("Bearer", "abc"),
+        HTTPTimeout(),
     )
     resp = await proxy.get({})
     assert resp == [{"name": "alice"}, {"name": "bob"}]
@@ -453,6 +498,7 @@ async def test_route_proxy_post():
         ),
         tp,
         HTTPAuthorization("Bearer", "abc"),
+        HTTPTimeout(),
     )
     resp = await proxy.post({})
     assert resp == {"detail": "accepted"}
@@ -475,6 +521,7 @@ async def test_route_proxy_put():
         ),
         tp,
         HTTPAuthorization("Bearer", "abc"),
+        HTTPTimeout(),
     )
     resp = await proxy.put({})
     assert resp == {"detail": "accepted"}
@@ -497,6 +544,7 @@ async def test_route_proxy_patch():
         ),
         tp,
         HTTPAuthorization("Bearer", "abc"),
+        HTTPTimeout(),
     )
     resp = await proxy.patch({})
     assert resp == {"detail": "accepted"}
@@ -519,6 +567,7 @@ async def test_route_proxy_delete():
         ),
         tp,
         HTTPAuthorization("Bearer", "abc"),
+        HTTPTimeout(),
     )
     resp = await proxy.delete({})
     assert resp == {"detail": "accepted"}
@@ -541,6 +590,7 @@ async def test_route_proxy_options():
         ),
         tp,
         HTTPAuthorization("Bearer", "abc"),
+        HTTPTimeout(),
     )
     resp = await proxy.options({})
     assert resp == {"detail": "accepted"}

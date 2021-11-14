@@ -3,6 +3,7 @@ from aioli.domain.model import (
     HTTPAuthorization,
     HTTPRequest,
     HTTPResponse,
+    HTTPTimeout,
 )
 
 from aioli.sd.adapters.static import StaticDiscovery, Endpoints
@@ -20,7 +21,9 @@ def static_sd():
 
 
 class FakeConsulTransport(AbstractTransport):
-    async def request(self, method: HttpMethod, request: HTTPRequest) -> HTTPResponse:
+    async def request(
+        self, method: HttpMethod, request: HTTPRequest, timeout: HTTPTimeout
+    ) -> HTTPResponse:
         if request.path["name"] == "dummy-v2":
             return HTTPResponse(200, [])
 

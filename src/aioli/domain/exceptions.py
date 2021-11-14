@@ -89,3 +89,7 @@ class HTTPError(Exception):
     @property
     def json(self):
         return self.response.json
+
+
+class TimeoutError(Exception):
+    """Represent the http timeout error."""

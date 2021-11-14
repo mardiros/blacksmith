@@ -42,7 +42,7 @@ async def main():
         print("Missing environment var GANDIV5_API_KEY", file=sys.stderr)
         sys.exit(-1)
     apikey = os.environ["GANDIV5_API_KEY"]
-    sd = StaticDiscovery({("gandi", "v5"): "https://api.gandi.net/v5/"})
+    sd = StaticDiscovery({("gandi", "v5"): "https://api.gandi.net/v5"})
     auth = HTTPAuthorization("Apikey", apikey)
     cli = ClientFactory(sd, auth)
     api = await cli("gandi")

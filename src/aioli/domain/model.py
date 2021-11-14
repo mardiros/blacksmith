@@ -59,6 +59,16 @@ class HTTPAuthorization(HTTPAuthentication):
         return super().__init__(headers={"Authorization": f"{scheme} {value}"})
 
 
+class HTTPTimeout:
+    """Request timeout."""
+    request: float
+    connect: float
+
+    def __init__(self, timeout: float = 30.0, connect: Optional[float] = None):
+        self.request = timeout
+        self.connect = connect or timeout
+
+
 @dataclass
 class HTTPRequest:
     """
