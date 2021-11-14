@@ -80,7 +80,7 @@ async def test_consul_discovery_get_endpoint_unregistered(consul_sd: ConsulDisco
 @pytest.mark.asyncio
 async def test_router_sd_get_endpoint_versionned(router_sd: RouterDiscovery):
     endpoint = await router_sd.get_endpoint("dummy", "v1")
-    assert endpoint == "http://router/dummy/v1"
+    assert endpoint == "http://router/dummy-v1/v1"
 
 
 @pytest.mark.asyncio
