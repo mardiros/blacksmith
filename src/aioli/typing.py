@@ -1,4 +1,4 @@
-from typing import Literal, Mapping, Optional, Tuple, Union
+from typing import Mapping, Optional, Tuple, Union
 
 from pydantic import BaseModel
 
@@ -10,5 +10,11 @@ Version = Optional[str]
 Service = Tuple[str, Version]
 
 Path = str
-HttpLocation = Literal["path", "headers", "querystring", "body"]
-HttpMethod = Literal["HEAD", "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
+
+try:
+    from typing import Literal
+    HttpLocation = Literal["path", "headers", "querystring", "body"]
+    HttpMethod = Literal["HEAD", "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
+except ImportError:
+    HttpLocation = str
+    HttpMethod = str
