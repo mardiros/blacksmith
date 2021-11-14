@@ -30,10 +30,8 @@ from .base import AbstractTransport
 
 
 ResourceResponse = Optional[Union[Response, Dict[Any, Any]]]
-
-
-
 ClientTimeout = Union[HTTPTimeout, float, Tuple[float, float]]
+
 
 def build_timeout(timeout: ClientTimeout) -> HTTPTimeout:
     if isinstance(timeout, float):
@@ -41,6 +39,11 @@ def build_timeout(timeout: ClientTimeout) -> HTTPTimeout:
     elif isinstance(timeout, tuple):
         timeout = HTTPTimeout(*timeout)
     return timeout
+
+
+
+class CollectionGenerator(Generator):
+    pass
 
 
 class RouteProxy:
@@ -377,7 +380,6 @@ class ClientFactory:
         self.transport = transport or HttpxTransport()
         self.auth = auth
         self.timeout = build_timeout(timeout)
-
 
     async def __call__(
         self, client_name: ClientName, auth: Optional[HTTPAuthentication] = None

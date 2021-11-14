@@ -1,25 +1,25 @@
 import pytest
 
-from aioli import Request, PathInfoField, Response
+from aioli import PathInfoField, Request, Response
 from aioli.domain.exceptions import (
     NoContractException,
+    TimeoutError,
     UnregisteredResourceException,
     UnregisteredRouteException,
     WrongRequestTypeException,
-    TimeoutError,
 )
 from aioli.domain.model import (
     HTTPAuthorization,
     HTTPRequest,
     HTTPResponse,
     HTTPTimeout,
-    PostBodyField,
     HTTPUnauthenticated,
+    PostBodyField,
 )
 from aioli.domain.registry import ApiRoutes, Registry
 from aioli.service.base import AbstractTransport
+from aioli.service.client import Client, ClientFactory, RouteProxy, build_timeout
 from aioli.typing import HttpMethod
-from aioli.service.client import Client, ClientFactory, RouteProxy
 
 
 class FakeTransport(AbstractTransport):
@@ -27,12 +27,16 @@ class FakeTransport(AbstractTransport):
         super().__init__()
         self.resp = resp
 
-    async def request(self, method: HttpMethod, request: HTTPRequest, timeout: HTTPTimeout) -> HTTPResponse:
+    async def request(
+        self, method: HttpMethod, request: HTTPRequest, timeout: HTTPTimeout
+    ) -> HTTPResponse:
         return self.resp
 
-class FakeTimeoutTransport(AbstractTransport):
 
-    async def request(self, method: HttpMethod, request: HTTPRequest, timeout: HTTPTimeout) -> HTTPResponse:
+class FakeTimeoutTransport(AbstractTransport):
+    async def request(
+        self, method: HttpMethod, request: HTTPRequest, timeout: HTTPTimeout
+    ) -> HTTPResponse:
         raise TimeoutError(f"ReadTimeout while calling {method} {request.url}")
 
 
@@ -59,6 +63,15 @@ dummy_registry.register(
     "/dummies/{name}",
     {"GET": (GetParam, GetResponse)},
 )
+
+
+def test_build_timeout():
+    timeout = build_timeout(HTTPTimeout())
+    assert timeout == HTTPTimeout(30.0, 15.0)
+    timeout = build_timeout(5.0)
+    assert timeout == HTTPTimeout(5.0, 15.0)
+    timeout = build_timeout((5.0, 2.0))
+    assert timeout == HTTPTimeout(5.0, 2.0)
 
 
 @pytest.mark.asyncio
@@ -119,6 +132,7 @@ async def test_client(static_sd):
         "in resource 'dummies' in client 'api'"
     )
 
+
 @pytest.mark.asyncio
 async def test_client_timeout(static_sd):
 
@@ -139,10 +153,13 @@ async def test_client_timeout(static_sd):
         transport=FakeTimeoutTransport(),
         auth=HTTPUnauthenticated(),
         timeout=HTTPTimeout(),
-    )  
+    )
     with pytest.raises(TimeoutError) as exc:
         await client.dummies.get({"name": "barbie"})
-    assert str(exc.value) == "ReadTimeout while calling GET http://dummies.v1/dummies/barbie"
+    assert (
+        str(exc.value)
+        == "ReadTimeout while calling GET http://dummies.v1/dummies/barbie"
+    )
 
 
 @pytest.mark.asyncio

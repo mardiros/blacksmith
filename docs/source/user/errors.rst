@@ -8,7 +8,7 @@ If a service is too slow, an exception will be raised to avoid a process
 to be locked.
 The default timeout is at 30 seconds but it can be configured on the client
 factory, and can be overriden on every http call.
-
+The default connect timeout is at 15 seconds.
 
 ::
 
@@ -33,5 +33,5 @@ factory, and can be overriden on every http call.
 
    # force the timeout
    resources = await api.resource.collection_get(timeout=42.0)
-   # Or even
+   # Or even with a connect timeout
    resources = await api.resource.collection_get(timeout=(42.0, 7.0))

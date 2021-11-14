@@ -64,9 +64,12 @@ class HTTPTimeout:
     request: float
     connect: float
 
-    def __init__(self, timeout: float = 30.0, connect: Optional[float] = None):
+    def __init__(self, timeout: float = 30.0, connect: float = 15.0):
         self.request = timeout
-        self.connect = connect or timeout
+        self.connect = connect
+
+    def __eq__(self, other):
+        return self.request == other.request and self.connect == other.connect
 
 
 @dataclass
