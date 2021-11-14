@@ -14,7 +14,7 @@ With aioli, the authentication mechanism is declared in the
 It also can be overridden on every api call.
 
 
-Exemple
+Example
 -------
 
 ::
@@ -26,7 +26,7 @@ Exemple
    cli = ClientFactory(sd, auth=auth)
    api = await cli("api")
    protected_resource = await api.protected_resource.get({...})
-   # exemple of overriden authentication
+   # example of overriden authentication
    # with no authentication
    public_resource = await api.public_resource.get(
        {}, auth=HTTPUnauthenticated()

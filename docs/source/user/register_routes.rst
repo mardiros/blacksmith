@@ -2,9 +2,12 @@ Register resources
 ==================
 
 A resource is a json document that is served by a :term:`service`
-The exemple below, that has been copy paste from the test suite show
+The example below, that has been copy paste from the test suite show
 how to register a resource.
 
+
+Full example
+------------
 
 ::
 
@@ -172,3 +175,34 @@ or event a collection to bind an api that return a list.
 
    An exception will be raised if a path or an http method has not
    been declared. No http request will be made.
+
+
+Scanning resources
+------------------
+
+To keep the code clean, a good practice is to have a module named `resources`
+and one submodule per services, then to have one submodule per per resources.
+
+Something like this:
+
+::
+
+   mypkg/resources
+   mypkg/resources/__init__.py
+   mypkg/resources/serviceA/__init__.py
+   mypkg/resources/serviceA/resourceA.py
+   mypkg/resources/serviceA/resourceB.py
+   mypkg/resources/serviceB/__init__.py
+   mypkg/resources/serviceB/resourceC.py
+   mypkg/resources/serviceB/resourceD.py
+
+
+Then to load all the resources, use the `aioli.scan` method:
+
+
+::
+
+   import aioli
+
+   # Fully load the registry with all resources
+   aoili.scan("mypkg.resources")

@@ -13,4 +13,4 @@ User manual of Aioli.
    instanciating_client
    service_discovery
    authorization
-
+   errors
