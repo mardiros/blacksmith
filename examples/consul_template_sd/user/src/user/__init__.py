@@ -24,7 +24,7 @@ USERS = {
 }
 
 
-@app.route('/v1/users/{username}', methods=["GET"])
+@app.route("/v1/users/{username}", methods=["GET"])
 async def show_user(request):
     username = request.path_params["username"]
     try:
@@ -34,4 +34,4 @@ async def show_user(request):
 
 
 if __name__ == "__main__":
-    uvicorn.run(cast(ASGI3Application, app), host='0.0.0.0', port=8000)
+    uvicorn.run(cast(ASGI3Application, app), host="0.0.0.0", port=8000)

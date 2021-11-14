@@ -27,18 +27,21 @@ from aioli.typing import Service, ServiceName, Version
 
 class ConsulApiError(HTTPError):
     """Raised when consul API is not responding what is expected."""
+
     def __init__(self, exc: HTTPError):
         return super().__init__(str(exc), exc.request, exc.response)
 
 
 class ServiceRequest(Request):
     """Request parameter of the Consul API to retrieve a host for a service."""
+
     name: str = PathInfoField()
     """Name of the service to search for an endpoint."""
 
 
 class Service(Response):
     """Consul Service response."""
+
     address: str = Field(alias="ServiceAddress")
     """IP Address of an instance that host the service."""
     port: int = Field(alias="ServicePort")
@@ -69,11 +72,12 @@ class ConsulDiscovery(AbstractServiceDiscovery):
     A discovery instance based on a :term:`Consul` server.
 
     :param service_name_fmt: pattern for name of versionned service
-    :param service_url_fmt: pattern for url of versionned service 
+    :param service_url_fmt: pattern for url of versionned service
     :param unversioned_service_name_fmt: pattern for name of unversioned service
     :param unversioned_service_url_fmt: pattern for url of unversioned service
 
     """
+
     service_name_fmt: str
     service_url_fmt: str
     unversioned_service_name_fmt: str

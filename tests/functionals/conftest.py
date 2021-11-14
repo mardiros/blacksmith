@@ -40,7 +40,7 @@ not_found = HTTPException(404, "Item not found")
 def list_items(name: Optional[str] = None):
     if name:
         return [item for item in items_db.values() if item.name.startswith(name)]
-    return sorted(items_db.values(), key= lambda item: item.name)
+    return sorted(items_db.values(), key=lambda item: item.name)
 
 
 @app.post("/items")

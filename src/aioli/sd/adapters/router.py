@@ -35,7 +35,7 @@ class RouterDiscovery(AbstractServiceDiscovery):
 
     async def get_endpoint(self, service: ServiceName, version: Version) -> Url:
         """
-        Create and return the endpoint using the given parameters `service_url_fmt` 
+        Create and return the endpoint using the given parameters `service_url_fmt`
         or `unversioned_service_url_fmt` if version is `None`.
         """
         if version is None:

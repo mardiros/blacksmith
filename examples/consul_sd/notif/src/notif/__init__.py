@@ -42,6 +42,7 @@ async def send_email(user: User, message: str):
     s.send_message(msg)
     s.quit()
 
+
 @app.route("/v1/notification", methods=["GET"])
 async def get_notif(request):
     return JSONResponse({"detail": "Use POST"}, status_code=200)

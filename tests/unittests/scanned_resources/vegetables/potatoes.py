@@ -2,6 +2,7 @@ from aioli import Request, PathInfoField, Response
 
 from .. import registry
 
+
 class GetParam(Request):
     name: str = PathInfoField(str)
 
