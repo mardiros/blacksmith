@@ -109,20 +109,34 @@ class HTTPRequest:
         )
 
 
-# Stolen code from httpx _utils.py (private method)
 def parse_header_links(value: str) -> List[Dict[str, str]]:
     """
     Returns a list of parsed link headers, for more info see:
     https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Link
+
     The generic syntax of those is:
-    Link: < uri-reference >; param1=value1; param2="value2"
+
+    ::
+
+        Link: < uri-reference >; param1=value1; param2="value2"
+    
     So for instance:
+    
     Link; '<http:/.../front.jpeg>; type="image/jpeg",<http://.../back.jpeg>;'
     would return
+
+    ::
+
         [
             {"url": "http:/.../front.jpeg", "type": "image/jpeg"},
             {"url": "http://.../back.jpeg"},
         ]
+
+    .. note::
+
+        Stolen code from httpx _utils.py (private method)
+
+
     :param value: HTTP Link entity-header field
     :return: list of parsed link headers
     """

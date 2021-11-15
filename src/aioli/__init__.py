@@ -1,6 +1,10 @@
 import pkg_resources
 
-__version__ = pkg_resources.get_distribution("aioli-client").version
+try:
+    __version__ = pkg_resources.get_distribution("aioli-client").version
+except pkg_resources.DistributionNotFound:
+    # read the doc does not support poetry
+    pass
 
 from .domain.model import (
     HTTPUnauthenticated,
