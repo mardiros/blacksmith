@@ -12,18 +12,29 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../../src'))
+
+import tomlkit
+
+sys.path.insert(0, os.path.abspath("../../src"))
 
 
 # -- Project information -----------------------------------------------------
+def _get_project_meta():
+    with open("../../pyproject.toml") as pyproject:
+        file_contents = pyproject.read()
 
-project = "Aioli"
-copyright = "2021, Guillaume Gauvrit"
-author = "Guillaume Gauvrit"
+    return tomlkit.parse(file_contents)["tool"]["poetry"]
 
 
+pkg_meta = _get_project_meta()
+project = str(pkg_meta["name"])
+author = str(pkg_meta["authors"][0])
+copyright = author  # noqa: WPS125
+
+# The short X.Y version
+version = str(pkg_meta["version"])
 # The full version, including alpha/beta/rc tags
-release = "0.1"
+release = version
 
 
 # -- General configuration ---------------------------------------------------
@@ -57,4 +68,4 @@ html_theme = "sphinx_rtd_theme"
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = [] #"_static"]
+html_static_path = []  # "_static"]
