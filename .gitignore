@@ -4,3 +4,7 @@ docs/_build
 *.py[co]
 .vscode
 .pytest_cache
+.coverage
+junit
+htmlcov
+coverage.xml
