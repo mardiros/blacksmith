@@ -66,11 +66,19 @@ registered client side, this is a :term:`client-side service discovery`.
    )
 
 
-.. note::
+.. warning::
 
    Using consul in client require some discipline in naming convention,
    endoint must match pattern to build the rest endpoint. So every endpoint
    must follow the same pattern here.
+
+
+.. note::
+
+   **Take a look at the example!**
+
+   https://github.com/mardiros/aioli/tree/master/examples/consul_sd
+
 
 
 Server Side Service Discovery
@@ -92,9 +100,17 @@ that is connected to the :term:`service registry` to update is configuration.
         unversioned_service_url_fmt = "http://router/{service}",
    )
 
-.. note::
+.. warning::
 
    Every endpoint must follow the same pattern here, it works well if the
    router configuration is based on a :term:`service registry`, but if the
    configuration of the router is maded by humans, inconcistency may exists,
    and the `Static Discovery` should be used instead.
+
+
+.. note::
+
+   **Take a look at the example!**
+
+   https://github.com/mardiros/aioli/tree/master/examples/consul_template_sd
+
