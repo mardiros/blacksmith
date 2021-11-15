@@ -1,6 +1,10 @@
 Aioli
 =====
 
+.. image:: https://github.com/mardiros/aioli/actions/workflows/main.yml/badge.svg
+   :target: https://github.com/mardiros/aioli/actions/workflows/main.yml
+   :alt: Continuous Integration
+
 .. image:: https://readthedocs.org/projects/aioli-client/badge/?version=latest
    :target: https://aioli-client.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status
