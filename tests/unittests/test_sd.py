@@ -1,7 +1,7 @@
 import pytest
 
 from aioli.sd.adapters.static import StaticDiscovery
-from aioli.sd.adapters.consul import ConsulDiscovery, Service
+from aioli.sd.adapters.consul import ConsulDiscovery, Service, aioli_cli, ServiceRequest
 from aioli.sd.adapters.router import RouterDiscovery
 from aioli.domain.exceptions import UnregisteredServiceException
 
@@ -17,6 +17,19 @@ async def test_static_discovery_raise(static_sd: StaticDiscovery):
     with pytest.raises(UnregisteredServiceException) as ctx:
         await static_sd.get_endpoint("dummy", "v2")
     assert str(ctx.value) == "Unregistered service 'dummy/v2'"
+
+
+@pytest.mark.asyncio
+async def test_consul_sd_cli():
+    cli = aioli_cli("http://consul:8888", "abc")
+    assert cli.registry.client_service == {"consul": ("consul", "v1")}
+    assert (
+        cli.registry.clients["consul"]["services"].collection.path
+        == "/catalog/service/{name}"
+    )
+    assert cli.registry.clients["consul"]["services"].collection.contract == {
+        "GET": (ServiceRequest, Service)
+    }
 
 
 @pytest.mark.asyncio
@@ -75,6 +88,16 @@ async def test_consul_discovery_get_endpoint_unregistered(consul_sd: ConsulDisco
     with pytest.raises(UnregisteredServiceException) as ctx:
         await consul_sd.get_endpoint("dummy", "v2")
     assert str(ctx.value) == "Unregistered service 'dummy/v2'"
+
+
+from aioli.sd.adapters.consul import ConsulApiError
+
+
+@pytest.mark.asyncio
+async def test_consul_resolve_consul_error(consul_sd: ConsulDiscovery):
+    with pytest.raises(ConsulApiError) as ctx:
+        await consul_sd.resolve("dummy", "v3")
+    assert str(ctx.value) == "422 Unprocessable entity"
 
 
 @pytest.mark.asyncio

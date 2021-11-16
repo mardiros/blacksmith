@@ -1,9 +1,7 @@
 import pytest
-from aioli.domain.exceptions import (
-    UnregisteredClientException,
-)
 
-from aioli.domain.model import Request, PathInfoField, PostBodyField, Response
+from aioli.domain.exceptions import ConfigurationError, UnregisteredClientException
+from aioli.domain.model import PathInfoField, PostBodyField, Request, Response
 from aioli.domain.registry import Registry
 
 
@@ -175,3 +173,33 @@ def test_get_service():
         registry.get_service("DUMMIES_API")
 
     assert str(ctx.value) == "Unregistered client 'DUMMIES_API'"
+
+
+def test_registry_conflict():
+    registry = Registry()
+    registry.register(
+        "client_name",
+        "foo",
+        "api",
+        "v5",
+        path="/foo/{name}",
+        contract={
+            "GET": (Request, None),
+        },
+    )
+
+    with pytest.raises(ConfigurationError) as ctx:
+        registry.register(
+            "client_name",
+            "bar",
+            "api",
+            "v6",
+            path="/bar/{name}",
+            contract={
+                "GET": (Request, None),
+            },
+        )
+    assert (
+        str(ctx.value)
+        == "Client client_name has been registered twice with api/v5 and api/v6"
+    )

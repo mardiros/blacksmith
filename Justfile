@@ -20,3 +20,7 @@ black:
 
 rdt:
     poetry export --dev -f requirements.txt -o docs/requirements.txt
+
+coverage:
+    poetry run pytest tests/unittests --cov-report=html --cov=aioli
+    xdg-open htmlcov/index.html

@@ -1,9 +1,11 @@
 import pytest
+from aioli.domain.exceptions import HTTPError
 from aioli.domain.model import (
     HTTPAuthorization,
     HTTPRequest,
     HTTPResponse,
     HTTPTimeout,
+    Response,
 )
 
 from aioli.sd.adapters.static import StaticDiscovery, Endpoints
@@ -26,6 +28,13 @@ class FakeConsulTransport(AbstractTransport):
     ) -> HTTPResponse:
         if request.path["name"] == "dummy-v2":
             return HTTPResponse(200, {}, [])
+
+        if request.path["name"] == "dummy-v3":
+            raise HTTPError(
+                f"422 Unprocessable entity",
+                request,
+                HTTPResponse(422, {}, {"detail": "error"}),
+            )
 
         return HTTPResponse(
             200,

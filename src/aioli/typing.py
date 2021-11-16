@@ -13,6 +13,7 @@ Path = str
 
 try:
     from typing import Literal
+
     HttpLocation = Literal["path", "headers", "querystring", "body"]
     HttpMethod = Literal["HEAD", "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
 except ImportError:
