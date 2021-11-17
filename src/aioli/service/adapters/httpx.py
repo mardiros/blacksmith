@@ -12,7 +12,7 @@ def safe_json(r: HttpxRepsonse):
     try:
         return r.json()
     except Exception:
-        return ""
+        return {"error": r.text}
 
 
 class HttpxTransport(AbstractTransport):

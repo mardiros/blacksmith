@@ -1,8 +1,47 @@
 import pytest
-
+import aioli
 from aioli.domain.exceptions import ConfigurationError, UnregisteredClientException
 from aioli.domain.model import PathInfoField, PostBodyField, Request, Response
-from aioli.domain.registry import Registry
+from aioli.domain.registry import Registry, registry as default_registry
+
+
+def test_default_registry():
+    class DummyRequest(Request):
+        name = PathInfoField(str)
+
+    class Dummy(Response):
+        name = str
+
+    assert default_registry.client_service == {}
+    assert list(default_registry.clients.keys()) == []
+
+    aioli.register(
+        "dummies_api",
+        "dummies",
+        "api",
+        "v5",
+        path="/dummies/{name}",
+        contract={
+            "GET": (DummyRequest, Dummy),
+        },
+    )
+    try:
+        assert default_registry.client_service == {"dummies_api": ("api", "v5")}
+        assert set(default_registry.clients.keys()) == {"dummies_api"}
+
+        assert set(default_registry.clients["dummies_api"].keys()) == {"dummies"}
+
+        api = default_registry.clients["dummies_api"]
+        assert api["dummies"].resource.path == "/dummies/{name}"
+        assert set(api["dummies"].resource.contract.keys()) == {"GET"}
+        assert api["dummies"].resource.contract["GET"][0] == DummyRequest
+        assert api["dummies"].resource.contract["GET"][1] == Dummy
+        assert api["dummies"].collection is None
+    finally:
+        # cleanup side effects
+        from aioli.domain import registry as registry_module
+
+        registry_module.registry = Registry()
 
 
 def test_registry_without_collection():

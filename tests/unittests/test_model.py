@@ -76,6 +76,8 @@ def test_response_from_http_response():
 
 
 def test_parse_header_links():
+    links = parse_header_links('')
+    assert links == []
     links = parse_header_links(
         '<https://ne.xt/>; rel="next", <https://la.st/>; rel="last"'
     )
@@ -83,6 +85,11 @@ def test_parse_header_links():
         {"rel": "next", "url": "https://ne.xt/"},
         {"rel": "last", "url": "https://la.st/"},
     ]
+
+    links = parse_header_links(
+        '<https://la.st/>'
+    )
+    assert links == [{'url': 'https://la.st/'}]
 
 
 def test_collection_parser():
