@@ -18,7 +18,7 @@ functest:
 black:
     poetry run black **/*.py
 
-rdt:
+rtd:
     poetry export --dev -f requirements.txt -o docs/requirements.txt
 
 coverage:

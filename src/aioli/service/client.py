@@ -1,10 +1,8 @@
 from typing import (
     Any,
     Dict,
-    Generator,
     Generic,
     Iterator,
-    List,
     Optional,
     Tuple,
     Type,
@@ -12,6 +10,7 @@ from typing import (
     Union,
     cast,
 )
+from aioli.monitoring.base import AbstractMetricsCollector, SinkholeMetrics
 
 from aioli.service.adapters.httpx import HttpxTransport
 
@@ -103,6 +102,7 @@ class RouteProxy:
     auth: HTTPAuthentication
     timeout: HTTPTimeout
     collection_parser: Type[CollectionParser]
+    metrics: AbstractMetricsCollector
 
     def __init__(
         self,
@@ -114,6 +114,7 @@ class RouteProxy:
         auth: HTTPAuthentication,
         timeout: HTTPTimeout,
         collection_parser: Type[CollectionParser],
+        metrics: AbstractMetricsCollector,
     ) -> None:
         self.client_name = client_name
         self.name = name
@@ -123,6 +124,7 @@ class RouteProxy:
         self.auth = auth
         self.timeout = timeout
         self.collection_parser = collection_parser
+        self.metrics = metrics
 
     def _prepare_request(
         self,
@@ -169,6 +171,7 @@ class RouteProxy:
         response_schema: Optional[Type[Response]],
         collection_parser: Optional[Type[CollectionParser]],
     ) -> CollectionIterator:
+
         return CollectionIterator(
             response, response_schema, collection_parser or self.collection_parser
         )
@@ -199,7 +202,15 @@ class RouteProxy:
             method, params, self.routes.collection, auth
         )
         resp = await self.transport.request(method, req, timeout)
-        return self._prepare_response(resp, resp_schema)
+        status_code = resp.status_code
+        resp = self._prepare_response(resp, resp_schema)
+        self.metrics.inc_request(
+            self.client_name,
+            method,
+            self.routes.collection.path,
+            status_code,
+        )
+        return resp
 
     async def _request(
         self,
@@ -212,7 +223,15 @@ class RouteProxy:
             method, params, self.routes.resource, auth
         )
         resp = await self.transport.request(method, req, timeout)
-        return self._prepare_response(resp, resp_schema)
+        status_code = resp.status_code
+        resp = self._prepare_response(resp, resp_schema)
+        self.metrics.inc_request(
+            self.client_name,
+            method,
+            self.routes.resource.path,
+            status_code,
+        )
+        return resp
 
     async def collection_head(
         self,
@@ -365,6 +384,7 @@ class Client:
     auth: HTTPAuthentication
     timeout: HTTPTimeout
     collection_parser: Type[CollectionParser]
+    metrics: AbstractMetricsCollector
 
     def __init__(
         self,
@@ -375,6 +395,7 @@ class Client:
         auth: HTTPAuthentication,
         timeout: HTTPTimeout,
         collection_parser: Type[CollectionParser],
+        metrics: AbstractMetricsCollector,
     ) -> None:
         self.name = name
         self.endpoint = endpoint
@@ -383,6 +404,7 @@ class Client:
         self.auth = auth
         self.timeout = timeout
         self.collection_parser = collection_parser
+        self.metrics = metrics
 
     def __getattr__(self, name: ResourceName) -> RouteProxy:
         """
@@ -400,6 +422,7 @@ class Client:
                 self.auth,
                 self.timeout,
                 self.collection_parser,
+                self.metrics,
             )
         except KeyError:
             raise UnregisteredResourceException(name, self.name)
@@ -414,6 +437,7 @@ class ClientFactory:
         default use :class:`aioli.service.adapters.httpx.HttpxTransport`
     :param registry: :registy where the resources has been registered.
         default use :data:`aioli.domain.registry.registry`
+    :param metrics: a metrics collector.
     """
 
     sd: AbstractServiceDiscovery
@@ -422,6 +446,7 @@ class ClientFactory:
     auth: HTTPAuthentication
     timeout: HTTPTimeout
     collection_parser: Type[CollectionParser]
+    metrics: AbstractMetricsCollector
 
     def __init__(
         self,
@@ -431,6 +456,7 @@ class ClientFactory:
         registry: Registry = default_registry,
         timeout: ClientTimeout = HTTPTimeout(),
         collection_parser: Type[CollectionParser] = CollectionParser,
+        metrics: AbstractMetricsCollector = SinkholeMetrics(),
     ) -> None:
         self.sd = sd
         self.registry = registry
@@ -438,6 +464,7 @@ class ClientFactory:
         self.auth = auth
         self.timeout = build_timeout(timeout)
         self.collection_parser = collection_parser
+        self.metrics = metrics
 
     async def __call__(
         self, client_name: ClientName, auth: Optional[HTTPAuthentication] = None
@@ -452,4 +479,5 @@ class ClientFactory:
             auth or self.auth,
             self.timeout,
             self.collection_parser,
+            self.metrics,
         )

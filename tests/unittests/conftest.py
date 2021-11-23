@@ -1,3 +1,4 @@
+from collections import Counter
 import pytest
 from aioli.domain.exceptions import HTTPError
 from aioli.domain.model import (
@@ -5,15 +6,15 @@ from aioli.domain.model import (
     HTTPRequest,
     HTTPResponse,
     HTTPTimeout,
-    Response,
 )
 
+from aioli.monitoring.base import AbstractMetricsCollector
 from aioli.sd.adapters.static import StaticDiscovery, Endpoints
 from aioli.sd.adapters.consul import ConsulDiscovery, _registry
 from aioli.sd.adapters.router import RouterDiscovery
 from aioli.service.base import AbstractTransport
 from aioli.service.client import ClientFactory
-from aioli.typing import HttpMethod
+from aioli.typing import ClientName, HttpMethod
 
 
 @pytest.fixture
@@ -46,6 +47,25 @@ class FakeConsulTransport(AbstractTransport):
                 }
             ],
         )
+
+
+class DummyMetricsCollector(AbstractMetricsCollector):
+    def __init__(self) -> None:
+        self.counter = Counter()
+
+    def inc_request(
+        self,
+        client_name: ClientName,
+        method: HttpMethod,
+        path: str,
+        status_code: int,
+    ):
+        self.counter[(client_name, method, path, status_code)] += 1
+
+
+@pytest.fixture
+def dummy_metrics_collector():
+    return DummyMetricsCollector()
 
 
 @pytest.fixture
