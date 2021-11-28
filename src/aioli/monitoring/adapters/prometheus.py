@@ -1,3 +1,4 @@
+"""Collect metrics to preometheus"""
 import pkg_resources
 from aioli.typing import ClientName, HttpMethod, ServiceName, Version
 
