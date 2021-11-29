@@ -4,6 +4,11 @@ from aioli import __version__
 from aioli.monitoring.adapters import PrometheusMetrics
 
 
+def test_prom_default_registry():
+    metrics = PrometheusMetrics()
+    val = REGISTRY.get_sample_value("aioli_info", labels={"version": __version__})
+    assert val == 1.0
+
 def test_prom_metrics():
     registry = CollectorRegistry()
     metrics = PrometheusMetrics(registry=registry)
