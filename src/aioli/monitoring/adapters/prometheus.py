@@ -1,12 +1,39 @@
-"""Collect metrics to preometheus"""
+"""Collect metrics based on prometheus."""
 import pkg_resources
-from aioli.typing import ClientName, HttpMethod, ServiceName, Version
+from typing import Any, Optional, TYPE_CHECKING
+from aioli.typing import ClientName, HttpMethod
 
 from ..base import AbstractMetricsCollector
 
+if TYPE_CHECKING:
+    try:
+        import prometheus_client
+    except ImportError:
+        pass
+    Registry = Optional["prometheus_client.CollectorRegistry"]
+else:
+    Registry = Any
+
 
 class PrometheusMetrics(AbstractMetricsCollector):
-    def __init__(self, registry=None):
+    """
+    Collect the api calls made in a prometheus registry.
+
+    It expose a `aioli_info` Gauge to get the aioli version, as a label, and a
+    `aioli_http_requests_total` Counter to get the number of http requests
+    made.
+    The counter `aioli_http_requests_total` as client_name, method, path and
+    status_code labels.
+
+    .. note::
+
+        the service_name and service version is redundant with the client_name,
+        so they are not exposed as labels. By the way, you may have multiple
+        client_name for 1 service name/version.
+
+    """
+
+    def __init__(self, registry: Registry = None):
         from prometheus_client import Counter, Gauge, REGISTRY
 
         if registry is None:
@@ -36,4 +63,7 @@ class PrometheusMetrics(AbstractMetricsCollector):
         path: str,
         status_code: int,
     ):
+        """
+        Increment the prometheus counter `aioli_http_requests_total`.
+        """
         self.aioli_http_requests.labels(client_name, method, path, status_code).inc()
