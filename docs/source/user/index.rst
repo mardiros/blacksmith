@@ -14,3 +14,4 @@ User manual of Aioli.
    service_discovery
    authorization
    errors
+   monitor_metrics

@@ -7,9 +7,9 @@ except pkg_resources.DistributionNotFound:
     pass
 
 from .domain.model import (
-    HTTPUnauthenticated,
-    HTTPAuthorization,
     HeaderField,
+    HTTPAuthorization,
+    HTTPUnauthenticated,
     PathInfoField,
     PostBodyField,
     QueryStringField,
@@ -18,7 +18,9 @@ from .domain.model import (
 )
 from .domain.registry import register
 from .domain.scanner import scan
-from .sd.adapters.static import StaticDiscovery
+from .monitoring import AbstractMetricsCollector
+from .monitoring.adapters import PrometheusMetrics
 from .sd.adapters.consul import ConsulDiscovery
 from .sd.adapters.router import RouterDiscovery
+from .sd.adapters.static import StaticDiscovery
 from .service.client import ClientFactory

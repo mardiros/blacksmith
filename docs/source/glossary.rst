@@ -14,6 +14,10 @@ Glossary
       A software made to designed for service discovery.
       Website: https://www.consul.io/
 
+   Prometheus
+      A software used for event monitoring and alerting.
+      https://prometheus.io/
+
    server-side service discovery
       The client is calling a proxy server that maintain its backends server
       list by receiving notification of the term:`service registry` to maintain.

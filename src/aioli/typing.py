@@ -1,6 +1,4 @@
-from typing import Mapping, Optional, Tuple, Union
-
-from pydantic import BaseModel
+from typing import Optional, Tuple
 
 Url = str
 ServiceName = str
