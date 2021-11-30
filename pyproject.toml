@@ -36,9 +36,17 @@ pytest-asyncio = "^0.16.0"
 pytest-cov = "^3.0.0"
 sphinx-rtd-theme = "^1.0.0"
 uvicorn = "^0.15.0"
+coverage = { version="^6.2", extras = ["toml"] }
 
 [tool.pytest.ini_options]
 norecursedirs = "tests/unittests/scanned_resources"
+
+[tool.coverage.report]
+exclude_lines = [
+    "if TYPE_CHECKING:",
+    "except ImportError:",
+    "except pkg_resources.DistributionNotFound:",
+]
 
 [build-system]
 build-backend = "poetry.core.masonry.api"
