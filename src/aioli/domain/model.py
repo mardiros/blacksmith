@@ -261,7 +261,7 @@ class CollectionParser:
         self.resp = resp
 
     @property
-    def meta(self):
+    def meta(self) -> Metadata:
         total_count = self.resp.headers.get(self.total_count_header)
         return Metadata(
             count=len(self.json),
