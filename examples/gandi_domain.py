@@ -38,13 +38,6 @@ class CollectionDomainParam(Request):
     per_page: int = QueryStringField(2)
 
 
-class GetDomainResponse(Response):
-    name: str = Field(str, alias="fqdn_unicode")
-
-    class Dates(BaseModel):
-        renew_begins_at: datetime.datetime = Field(datetime.datetime)
-        registry_ends_at: datetime.datetime = Field(datetime.datetime)
-
 
 aioli.register(
     "gandi",
