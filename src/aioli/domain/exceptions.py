@@ -2,6 +2,7 @@ from typing import Type
 from aioli.typing import (
     ClientName,
     HttpMethod,
+    Path,
     ResourceName,
     Service,
     ServiceName,
@@ -57,10 +58,21 @@ class NoContractException(RuntimeError):
     """Raised when an unregistered service is beeing requested."""
 
     def __init__(
-        self, route: HttpMethod, resource: ResourceName, client: ClientName
+        self, method: HttpMethod, resource: ResourceName, client: ClientName
     ) -> None:
         super().__init__(
-            f"Unregistered route '{route}' in resource '{resource}' in client '{client}'"
+            f"Unregistered route '{method}' in resource '{resource}' in client '{client}'"
+        )
+
+
+class NoResponseSchemaException(RuntimeError):
+    """Raised when an unregistered service is beeing requested."""
+
+    def __init__(
+        self, method: HttpMethod, path: Path, resource: ResourceName, client: ClientName
+    ) -> None:
+        super().__init__(
+            f"No response schema in route '{method} {path}' in resource'{resource}' in client '{client}'"
         )
 
 

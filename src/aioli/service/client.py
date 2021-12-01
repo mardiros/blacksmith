@@ -17,6 +17,7 @@ from aioli.service.adapters.httpx import HttpxTransport
 
 from ..domain.exceptions import (
     NoContractException,
+    NoResponseSchemaException,
     UnregisteredResourceException,
     UnregisteredRouteException,
     WrongRequestTypeException,
@@ -40,7 +41,7 @@ from ..domain.registry import (
     registry as default_registry,
 )
 from ..sd.base import AbstractServiceDiscovery
-from ..typing import ClientName, HttpMethod, ResourceName, Url
+from ..typing import ClientName, HttpMethod, Path, ResourceName, Url
 from .base import AbstractTransport
 
 
@@ -55,6 +56,37 @@ def build_timeout(timeout: ClientTimeout) -> HTTPTimeout:
     elif isinstance(timeout, tuple):
         timeout = HTTPTimeout(*timeout)
     return timeout
+
+
+class ResponseBox(Generic[TResponse]):
+    def __init__(
+        self,
+        response: HTTPResponse,
+        response_schema: Optional[Type[Response]],
+        method: HttpMethod,
+        path: Path,
+        name: ResourceName,
+        client_name: ClientName,
+    ) -> None:
+        self.http_response = response
+        self.response_schema = response_schema
+        self.method = method
+        self.path = path
+        self.name = name
+        self.client_name = client_name
+
+    @property
+    def json(self) -> Optional[Dict]:
+        return self.http_response.json
+
+    @property
+    def response(self) -> TResponse:
+        if self.response_schema is None:
+            raise NoResponseSchemaException(
+                self.method, self.path, self.name, self.client_name
+            )
+        resp = self.response_schema(**(self.json or {}))
+        return cast(TResponse, resp)
 
 
 class CollectionIterator(Generic[TResponse], Iterator[ResourceResponse]):

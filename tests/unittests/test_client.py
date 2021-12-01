@@ -3,6 +3,7 @@ import pytest
 from aioli import PathInfoField, Request, Response
 from aioli.domain.exceptions import (
     NoContractException,
+    NoResponseSchemaException,
     TimeoutError,
     UnregisteredResourceException,
     UnregisteredRouteException,
@@ -24,6 +25,7 @@ from aioli.service.client import (
     Client,
     ClientFactory,
     CollectionIterator,
+    ResponseBox,
     RouteProxy,
     build_timeout,
 )
@@ -80,6 +82,52 @@ def test_build_timeout():
     assert timeout == HTTPTimeout(5.0, 15.0)
     timeout = build_timeout((5.0, 2.0))
     assert timeout == HTTPTimeout(5.0, 2.0)
+
+
+def test_response_box():
+    resp = ResponseBox(
+        HTTPResponse(
+            200,
+            {},
+            {
+                "name": "Alice",
+                "age": 24,
+                "useless": True,
+            },
+        ),
+        GetResponse,
+        "",
+        "",
+        "",
+        "",
+    )
+    assert resp.response.dict() == {"age": 24, "name": "Alice"}
+    assert resp.json == {"age": 24, "name": "Alice", "useless": True}
+
+
+def test_response_box_no_schema():
+    resp = ResponseBox(
+        HTTPResponse(
+            200,
+            {},
+            {
+                "name": "Alice",
+                "age": 24,
+                "useless": True,
+            },
+        ),
+        None,
+        "GET",
+        "/dummies",
+        "Dummy",
+        "api",
+    )
+    with pytest.raises(NoResponseSchemaException) as ctx:
+        assert resp.response
+    assert (
+        str(ctx.value)
+        == "No response schema in route 'GET /dummies' in resource'Dummy' in client 'api'"
+    )
 
 
 def test_collection_iterator():
