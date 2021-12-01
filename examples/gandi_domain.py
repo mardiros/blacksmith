@@ -38,13 +38,6 @@ class CollectionDomainParam(Request):
     per_page: int = QueryStringField(2)
 
 
-class GetDomainResponse(Response):
-    name: str = Field(str, alias="fqdn_unicode")
-
-    class Dates(BaseModel):
-        renew_begins_at: datetime.datetime = Field(datetime.datetime)
-        registry_ends_at: datetime.datetime = Field(datetime.datetime)
-
 
 aioli.register(
     "gandi",
@@ -76,7 +69,7 @@ async def main():
     if len(sys.argv) == 2:
         domain = sys.argv[1]
         domain = await api.domain.get(DomainParam(name=domain))
-        print(domain)
+        print(domain.json)
     else:
         domains: CollectionIterator[
             ListDomainResponse

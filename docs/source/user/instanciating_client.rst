@@ -25,7 +25,7 @@ to build client for every registrated resources.
        items = await api.item.collection_get()
 
 
-In the exemple above, we consume the previously registered resource `item`,
+In the example above, we consume the previously registered resource `item`,
 from the service "api" at version `None`.
 
 The **item** property has method **collection_get**, **collection_post**,
@@ -37,3 +37,20 @@ The **item** property has method **collection_get**, **collection_post**,
 
    Only registered routes works, consuming an unregistered route in the contract
    will raise error at the runtime.
+
+
+For a better development experience, type hints can be added, like the
+example bellow:
+
+
+::
+
+   from aioli import ClientFactory, StaticDiscovery, CollectionIterator
+
+   async def main():
+       sd = StaticDiscovery({("api", None): "http://srv:8000/"})
+       cli = ClientFactory(sd)
+       api = await cli("api")
+       items: CollectionIterator[Item] = await api.item.collection_get()
+       for item in items:
+          item: FullItem = (await api.item.get({"id": item.id})).response

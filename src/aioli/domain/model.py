@@ -1,7 +1,7 @@
 import re
 from dataclasses import dataclass, field
 from functools import partial
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
+from typing import Generic, TYPE_CHECKING, Any, Dict, List, Optional, Type, TypeVar, Union, cast
 
 from pydantic import BaseModel, Field
 
@@ -227,12 +227,13 @@ class Request(BaseModel):
         )
         return req
 
+TResponse = TypeVar("TResponse", bound="Response")
 
 class Response(BaseModel):
     """Response Model."""
 
     @classmethod
-    def from_http_response(cls, response: HTTPResponse) -> Optional["Response"]:
+    def from_http_response(cls: Type[TResponse], response: HTTPResponse) -> Optional[TResponse]:
         """Build the response from the given HTTPResponse."""
         if response.json:
             return cls(**response.json)
@@ -260,7 +261,7 @@ class CollectionParser:
         self.resp = resp
 
     @property
-    def meta(self):
+    def meta(self) -> Metadata:
         total_count = self.resp.headers.get(self.total_count_header)
         return Metadata(
             count=len(self.json),

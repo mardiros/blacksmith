@@ -2,7 +2,8 @@ import pytest
 import aioli
 from aioli.domain.exceptions import ConfigurationError, UnregisteredClientException
 from aioli.domain.model import PathInfoField, PostBodyField, Request, Response
-from aioli.domain.registry import Registry, registry as default_registry
+from aioli.domain import registry
+from aioli.domain.registry import Registry
 
 
 def test_default_registry():
@@ -12,8 +13,7 @@ def test_default_registry():
     class Dummy(Response):
         name = str
 
-    assert default_registry.client_service == {}
-    assert list(default_registry.clients.keys()) == []
+    default_registry = registry.registry = Registry()
 
     aioli.register(
         "dummies_api",

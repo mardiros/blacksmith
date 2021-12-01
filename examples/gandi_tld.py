@@ -1,6 +1,7 @@
 import asyncio
 import os
 import sys
+from typing import Optional
 
 import aioli
 from aioli import HTTPAuthorization, Request, PathInfoField, Response
@@ -46,7 +47,7 @@ async def main():
     auth = HTTPAuthorization("Apikey", apikey)
     cli = ClientFactory(sd, auth)
     api = await cli("gandi")
-    tld = await api.tld.get(TLDInfoGetParam(name="eu"))
+    tld: TLDResponse = (await api.tld.get(TLDInfoGetParam(name="eu"))).response
     print(tld)
 
 
