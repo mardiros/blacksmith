@@ -115,14 +115,14 @@ async def test_crud(dummy_api_endpoint):
     ]
 
     # Test get
-    item = await api.item.get(GetItem(item_name="zdummy"))
+    item: Item = (await api.item.get(GetItem(item_name="zdummy"))).response
     assert item == Item(name="zdummy", size=SizeEnum.l)
 
-    item = await api.item.get({"item_name": "zdummy"})
+    item = (await api.item.get({"item_name": "zdummy"})).response
     assert item == Item(name="zdummy", size=SizeEnum.l)
 
     with pytest.raises(HTTPError) as exc:
-        item = await api.item.get({"item_name": "nonono"})
+        item = (await api.item.get({"item_name": "nonono"})).response
     assert exc.value.status_code == 404
     assert exc.value.json == {"detail": "Item not found"}
 

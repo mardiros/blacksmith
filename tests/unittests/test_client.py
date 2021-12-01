@@ -194,12 +194,19 @@ async def test_client(static_sd):
     )
 
     resp = await client.dummies.get({"name": "barbie"})
-    assert isinstance(resp, GetResponse)
-    assert resp.dict() == {"name": "Barbie", "age": 42}
+    assert isinstance(resp, ResponseBox)
+    assert isinstance(resp.response, GetResponse)
+    assert resp.response.dict() == {"name": "Barbie", "age": 42}
+    assert resp.json == {
+        "name": "Barbie",
+        "age": 42,
+        "hair_color": "blond",
+    }
 
     resp = await client.dummies.get(GetParam(name="barbie"))
-    assert isinstance(resp, GetResponse)
-    assert resp.dict() == {"name": "Barbie", "age": 42}
+    assert isinstance(resp, ResponseBox)
+    assert isinstance(resp.response, GetResponse)
+    assert resp.response.dict() == {"name": "Barbie", "age": 42}
 
     with pytest.raises(UnregisteredResourceException) as ctx:
         client.daemon
@@ -426,7 +433,7 @@ async def test_route_proxy_collection_head():
         collection_parser=CollectionParser,
         metrics=SinkholeMetrics(),
     )
-    resp = await proxy.collection_head({"name": "baby"})
+    resp = (await proxy.collection_head({"name": "baby"})).json
     assert resp == ""
 
 
@@ -517,7 +524,7 @@ async def test_route_proxy_collection_post():
         collection_parser=CollectionParser,
         metrics=SinkholeMetrics(),
     )
-    resp = await proxy.collection_post({})
+    resp = (await proxy.collection_post({})).json
     assert resp == {"detail": "accepted"}
 
 
@@ -543,7 +550,7 @@ async def test_route_proxy_collection_put():
         collection_parser=CollectionParser,
         metrics=SinkholeMetrics(),
     )
-    resp = await proxy.collection_put({})
+    resp = (await proxy.collection_put({})).json
     assert resp == {"detail": "accepted"}
 
 
@@ -569,7 +576,7 @@ async def test_route_proxy_collection_patch():
         collection_parser=CollectionParser,
         metrics=SinkholeMetrics(),
     )
-    resp = await proxy.collection_patch({})
+    resp = (await proxy.collection_patch({})).json
     assert resp == {"detail": "accepted"}
 
 
@@ -595,7 +602,7 @@ async def test_route_proxy_collection_delete():
         collection_parser=CollectionParser,
         metrics=SinkholeMetrics(),
     )
-    resp = await proxy.collection_delete({})
+    resp = (await proxy.collection_delete({})).json
     assert resp == {"detail": "accepted"}
 
 
@@ -621,7 +628,7 @@ async def test_route_proxy_collection_options():
         collection_parser=CollectionParser,
         metrics=SinkholeMetrics(),
     )
-    resp = await proxy.collection_options({})
+    resp = (await proxy.collection_options({})).json
     assert resp == {"detail": "accepted"}
 
 
@@ -646,7 +653,7 @@ async def test_route_proxy_head():
         collection_parser=CollectionParser,
         metrics=SinkholeMetrics(),
     )
-    resp = await proxy.head({"name": "baby"})
+    resp = (await proxy.head({"name": "baby"})).json
     assert resp == ""
 
 
@@ -672,7 +679,7 @@ async def test_route_proxy_get():
         collection_parser=CollectionParser,
         metrics=SinkholeMetrics(),
     )
-    resp = await proxy.get({})
+    resp = (await proxy.get({})).json
     assert resp == [{"name": "alice"}, {"name": "bob"}]
 
 
@@ -698,7 +705,7 @@ async def test_route_proxy_post():
         collection_parser=CollectionParser,
         metrics=SinkholeMetrics(),
     )
-    resp = await proxy.post({})
+    resp = (await proxy.post({})).json
     assert resp == {"detail": "accepted"}
 
 
@@ -724,7 +731,7 @@ async def test_route_proxy_put():
         collection_parser=CollectionParser,
         metrics=SinkholeMetrics(),
     )
-    resp = await proxy.put({})
+    resp = (await proxy.put({})).json
     assert resp == {"detail": "accepted"}
 
 
@@ -750,7 +757,7 @@ async def test_route_proxy_patch():
         collection_parser=CollectionParser,
         metrics=SinkholeMetrics(),
     )
-    resp = await proxy.patch({})
+    resp = (await proxy.patch({})).json
     assert resp == {"detail": "accepted"}
 
 
@@ -776,7 +783,7 @@ async def test_route_proxy_delete():
         collection_parser=CollectionParser,
         metrics=SinkholeMetrics(),
     )
-    resp = await proxy.delete({})
+    resp = (await proxy.delete({})).json
     assert resp == {"detail": "accepted"}
 
 
@@ -802,7 +809,7 @@ async def test_route_proxy_options():
         collection_parser=CollectionParser,
         metrics=SinkholeMetrics(),
     )
-    resp = await proxy.options({})
+    resp = (await proxy.options({})).json
     assert resp == {"detail": "accepted"}
 
 
@@ -828,9 +835,9 @@ async def test_route_monitoring(dummy_metrics_collector):
         collection_parser=CollectionParser,
         metrics=dummy_metrics_collector,
     )
-    resp = await proxy.collection_post({})
-    resp = await proxy.collection_post({})
-    resp = await proxy.get({})
+    await proxy.collection_post({})
+    await proxy.collection_post({})
+    await proxy.get({})
 
     assert dict(dummy_metrics_collector.counter) == {
         ("dummy", "GET", "/dummy", 202): 1,

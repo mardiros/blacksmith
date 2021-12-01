@@ -45,7 +45,6 @@ from ..typing import ClientName, HttpMethod, Path, ResourceName, Url
 from .base import AbstractTransport
 
 
-ResourceResponse = Union[TResponse, Dict[Any, Any], NoneType]
 ClientTimeout = Union[HTTPTimeout, float, Tuple[float, float]]
 
 
@@ -89,7 +88,7 @@ class ResponseBox(Generic[TResponse]):
         return cast(TResponse, resp)
 
 
-class CollectionIterator(Generic[TResponse], Iterator[ResourceResponse]):
+class CollectionIterator(Iterator[TResponse]):
     response: CollectionParser
 
     def __init__(
@@ -184,13 +183,20 @@ class RouteProxy:
         return (req, return_schema)
 
     def _prepare_response(
-        self, response: HTTPResponse, response_schema: Optional[Type[Response]]
-    ) -> ResourceResponse:
-        if response_schema:
-            resp = response_schema.from_http_response(response)
-        else:
-            resp = response.json
-        return resp
+        self,
+        response: HTTPResponse,
+        response_schema: Optional[Type[Response]],
+        method: HttpMethod,
+        resource: Optional[HttpResource],
+    ) -> ResponseBox:
+        return ResponseBox(
+            response,
+            response_schema,
+            method,
+            resource.path,
+            self.name,
+            self.client_name,
+        )
 
     def _prepare_collection_response(
         self,
@@ -224,13 +230,13 @@ class RouteProxy:
         params: Union[Request, Dict[Any, Any]],
         auth: HTTPAuthentication,
         timeout: HTTPTimeout,
-    ) -> ResourceResponse:
+    ) -> ResponseBox:
         req, resp_schema = self._prepare_request(
             method, params, self.routes.collection, auth
         )
         resp = await self.transport.request(method, req, timeout)
         status_code = resp.status_code
-        resp = self._prepare_response(resp, resp_schema)
+        resp = self._prepare_response(resp, resp_schema, method, self.routes.collection)
         self.metrics.inc_request(
             self.client_name,
             method,
@@ -245,13 +251,13 @@ class RouteProxy:
         params: Union[Request, Dict[Any, Any]],
         auth: HTTPAuthentication,
         timeout: HTTPTimeout,
-    ) -> ResourceResponse:
+    ) -> ResponseBox:
         req, resp_schema = self._prepare_request(
             method, params, self.routes.resource, auth
         )
         resp = await self.transport.request(method, req, timeout)
         status_code = resp.status_code
-        resp = self._prepare_response(resp, resp_schema)
+        resp = self._prepare_response(resp, resp_schema, method, self.routes.resource)
         self.metrics.inc_request(
             self.client_name,
             method,
@@ -265,7 +271,7 @@ class RouteProxy:
         params: Union[Request, Dict[Any, Any]],
         auth: Optional[HTTPAuthentication] = None,
         timeout: Optional[ClientTimeout] = None,
-    ) -> ResourceResponse:
+    ) -> ResponseBox:
         return await self._collection_request(
             "HEAD", params, auth or self.auth, build_timeout(timeout or self.timeout)
         )
@@ -285,7 +291,7 @@ class RouteProxy:
         params: Union[Request, Dict[Any, Any]],
         auth: Optional[HTTPAuthentication] = None,
         timeout: Optional[ClientTimeout] = None,
-    ) -> ResourceResponse:
+    ) -> ResponseBox:
         return await self._collection_request(
             "POST", params, auth or self.auth, build_timeout(timeout or self.timeout)
         )
@@ -295,7 +301,7 @@ class RouteProxy:
         params: Union[Request, Dict[Any, Any]],
         auth: Optional[HTTPAuthentication] = None,
         timeout: Optional[ClientTimeout] = None,
-    ) -> ResourceResponse:
+    ) -> ResponseBox:
         return await self._collection_request(
             "PUT", params, auth or self.auth, build_timeout(timeout or self.timeout)
         )
@@ -305,7 +311,7 @@ class RouteProxy:
         params: Union[Request, Dict[Any, Any]],
         auth: Optional[HTTPAuthentication] = None,
         timeout: Optional[ClientTimeout] = None,
-    ) -> ResourceResponse:
+    ) -> ResponseBox:
         return await self._collection_request(
             "PATCH", params, auth or self.auth, build_timeout(timeout or self.timeout)
         )
@@ -315,7 +321,7 @@ class RouteProxy:
         params: Union[Request, Dict[Any, Any]],
         auth: Optional[HTTPAuthentication] = None,
         timeout: Optional[ClientTimeout] = None,
-    ) -> ResourceResponse:
+    ) -> ResponseBox:
         return await self._collection_request(
             "DELETE", params, auth or self.auth, build_timeout(timeout or self.timeout)
         )
@@ -325,7 +331,7 @@ class RouteProxy:
         params: Union[Request, Dict[Any, Any]],
         auth: Optional[HTTPAuthentication] = None,
         timeout: Optional[ClientTimeout] = None,
-    ) -> ResourceResponse:
+    ) -> ResponseBox:
         return await self._collection_request(
             "OPTIONS", params, auth or self.auth, build_timeout(timeout or self.timeout)
         )
@@ -335,7 +341,7 @@ class RouteProxy:
         params: Union[Request, Dict[Any, Any]],
         auth: Optional[HTTPAuthentication] = None,
         timeout: Optional[ClientTimeout] = None,
-    ) -> ResourceResponse:
+    ) -> ResponseBox:
         return await self._request(
             "HEAD", params, auth or self.auth, build_timeout(timeout or self.timeout)
         )
@@ -345,7 +351,7 @@ class RouteProxy:
         params: Union[Request, Dict[Any, Any]],
         auth: Optional[HTTPAuthentication] = None,
         timeout: Optional[ClientTimeout] = None,
-    ) -> ResourceResponse:
+    ) -> ResponseBox:
         resp = await self._request(
             "GET", params, auth or self.auth, build_timeout(timeout or self.timeout)
         )
@@ -356,7 +362,7 @@ class RouteProxy:
         params: Union[Request, Dict[Any, Any]],
         auth: Optional[HTTPAuthentication] = None,
         timeout: Optional[ClientTimeout] = None,
-    ) -> ResourceResponse:
+    ) -> ResponseBox:
         return await self._request(
             "POST", params, auth or self.auth, build_timeout(timeout or self.timeout)
         )
@@ -366,7 +372,7 @@ class RouteProxy:
         params: Union[Request, Dict[Any, Any]],
         auth: Optional[HTTPAuthentication] = None,
         timeout: Optional[ClientTimeout] = None,
-    ) -> ResourceResponse:
+    ) -> ResponseBox:
         return await self._request(
             "PUT", params, auth or self.auth, build_timeout(timeout or self.timeout)
         )
@@ -376,7 +382,7 @@ class RouteProxy:
         params: Union[Request, Dict[Any, Any]],
         auth: Optional[HTTPAuthentication] = None,
         timeout: Optional[ClientTimeout] = None,
-    ) -> ResourceResponse:
+    ) -> ResponseBox:
         return await self._request(
             "PATCH", params, auth or self.auth, build_timeout(timeout or self.timeout)
         )
@@ -386,7 +392,7 @@ class RouteProxy:
         params: Union[Request, Dict[Any, Any]],
         auth: Optional[HTTPAuthentication] = None,
         timeout: Optional[ClientTimeout] = None,
-    ) -> ResourceResponse:
+    ) -> ResponseBox:
         return await self._request(
             "DELETE", params, auth or self.auth, build_timeout(timeout or self.timeout)
         )
@@ -396,7 +402,7 @@ class RouteProxy:
         params: Union[Request, Dict[Any, Any]],
         auth: Optional[HTTPAuthentication] = None,
         timeout: Optional[ClientTimeout] = None,
-    ) -> ResourceResponse:
+    ) -> ResponseBox:
         return await self._request(
             "OPTIONS", params, auth or self.auth, build_timeout(timeout or self.timeout)
         )
