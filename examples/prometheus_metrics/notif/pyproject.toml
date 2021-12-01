@@ -8,7 +8,7 @@ authors = ["Guillaume Gauvrit <guillaume@gauvr.it>"]
 python = "^3.9"
 starlette = "^0.17.0"
 uvicorn = "^0.15.0"
-aioli-client = { git = "https://github.com/mardiros/aioli.git", branch = "features/monitoring", extras = ["prometheus"] }
+aioli-client = { git = "https://github.com/mardiros/aioli.git", branch = "master", extras = ["prometheus"] }
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
