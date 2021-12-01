@@ -76,7 +76,7 @@ async def main():
     if len(sys.argv) == 2:
         domain = sys.argv[1]
         domain = await api.domain.get(DomainParam(name=domain))
-        print(domain)
+        print(domain.json)
     else:
         domains: CollectionIterator[
             ListDomainResponse
