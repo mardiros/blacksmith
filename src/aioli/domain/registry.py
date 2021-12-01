@@ -3,7 +3,7 @@
 
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import Mapping, MutableMapping, Optional, Tuple, Type, cast
+from typing import Mapping, MutableMapping, Optional, Tuple, Type
 
 from aioli.typing import (
     ClientName,
@@ -16,7 +16,7 @@ from aioli.typing import (
 )
 
 from .exceptions import ConfigurationError, UnregisteredClientException
-from .model import CollectionParser, Request, Response
+from .model import CollectionParser, Request, TResponse, Response
 
 Schemas = Tuple[Type[Request], Optional[Type[Response]]]
 Contract = Mapping[HttpMethod, Schemas]

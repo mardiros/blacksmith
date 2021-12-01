@@ -6,10 +6,11 @@ from typing import (
     Optional,
     Tuple,
     Type,
-    TypeVar,
     Union,
     cast,
 )
+
+from pydantic.typing import NoneType
 from aioli.monitoring.base import AbstractMetricsCollector, SinkholeMetrics
 
 from aioli.service.adapters.httpx import HttpxTransport
@@ -29,6 +30,7 @@ from ..domain.model import (
     CollectionParser,
     Request,
     Response,
+    TResponse,
 )
 from ..domain.registry import (
     ApiRoutes,
@@ -42,7 +44,7 @@ from ..typing import ClientName, HttpMethod, ResourceName, Url
 from .base import AbstractTransport
 
 
-ResourceResponse = Optional[Union[Response, Dict[Any, Any]]]
+ResourceResponse = Union[TResponse, Dict[Any, Any], NoneType]
 ClientTimeout = Union[HTTPTimeout, float, Tuple[float, float]]
 
 
@@ -55,10 +57,7 @@ def build_timeout(timeout: ClientTimeout) -> HTTPTimeout:
     return timeout
 
 
-T = TypeVar("T")
-
-
-class CollectionIterator(Generic[T], Iterator[ResourceResponse]):
+class CollectionIterator(Generic[TResponse], Iterator[ResourceResponse]):
     response: CollectionParser
 
     def __init__(
@@ -76,7 +75,7 @@ class CollectionIterator(Generic[T], Iterator[ResourceResponse]):
     def meta(self):
         return self.response.meta
 
-    def __next__(self) -> T:
+    def __next__(self) -> TResponse:
         try:
             resp = self.json_resp[self.pos]
             if self.response_schema:
@@ -85,7 +84,7 @@ class CollectionIterator(Generic[T], Iterator[ResourceResponse]):
             raise StopIteration()
 
         self.pos += 1
-        return cast(T, resp)
+        return cast(TResponse, resp)  # Could be a dict
 
     def __iter__(self):
         return self
@@ -132,15 +131,13 @@ class RouteProxy:
         params: Union[Optional[Request], Dict[Any, Any]],
         resource: Optional[HttpResource],
         auth: HTTPAuthentication,
-    ) -> Tuple[HTTPRequest, Optional[Type[Response]]]:
+    ) -> Tuple[HTTPRequest, Union[NoneType, Type[TResponse]]]:
         if resource is None:
             raise UnregisteredRouteException(method, self.name, self.client_name)
         if resource.contract is None or method not in resource.contract:
             raise NoContractException(method, self.name, self.client_name)
 
-        # XXX Assume that the index error are not raised du to strong typing
-        param_schema = resource.contract[method][0]
-        return_schema = resource.contract[method][1]
+        param_schema, return_schema = resource.contract[method]
         if isinstance(params, dict):
             params = param_schema(**params)
         elif params is None:
@@ -149,12 +146,10 @@ class RouteProxy:
             raise WrongRequestTypeException(
                 params.__class__, method, self.name, self.client_name
             )
-        return (
-            params.to_http_request(self.endpoint + resource.path).merge_authentication(
-                auth
-            ),
-            return_schema,
-        )
+        req = params.to_http_request(
+            self.endpoint + resource.path
+        ).merge_authentication(auth)
+        return (req, return_schema)
 
     def _prepare_response(
         self, response: HTTPResponse, response_schema: Optional[Type[Response]]
@@ -319,9 +314,10 @@ class RouteProxy:
         auth: Optional[HTTPAuthentication] = None,
         timeout: Optional[ClientTimeout] = None,
     ) -> ResourceResponse:
-        return await self._request(
+        resp = await self._request(
             "GET", params, auth or self.auth, build_timeout(timeout or self.timeout)
         )
+        return resp
 
     async def post(
         self,
