@@ -211,7 +211,10 @@ class RouteProxy:
             )
         req = params.to_http_request(
             self.endpoint + resource.path
-        ).merge_middleware(auth)
+        )
+        for middleware in self.middlewares:
+            req = req.merge_middleware(middleware)
+        req = req.merge_middleware(auth)
         return (req, return_schema)
 
     def _prepare_response(

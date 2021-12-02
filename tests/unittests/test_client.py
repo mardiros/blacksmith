@@ -12,6 +12,7 @@ from aioli.domain.exceptions import (
 from aioli.domain.model import (
     CollectionParser,
     HTTPAuthorization,
+    HTTPMiddleware,
     HTTPRequest,
     HTTPResponse,
     HTTPTimeout,
@@ -293,6 +294,77 @@ async def test_client_factory(static_sd, dummy_middleware):
 
 
 @pytest.mark.asyncio
+async def test_route_proxy_prepare_middleware():
+    resp = HTTPResponse(200, {}, "")
+    tp = FakeTransport(resp)
+
+    proxy = RouteProxy(
+        "dummy",
+        "dummies",
+        "http://dummy/",
+        ApiRoutes(
+            path="/",
+            contract={"GET": (Request, None)},
+            collection_path=None,
+            collection_contract=None,
+            collection_parser=None,
+        ),
+        transport=tp,
+        auth=HTTPUnauthenticated(),
+        timeout=HTTPTimeout(),
+        collection_parser=CollectionParser,
+        metrics=SinkholeMetrics(),
+        middlewares=[
+            HTTPAuthorization("Bearer", "abc"),
+            HTTPMiddleware({"foo": "bar"}),
+            HTTPMiddleware({"Eggs": "egg"}),
+        ],
+    )
+    req, *_ = proxy._prepare_request(
+        "GET",
+        {},
+        proxy.routes.resource,
+        HTTPUnauthenticated(),
+    )
+    assert req.headers == {"Authorization": "Bearer abc", "Eggs": "egg", "foo": "bar"}
+
+@pytest.mark.asyncio
+async def test_route_proxy_prepare_middleware_with_auth():
+    resp = HTTPResponse(200, {}, "")
+    tp = FakeTransport(resp)
+
+    proxy = RouteProxy(
+        "dummy",
+        "dummies",
+        "http://dummy/",
+        ApiRoutes(
+            path="/",
+            contract={"GET": (Request, None)},
+            collection_path=None,
+            collection_contract=None,
+            collection_parser=None,
+        ),
+        transport=tp,
+        auth=HTTPAuthorization("Bearer", "abc"),
+        timeout=HTTPTimeout(),
+        collection_parser=CollectionParser,
+        metrics=SinkholeMetrics(),
+        middlewares=[
+            HTTPAuthorization("Bearer", "overriden_sorry"),
+            HTTPMiddleware({"foo": "bar"}),
+            HTTPMiddleware({"Eggs": "egg"}),
+        ],
+    )
+    req, *_ = proxy._prepare_request(
+        "GET",
+        {},
+        proxy.routes.resource,
+        HTTPAuthorization("Bearer", "abc"),
+    )
+    assert req.headers == {"Authorization": "Bearer abc", "Eggs": "egg", "foo": "bar"}
+
+
+@pytest.mark.asyncio
 async def test_route_proxy_prepare_unregistered_method_resource():
     resp = HTTPResponse(200, {}, "")
     tp = FakeTransport(resp)
@@ -302,10 +374,10 @@ async def test_route_proxy_prepare_unregistered_method_resource():
         "dummies",
         "http://dummy/",
         ApiRoutes(
-            "/",
-            {},
-            None,
-            None,
+            path="/",
+            contract={},
+            collection_path=None,
+            collection_contract=None,
             collection_parser=None,
         ),
         transport=tp,
