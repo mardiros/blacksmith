@@ -30,11 +30,15 @@ PostBodyField = partial(Field, location=BODY)
 simpletypes = Union[str, int, float, bool]
 
 
-@dataclass(frozen=True)
-class HTTPAuthentication:
-    """Authentication Mechanism."""
+@dataclass
+class HTTPMiddleware:
+    """Inject data in http query on every requests."""
 
     headers: Dict[str, str] = field(default_factory=dict)
+
+
+class HTTPAuthentication(HTTPMiddleware):
+    """Authentication Mechanism."""
 
 
 class HTTPUnauthenticated(HTTPAuthentication):
@@ -45,7 +49,7 @@ class HTTPUnauthenticated(HTTPAuthentication):
     """
 
     def __init__(self):
-        return super().__init__(headers={})
+        return super().__init__()
 
 
 class HTTPAuthorization(HTTPAuthentication):
@@ -96,10 +100,9 @@ class HTTPRequest:
     def url(self):
         return self.url_pattern.format(**self.path)
 
-    def merge_authentication(self, authent: HTTPAuthentication) -> "HTTPRequest":
-        """Get the http request with the authentication information."""
+    def merge_middleware(self, middleware: HTTPMiddleware) -> "HTTPRequest":
         headers = self.headers.copy()
-        headers.update(authent.headers)
+        headers.update(middleware.headers)
         return HTTPRequest(
             url_pattern=self.url_pattern,
             path=self.path.copy(),
