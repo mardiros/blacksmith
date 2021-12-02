@@ -21,9 +21,6 @@ sd = ConsulDiscovery()
 cli = ClientFactory(sd, metrics=PrometheusMetrics())
 
 
-smtp_sd = ConsulDiscovery(unversioned_service_url_fmt="{address} {port}")
-
-
 async def send_email(user: User, message: str):
     email_content = dedent(
         f"""\
@@ -36,7 +33,7 @@ async def send_email(user: User, message: str):
     )
     msg = emaillib.message_from_string(email_content)
 
-    srv = await smtp_sd.resolve("smtp", None)
+    srv = await sd.resolve("smtp", None)
     # XXX Synchronous socket here, OK for the example
     # real code should use aiosmtplib
     s = smtplib.SMTP(srv.address, int(srv.port))

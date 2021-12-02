@@ -1,7 +1,18 @@
 import re
 from dataclasses import dataclass, field
 from functools import partial
-from typing import Generic, TYPE_CHECKING, Any, Dict, List, Optional, Type, TypeVar, Union, cast
+from typing import (
+    Generic,
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    List,
+    Optional,
+    Type,
+    TypeVar,
+    Union,
+    cast,
+)
 
 from pydantic import BaseModel, Field
 
@@ -234,13 +245,17 @@ class Request(BaseModel):
         )
         return req
 
+
 TResponse = TypeVar("TResponse", bound="Response")
+
 
 class Response(BaseModel):
     """Response Model."""
 
     @classmethod
-    def from_http_response(cls: Type[TResponse], response: HTTPResponse) -> Optional[TResponse]:
+    def from_http_response(
+        cls: Type[TResponse], response: HTTPResponse
+    ) -> Optional[TResponse]:
         """Build the response from the given HTTPResponse."""
         if response.json:
             return cls(**response.json)

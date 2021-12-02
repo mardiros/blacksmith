@@ -1,24 +1,21 @@
 import email as emaillib
 import smtplib
 from textwrap import dedent
-from typing import cast
+from typing import Dict, cast
 
-import uvicorn
-from asgiref.typing import ASGI3Application
+import aiozipkin
+from aiozipkin.helpers import make_headers
 from starlette.applications import Starlette
 from starlette.responses import JSONResponse
 
 import aioli
-from aioli import ClientFactory, ConsulDiscovery, RouterDiscovery
+from aioli import ClientFactory, ConsulDiscovery
+from aioli.domain.model import HTTPAuthentication
 
 from notif.resources.user import User
+from notif.zk_middleware import Trace
 
 app = Starlette(debug=True)
-
-aioli.scan("notif.resources")
-sd = RouterDiscovery()
-cli = ClientFactory(sd)
-
 
 smtp_sd = ConsulDiscovery()
 
@@ -50,12 +47,23 @@ async def get_notif(request):
 
 @app.route("/v1/notification", methods=["POST"])
 async def post_notif(request):
+    cli = cast(ClientFactory, request.scope.get("aioli_client"))
     body = await request.json()
-    api_user = await cli("api_user")
-    user: User = (await api_user.users.get({"username": body["username"]})).response
-    await send_email(user, body["message"])
-    return JSONResponse({"detail": f"{user.email} accepted"}, status_code=202)
 
+    root_trace: Trace = request.scope["trace"]
 
-if __name__ == "__main__":
-    uvicorn.run(cast(ASGI3Application, app), host="0.0.0.0", port=8000)
+    async with root_trace.new_child("resolve_api_user") as trace:
+        api_user = await cli("api_user")
+
+    async with trace.new_child("get_user"):
+        user: User = (
+            await api_user.users.get({"username": body["username"]})
+        ).response
+
+    async with root_trace.new_child("send_email"):
+        await send_email(user, body["message"])
+
+    return JSONResponse(
+        {"detail": f"{user.email} accepted"},
+        status_code=202,
+    )
