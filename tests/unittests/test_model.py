@@ -28,11 +28,20 @@ def test_authotization_http_unauthenticated():
     assert auth.headers == {}
 
 
-def test_merge_authorization_in_request():
+def test_merge_middleware():
+    req = HTTPRequest(
+        "/",
+        path={},
+        querystring={},
+        headers={"H": "h"},
+        body="",
+    )
     auth = HTTPAuthentication(headers={"X-Auth": "abc"})
-    req = HTTPRequest("/", path={}, querystring={}, headers={"H": "h"}, body={})
-    authreq = req.merge_authentication(auth)
+    authreq = req.merge_middleware(auth)
     assert authreq.headers == {"H": "h", "X-Auth": "abc"}
+    auth = HTTPAuthentication(headers={"X-Auth": "abcd"})
+    authreq = req.merge_middleware(auth)
+    assert authreq.headers == {"H": "h", "X-Auth": "abcd"}
 
 
 def test_request_url():
@@ -76,7 +85,7 @@ def test_response_from_http_response():
 
 
 def test_parse_header_links():
-    links = parse_header_links('')
+    links = parse_header_links("")
     assert links == []
     links = parse_header_links(
         '<https://ne.xt/>; rel="next", <https://la.st/>; rel="last"'
@@ -86,10 +95,8 @@ def test_parse_header_links():
         {"rel": "last", "url": "https://la.st/"},
     ]
 
-    links = parse_header_links(
-        '<https://la.st/>'
-    )
-    assert links == [{'url': 'https://la.st/'}]
+    links = parse_header_links("<https://la.st/>")
+    assert links == [{"url": "https://la.st/"}]
 
 
 def test_collection_parser():

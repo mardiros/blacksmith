@@ -1,7 +1,18 @@
 import re
 from dataclasses import dataclass, field
 from functools import partial
-from typing import Generic, TYPE_CHECKING, Any, Dict, List, Optional, Type, TypeVar, Union, cast
+from typing import (
+    Generic,
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    List,
+    Optional,
+    Type,
+    TypeVar,
+    Union,
+    cast,
+)
 
 from pydantic import BaseModel, Field
 
@@ -30,11 +41,15 @@ PostBodyField = partial(Field, location=BODY)
 simpletypes = Union[str, int, float, bool]
 
 
-@dataclass(frozen=True)
-class HTTPAuthentication:
-    """Authentication Mechanism."""
+@dataclass
+class HTTPMiddleware:
+    """Inject data in http query on every requests."""
 
-    headers: Dict[str, str] = field(default_factory=dict)
+    headers: Dict[str, Optional[str]] = field(default_factory=dict)
+
+
+class HTTPAuthentication(HTTPMiddleware):
+    """Authentication Mechanism."""
 
 
 class HTTPUnauthenticated(HTTPAuthentication):
@@ -45,7 +60,7 @@ class HTTPUnauthenticated(HTTPAuthentication):
     """
 
     def __init__(self):
-        return super().__init__(headers={})
+        return super().__init__()
 
 
 class HTTPAuthorization(HTTPAuthentication):
@@ -96,10 +111,13 @@ class HTTPRequest:
     def url(self):
         return self.url_pattern.format(**self.path)
 
-    def merge_authentication(self, authent: HTTPAuthentication) -> "HTTPRequest":
-        """Get the http request with the authentication information."""
+    def merge_middleware(self, middleware: HTTPMiddleware) -> "HTTPRequest":
         headers = self.headers.copy()
-        headers.update(authent.headers)
+        for key, val in middleware.headers.items():
+            if val is None:
+                headers.pop(key, None)
+            else:
+                headers[key] = val
         return HTTPRequest(
             url_pattern=self.url_pattern,
             path=self.path.copy(),
@@ -227,13 +245,17 @@ class Request(BaseModel):
         )
         return req
 
+
 TResponse = TypeVar("TResponse", bound="Response")
+
 
 class Response(BaseModel):
     """Response Model."""
 
     @classmethod
-    def from_http_response(cls: Type[TResponse], response: HTTPResponse) -> Optional[TResponse]:
+    def from_http_response(
+        cls: Type[TResponse], response: HTTPResponse
+    ) -> Optional[TResponse]:
         """Build the response from the given HTTPResponse."""
         if response.json:
             return cls(**response.json)

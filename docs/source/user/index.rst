@@ -15,3 +15,4 @@ User manual of Aioli.
    authorization
    errors
    monitor_metrics
+   http_middleware
