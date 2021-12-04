@@ -1,7 +1,7 @@
-Example using Consul
-====================
+Example using prometheus
+========================
 
-This example is a dummy microservice stack that do nothing.
+This example is a dummy microservice stack that send email to a user.
 
 There is a "user" service which contains a users API used to retrieve fake email.
 

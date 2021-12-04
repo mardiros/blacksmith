@@ -1,7 +1,7 @@
-Example using Consul
+Example using Zipkin
 ====================
 
-This example is a dummy microservice stack that do nothing.
+This example is a dummy microservice stack that send email to a user.
 
 There is a "user" service which contains a users API used to retrieve fake email.
 
@@ -31,12 +31,17 @@ Call the service
 ::
 
    curl -H "Content-Type: application/json" \
-      --data '{"username": "naruto", "message": "Datte Bayo"}' \
+      -v --data '{"username": "naruto", "message": "Datte Bayo"}' \
       -X POST http://notif.localhost/v1/notification
 
 
 Check result
 ------------
 
-The mailbox is available in a web application http://mailhog.localhost/
-to view the email has been properly received.
+
+The curl response contains a header `X-B3-Traceid` that can be searched
+
+on http://zipkin.localhost/
+
+
+.. image:: ../../docs/screenshots/zipkin.png
