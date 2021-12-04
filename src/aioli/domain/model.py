@@ -34,7 +34,7 @@ simpletypes = Union[str, int, float, bool]
 class HTTPMiddleware:
     """Inject data in http query on every requests."""
 
-    headers: Dict[str, str] = field(default_factory=dict)
+    headers: Dict[str, Optional[str]] = field(default_factory=dict)
 
 
 class HTTPAuthentication(HTTPMiddleware):
@@ -102,7 +102,11 @@ class HTTPRequest:
 
     def merge_middleware(self, middleware: HTTPMiddleware) -> "HTTPRequest":
         headers = self.headers.copy()
-        headers.update(middleware.headers)
+        for key, val in middleware.headers.items():
+            if val is None:
+                headers.pop(key, None)
+            else:
+                headers[key] = val
         return HTTPRequest(
             url_pattern=self.url_pattern,
             path=self.path.copy(),
