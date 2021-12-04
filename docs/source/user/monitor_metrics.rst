@@ -65,3 +65,16 @@ Example using starlette.
    ::
 
       metric = PrometheusMetrics(my_registry)
+
+
+Full example
+------------
+
+You will find an example using prometheus in the examples directory:
+
+   https://github.com/mardiros/aioli/tree/master/examples/prometheus_metrics
+
+
+.. figure:: ../screenshots/prometheus.png
+
+   Example of querying the prometheus instance on http://prometheus.localhost/

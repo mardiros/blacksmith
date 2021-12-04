@@ -58,3 +58,16 @@ to achieve this, lets create a simple middleware that forward the headers.
                self.middleware.headers=trace.http_headers
          scope["aioli_client"] = self.cli
          await self.app(scope, receive, send)
+
+
+Full example
+------------
+
+You will find an example using prometheus in the examples directory:
+
+   https://github.com/mardiros/aioli/tree/master/examples/zipkin_tracing
+
+
+.. figure:: ../screenshots/zipkin.png
+
+   Example of querying the prometheus instance on http://prometheus.localhost/
