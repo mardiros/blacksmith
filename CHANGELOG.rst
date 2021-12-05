@@ -1,4 +1,8 @@
 
+0.2.1 - Released at 2021-12-05
+------------------------------
+ * Add metadata in pyproject.toml for pypi
+
 0.2.0 - Released at 2021-12-05
 ------------------------------
  * Implement consul discovery (see consul example)

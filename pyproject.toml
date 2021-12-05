@@ -14,7 +14,7 @@ name = "aioli-client"
 packages = [
   {include = "aioli", from = "src"},
 ]
-version = "0.2.0"
+version = "0.2.1"
 readme = "README.rst"
 homepage = "https://github.com/mardiros/aioli"
 repository = "https://github.com/mardiros/aioli"
