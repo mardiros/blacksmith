@@ -16,3 +16,4 @@ User manual of Aioli.
    errors
    monitor_metrics
    http_middleware
+   changelog
