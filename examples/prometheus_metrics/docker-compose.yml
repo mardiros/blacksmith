@@ -95,9 +95,9 @@ services:
       - "SERVICE_NAME=notif-v1"
     networks:
       - "internal"
-    volumes:
-      - "./notif:/srv/notif"
-      - "../../src/aioli:/home/notif/.cache/pypoetry/virtualenvs/notif-E5XGZiq1-py3.10/lib/python3.10/site-packages/aioli"
+    # volumes:
+    #   - "./notif:/srv/notif"
+    #   - "../../src/aioli:/home/notif/.cache/pypoetry/virtualenvs/notif-E5XGZiq1-py3.10/lib/python3.10/site-packages/aioli"
 
   mailhog:
     image: mailhog/mailhog

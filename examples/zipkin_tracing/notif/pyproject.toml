@@ -8,7 +8,7 @@ authors = ["Guillaume Gauvrit <guillaume@gauvr.it>"]
 python = "^3.9"
 starlette = "^0.17.0"
 uvicorn = "^0.15.0"
-aioli-client = { git = "https://github.com/mardiros/aioli.git", branch = "master" }
+aioli-client = "0.2.1"
 aiohttp = "^3.8.1"
 aiozipkin = "^1.1.1"
 
