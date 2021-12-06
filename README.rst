@@ -19,6 +19,53 @@ Aioli is REST API client designed for microservices.
 The goal of this http client is to create consumer driven contracts.
 
 
+What is Aioli
+-------------
+
+Aioli is a declarative tool for REST Api.
+
+In a REST API, resources are declared under HTTP routes, and every http verb
+as its own definition.
+
+In Aioli, every resources are bound to schemas that define request and response,
+in order abstract HTTP.
+
+This is a common concept for SQL table with ORM, where tables are bound to models,
+and then, operations are available on models. This is a usefull abstraction to 
+write maintainable code and to dive into a project easilly.
+
+Handling API resources using an http client, such as `requests`_ does not handle
+that abstraction, and does not handle bindings to object, and can be compared to
+a raw connection because it is just a transport.
+
+This is the problem aioli is solving, having a nice abstraction of a service.
+
+.. _`requests`: https://docs.python-requests.org/
+
+
+Why not using a SDK to consume APIs ?
+-------------------------------------
+
+SDK are about importing an external library in a service. And a service is
+consumed by many services for different purpose. As a result, SDK create
+coupling between service, and this is something that should be avoid.
+
+An SDK for a service will declare all the resources, routes, and attribute
+of resources when a service consumer may consume just a few.
+
+SDK may hide what is really used by every service.
+
+To avoid this, every consumers of API, should declare its own consumers
+contracts to get a better view of which service use what.
+
+
+Read More
+---------
+
+You can read the `full documentation of this library here`_.
+
+.. _`full documentation of this library here`: https://aioli-client.readthedocs.io/en/latest/user/index.html
+
 
 Contributing
 ------------
@@ -26,7 +73,5 @@ Contributing
  * Use isort and black to keep the code well formatted.
  * Write tests (Test driven development is encouraged).
  * Using just_ to run commands.
-
-
 
 .. _just: https://github.com/casey/just
