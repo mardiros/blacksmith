@@ -2,6 +2,7 @@ import pytest
 
 from aioli import PathInfoField, Request, Response
 from aioli.domain.exceptions import (
+    HTTPError,
     NoContractException,
     NoResponseSchemaException,
     TimeoutError,
@@ -41,6 +42,8 @@ class FakeTransport(AbstractTransport):
     async def request(
         self, method: HttpMethod, request: HTTPRequest, timeout: HTTPTimeout
     ) -> HTTPResponse:
+        if self.resp.status_code >= 400:
+            raise HTTPError(f"{self.resp.status_code} blah", request, self.resp)
         return self.resp
 
 
@@ -330,7 +333,7 @@ async def test_route_proxy_prepare_middleware():
 
 
 @pytest.mark.asyncio
-async def test_route_proxy_prepare_middleware():
+async def test_route_proxy_prepare_middleware_drop_header():
     resp = HTTPResponse(200, {}, "")
     tp = FakeTransport(resp)
 
@@ -976,7 +979,23 @@ async def test_route_monitoring(dummy_metrics_collector):
     await proxy.collection_post({})
     await proxy.get({})
 
+    resp = HTTPResponse(404, {}, {"detail": "not found"})
+    tp = FakeTransport(resp)
+    proxy.transport = tp
+    with pytest.raises(HTTPError):
+        await proxy.collection_post({})
+    with pytest.raises(HTTPError):
+        await proxy.get({})
+
     assert dict(dummy_metrics_collector.counter) == {
         ("dummy", "GET", "/dummy", 202): 1,
+        ("dummy", "GET", "/dummy", 404): 1,
         ("dummy", "POST", "/", 202): 2,
+        ("dummy", "POST", "/", 404): 1,
+    }
+    assert dict(dummy_metrics_collector.duration) == {
+        ("dummy", "GET", "/dummy", 202): [0],
+        ("dummy", "GET", "/dummy", 404): [0],
+        ("dummy", "POST", "/", 202): [0, 0],
+        ("dummy", "POST", "/", 404): [0],
     }

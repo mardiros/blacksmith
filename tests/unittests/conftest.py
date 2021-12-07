@@ -54,7 +54,7 @@ class FakeConsulTransport(AbstractTransport):
 class DummyMetricsCollector(AbstractMetricsCollector):
     def __init__(self) -> None:
         self.counter = Counter()
-        self.duration: Dict[Tuple, List[float]] = defaultdict(list)
+        self.duration: Dict[Tuple, List[int]] = defaultdict(list)
 
     def observe_request(
         self,
@@ -65,7 +65,7 @@ class DummyMetricsCollector(AbstractMetricsCollector):
         duration: float,
     ):
         self.counter[(client_name, method, path, status_code)] += 1
-        self.duration[(client_name, method, path, status_code)].append(duration)
+        self.duration[(client_name, method, path, status_code)].append(int(duration))
 
 
 @pytest.fixture
