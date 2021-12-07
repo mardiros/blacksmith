@@ -328,6 +328,7 @@ async def test_route_proxy_prepare_middleware():
     )
     assert req.headers == {"Authorization": "Bearer abc", "Eggs": "egg", "foo": "bar"}
 
+
 @pytest.mark.asyncio
 async def test_route_proxy_prepare_middleware():
     resp = HTTPResponse(200, {}, "")
@@ -362,6 +363,7 @@ async def test_route_proxy_prepare_middleware():
         HTTPUnauthenticated(),
     )
     assert req.headers == {"Authorization": "Bearer abc"}
+
 
 @pytest.mark.asyncio
 async def test_route_proxy_prepare_middleware_with_auth():

@@ -157,6 +157,7 @@ class ZipkinMiddleware:
         # we call the private method to get the root context.
         root_trace = await tracer(request)
         async with root_trace:
+
             async def send_with_headers(message: Message):
                 if message["type"] == "http.response.start":
                     headers = MutableHeaders(raw=message["headers"])

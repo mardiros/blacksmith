@@ -56,9 +56,7 @@ async def post_notif(request):
         api_user = await cli("api_user")
 
     async with trace.new_child("get_user"):
-        user: User = (
-            await api_user.users.get({"username": body["username"]})
-        ).response
+        user: User = (await api_user.users.get({"username": body["username"]})).response
 
     async with root_trace.new_child("send_email"):
         await send_email(user, body["message"])

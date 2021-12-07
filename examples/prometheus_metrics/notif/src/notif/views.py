@@ -5,9 +5,7 @@ from typing import cast
 
 from starlette.applications import Starlette
 from starlette.responses import Response, JSONResponse
-from prometheus_client import (
-    generate_latest, CONTENT_TYPE_LATEST, REGISTRY
-    )
+from prometheus_client import generate_latest, CONTENT_TYPE_LATEST, REGISTRY
 
 import aioli
 from aioli import ClientFactory, ConsulDiscovery, PrometheusMetrics
@@ -55,11 +53,10 @@ async def post_notif(request):
     return JSONResponse({"detail": f"{user.email} accepted"}, status_code=202)
 
 
-
 @app.route("/metrics", methods=["GET"])
 async def get_metrics(request):
     resp = Response(
         generate_latest(REGISTRY),
         media_type=CONTENT_TYPE_LATEST,
-        )
+    )
     return resp

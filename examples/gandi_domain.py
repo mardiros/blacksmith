@@ -38,7 +38,6 @@ class CollectionDomainParam(Request):
     per_page: int = QueryStringField(2)
 
 
-
 aioli.register(
     "gandi",
     "domain",

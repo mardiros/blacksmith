@@ -17,6 +17,7 @@ dummy_empty_response = Response(204, headers={}, json=None)
 dummy_error_response = Response(422, headers={}, json=dummy_error)
 dummy_error_500_response = Response(500, headers={}, text="internal server error")
 
+
 def dummy_query_timeout():
     raise HttpxTimeoutException("ReadTimeout", request=None)
 
@@ -67,8 +68,6 @@ async def test_query_http_422(patch):
     assert ctx.value.json == dummy_error
 
 
-
-
 @mock.patch(
     "httpx._client.AsyncClient.request",
     side_effect=lambda *args, **kwargs: dummy_query_timeout(),
@@ -95,4 +94,4 @@ async def test_query_http_no_json(patch):
 
     assert str(ctx.value) == "500 Internal Server Error"
     assert ctx.value.status_code == 500
-    assert ctx.value.json == {'error': 'internal server error'}
+    assert ctx.value.json == {"error": "internal server error"}
