@@ -33,11 +33,13 @@ class PrometheusMetrics(AbstractMetricsCollector):
 
     """
 
-    def __init__(self, registry: Registry = None):
-        from prometheus_client import Counter, Gauge, REGISTRY
+    def __init__(self, registry: Registry = None, buckets=None):
+        from prometheus_client import Counter, Gauge, Histogram, REGISTRY
 
         if registry is None:
             registry = REGISTRY
+        if buckets is None:
+            buckets = [0.05 * 2 ** x for x in range(10)]
         version_info = {
             "version": pkg_resources.get_distribution("aioli-client").version
         }
@@ -55,15 +57,26 @@ class PrometheusMetrics(AbstractMetricsCollector):
             registry=registry,
             labelnames=["client_name", "method", "path", "status_code"],
         )
+        self.aioli_request_latency_seconds = Histogram(
+            "aioli_request_latency_seconds",
+            "Latency of http requests in seconds",
+            buckets=buckets,
+            registry=registry,
+            labelnames=["client_name", "method", "path", "status_code"],
+        )
 
-    def inc_request(
+    def observe_request(
         self,
         client_name: ClientName,
         method: HttpMethod,
         path: str,
         status_code: int,
+        latency: float,
     ):
         """
         Increment the prometheus counter `aioli_http_requests_total`.
         """
         self.aioli_http_requests.labels(client_name, method, path, status_code).inc()
+        self.aioli_request_latency_seconds.labels(
+            client_name, method, path, status_code
+        ).observe(latency)

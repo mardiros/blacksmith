@@ -1,4 +1,5 @@
-from collections import Counter
+from collections import Counter, defaultdict
+from typing import Dict, List, Tuple
 import pytest
 from aioli.domain.exceptions import HTTPError
 from aioli.domain.model import (
@@ -53,15 +54,18 @@ class FakeConsulTransport(AbstractTransport):
 class DummyMetricsCollector(AbstractMetricsCollector):
     def __init__(self) -> None:
         self.counter = Counter()
+        self.duration: Dict[Tuple, List[float]] = defaultdict(list)
 
-    def inc_request(
+    def observe_request(
         self,
         client_name: ClientName,
         method: HttpMethod,
         path: str,
         status_code: int,
+        duration: float,
     ):
         self.counter[(client_name, method, path, status_code)] += 1
+        self.duration[(client_name, method, path, status_code)].append(duration)
 
 
 @pytest.fixture
