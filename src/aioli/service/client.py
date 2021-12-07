@@ -1,3 +1,4 @@
+import time
 from typing import (
     Any,
     Dict,
@@ -17,6 +18,7 @@ from aioli.monitoring.base import AbstractMetricsCollector, SinkholeMetrics
 from aioli.service.adapters.httpx import HttpxTransport
 
 from ..domain.exceptions import (
+    HTTPError,
     NoContractException,
     NoResponseSchemaException,
     UnregisteredResourceException,
@@ -209,9 +211,7 @@ class RouteProxy:
             raise WrongRequestTypeException(
                 params.__class__, method, self.name, self.client_name
             )
-        req = params.to_http_request(
-            self.endpoint + resource.path
-        )
+        req = params.to_http_request(self.endpoint + resource.path)
         for middleware in self.middlewares:
             req = req.merge_middleware(middleware)
         req = req.merge_middleware(auth)
@@ -266,18 +266,29 @@ class RouteProxy:
         auth: HTTPAuthentication,
         timeout: HTTPTimeout,
     ) -> ResponseBox:
-        req, resp_schema = self._prepare_request(
-            method, params, self.routes.collection, auth
-        )
-        resp = await self.transport.request(method, req, timeout)
-        status_code = resp.status_code
-        resp = self._prepare_response(resp, resp_schema, method, self.routes.collection)
-        self.metrics.inc_request(
-            self.client_name,
-            method,
-            self.routes.collection.path,
-            status_code,
-        )
+        status_code = 0
+        start = time.perf_counter()
+        try:
+            req, resp_schema = self._prepare_request(
+                method, params, self.routes.collection, auth
+            )
+            resp = await self.transport.request(method, req, timeout)
+            status_code = resp.status_code
+            resp = self._prepare_response(
+                resp, resp_schema, method, self.routes.collection
+            )
+        except HTTPError as exc:
+            status_code = exc.response.status_code
+            raise exc
+        finally:
+            if status_code > 0:
+                self.metrics.observe_request(
+                    self.client_name,
+                    method,
+                    self.routes.collection.path,
+                    status_code,
+                    time.perf_counter() - start,
+                )
         return resp
 
     async def _request(
@@ -287,18 +298,29 @@ class RouteProxy:
         auth: HTTPAuthentication,
         timeout: HTTPTimeout,
     ) -> ResponseBox:
-        req, resp_schema = self._prepare_request(
-            method, params, self.routes.resource, auth
-        )
-        resp = await self.transport.request(method, req, timeout)
-        status_code = resp.status_code
-        resp = self._prepare_response(resp, resp_schema, method, self.routes.resource)
-        self.metrics.inc_request(
-            self.client_name,
-            method,
-            self.routes.resource.path,
-            status_code,
-        )
+        status_code = 0
+        start = time.perf_counter()
+        try:
+            req, resp_schema = self._prepare_request(
+                method, params, self.routes.resource, auth
+            )
+            resp = await self.transport.request(method, req, timeout)
+            status_code = resp.status_code
+            resp = self._prepare_response(
+                resp, resp_schema, method, self.routes.resource
+            )
+        except HTTPError as exc:
+            status_code = exc.response.status_code
+            raise exc
+        finally:
+            if status_code > 0:
+                self.metrics.observe_request(
+                    self.client_name,
+                    method,
+                    self.routes.resource.path,
+                    status_code,
+                    time.perf_counter() - start,
+                )
         return resp
 
     async def collection_head(
@@ -548,9 +570,9 @@ class ClientFactory:
     def add_middleware(self, middleware: HTTPMiddleware):
         """
         Add a middleware to the client factory.
-        
+
         ..note:: Clients created before the call of this method will also be
-            altered. The middleware stack is a reference for all clients. 
+            altered. The middleware stack is a reference for all clients.
         """
         self.middlewares.append(middleware)
 

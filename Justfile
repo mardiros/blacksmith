@@ -23,5 +23,7 @@ rtd:
     poetry export --dev -f requirements.txt -o docs/requirements.txt
 
 coverage:
+    rm -f .coverage
+    rm -rf htmlcov
     poetry run pytest tests/unittests --cov-report=html --cov=aioli
     xdg-open htmlcov/index.html
