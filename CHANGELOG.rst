@@ -1,3 +1,7 @@
+0.3.0 - Released at 2021-12-08
+------------------------------
+ * Replace `aioli_http_requests` Gauge by `aioli_request_latency_seconds` Histogram. (prometheus)
+
 
 0.2.1 - Released at 2021-12-05
 ------------------------------
