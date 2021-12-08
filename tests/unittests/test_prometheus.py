@@ -10,7 +10,7 @@ def test_prom_default_registry():
     assert val == 1.0
     metrics.observe_request("client", "GET", "/", 200, 0.42)
     val = REGISTRY.get_sample_value(
-        "aioli_http_requests_total",
+        "aioli_request_latency_seconds_count",
         labels={
             "client_name": "client",
             "method": "GET",
@@ -28,7 +28,7 @@ def test_prom_metrics():
     assert val == 1.0
     metrics.observe_request("client", "GET", "/", 200, 0.42)
     val = registry.get_sample_value(
-        "aioli_http_requests_total",
+        "aioli_request_latency_seconds_count",
         labels={
             "client_name": "client",
             "method": "GET",

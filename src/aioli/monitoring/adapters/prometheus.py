@@ -20,9 +20,9 @@ class PrometheusMetrics(AbstractMetricsCollector):
     Collect the api calls made in a prometheus registry.
 
     It expose a `aioli_info` Gauge to get the aioli version, as a label, and a
-    `aioli_http_requests_total` Counter to get the number of http requests
+    `aioli_request_latency_seconds_count` Counter to get the number of http requests
     made.
-    The counter `aioli_http_requests_total` as client_name, method, path and
+    The counter `aioli_request_latency_seconds_count` as client_name, method, path and
     status_code labels.
 
     .. note::
@@ -33,7 +33,7 @@ class PrometheusMetrics(AbstractMetricsCollector):
 
     """
 
-    def __init__(self, registry: Registry = None, buckets=None):
+    def __init__(self, buckets=None, registry: Registry = None):
         from prometheus_client import Counter, Gauge, Histogram, REGISTRY
 
         if registry is None:
@@ -51,12 +51,6 @@ class PrometheusMetrics(AbstractMetricsCollector):
         )
         self.aioli_info.labels(**version_info).set(1)
 
-        self.aioli_http_requests = Counter(
-            "aioli_http_requests",
-            "number of http requests count.",
-            registry=registry,
-            labelnames=["client_name", "method", "path", "status_code"],
-        )
         self.aioli_request_latency_seconds = Histogram(
             "aioli_request_latency_seconds",
             "Latency of http requests in seconds",
@@ -74,9 +68,8 @@ class PrometheusMetrics(AbstractMetricsCollector):
         latency: float,
     ):
         """
-        Increment the prometheus counter `aioli_http_requests_total`.
+        Increment the prometheus counter `aioli_request_latency_seconds_count`.
         """
-        self.aioli_http_requests.labels(client_name, method, path, status_code).inc()
         self.aioli_request_latency_seconds.labels(
             client_name, method, path, status_code
         ).observe(latency)

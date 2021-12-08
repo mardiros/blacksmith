@@ -13,30 +13,65 @@ This is accomplished during the instantiation of the `ClientFactory`.
    cli = ClientFactory(sd, metrics=PrometheusMetrics())
 
 
+Metrics
+-------
+
 While installing the metrics collector, it will add metrics on api call
 made.
+There is `aioli_request_latency_seconds` Histogram and `aioli_info` Gauge.
 
-Currently collected metrics are `aioli_info` which is a Gauge that always
-return 1, it is usefull to get the version of the aioli client installed,
-in its label `version`.
-The other metrics is `aioli_http_requests_total` which is a Counter that
-increment on every API calls.
 
-Labels are  `client_name`, `method`, `path`, `status_code`.
-The client_name can indicated the service at its version, and, because a
-service can register the same method/path many times, it can be usefull
-to get the monitoring on every binding.
+aioli_request_latency_seconds Histogram
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Imagine the same route is consumed to get different aspect of the resource
-in many place of a code base. It can be appropriate to register different
-clients to distingate them.
+Histogram have 3 metrics that are `aioli_request_latency_seconds_count`,
+`aioli_request_latency_seconds_sum` and `aioli_request_latency_seconds_bucket`.
+
+All those metrics are incremented on every API calls.
+
+
+You may configure the buckets using the parameter buckets
+
+::
+
+   from aioli import PrometheusMetrics
+   BUCKETS = [0.05, 0.1, 0.2, 0.4, 0.8, 1.6, 3.2, 6.4, 12.8, 25.6]
+   metric = PrometheusMetrics(buckets=BUCKETS)
+
+
+`aioli_request_latency_seconds` labels are  `client_name`, `method`,
+`path`, `status_code`.
+
+
+.. note::
+
+   The client_name can indicated the service at its version, and, because a
+   service can register the same method/path many times, it can be usefull
+   to get the monitoring on every binding.
+
+   Imagine the same route is consumed to get different aspect of the resource
+   in many place of a code base. It can be appropriate to register different
+   clients to distingate them.
+
+
+aioli_info Gauge
+~~~~~~~~~~~~~~~~
+
+The metrics is `aioli_info` which is a Gauge that always return 1, it is usefull
+to get the version of the aioli client installed, in its label `version`.
+
+
+Expose metrics
+--------------
 
 After collecting metrics in the registry, the metrics has to be exposed,
 because aioli is a client purpose API, it does not offer a way to expose
 them, but, usually, a web framework application is used for that,
 and used scrapped by a Prometheus instanced.
 
-Example using starlette.
+
+Example using starlette
+~~~~~~~~~~~~~~~~~~~~~~~
 
 ::
 
@@ -64,7 +99,8 @@ Example using starlette.
 
    ::
 
-      metric = PrometheusMetrics(my_registry)
+      from aioli import PrometheusMetrics
+      metric = PrometheusMetrics(registry=my_registry)
 
 
 Full example

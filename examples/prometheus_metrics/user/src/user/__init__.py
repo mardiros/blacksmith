@@ -1,3 +1,5 @@
+import asyncio
+import random
 from typing import cast
 from asgiref.typing import ASGI3Application
 import uvicorn
@@ -27,6 +29,7 @@ USERS = {
 @app.route("/v1/users/{username}", methods=["GET"])
 async def show_user(request):
     username = request.path_params["username"]
+    await asyncio.sleep(random.random() * 3)
     try:
         return JSONResponse(USERS[username])
     except KeyError:
