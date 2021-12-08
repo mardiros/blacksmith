@@ -85,7 +85,6 @@ For instance:
 Response
 --------
 
-
 The response represent only the **json** body of a response.
 When no schema is passed (explicitly None), then, the raw response is returned.
 
@@ -101,6 +100,12 @@ When no schema is passed (explicitly None), then, the raw response is returned.
    class Item(Response):
       name: str = ""
       size: SizeEnum = SizeEnum.m
+
+
+.. note::
+
+   Both Request and Response are :term:`Pydantic` models.
+   So you can add all the Pydantic validation you want.
 
 
 Registration

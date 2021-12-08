@@ -17,6 +17,11 @@ Glossary
    Prometheus
       A software used for event monitoring and alerting.
       https://prometheus.io/
+   
+   Pydantic
+      Data validation using python type annotations.
+      Type hints provides user friendly errors when data is invalid.
+      https://pydantic-docs.helpmanual.io/
 
    server-side service discovery
       The client is calling a proxy server that maintain its backends server

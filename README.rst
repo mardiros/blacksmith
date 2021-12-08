@@ -40,7 +40,12 @@ a raw connection because it is just a transport.
 
 This is the problem aioli is solving, having a nice abstraction of a service.
 
+Aioli is using `httpx`_ to perform http query, and use `Pydantic`_ to validate
+schema.
+
 .. _`requests`: https://docs.python-requests.org/
+.. _`httpx`: https://www.python-httpx.org/
+.. _`Pydantic`: https://pydantic-docs.helpmanual.io/
 
 
 Why not using a SDK to consume APIs ?
@@ -57,6 +62,11 @@ SDK may hide what is really used by every service.
 
 To avoid this, every consumers of API, should declare its own consumers
 contracts to get a better view of which service use what.
+
+.. note::
+
+   TLDR; SDK are fine in public API, by the way, but not in a microservices
+   architecture.
 
 
 Read More
