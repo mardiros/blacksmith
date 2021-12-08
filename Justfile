@@ -17,7 +17,8 @@ functest:
     poetry run pytest -sxv tests/functionals
 
 black:
-    poetry run black **/*.py
+    poetry run isort .
+    poetry run black .
 
 rtd:
     poetry export --dev -f requirements.txt -o docs/requirements.txt

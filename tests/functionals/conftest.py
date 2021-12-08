@@ -1,10 +1,10 @@
 from enum import Enum
 from multiprocessing import Process
 from typing import Dict, List, Optional, cast
-from asgiref.typing import ASGI3Application
 
 import pytest
 import uvicorn
+from asgiref.typing import ASGI3Application
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from pydantic.fields import Field

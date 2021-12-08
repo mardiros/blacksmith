@@ -5,13 +5,12 @@ from typing import cast
 
 import uvicorn
 from asgiref.typing import ASGI3Application
+from notif.resources.user import User
 from starlette.applications import Starlette
 from starlette.responses import JSONResponse
 
 import aioli
 from aioli import ClientFactory, ConsulDiscovery
-
-from notif.resources.user import User
 
 app = Starlette(debug=True)
 

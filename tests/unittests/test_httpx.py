@@ -1,9 +1,10 @@
 from unittest import mock
 
 import pytest
-from httpx import Headers, Response, TimeoutException as HttpxTimeoutException
-from aioli.domain.exceptions import HTTPError
+from httpx import Headers, Response
+from httpx import TimeoutException as HttpxTimeoutException
 
+from aioli.domain.exceptions import HTTPError
 from aioli.domain.model import HTTPRequest, HTTPTimeout
 from aioli.service.adapters.httpx import HttpxTransport
 

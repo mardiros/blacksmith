@@ -1,11 +1,10 @@
 from typing import cast
 
+from notif.zk_middleware import Trace
 from starlette.types import ASGIApp, Receive, Scope, Send
 
 from aioli import ClientFactory, ConsulDiscovery
 from aioli.domain.model import HTTPMiddleware
-
-from notif.zk_middleware import Trace
 
 
 class AioliMiddleware:

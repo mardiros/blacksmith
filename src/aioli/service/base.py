@@ -1,6 +1,5 @@
 import abc
 
-
 from aioli.domain.model import HTTPRequest, HTTPResponse, HTTPTimeout
 from aioli.typing import HttpMethod
 

@@ -1,4 +1,5 @@
 from typing import Type
+
 from aioli.typing import (
     ClientName,
     HttpMethod,
@@ -8,6 +9,7 @@ from aioli.typing import (
     ServiceName,
     Version,
 )
+
 from .model import HTTPRequest, HTTPResponse
 
 

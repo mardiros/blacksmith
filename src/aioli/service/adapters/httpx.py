@@ -1,5 +1,7 @@
 import httpx
-from httpx import AsyncClient, Response as HttpxRepsonse, Timeout as HttpxTimeout
+from httpx import AsyncClient
+from httpx import Response as HttpxRepsonse
+from httpx import Timeout as HttpxTimeout
 
 from aioli.domain.exceptions import HTTPError
 from aioli.domain.model import HTTPRequest, HTTPResponse, HTTPTimeout

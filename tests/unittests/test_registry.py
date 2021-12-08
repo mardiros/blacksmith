@@ -1,8 +1,9 @@
 import pytest
+
 import aioli
+from aioli.domain import registry
 from aioli.domain.exceptions import ConfigurationError, UnregisteredClientException
 from aioli.domain.model import PathInfoField, PostBodyField, Request, Response
-from aioli.domain import registry
 from aioli.domain.registry import Registry
 
 

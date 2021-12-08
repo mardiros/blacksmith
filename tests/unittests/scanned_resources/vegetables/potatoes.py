@@ -1,4 +1,4 @@
-from aioli import Request, PathInfoField, Response
+from aioli import PathInfoField, Request, Response
 
 from .. import registry
 

@@ -5,15 +5,14 @@ from typing import Dict, cast
 
 import aiozipkin
 from aiozipkin.helpers import make_headers
+from notif.resources.user import User
+from notif.zk_middleware import Trace
 from starlette.applications import Starlette
 from starlette.responses import JSONResponse
 
 import aioli
 from aioli import ClientFactory, ConsulDiscovery
 from aioli.domain.model import HTTPAuthentication
-
-from notif.resources.user import User
-from notif.zk_middleware import Trace
 
 app = Starlette(debug=True)
 

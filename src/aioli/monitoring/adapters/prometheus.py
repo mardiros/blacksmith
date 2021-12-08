@@ -1,6 +1,8 @@
 """Collect metrics based on prometheus."""
+from typing import TYPE_CHECKING, Any, Optional
+
 import pkg_resources
-from typing import Any, Optional, TYPE_CHECKING
+
 from aioli.typing import ClientName, HttpMethod
 
 from ..base import AbstractMetricsCollector
@@ -34,7 +36,7 @@ class PrometheusMetrics(AbstractMetricsCollector):
     """
 
     def __init__(self, buckets=None, registry: Registry = None):
-        from prometheus_client import Counter, Gauge, Histogram, REGISTRY
+        from prometheus_client import REGISTRY, Counter, Gauge, Histogram
 
         if registry is None:
             registry = REGISTRY

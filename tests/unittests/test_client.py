@@ -20,8 +20,8 @@ from aioli.domain.model import (
     HTTPUnauthenticated,
     PostBodyField,
 )
-from aioli.monitoring import SinkholeMetrics
 from aioli.domain.registry import ApiRoutes, Registry
+from aioli.monitoring import SinkholeMetrics
 from aioli.service.base import AbstractTransport
 from aioli.service.client import (
     Client,

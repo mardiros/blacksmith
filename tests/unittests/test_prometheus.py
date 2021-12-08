@@ -1,4 +1,4 @@
-from prometheus_client import CollectorRegistry, REGISTRY
+from prometheus_client import REGISTRY, CollectorRegistry
 
 from aioli import __version__
 from aioli.monitoring.adapters import PrometheusMetrics

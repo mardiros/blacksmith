@@ -3,14 +3,13 @@ import smtplib
 from textwrap import dedent
 from typing import cast
 
+from notif.resources.user import User
+from prometheus_client import CONTENT_TYPE_LATEST, REGISTRY, generate_latest
 from starlette.applications import Starlette
-from starlette.responses import Response, JSONResponse
-from prometheus_client import generate_latest, CONTENT_TYPE_LATEST, REGISTRY
+from starlette.responses import JSONResponse, Response
 
 import aioli
 from aioli import ClientFactory, ConsulDiscovery, PrometheusMetrics
-
-from notif.resources.user import User
 
 app = Starlette(debug=True)
 

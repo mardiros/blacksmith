@@ -1,6 +1,8 @@
 from collections import Counter, defaultdict
 from typing import Dict, List, Tuple
+
 import pytest
+
 from aioli.domain.exceptions import HTTPError
 from aioli.domain.model import (
     HTTPAuthorization,
@@ -9,11 +11,10 @@ from aioli.domain.model import (
     HTTPResponse,
     HTTPTimeout,
 )
-
 from aioli.monitoring.base import AbstractMetricsCollector
-from aioli.sd.adapters.static import StaticDiscovery, Endpoints
 from aioli.sd.adapters.consul import ConsulDiscovery, _registry
 from aioli.sd.adapters.router import RouterDiscovery
+from aioli.sd.adapters.static import Endpoints, StaticDiscovery
 from aioli.service.base import AbstractTransport
 from aioli.service.client import ClientFactory
 from aioli.typing import ClientName, HttpMethod

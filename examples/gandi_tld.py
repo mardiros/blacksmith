@@ -4,7 +4,7 @@ import sys
 from typing import Optional
 
 import aioli
-from aioli import HTTPAuthorization, Request, PathInfoField, Response
+from aioli import HTTPAuthorization, PathInfoField, Request, Response
 from aioli.sd.adapters import StaticDiscovery
 from aioli.service.client import ClientFactory
 

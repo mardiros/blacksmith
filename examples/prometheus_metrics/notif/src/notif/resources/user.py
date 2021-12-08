@@ -1,9 +1,5 @@
 import aioli
-from aioli import (
-    PathInfoField,
-    Request,
-    Response,
-)
+from aioli import PathInfoField, Request, Response
 
 
 class UserRequest(Request):

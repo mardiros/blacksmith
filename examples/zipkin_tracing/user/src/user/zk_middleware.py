@@ -8,9 +8,8 @@ from aiozipkin.mypy_types import Headers
 from aiozipkin.span import SpanAbc
 from aiozipkin.tracer import Tracer as ZkTracer
 from starlette.datastructures import MutableHeaders
-from starlette.types import ASGIApp, Message, Receive, Scope, Send
 from starlette.requests import Request
-
+from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 try:
     from aioli import ConsulDiscovery

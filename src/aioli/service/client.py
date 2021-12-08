@@ -13,8 +13,8 @@ from typing import (
 )
 
 from pydantic.typing import NoneType
-from aioli.monitoring.base import AbstractMetricsCollector, SinkholeMetrics
 
+from aioli.monitoring.base import AbstractMetricsCollector, SinkholeMetrics
 from aioli.service.adapters.httpx import HttpxTransport
 
 from ..domain.exceptions import (
@@ -26,29 +26,23 @@ from ..domain.exceptions import (
     WrongRequestTypeException,
 )
 from ..domain.model import (
+    CollectionParser,
     HTTPAuthentication,
     HTTPMiddleware,
     HTTPRequest,
     HTTPResponse,
     HTTPTimeout,
     HTTPUnauthenticated,
-    CollectionParser,
     Metadata,
     Request,
     Response,
     TResponse,
 )
-from ..domain.registry import (
-    ApiRoutes,
-    HttpResource,
-    Registry,
-    Resources,
-    registry as default_registry,
-)
+from ..domain.registry import ApiRoutes, HttpResource, Registry, Resources
+from ..domain.registry import registry as default_registry
 from ..sd.base import AbstractServiceDiscovery
 from ..typing import ClientName, HttpMethod, Path, ResourceName, Url
 from .base import AbstractTransport
-
 
 ClientTimeout = Union[HTTPTimeout, float, Tuple[float, float]]
 

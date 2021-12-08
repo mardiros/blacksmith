@@ -1,12 +1,12 @@
 from typing import cast
 
-import aioli
 import uvicorn
 from asgiref.typing import ASGI3Application
+from notif.aioli_middleware import AioliMiddleware
 from notif.views import app
 from notif.zk_middleware import ZipkinMiddleware
-from notif.aioli_middleware import AioliMiddleware
 
+import aioli
 
 if __name__ == "__main__":
     aioli.scan("notif.resources")

@@ -1,9 +1,9 @@
 import pytest
 
-from aioli.sd.adapters.static import StaticDiscovery
-from aioli.sd.adapters.consul import ConsulDiscovery, Service, aioli_cli, ServiceRequest
-from aioli.sd.adapters.router import RouterDiscovery
 from aioli.domain.exceptions import UnregisteredServiceException
+from aioli.sd.adapters.consul import ConsulDiscovery, Service, ServiceRequest, aioli_cli
+from aioli.sd.adapters.router import RouterDiscovery
+from aioli.sd.adapters.static import StaticDiscovery
 
 
 @pytest.mark.asyncio

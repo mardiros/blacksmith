@@ -1,8 +1,9 @@
 import asyncio
 import random
 from typing import cast
-from asgiref.typing import ASGI3Application
+
 import uvicorn
+from asgiref.typing import ASGI3Application
 from starlette.applications import Starlette
 from starlette.responses import JSONResponse
 

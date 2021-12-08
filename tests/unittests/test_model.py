@@ -1,18 +1,19 @@
-from datetime import datetime
 import json
+from datetime import datetime
 from typing import Optional
+
 from aioli.domain.model import (
     CollectionParser,
-    HTTPAuthorization,
-    HTTPResponse,
-    HTTPUnauthenticated,
     HeaderField,
     HTTPAuthentication,
+    HTTPAuthorization,
     HTTPRequest,
-    Request,
+    HTTPResponse,
+    HTTPUnauthenticated,
     PathInfoField,
     PostBodyField,
     QueryStringField,
+    Request,
     Response,
     parse_header_links,
 )

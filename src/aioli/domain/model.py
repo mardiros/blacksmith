@@ -2,10 +2,10 @@ import re
 from dataclasses import dataclass, field
 from functools import partial
 from typing import (
-    Generic,
     TYPE_CHECKING,
     Any,
     Dict,
+    Generic,
     List,
     Optional,
     Type,

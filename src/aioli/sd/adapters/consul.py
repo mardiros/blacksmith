@@ -8,16 +8,8 @@ from typing import Callable, cast
 
 from pydantic.fields import Field
 
-from aioli.domain.exceptions import (
-    HTTPError,
-    UnregisteredServiceException,
-)
-from aioli.domain.model import (
-    HTTPAuthorization,
-    PathInfoField,
-    Request,
-    Response,
-)
+from aioli.domain.exceptions import HTTPError, UnregisteredServiceException
+from aioli.domain.model import HTTPAuthorization, PathInfoField, Request, Response
 from aioli.domain.registry import Registry
 from aioli.sd.adapters.static import StaticDiscovery
 from aioli.sd.base import AbstractServiceDiscovery, Url
