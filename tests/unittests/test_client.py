@@ -4,7 +4,6 @@ from aioli import PathInfoField, Request, Response
 from aioli.domain.exceptions import (
     HTTPError,
     NoContractException,
-    NoResponseSchemaException,
     TimeoutError,
     UnregisteredResourceException,
     UnregisteredRouteException,
@@ -86,87 +85,6 @@ def test_build_timeout():
     assert timeout == HTTPTimeout(5.0, 15.0)
     timeout = build_timeout((5.0, 2.0))
     assert timeout == HTTPTimeout(5.0, 2.0)
-
-
-def test_response_box():
-    resp = ResponseBox(
-        HTTPResponse(
-            200,
-            {},
-            {
-                "name": "Alice",
-                "age": 24,
-                "useless": True,
-            },
-        ),
-        GetResponse,
-        "",
-        "",
-        "",
-        "",
-    )
-    assert resp.response.dict() == {"age": 24, "name": "Alice"}
-    assert resp.json == {"age": 24, "name": "Alice", "useless": True}
-
-
-def test_response_box_no_schema():
-    resp = ResponseBox(
-        HTTPResponse(
-            200,
-            {},
-            {
-                "name": "Alice",
-                "age": 24,
-                "useless": True,
-            },
-        ),
-        None,
-        "GET",
-        "/dummies",
-        "Dummy",
-        "api",
-    )
-    with pytest.raises(NoResponseSchemaException) as ctx:
-        assert resp.response
-    assert (
-        str(ctx.value)
-        == "No response schema in route 'GET /dummies' in resource'Dummy' in client 'api'"
-    )
-
-
-def test_collection_iterator():
-    collec = CollectionIterator(
-        HTTPResponse(
-            200,
-            {"Total-Count": "5"},
-            [
-                {
-                    "name": "Alice",
-                    "age": 24,
-                    "useless": True,
-                },
-                {
-                    "name": "Bob",
-                    "age": 42,
-                },
-            ],
-        ),
-        GetResponse,
-        CollectionParser,
-    )
-    assert collec.meta.count == 2
-    assert collec.meta.total_count == 5
-    list_collec = list(collec)
-    assert list_collec == [
-        {
-            "name": "Alice",
-            "age": 24,
-        },
-        {
-            "name": "Bob",
-            "age": 42,
-        },
-    ]
 
 
 @pytest.mark.asyncio

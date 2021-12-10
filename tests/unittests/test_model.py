@@ -2,7 +2,11 @@ import json
 from datetime import datetime
 from typing import Optional
 
+import pytest
+
+from aioli.domain.exceptions import NoResponseSchemaException
 from aioli.domain.model import (
+    CollectionIterator,
     CollectionParser,
     HeaderField,
     HTTPAuthentication,
@@ -15,8 +19,14 @@ from aioli.domain.model import (
     QueryStringField,
     Request,
     Response,
-    parse_header_links,
+    ResponseBox,
 )
+from aioli.domain.model.http import parse_header_links
+
+
+class GetResponse(Response):
+    name: str
+    age: int
 
 
 def test_authotization_header():
@@ -116,3 +126,84 @@ def test_collection_parser():
         "last": {"rel": "last", "url": "https://dummy/?page=4"},
         "next": {"rel": "next", "url": "https://dummy/?page=2"},
     }
+
+
+def test_response_box():
+    resp = ResponseBox(
+        HTTPResponse(
+            200,
+            {},
+            {
+                "name": "Alice",
+                "age": 24,
+                "useless": True,
+            },
+        ),
+        GetResponse,
+        "",
+        "",
+        "",
+        "",
+    )
+    assert resp.response.dict() == {"age": 24, "name": "Alice"}
+    assert resp.json == {"age": 24, "name": "Alice", "useless": True}
+
+
+def test_response_box_no_schema():
+    resp = ResponseBox(
+        HTTPResponse(
+            200,
+            {},
+            {
+                "name": "Alice",
+                "age": 24,
+                "useless": True,
+            },
+        ),
+        None,
+        "GET",
+        "/dummies",
+        "Dummy",
+        "api",
+    )
+    with pytest.raises(NoResponseSchemaException) as ctx:
+        assert resp.response
+    assert (
+        str(ctx.value)
+        == "No response schema in route 'GET /dummies' in resource'Dummy' in client 'api'"
+    )
+
+
+def test_collection_iterator():
+    collec = CollectionIterator(
+        HTTPResponse(
+            200,
+            {"Total-Count": "5"},
+            [
+                {
+                    "name": "Alice",
+                    "age": 24,
+                    "useless": True,
+                },
+                {
+                    "name": "Bob",
+                    "age": 42,
+                },
+            ],
+        ),
+        GetResponse,
+        CollectionParser,
+    )
+    assert collec.meta.count == 2
+    assert collec.meta.total_count == 5
+    list_collec = list(collec)
+    assert list_collec == [
+        {
+            "name": "Alice",
+            "age": 24,
+        },
+        {
+            "name": "Bob",
+            "age": 42,
+        },
+    ]
