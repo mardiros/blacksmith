@@ -15,6 +15,8 @@ from .domain.model import (
     QueryStringField,
     Request,
     Response,
+    ResponseBox,
+    CollectionIterator,
 )
 from .domain.registry import register
 from .domain.scanner import scan
@@ -23,4 +25,4 @@ from .monitoring.adapters import PrometheusMetrics
 from .sd.adapters.consul import ConsulDiscovery
 from .sd.adapters.router import RouterDiscovery
 from .sd.adapters.static import StaticDiscovery
-from .service.client import ClientFactory, CollectionIterator
+from .service.client import ClientFactory
