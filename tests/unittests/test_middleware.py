@@ -1,15 +1,13 @@
 import pytest
-
-from prometheus_client import REGISTRY, CollectorRegistry
 from aiobreaker.state import CircuitBreakerError
+from prometheus_client import REGISTRY, CollectorRegistry
 
 from aioli import __version__
 from aioli.domain.exceptions import HTTPError
+from aioli.middleware.auth import HTTPAuthorization
+from aioli.middleware.base import HTTPAddHeaderdMiddleware
 from aioli.middleware.circuit_breaker import CircuitBreaker
 from aioli.middleware.prometheus import PrometheusMetrics
-
-from aioli.middleware.base import HTTPAddHeaderdMiddleware
-from aioli.middleware.auth import HTTPAuthorization
 
 
 @pytest.mark.asyncio
@@ -171,3 +169,7 @@ async def test_circuit_breaker(echo_middleware, boom_middleware, dummy_http_requ
     next = metrics(echo_middleware)
     with pytest.raises(CircuitBreakerError) as exc:
         await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
+
+    # Other service is still working
+    await next(dummy_http_request, "GET", "foo", "/dummies/{name}")
+    assert resp.status_code == 200

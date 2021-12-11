@@ -1,25 +1,39 @@
 """Cut the circuit in case a service is down."""
 from datetime import timedelta
-from typing import Any, Callable, Iterable, Optional, TYPE_CHECKING, Type, Union, cast
-
+from functools import partial
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    DefaultDict,
+    Dict,
+    Iterable,
+    Optional,
+    Type,
+    Union,
+    cast,
+)
 
 from aioli.domain.model.http import HTTPRequest, HTTPResponse
-
 from aioli.typing import ClientName, HttpMethod, Path
 
 from .base import HTTPMiddleware, Middleware
 
 if TYPE_CHECKING:
     try:
+        from aiobreaker import CircuitBreaker as AioBreaker
         from aiobreaker import CircuitBreakerListener
         from aiobreaker.storage.base import CircuitBreakerStorage
     except ImportError:
         pass
     Listeners = Optional[Iterable["CircuitBreakerListener"]]
     StateStorage = Optional["CircuitBreakerStorage"]
+    CircuitBreakers = Dict[str, "AioBreaker"]
+
 else:
     Listeners = Any
     StateStorage = Any
+    CircuitBreakers = Any
 
 
 class CircuitBreaker(HTTPMiddleware):
@@ -34,6 +48,8 @@ class CircuitBreaker(HTTPMiddleware):
 
     """
 
+    breakers: CircuitBreakers
+
     def __init__(
         self,
         fail_max=5,
@@ -41,25 +57,33 @@ class CircuitBreaker(HTTPMiddleware):
         exclude: Optional[Iterable[Union[Callable, Type[Exception]]]] = None,
         listeners: Listeners = None,
         state_storage: StateStorage = None,
-        name: Optional[str] = None,
     ):
         import aiobreaker
 
-        # FIXME, should have one circuit breaker per service name
-        self.breaker = aiobreaker.CircuitBreaker(
+        self.CircuitBreaker = partial(
+            aiobreaker.CircuitBreaker,
             fail_max=fail_max,
             timeout_duration=timeout_duration,
             exclude=exclude,
             listeners=listeners,
             state_storage=state_storage,
-            name=name,
         )
+        self.breakers = {}
+
+    def get_breaker(self, client_name: str) -> "AioBreaker":
+        if client_name not in self.breakers:
+            self.breakers[client_name] = self.CircuitBreaker(
+                name=client_name,
+            )
+        return self.breakers[client_name]
 
     def __call__(self, next: Middleware) -> Middleware:
         async def handle(
             req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
         ) -> HTTPResponse:
-            resp = await self.breaker.call_async(next, req, method, client_name, path)
+
+            breaker = self.get_breaker(client_name)
+            resp = await breaker.call_async(next, req, method, client_name, path)
             return cast(HTTPResponse, resp)
 
         return handle
