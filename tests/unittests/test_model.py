@@ -9,10 +9,8 @@ from aioli.domain.model import (
     CollectionIterator,
     CollectionParser,
     HeaderField,
-    HTTPAuthorization,
     HTTPRequest,
     HTTPResponse,
-    HTTPUnauthenticated,
     PathInfoField,
     PostBodyField,
     QueryStringField,
@@ -20,13 +18,9 @@ from aioli.domain.model import (
     Response,
     ResponseBox,
 )
-from aioli.domain.model.http import (
-    HTTPAddHeaderdMiddleware,
-    HTTPMiddleware,
-    HTTPTimeout,
-    Middleware,
-    parse_header_links,
-)
+from aioli.domain.model.http import HTTPTimeout, parse_header_links
+from aioli.middleware.auth import HTTPAuthorization, HTTPUnauthenticated
+from aioli.middleware.base import HTTPAddHeaderdMiddleware, HTTPMiddleware
 from aioli.typing import ClientName, HttpMethod, Path
 
 
@@ -40,10 +34,12 @@ def test_timeout_eq():
     assert HTTPTimeout(10) == HTTPTimeout(10)
     assert HTTPTimeout(10, 20) == HTTPTimeout(10, 20)
 
+
 def test_timeout_neq():
     assert HTTPTimeout() != HTTPTimeout(42)
     assert HTTPTimeout(42) != HTTPTimeout(42, 42)
     assert HTTPTimeout(42, 42) != HTTPTimeout(42, 43)
+
 
 def test_authorization_header():
     auth = HTTPAuthorization("Bearer", "abc")
@@ -55,7 +51,9 @@ def test_authorization_header():
 async def test_empty_middleware(middleware, dummy_http_request):
     auth = middleware()
 
-    async def handle_req(req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path) -> HTTPResponse:
+    async def handle_req(
+        req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
+    ) -> HTTPResponse:
         return HTTPResponse(200, req.headers, json=req)
 
     next = auth(handle_req)
@@ -80,7 +78,9 @@ async def test_headers_middleware(middleware, dummy_http_request):
     middleware_cls, middleware_params, expected_headers = middleware
     auth = middleware_cls(*middleware_params)
 
-    async def handle_req(req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path) -> HTTPResponse:
+    async def handle_req(
+        req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
+    ) -> HTTPResponse:
         return HTTPResponse(200, req.headers, json=req)
 
     next = auth(handle_req)

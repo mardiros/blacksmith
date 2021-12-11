@@ -1,19 +1,17 @@
 from typing import List, Optional, Type
 
+from aioli.domain.exceptions import UnregisteredResourceException
+from aioli.domain.model.http import HTTPTimeout
+from aioli.domain.model.params import CollectionParser
+from aioli.domain.registry import Registry, Resources
+from aioli.domain.registry import registry as default_registry
+from aioli.middleware.auth import HTTPUnauthenticated
+from aioli.middleware.base import HTTPMiddleware
 from aioli.monitoring.base import AbstractMetricsCollector, SinkholeMetrics
+from aioli.sd.base import AbstractServiceDiscovery
 from aioli.service.adapters.httpx import HttpxTransport
+from aioli.typing import ClientName, ResourceName, Url
 
-from ..domain.exceptions import UnregisteredResourceException
-from ..domain.model import (
-    CollectionParser,
-    HTTPMiddleware,
-    HTTPTimeout,
-    HTTPUnauthenticated,
-)
-from ..domain.registry import Registry, Resources
-from ..domain.registry import registry as default_registry
-from ..sd.base import AbstractServiceDiscovery
-from ..typing import ClientName, ResourceName, Url
 from .base import AbstractTransport
 from .route_proxy import ClientTimeout, HTTPAuthentication, RouteProxy, build_timeout
 

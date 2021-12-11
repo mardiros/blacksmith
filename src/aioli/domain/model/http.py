@@ -1,20 +1,11 @@
 import re
 from dataclasses import dataclass, field
-from typing import (
-    Callable,
-    Coroutine,
-    TYPE_CHECKING,
-    Any,
-    Dict,
-    List,
-    Optional,
-    Tuple,
-    Union,
-)
-from typing_extensions import Protocol
-from ...typing import ClientName, HttpMethod, Path, Url
+from typing import Any, Dict, List, Optional, Union
+
+from aioli.typing import Url
 
 simpletypes = Union[str, int, float, bool]
+Links = Dict[Optional[str], Dict[str, str]]
 
 
 class HTTPTimeout:
@@ -106,9 +97,6 @@ def parse_header_links(value: str) -> List[Dict[str, str]]:
     return links
 
 
-Links = Dict[Optional[str], Dict[str, str]]
-
-
 @dataclass
 class HTTPResponse:
     """
@@ -132,63 +120,3 @@ class HTTPResponse:
                 key = link.get("rel") or link.get("url")
                 ldict[key] = link
         return ldict
-
-
-class Middleware(Protocol):
-    def __call__(
-        self, req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
-    ) -> Coroutine[Any, Any, HTTPResponse]:
-        ...
-
-
-class HTTPMiddleware:
-    """Inject data in http query on every requests."""
-
-    def __init__(self) -> None:
-        pass
-
-    def __call__(self, next: Middleware) -> Middleware:
-        async def handle(
-            req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
-        ) -> HTTPResponse:
-            return await next(req, method, client_name, path)
-
-        return handle
-
-
-class HTTPAddHeaderdMiddleware(HTTPMiddleware):
-    """Generic middleware that inject header."""
-
-    headers: Dict[str, str] = field(default_factory=dict)
-
-    def __init__(self, headers: Dict[str, str]):
-        self.headers = headers
-
-    def __call__(self, next: Middleware) -> Middleware:
-        async def handle(
-            req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
-        ) -> HTTPResponse:
-            req.headers.update(self.headers)
-            return await next(req, method, client_name, path)
-
-        return handle
-
-
-class HTTPUnauthenticated(HTTPMiddleware):
-    """
-    Empty Authentication Mechanism.
-
-    This is the default value for every call.
-    """
-
-
-class HTTPAuthorization(HTTPAddHeaderdMiddleware):
-    """
-    Authentication Mechanism based on the header `Authorization`.
-
-    :param scheme: the scheme of the mechanism.
-    :param value: the value that authenticate the user using the scheme.
-    """
-
-    def __init__(self, scheme: str, value: str):
-        return super().__init__({"Authorization": f"{scheme} {value}"})

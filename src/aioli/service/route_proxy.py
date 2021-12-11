@@ -1,21 +1,17 @@
 import time
-from typing import Any, Coroutine, Dict, List, Optional, Tuple, Type, Union, cast
+from typing import Any, Dict, List, Optional, Tuple, Type, Union, cast
 
 from pydantic.typing import NoneType
-from aioli.domain.model.http import Middleware
 
-from aioli.monitoring.base import AbstractMetricsCollector
-
-from ..domain.exceptions import (
+from aioli.domain.exceptions import (
     HTTPError,
     NoContractException,
     UnregisteredRouteException,
     WrongRequestTypeException,
 )
-from ..domain.model import (
+from aioli.domain.model import (
     CollectionIterator,
     CollectionParser,
-    HTTPMiddleware,
     HTTPRequest,
     HTTPResponse,
     HTTPTimeout,
@@ -24,8 +20,12 @@ from ..domain.model import (
     ResponseBox,
     TResponse,
 )
-from ..domain.registry import ApiRoutes, HttpResource
-from ..typing import ClientName, HttpMethod, Path, ResourceName, Url
+from aioli.domain.registry import ApiRoutes, HttpResource
+from aioli.middleware.auth import HTTPMiddleware
+from aioli.middleware.base import Middleware
+from aioli.monitoring.base import AbstractMetricsCollector
+from aioli.typing import ClientName, HttpMethod, Path, ResourceName, Url
+
 from .base import AbstractTransport
 
 ClientTimeout = Union[HTTPTimeout, float, Tuple[float, float]]

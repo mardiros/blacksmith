@@ -4,14 +4,9 @@ from typing import Dict, List, Tuple
 import pytest
 
 from aioli.domain.exceptions import HTTPError
-from aioli.domain.model import (
-    HTTPAuthorization,
-    HTTPRequest,
-    HTTPResponse,
-    HTTPTimeout,
-    HTTPAddHeaderdMiddleware,
-)
-from aioli.domain.model.params import Request
+from aioli.domain.model import HTTPRequest, HTTPResponse, HTTPTimeout
+from aioli.middleware.auth import HTTPAuthorization
+from aioli.middleware.base import HTTPAddHeaderdMiddleware
 from aioli.monitoring.base import AbstractMetricsCollector
 from aioli.sd.adapters.consul import ConsulDiscovery, _registry
 from aioli.sd.adapters.router import RouterDiscovery

@@ -7,16 +7,10 @@ from aioli.domain.exceptions import (
     UnregisteredRouteException,
     WrongRequestTypeException,
 )
-from aioli.domain.model import (
-    CollectionParser,
-    HTTPAuthorization,
-    HTTPRequest,
-    HTTPResponse,
-    HTTPTimeout,
-    HTTPUnauthenticated,
-)
-from aioli.domain.model.http import HTTPAddHeaderdMiddleware
+from aioli.domain.model import CollectionParser, HTTPRequest, HTTPResponse, HTTPTimeout
 from aioli.domain.registry import ApiRoutes
+from aioli.middleware.auth import HTTPAuthorization, HTTPUnauthenticated
+from aioli.middleware.base import HTTPAddHeaderdMiddleware
 from aioli.monitoring import SinkholeMetrics
 from aioli.service.base import AbstractTransport
 from aioli.service.route_proxy import RouteProxy, build_timeout

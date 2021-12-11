@@ -9,8 +9,9 @@ from typing import Callable, cast
 from pydantic.fields import Field
 
 from aioli.domain.exceptions import HTTPError, UnregisteredServiceException
-from aioli.domain.model import HTTPAuthorization, PathInfoField, Request, Response
+from aioli.domain.model import PathInfoField, Request, Response
 from aioli.domain.registry import Registry
+from aioli.middleware.auth import HTTPBearerAuthorization
 from aioli.sd.adapters.static import StaticDiscovery
 from aioli.sd.base import AbstractServiceDiscovery, Url
 from aioli.service.client import ClientFactory
@@ -55,7 +56,7 @@ def aioli_cli(endpoint: Url, consul_token: str) -> ClientFactory:
     sd = StaticDiscovery({("consul", "v1"): endpoint})
     kwargs = {}
     if consul_token:
-        kwargs["auth"] = HTTPAuthorization("Bearer", consul_token)
+        kwargs["auth"] = HTTPBearerAuthorization(consul_token)
     return ClientFactory(sd, registry=_registry, **kwargs)
 
 
