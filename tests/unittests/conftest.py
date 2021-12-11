@@ -6,11 +6,12 @@ import pytest
 from aioli.domain.exceptions import HTTPError
 from aioli.domain.model import (
     HTTPAuthorization,
-    HTTPMiddleware,
     HTTPRequest,
     HTTPResponse,
     HTTPTimeout,
+    HTTPAddHeaderdMiddleware,
 )
+from aioli.domain.model.params import Request
 from aioli.monitoring.base import AbstractMetricsCollector
 from aioli.sd.adapters.consul import ConsulDiscovery, _registry
 from aioli.sd.adapters.router import RouterDiscovery
@@ -74,7 +75,34 @@ def dummy_metrics_collector():
     return DummyMetricsCollector()
 
 
-class DummyMiddleware(HTTPMiddleware):
+
+class EchoTransport(AbstractTransport):
+    def __init__(self) -> None:
+        super().__init__()
+
+    async def request(
+        self, method: HttpMethod, request: HTTPRequest, timeout: HTTPTimeout
+    ) -> HTTPResponse:
+        return HTTPResponse(200, request.headers, request)
+
+
+@pytest.fixture
+def echo_transport():
+    return EchoTransport()
+
+
+@pytest.fixture
+def dummy_http_request():
+    return HTTPRequest(
+        "/dummy/{name}",
+        {"name": 42},
+        {"foo": "bar"},
+        {"X-Req-Id": "42"},
+        '{"bandi_manchot": "777"}',
+    )
+
+
+class DummyMiddleware(HTTPAddHeaderdMiddleware):
     def __init__(self):
         super().__init__(headers={"x-dummy": "test"})
 

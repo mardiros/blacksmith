@@ -7,9 +7,14 @@ Here is a dummy example.
 
 ::
 
-   class DummyMiddleware(HTTPMiddleware):
-      def __init__(self):
-         super().__init__(headers={"x-request-header": "foo"})
+   class DummyMiddleware(Middleware):
+
+      def __call__(self, next: Middleware) -> Middleware:
+         async def handle(req: HTTPRequest) -> HTTPResponse:
+               req.headers["x-request-header"] "foo"
+               return await next(req)
+
+        return handle
 
    dummy_middleware = DummyMiddleware()
 

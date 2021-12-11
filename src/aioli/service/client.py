@@ -6,7 +6,6 @@ from aioli.service.adapters.httpx import HttpxTransport
 from ..domain.exceptions import UnregisteredResourceException
 from ..domain.model import (
     CollectionParser,
-    HTTPAuthentication,
     HTTPMiddleware,
     HTTPTimeout,
     HTTPUnauthenticated,
@@ -16,7 +15,7 @@ from ..domain.registry import registry as default_registry
 from ..sd.base import AbstractServiceDiscovery
 from ..typing import ClientName, ResourceName, Url
 from .base import AbstractTransport
-from .route_proxy import ClientTimeout, RouteProxy, build_timeout
+from .route_proxy import ClientTimeout, HTTPAuthentication, RouteProxy, build_timeout
 
 
 class Client:

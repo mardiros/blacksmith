@@ -1,7 +1,8 @@
 import time
-from typing import Any, Dict, List, Optional, Tuple, Type, Union
+from typing import Any, Coroutine, Dict, List, Optional, Tuple, Type, Union, cast
 
 from pydantic.typing import NoneType
+from aioli.domain.model.http import Middleware
 
 from aioli.monitoring.base import AbstractMetricsCollector
 
@@ -14,7 +15,6 @@ from ..domain.exceptions import (
 from ..domain.model import (
     CollectionIterator,
     CollectionParser,
-    HTTPAuthentication,
     HTTPMiddleware,
     HTTPRequest,
     HTTPResponse,
@@ -29,7 +29,7 @@ from ..typing import ClientName, HttpMethod, ResourceName, Url
 from .base import AbstractTransport
 
 ClientTimeout = Union[HTTPTimeout, float, Tuple[float, float]]
-
+HTTPAuthentication = HTTPMiddleware
 
 def build_timeout(timeout: ClientTimeout) -> HTTPTimeout:
     """Build the timeout from the convenient timeout."""
@@ -83,7 +83,6 @@ class RouteProxy:
         method: HttpMethod,
         params: Union[Optional[Request], Dict[Any, Any]],
         resource: Optional[HttpResource],
-        auth: HTTPAuthentication,
     ) -> Tuple[HTTPRequest, Union[NoneType, Type[TResponse]]]:
         if resource is None:
             raise UnregisteredRouteException(method, self.name, self.client_name)
@@ -100,9 +99,6 @@ class RouteProxy:
                 params.__class__, method, self.name, self.client_name
             )
         req = params.to_http_request(self.endpoint + resource.path)
-        for middleware in self.middlewares:
-            req = req.merge_middleware(middleware)
-        req = req.merge_middleware(auth)
         return (req, return_schema)
 
     def _prepare_response(
@@ -132,6 +128,26 @@ class RouteProxy:
             response, response_schema, collection_parser or self.collection_parser
         )
 
+    async def _handle_req_with_middlewares(
+        self,
+        method: HttpMethod,
+        req: HTTPRequest,
+        auth: HTTPAuthentication,
+        timeout: HTTPTimeout,
+    ) -> HTTPResponse:
+
+        async def handle_req(req: HTTPRequest) -> HTTPResponse:
+            return (await self.transport.request(method, req, timeout))
+
+        next = cast(Middleware, handle_req)
+
+        for middleware in self.middlewares:
+            next = middleware(next)
+        next = auth(next)
+
+        resp = await next(req)
+        return resp
+
     async def _yield_collection_request(
         self,
         method: HttpMethod,
@@ -139,10 +155,8 @@ class RouteProxy:
         auth: HTTPAuthentication,
         timeout: HTTPTimeout,
     ) -> CollectionIterator:
-        req, resp_schema = self._prepare_request(
-            method, params, self.routes.collection, auth
-        )
-        resp = await self.transport.request(method, req, timeout)
+        req, resp_schema = self._prepare_request(method, params, self.routes.collection)
+        resp = await self._handle_req_with_middlewares(method, req, auth, timeout)
         return self._prepare_collection_response(
             resp, resp_schema, self.routes.collection.collection_parser
         )
@@ -158,9 +172,9 @@ class RouteProxy:
         start = time.perf_counter()
         try:
             req, resp_schema = self._prepare_request(
-                method, params, self.routes.collection, auth
+                method, params, self.routes.collection
             )
-            resp = await self.transport.request(method, req, timeout)
+            resp = await self._handle_req_with_middlewares(method, req, auth, timeout)
             status_code = resp.status_code
             resp = self._prepare_response(
                 resp, resp_schema, method, self.routes.collection
@@ -190,9 +204,9 @@ class RouteProxy:
         start = time.perf_counter()
         try:
             req, resp_schema = self._prepare_request(
-                method, params, self.routes.resource, auth
+                method, params, self.routes.resource
             )
-            resp = await self.transport.request(method, req, timeout)
+            resp = await self._handle_req_with_middlewares(method, req, auth, timeout)
             status_code = resp.status_code
             resp = self._prepare_response(
                 resp, resp_schema, method, self.routes.resource

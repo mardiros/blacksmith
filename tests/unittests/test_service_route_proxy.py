@@ -5,17 +5,18 @@ from aioli.domain.exceptions import (
     HTTPError,
     NoContractException,
     UnregisteredRouteException,
+    WrongRequestTypeException,
 )
 from aioli.domain.model import (
     CollectionParser,
     HTTPAuthorization,
-    HTTPMiddleware,
     HTTPRequest,
     HTTPResponse,
     HTTPTimeout,
     HTTPUnauthenticated,
 )
-from aioli.domain.registry import ApiRoutes, Registry
+from aioli.domain.model.http import HTTPAddHeaderdMiddleware
+from aioli.domain.registry import ApiRoutes
 from aioli.monitoring import SinkholeMetrics
 from aioli.service.base import AbstractTransport
 from aioli.service.route_proxy import RouteProxy, build_timeout
@@ -45,9 +46,8 @@ def test_build_timeout():
 
 
 @pytest.mark.asyncio
-async def test_route_proxy_prepare_middleware():
+async def test_route_proxy_prepare_middleware(dummy_http_request, echo_transport):
     resp = HTTPResponse(200, {}, "")
-    tp = FakeTransport(resp)
 
     proxy = RouteProxy(
         "dummy",
@@ -60,96 +60,28 @@ async def test_route_proxy_prepare_middleware():
             collection_contract=None,
             collection_parser=None,
         ),
-        transport=tp,
+        transport=echo_transport,
         auth=HTTPUnauthenticated(),
         timeout=HTTPTimeout(),
         collection_parser=CollectionParser,
         metrics=SinkholeMetrics(),
         middlewares=[
-            HTTPAuthorization("Bearer", "abc"),
-            HTTPMiddleware({"foo": "bar"}),
-            HTTPMiddleware({"Eggs": "egg"}),
+            HTTPAddHeaderdMiddleware({"foo": "bar"}),
+            HTTPAddHeaderdMiddleware({"Eggs": "egg"}),
         ],
     )
-    req, *_ = proxy._prepare_request(
+    resp = await proxy._handle_req_with_middlewares(
         "GET",
-        {},
-        proxy.routes.resource,
-        HTTPUnauthenticated(),
-    )
-    assert req.headers == {"Authorization": "Bearer abc", "Eggs": "egg", "foo": "bar"}
-
-
-@pytest.mark.asyncio
-async def test_route_proxy_prepare_middleware_drop_header():
-    resp = HTTPResponse(200, {}, "")
-    tp = FakeTransport(resp)
-
-    proxy = RouteProxy(
-        "dummy",
-        "dummies",
-        "http://dummy/",
-        ApiRoutes(
-            path="/",
-            contract={"GET": (Request, None)},
-            collection_path=None,
-            collection_contract=None,
-            collection_parser=None,
-        ),
-        transport=tp,
-        auth=HTTPUnauthenticated(),
-        timeout=HTTPTimeout(),
-        collection_parser=CollectionParser,
-        metrics=SinkholeMetrics(),
-        middlewares=[
-            HTTPAuthorization("Bearer", "abc"),
-            HTTPMiddleware({"foo": "bar"}),
-            HTTPMiddleware({"foo": None}),
-        ],
-    )
-    req, *_ = proxy._prepare_request(
-        "GET",
-        {},
-        proxy.routes.resource,
-        HTTPUnauthenticated(),
-    )
-    assert req.headers == {"Authorization": "Bearer abc"}
-
-
-@pytest.mark.asyncio
-async def test_route_proxy_prepare_middleware_with_auth():
-    resp = HTTPResponse(200, {}, "")
-    tp = FakeTransport(resp)
-
-    proxy = RouteProxy(
-        "dummy",
-        "dummies",
-        "http://dummy/",
-        ApiRoutes(
-            path="/",
-            contract={"GET": (Request, None)},
-            collection_path=None,
-            collection_contract=None,
-            collection_parser=None,
-        ),
-        transport=tp,
-        auth=HTTPAuthorization("Bearer", "abc"),
-        timeout=HTTPTimeout(),
-        collection_parser=CollectionParser,
-        metrics=SinkholeMetrics(),
-        middlewares=[
-            HTTPAuthorization("Bearer", "overriden_sorry"),
-            HTTPMiddleware({"foo": "bar"}),
-            HTTPMiddleware({"Eggs": "egg"}),
-        ],
-    )
-    req, *_ = proxy._prepare_request(
-        "GET",
-        {},
-        proxy.routes.resource,
+        dummy_http_request,
         HTTPAuthorization("Bearer", "abc"),
+        HTTPTimeout(4.2),
     )
-    assert req.headers == {"Authorization": "Bearer abc", "Eggs": "egg", "foo": "bar"}
+    assert resp.headers == {
+        "Authorization": "Bearer abc",
+        "X-Req-Id": "42",
+        "Eggs": "egg",
+        "foo": "bar",
+    }
 
 
 @pytest.mark.asyncio
@@ -176,9 +108,7 @@ async def test_route_proxy_prepare_unregistered_method_resource():
         middlewares=[],
     )
     with pytest.raises(NoContractException) as exc:
-        resp = proxy._prepare_request(
-            "GET", {}, proxy.routes.resource, HTTPUnauthenticated()
-        )
+        resp = proxy._prepare_request("GET", {}, proxy.routes.resource)
     assert (
         str(exc.value)
         == "Unregistered route 'GET' in resource 'dummies' in client 'dummy'"
@@ -209,9 +139,7 @@ async def test_route_proxy_prepare_unregistered_method_collection():
         middlewares=[],
     )
     with pytest.raises(NoContractException) as exc:
-        resp = proxy._prepare_request(
-            "GET", {}, proxy.routes.collection, HTTPUnauthenticated()
-        )
+        resp = proxy._prepare_request("GET", {}, proxy.routes.collection)
     assert (
         str(exc.value)
         == "Unregistered route 'GET' in resource 'dummies' in client 'dummy'"
@@ -242,9 +170,7 @@ async def test_route_proxy_prepare_unregistered_resource():
         middlewares=[],
     )
     with pytest.raises(UnregisteredRouteException) as exc:
-        resp = proxy._prepare_request(
-            "GET", {}, proxy.routes.resource, HTTPUnauthenticated()
-        )
+        resp = proxy._prepare_request("GET", {}, proxy.routes.resource)
     assert (
         str(exc.value)
         == "Unregistered route 'GET' in resource 'dummies' in client 'dummy'"
@@ -275,12 +201,56 @@ async def test_route_proxy_prepare_unregistered_collection():
         middlewares=[],
     )
     with pytest.raises(UnregisteredRouteException) as exc:
-        resp = proxy._prepare_request(
-            "GET", {}, proxy.routes.collection, HTTPUnauthenticated()
-        )
+        resp = proxy._prepare_request("GET", {}, proxy.routes.collection)
     assert (
         str(exc.value)
         == "Unregistered route 'GET' in resource 'dummies' in client 'dummy'"
+    )
+
+
+@pytest.mark.asyncio
+async def test_route_proxy_prepare_wrong_type():
+    resp = HTTPResponse(200, {}, "")
+    tp = FakeTransport(resp)
+
+    class GetParam(Request):
+        name: str = PathInfoField(str)
+
+    class GetResponse(Response):
+        name: str
+        age: int
+
+    class PostParam(Request):
+        name: str = PostBodyField(str)
+        age: int = PostBodyField(int)
+
+    proxy = RouteProxy(
+        "dummy",
+        "dummies",
+        "http://dummy/",
+        ApiRoutes(
+            "/",
+            {"GET": (GetParam, GetResponse)},
+            None,
+            None,
+            collection_parser=None,
+        ),
+        transport=tp,
+        auth=HTTPAuthorization("Bearer", "abc"),
+        timeout=HTTPTimeout(),
+        collection_parser=CollectionParser,
+        metrics=SinkholeMetrics(),
+        middlewares=[],
+    )
+    with pytest.raises(WrongRequestTypeException) as exc:
+        resp = proxy._prepare_request(
+            "GET", PostParam(name="barbie", age=42), proxy.routes.resource
+        )
+
+    assert (
+        str(exc.value)
+        == "Invalid type 'tests.unittests.test_service_route_proxy.PostParam' "
+        "for route 'GET' in resource 'dummies' in client 'dummy'"
     )
 
 

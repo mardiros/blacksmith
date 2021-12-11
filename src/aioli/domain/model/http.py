@@ -1,44 +1,20 @@
 import re
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import (
+    Callable,
+    Coroutine,
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    Union,
+)
 
 from ...typing import Url
 
 simpletypes = Union[str, int, float, bool]
-
-
-@dataclass
-class HTTPMiddleware:
-    """Inject data in http query on every requests."""
-
-    headers: Dict[str, Optional[str]] = field(default_factory=dict)
-
-
-class HTTPAuthentication(HTTPMiddleware):
-    """Authentication Mechanism."""
-
-
-class HTTPUnauthenticated(HTTPAuthentication):
-    """
-    Empty Authentication Mechanism.
-
-    This is the default value for every call.
-    """
-
-    def __init__(self):
-        return super().__init__()
-
-
-class HTTPAuthorization(HTTPAuthentication):
-    """
-    Authentication Mechanism based on the header `Authorization`.
-
-    :param scheme: the scheme of the mechanism.
-    :param value: the value that authenticate the user using the scheme.
-    """
-
-    def __init__(self, scheme: str, value: str):
-        return super().__init__(headers={"Authorization": f"{scheme} {value}"})
 
 
 class HTTPTimeout:
@@ -76,21 +52,6 @@ class HTTPRequest:
     @property
     def url(self):
         return self.url_pattern.format(**self.path)
-
-    def merge_middleware(self, middleware: HTTPMiddleware) -> "HTTPRequest":
-        headers = self.headers.copy()
-        for key, val in middleware.headers.items():
-            if val is None:
-                headers.pop(key, None)
-            else:
-                headers[key] = val
-        return HTTPRequest(
-            url_pattern=self.url_pattern,
-            path=self.path.copy(),
-            querystring=self.querystring.copy(),
-            headers=headers,
-            body=self.body,
-        )
 
 
 def parse_header_links(value: str) -> List[Dict[str, str]]:
@@ -171,3 +132,56 @@ class HTTPResponse:
                 key = link.get("rel") or link.get("url")
                 ldict[key] = link
         return ldict
+
+
+Middleware = Callable[[HTTPRequest], Coroutine[Any, Any, HTTPResponse]]
+
+
+class HTTPMiddleware:
+    """Inject data in http query on every requests."""
+
+    def __init__(self) -> None:
+        pass
+
+    def __call__(self, next: Middleware) -> Middleware:
+        
+        async def handle(req: HTTPRequest) -> HTTPResponse:
+            return await next(req)
+
+        return handle
+
+
+class HTTPAddHeaderdMiddleware(HTTPMiddleware):
+    """Generic middleware that inject header."""
+
+    headers: Dict[str, str] = field(default_factory=dict)
+
+    def __init__(self, headers: Dict[str, str]):
+        self.headers = headers
+
+    def __call__(self, next: Middleware) -> Middleware:
+        async def handle(req: HTTPRequest) -> HTTPResponse:
+            req.headers.update(self.headers)
+            return await next(req)
+
+        return handle
+
+
+class HTTPUnauthenticated(HTTPMiddleware):
+    """
+    Empty Authentication Mechanism.
+
+    This is the default value for every call.
+    """
+
+
+class HTTPAuthorization(HTTPAddHeaderdMiddleware):
+    """
+    Authentication Mechanism based on the header `Authorization`.
+
+    :param scheme: the scheme of the mechanism.
+    :param value: the value that authenticate the user using the scheme.
+    """
+
+    def __init__(self, scheme: str, value: str):
+        return super().__init__({"Authorization": f"{scheme} {value}"})

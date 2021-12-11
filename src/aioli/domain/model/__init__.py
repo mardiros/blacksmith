@@ -1,5 +1,5 @@
 from .http import (
-    HTTPAuthentication,
+    HTTPAddHeaderdMiddleware,
     HTTPAuthorization,
     HTTPMiddleware,
     HTTPRequest,
