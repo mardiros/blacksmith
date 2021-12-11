@@ -3,6 +3,7 @@ import pytest
 from prometheus_client import REGISTRY, CollectorRegistry
 
 from aioli import __version__
+from aioli.domain.exceptions import HTTPError
 from aioli.domain.model.http import HTTPRequest, HTTPResponse
 from aioli.middleware.prometheus import PrometheusMetrics
 
@@ -124,3 +125,26 @@ async def test_prom_metrics(slow_middleware, dummy_http_request):
         },
     )
     assert val == 1.0
+
+
+
+@pytest.mark.asyncio
+async def test_prom_metrics(boom_middleware, dummy_http_request):
+    registry = CollectorRegistry()
+    metrics = PrometheusMetrics(registry=registry)
+    next = metrics(boom_middleware)
+
+    with pytest.raises(HTTPError):
+        await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
+
+    val = registry.get_sample_value(
+        "aioli_request_latency_seconds_bucket",
+        labels={
+            "le": "0.1",
+            "client_name": "dummy",
+            "method": "GET",
+            "path": "/dummies/{name}",
+            "status_code": "500",
+        },
+    )
+    assert val == 1

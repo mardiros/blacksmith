@@ -82,6 +82,16 @@ def slow_middleware():
         return HTTPResponse(200, req.headers, json=req)
     return next
 
+@pytest.fixture
+def boom_middleware():
+    async def next(
+        req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
+    ) -> HTTPResponse:
+        raise HTTPError(
+            "Boom", req, HTTPResponse(500, {}, json={"detail": "I am bored"})
+        )
+    return next
+
 
 @pytest.fixture
 def dummy_http_request():
