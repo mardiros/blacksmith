@@ -1,0 +1,1 @@
+A dummy api that send message by email to user account.

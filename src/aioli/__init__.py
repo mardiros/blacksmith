@@ -19,6 +19,7 @@ from .domain.model import (
 from .domain.registry import register
 from .domain.scanner import scan
 from .middleware import (
+    CircuitBreaker,
     HTTPAddHeaderdMiddleware,
     HTTPAuthorization,
     HTTPBearerAuthorization,

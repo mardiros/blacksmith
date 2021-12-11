@@ -1,15 +1,15 @@
 import pytest
 
 from prometheus_client import REGISTRY, CollectorRegistry
+from aiobreaker.state import CircuitBreakerError
 
 from aioli import __version__
 from aioli.domain.exceptions import HTTPError
-from aioli.domain.model.http import HTTPRequest, HTTPResponse
+from aioli.middleware.circuit_breaker import CircuitBreaker
 from aioli.middleware.prometheus import PrometheusMetrics
 
 from aioli.middleware.base import HTTPAddHeaderdMiddleware
-from aioli.typing import ClientName, HttpMethod, Path
-from aioli.middleware.auth import HTTPAuthorization, HTTPUnauthenticated
+from aioli.middleware.auth import HTTPAuthorization
 
 
 @pytest.mark.asyncio
@@ -127,9 +127,8 @@ async def test_prom_metrics(slow_middleware, dummy_http_request):
     assert val == 1.0
 
 
-
 @pytest.mark.asyncio
-async def test_prom_metrics(boom_middleware, dummy_http_request):
+async def test_prom_metrics_error(boom_middleware, dummy_http_request):
     registry = CollectorRegistry()
     metrics = PrometheusMetrics(registry=registry)
     next = metrics(boom_middleware)
@@ -148,3 +147,27 @@ async def test_prom_metrics(boom_middleware, dummy_http_request):
         },
     )
     assert val == 1
+
+
+@pytest.mark.asyncio
+async def test_circuit_breaker(echo_middleware, boom_middleware, dummy_http_request):
+    metrics = CircuitBreaker(fail_max=2)
+    next = metrics(echo_middleware)
+    resp = await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
+    assert resp.status_code == 200
+
+    next = metrics(boom_middleware)
+
+    with pytest.raises(HTTPError) as exc:
+        await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
+    # with pytest.raises(HTTPError) as exc:
+    #     await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
+
+    with pytest.raises(CircuitBreakerError) as exc:
+        await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
+    assert exc.value.message == "Failures threshold reached, circuit breaker opened."
+
+    # Event if it works, the circuit breaker is open
+    next = metrics(echo_middleware)
+    with pytest.raises(CircuitBreakerError) as exc:
+        await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
