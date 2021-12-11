@@ -11,7 +11,6 @@ from aioli.domain.model import CollectionParser, HTTPRequest, HTTPResponse, HTTP
 from aioli.domain.registry import ApiRoutes
 from aioli.middleware.auth import HTTPAuthorization, HTTPUnauthenticated
 from aioli.middleware.base import HTTPAddHeaderdMiddleware
-from aioli.monitoring import SinkholeMetrics
 from aioli.service.base import AbstractTransport
 from aioli.service.route_proxy import RouteProxy, build_timeout
 from aioli.typing import HttpMethod
@@ -58,7 +57,6 @@ async def test_route_proxy_prepare_middleware(dummy_http_request, echo_transport
         auth=HTTPUnauthenticated(),
         timeout=HTTPTimeout(),
         collection_parser=CollectionParser,
-        metrics=SinkholeMetrics(),
         middlewares=[
             HTTPAddHeaderdMiddleware({"foo": "bar"}),
             HTTPAddHeaderdMiddleware({"Eggs": "egg"}),
@@ -99,7 +97,6 @@ async def test_route_proxy_prepare_unregistered_method_resource():
         auth=HTTPAuthorization("Bearer", "abc"),
         timeout=HTTPTimeout(),
         collection_parser=CollectionParser,
-        metrics=SinkholeMetrics(),
         middlewares=[],
     )
     with pytest.raises(NoContractException) as exc:
@@ -130,7 +127,6 @@ async def test_route_proxy_prepare_unregistered_method_collection():
         auth=HTTPAuthorization("Bearer", "abc"),
         timeout=HTTPTimeout(),
         collection_parser=CollectionParser,
-        metrics=SinkholeMetrics(),
         middlewares=[],
     )
     with pytest.raises(NoContractException) as exc:
@@ -161,7 +157,6 @@ async def test_route_proxy_prepare_unregistered_resource():
         auth=HTTPAuthorization("Bearer", "abc"),
         timeout=HTTPTimeout(),
         collection_parser=CollectionParser,
-        metrics=SinkholeMetrics(),
         middlewares=[],
     )
     with pytest.raises(UnregisteredRouteException) as exc:
@@ -192,7 +187,6 @@ async def test_route_proxy_prepare_unregistered_collection():
         auth=HTTPAuthorization("Bearer", "abc"),
         timeout=HTTPTimeout(),
         collection_parser=CollectionParser,
-        metrics=SinkholeMetrics(),
         middlewares=[],
     )
     with pytest.raises(UnregisteredRouteException) as exc:
@@ -234,7 +228,6 @@ async def test_route_proxy_prepare_wrong_type():
         auth=HTTPAuthorization("Bearer", "abc"),
         timeout=HTTPTimeout(),
         collection_parser=CollectionParser,
-        metrics=SinkholeMetrics(),
         middlewares=[],
     )
     with pytest.raises(WrongRequestTypeException) as exc:
@@ -268,7 +261,6 @@ async def test_route_proxy_collection_head():
         auth=HTTPAuthorization("Bearer", "abc"),
         timeout=HTTPTimeout(),
         collection_parser=CollectionParser,
-        metrics=SinkholeMetrics(),
         middlewares=[],
     )
     resp = (await proxy.collection_head({"name": "baby"})).json
@@ -297,7 +289,6 @@ async def test_route_proxy_collection_get():
         auth=HTTPAuthorization("Bearer", "abc"),
         timeout=HTTPTimeout(),
         collection_parser=CollectionParser,
-        metrics=SinkholeMetrics(),
         middlewares=[],
     )
     resp = await proxy.collection_get()
@@ -332,7 +323,6 @@ async def test_route_proxy_collection_get_with_parser():
         auth=HTTPAuthorization("Bearer", "abc"),
         timeout=HTTPTimeout(),
         collection_parser=CollectionParser,
-        metrics=SinkholeMetrics(),
         middlewares=[],
     )
     resp = await proxy.collection_get()
@@ -362,7 +352,6 @@ async def test_route_proxy_collection_post():
         auth=HTTPAuthorization("Bearer", "abc"),
         timeout=HTTPTimeout(),
         collection_parser=CollectionParser,
-        metrics=SinkholeMetrics(),
         middlewares=[],
     )
     resp = (await proxy.collection_post({})).json
@@ -389,7 +378,6 @@ async def test_route_proxy_collection_put():
         auth=HTTPAuthorization("Bearer", "abc"),
         timeout=HTTPTimeout(),
         collection_parser=CollectionParser,
-        metrics=SinkholeMetrics(),
         middlewares=[],
     )
     resp = (await proxy.collection_put({})).json
@@ -416,7 +404,6 @@ async def test_route_proxy_collection_patch():
         auth=HTTPAuthorization("Bearer", "abc"),
         timeout=HTTPTimeout(),
         collection_parser=CollectionParser,
-        metrics=SinkholeMetrics(),
         middlewares=[],
     )
     resp = (await proxy.collection_patch({})).json
@@ -443,7 +430,6 @@ async def test_route_proxy_collection_delete():
         auth=HTTPAuthorization("Bearer", "abc"),
         timeout=HTTPTimeout(),
         collection_parser=CollectionParser,
-        metrics=SinkholeMetrics(),
         middlewares=[],
     )
     resp = (await proxy.collection_delete({})).json
@@ -470,7 +456,6 @@ async def test_route_proxy_collection_options():
         auth=HTTPAuthorization("Bearer", "abc"),
         timeout=HTTPTimeout(),
         collection_parser=CollectionParser,
-        metrics=SinkholeMetrics(),
         middlewares=[],
     )
     resp = (await proxy.collection_options({})).json
@@ -496,7 +481,6 @@ async def test_route_proxy_head():
         auth=HTTPAuthorization("Bearer", "abc"),
         timeout=HTTPTimeout(),
         collection_parser=CollectionParser,
-        metrics=SinkholeMetrics(),
         middlewares=[],
     )
     resp = (await proxy.head({"name": "baby"})).json
@@ -523,7 +507,6 @@ async def test_route_proxy_get():
         auth=HTTPAuthorization("Bearer", "abc"),
         timeout=HTTPTimeout(),
         collection_parser=CollectionParser,
-        metrics=SinkholeMetrics(),
         middlewares=[],
     )
     resp = (await proxy.get({})).json
@@ -550,7 +533,6 @@ async def test_route_proxy_post():
         auth=HTTPAuthorization("Bearer", "abc"),
         timeout=HTTPTimeout(),
         collection_parser=CollectionParser,
-        metrics=SinkholeMetrics(),
         middlewares=[],
     )
     resp = (await proxy.post({})).json
@@ -577,7 +559,6 @@ async def test_route_proxy_put():
         auth=HTTPAuthorization("Bearer", "abc"),
         timeout=HTTPTimeout(),
         collection_parser=CollectionParser,
-        metrics=SinkholeMetrics(),
         middlewares=[],
     )
     resp = (await proxy.put({})).json
@@ -604,7 +585,6 @@ async def test_route_proxy_patch():
         auth=HTTPAuthorization("Bearer", "abc"),
         timeout=HTTPTimeout(),
         collection_parser=CollectionParser,
-        metrics=SinkholeMetrics(),
         middlewares=[],
     )
     resp = (await proxy.patch({})).json
@@ -631,7 +611,6 @@ async def test_route_proxy_delete():
         auth=HTTPAuthorization("Bearer", "abc"),
         timeout=HTTPTimeout(),
         collection_parser=CollectionParser,
-        metrics=SinkholeMetrics(),
         middlewares=[],
     )
     resp = (await proxy.delete({})).json
@@ -658,57 +637,7 @@ async def test_route_proxy_options():
         auth=HTTPAuthorization("Bearer", "abc"),
         timeout=HTTPTimeout(),
         collection_parser=CollectionParser,
-        metrics=SinkholeMetrics(),
         middlewares=[],
     )
     resp = (await proxy.options({})).json
     assert resp == {"detail": "accepted"}
-
-
-@pytest.mark.asyncio
-async def test_route_monitoring(dummy_metrics_collector):
-    resp = HTTPResponse(202, {}, {"detail": "accepted"})
-    tp = FakeTransport(resp)
-
-    proxy = RouteProxy(
-        "dummy",
-        "dummies",
-        "http://dummy/",
-        ApiRoutes(
-            path="/dummy",
-            contract={"GET": (Request, None)},
-            collection_contract={"POST": (Request, None)},
-            collection_path="/",
-            collection_parser=None,
-        ),
-        transport=tp,
-        auth=HTTPAuthorization("Bearer", "abc"),
-        timeout=HTTPTimeout(),
-        collection_parser=CollectionParser,
-        metrics=dummy_metrics_collector,
-        middlewares=[],
-    )
-    await proxy.collection_post({})
-    await proxy.collection_post({})
-    await proxy.get({})
-
-    resp = HTTPResponse(404, {}, {"detail": "not found"})
-    tp = FakeTransport(resp)
-    proxy.transport = tp
-    with pytest.raises(HTTPError):
-        await proxy.collection_post({})
-    with pytest.raises(HTTPError):
-        await proxy.get({})
-
-    assert dict(dummy_metrics_collector.counter) == {
-        ("dummy", "GET", "/dummy", 202): 1,
-        ("dummy", "GET", "/dummy", 404): 1,
-        ("dummy", "POST", "/", 202): 2,
-        ("dummy", "POST", "/", 404): 1,
-    }
-    assert dict(dummy_metrics_collector.duration) == {
-        ("dummy", "GET", "/dummy", 202): [0],
-        ("dummy", "GET", "/dummy", 404): [0],
-        ("dummy", "POST", "/", 202): [0, 0],
-        ("dummy", "POST", "/", 404): [0],
-    }

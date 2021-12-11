@@ -15,7 +15,7 @@ app = Starlette(debug=True)
 
 aioli.scan("notif.resources")
 sd = ConsulDiscovery()
-cli = ClientFactory(sd, metrics=PrometheusMetrics())
+cli = ClientFactory(sd).add_middleware(PrometheusMetrics())
 
 
 async def send_email(user: User, message: str):

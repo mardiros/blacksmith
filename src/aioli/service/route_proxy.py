@@ -23,7 +23,6 @@ from aioli.domain.model import (
 from aioli.domain.registry import ApiRoutes, HttpResource
 from aioli.middleware.auth import HTTPMiddleware
 from aioli.middleware.base import Middleware
-from aioli.monitoring.base import AbstractMetricsCollector
 from aioli.typing import ClientName, HttpMethod, Path, ResourceName, Url
 
 from .base import AbstractTransport
@@ -52,7 +51,6 @@ class RouteProxy:
     auth: HTTPAuthentication
     timeout: HTTPTimeout
     collection_parser: Type[CollectionParser]
-    metrics: AbstractMetricsCollector
     middlewares: List[HTTPMiddleware]
 
     def __init__(
@@ -65,7 +63,6 @@ class RouteProxy:
         auth: HTTPAuthentication,
         timeout: HTTPTimeout,
         collection_parser: Type[CollectionParser],
-        metrics: AbstractMetricsCollector,
         middlewares: List[HTTPMiddleware],
     ) -> None:
         self.client_name = client_name
@@ -76,7 +73,6 @@ class RouteProxy:
         self.auth = auth
         self.timeout = timeout
         self.collection_parser = collection_parser
-        self.metrics = metrics
         self.middlewares = middlewares
 
     def _prepare_request(
@@ -172,32 +168,15 @@ class RouteProxy:
         auth: HTTPAuthentication,
         timeout: HTTPTimeout,
     ) -> ResponseBox:
-        status_code = 0
-        start = time.perf_counter()
-        try:
-            req, resp_schema = self._prepare_request(
-                method, params, self.routes.collection
-            )
-            resp = await self._handle_req_with_middlewares(
-                method, req, auth, timeout, self.routes.collection.path
-            )
-            status_code = resp.status_code
-            resp = self._prepare_response(
-                resp, resp_schema, method, self.routes.collection
-            )
-        except HTTPError as exc:
-            status_code = exc.response.status_code
-            raise exc
-        finally:
-            if status_code > 0:
-                self.metrics.observe_request(
-                    self.client_name,
-                    method,
-                    self.routes.collection.path,
-                    status_code,
-                    time.perf_counter() - start,
-                )
-        return resp
+        req, resp_schema = self._prepare_request(
+            method, params, self.routes.collection
+        )
+        resp = await self._handle_req_with_middlewares(
+            method, req, auth, timeout, self.routes.collection.path
+        )
+        return self._prepare_response(
+            resp, resp_schema, method, self.routes.collection
+        )
 
     async def _request(
         self,
@@ -206,36 +185,19 @@ class RouteProxy:
         auth: HTTPAuthentication,
         timeout: HTTPTimeout,
     ) -> ResponseBox:
-        status_code = 0
-        start = time.perf_counter()
-        try:
-            req, resp_schema = self._prepare_request(
-                method, params, self.routes.resource
-            )
-            resp = await self._handle_req_with_middlewares(
-                method,
-                req,
-                auth,
-                timeout,
-                self.routes.resource.path,
-            )
-            status_code = resp.status_code
-            resp = self._prepare_response(
-                resp, resp_schema, method, self.routes.resource
-            )
-        except HTTPError as exc:
-            status_code = exc.response.status_code
-            raise exc
-        finally:
-            if status_code > 0:
-                self.metrics.observe_request(
-                    self.client_name,
-                    method,
-                    self.routes.resource.path,
-                    status_code,
-                    time.perf_counter() - start,
-                )
-        return resp
+        req, resp_schema = self._prepare_request(
+            method, params, self.routes.resource
+        )
+        resp = await self._handle_req_with_middlewares(
+            method,
+            req,
+            auth,
+            timeout,
+            self.routes.resource.path,
+        )
+        return self._prepare_response(
+            resp, resp_schema, method, self.routes.resource
+        )
 
     async def collection_head(
         self,

@@ -19,7 +19,6 @@ from aioli.domain.model import (
 )
 from aioli.domain.registry import ApiRoutes, Registry
 from aioli.middleware.auth import HTTPAuthorization, HTTPUnauthenticated
-from aioli.monitoring import SinkholeMetrics
 from aioli.service.base import AbstractTransport
 from aioli.service.client import Client, ClientFactory
 from aioli.typing import HttpMethod
@@ -95,7 +94,6 @@ async def test_client(static_sd):
         auth=HTTPUnauthenticated(),
         timeout=HTTPTimeout(),
         collection_parser=CollectionParser,
-        metrics=SinkholeMetrics(),
         middlewares=[],
     )
 
@@ -166,7 +164,6 @@ async def test_client_timeout(static_sd):
         auth=HTTPUnauthenticated(),
         timeout=HTTPTimeout(),
         collection_parser=CollectionParser,
-        metrics=SinkholeMetrics(),
         middlewares=[],
     )
     with pytest.raises(TimeoutError) as exc:

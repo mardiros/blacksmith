@@ -7,7 +7,6 @@ from aioli.domain.registry import Registry, Resources
 from aioli.domain.registry import registry as default_registry
 from aioli.middleware.auth import HTTPUnauthenticated
 from aioli.middleware.base import HTTPMiddleware
-from aioli.monitoring.base import AbstractMetricsCollector, SinkholeMetrics
 from aioli.sd.base import AbstractServiceDiscovery
 from aioli.service.adapters.httpx import HttpxTransport
 from aioli.typing import ClientName, ResourceName, Url
@@ -30,7 +29,6 @@ class Client:
     auth: HTTPAuthentication
     timeout: HTTPTimeout
     collection_parser: Type[CollectionParser]
-    metrics: AbstractMetricsCollector
     middlewares: List[HTTPMiddleware]
 
     def __init__(
@@ -42,7 +40,6 @@ class Client:
         auth: HTTPAuthentication,
         timeout: HTTPTimeout,
         collection_parser: Type[CollectionParser],
-        metrics: AbstractMetricsCollector,
         middlewares: List[HTTPMiddleware],
     ) -> None:
         self.name = name
@@ -52,7 +49,6 @@ class Client:
         self.auth = auth
         self.timeout = timeout
         self.collection_parser = collection_parser
-        self.metrics = metrics
         self.middlewares = middlewares
 
     def __getattr__(self, name: ResourceName) -> RouteProxy:
@@ -71,7 +67,6 @@ class Client:
                 self.auth,
                 self.timeout,
                 self.collection_parser,
-                self.metrics,
                 self.middlewares,
             )
         except KeyError:
@@ -96,7 +91,6 @@ class ClientFactory:
     auth: HTTPAuthentication
     timeout: HTTPTimeout
     collection_parser: Type[CollectionParser]
-    metrics: AbstractMetricsCollector
     middlewares: List[HTTPMiddleware]
 
     def __init__(
@@ -107,7 +101,6 @@ class ClientFactory:
         registry: Registry = default_registry,
         timeout: ClientTimeout = HTTPTimeout(),
         collection_parser: Type[CollectionParser] = CollectionParser,
-        metrics: AbstractMetricsCollector = SinkholeMetrics(),
     ) -> None:
         self.sd = sd
         self.registry = registry
@@ -115,17 +108,17 @@ class ClientFactory:
         self.auth = auth
         self.timeout = build_timeout(timeout)
         self.collection_parser = collection_parser
-        self.metrics = metrics
         self.middlewares = []
 
-    def add_middleware(self, middleware: HTTPMiddleware):
+    def add_middleware(self, middleware: HTTPMiddleware) -> "ClientFactory":
         """
-        Add a middleware to the client factory.
+        Add a middleware to the client factory and return the client for chaining.
 
         ..note:: Clients created before the call of this method will also be
             altered. The middleware stack is a reference for all clients.
         """
         self.middlewares.append(middleware)
+        return self
 
     async def __call__(
         self, client_name: ClientName, auth: Optional[HTTPAuthentication] = None
@@ -140,6 +133,5 @@ class ClientFactory:
             auth or self.auth,
             self.timeout,
             self.collection_parser,
-            self.metrics,
             self.middlewares,
         )

@@ -25,9 +25,8 @@ from .middleware import (
     HTTPMiddleware,
     HTTPUnauthenticated,
     Middleware,
+    PrometheusMetrics,
 )
-from .monitoring import AbstractMetricsCollector
-from .monitoring.adapters import PrometheusMetrics
 from .sd.adapters.consul import ConsulDiscovery
 from .sd.adapters.router import RouterDiscovery
 from .sd.adapters.static import StaticDiscovery

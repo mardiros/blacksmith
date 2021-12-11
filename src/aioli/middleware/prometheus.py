@@ -1,11 +1,14 @@
 """Collect metrics based on prometheus."""
+import time
 from typing import TYPE_CHECKING, Any, Optional
 
 import pkg_resources
+from aioli.domain.exceptions import HTTPError
+from aioli.domain.model.http import HTTPRequest, HTTPResponse
 
-from aioli.typing import ClientName, HttpMethod
+from aioli.typing import ClientName, HttpMethod, Path
 
-from ..base import AbstractMetricsCollector
+from .base import HTTPMiddleware, Middleware
 
 if TYPE_CHECKING:
     try:
@@ -17,7 +20,7 @@ else:
     Registry = Any
 
 
-class PrometheusMetrics(AbstractMetricsCollector):
+class PrometheusMetrics(HTTPMiddleware):
     """
     Collect the api calls made in a prometheus registry.
 
@@ -36,7 +39,7 @@ class PrometheusMetrics(AbstractMetricsCollector):
     """
 
     def __init__(self, buckets=None, registry: Registry = None):
-        from prometheus_client import REGISTRY, Counter, Gauge, Histogram
+        from prometheus_client import REGISTRY, Gauge, Histogram
 
         if registry is None:
             registry = REGISTRY
@@ -61,17 +64,23 @@ class PrometheusMetrics(AbstractMetricsCollector):
             labelnames=["client_name", "method", "path", "status_code"],
         )
 
-    def observe_request(
-        self,
-        client_name: ClientName,
-        method: HttpMethod,
-        path: str,
-        status_code: int,
-        latency: float,
-    ):
-        """
-        Increment the prometheus counter `aioli_request_latency_seconds_count`.
-        """
-        self.aioli_request_latency_seconds.labels(
-            client_name, method, path, status_code
-        ).observe(latency)
+    def __call__(self, next: Middleware) -> Middleware:
+        async def handle(
+            req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
+        ) -> HTTPResponse:
+            status_code = 0
+            start = time.perf_counter()
+            try:
+                resp = await next(req, method, client_name, path)
+                status_code = resp.status_code
+            except HTTPError as exc:
+                status_code = exc.response.status_code
+                raise exc
+            finally:
+                if status_code > 0:
+                    latency = time.perf_counter() - start
+                    self.aioli_request_latency_seconds.labels(
+                        client_name, method, path, status_code
+                    ).observe(latency)
+            return resp
+        return handle
