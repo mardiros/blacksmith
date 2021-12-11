@@ -75,6 +75,7 @@ async def test_route_proxy_prepare_middleware(dummy_http_request, echo_transport
         dummy_http_request,
         HTTPAuthorization("Bearer", "abc"),
         HTTPTimeout(4.2),
+        "/",
     )
     assert resp.headers == {
         "Authorization": "Bearer abc",

@@ -11,8 +11,8 @@ from typing import (
     Tuple,
     Union,
 )
-
-from ...typing import Url
+from typing_extensions import Protocol
+from ...typing import ClientName, HttpMethod, Path, Url
 
 simpletypes = Union[str, int, float, bool]
 
@@ -134,7 +134,11 @@ class HTTPResponse:
         return ldict
 
 
-Middleware = Callable[[HTTPRequest], Coroutine[Any, Any, HTTPResponse]]
+class Middleware(Protocol):
+    def __call__(
+        self, req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
+    ) -> Coroutine[Any, Any, HTTPResponse]:
+        ...
 
 
 class HTTPMiddleware:
@@ -144,9 +148,10 @@ class HTTPMiddleware:
         pass
 
     def __call__(self, next: Middleware) -> Middleware:
-        
-        async def handle(req: HTTPRequest) -> HTTPResponse:
-            return await next(req)
+        async def handle(
+            req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
+        ) -> HTTPResponse:
+            return await next(req, method, client_name, path)
 
         return handle
 
@@ -160,9 +165,11 @@ class HTTPAddHeaderdMiddleware(HTTPMiddleware):
         self.headers = headers
 
     def __call__(self, next: Middleware) -> Middleware:
-        async def handle(req: HTTPRequest) -> HTTPResponse:
+        async def handle(
+            req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
+        ) -> HTTPResponse:
             req.headers.update(self.headers)
-            return await next(req)
+            return await next(req, method, client_name, path)
 
         return handle
 

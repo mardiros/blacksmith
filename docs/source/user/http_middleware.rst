@@ -10,9 +10,9 @@ Here is a dummy example.
    class DummyMiddleware(Middleware):
 
       def __call__(self, next: Middleware) -> Middleware:
-         async def handle(req: HTTPRequest) -> HTTPResponse:
+         async def handle(req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path) -> HTTPResponse:
                req.headers["x-request-header"] "foo"
-               return await next(req)
+               return await next(req, method, client_name, path)
 
         return handle
 

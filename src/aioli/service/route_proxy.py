@@ -25,11 +25,12 @@ from ..domain.model import (
     TResponse,
 )
 from ..domain.registry import ApiRoutes, HttpResource
-from ..typing import ClientName, HttpMethod, ResourceName, Url
+from ..typing import ClientName, HttpMethod, Path, ResourceName, Url
 from .base import AbstractTransport
 
 ClientTimeout = Union[HTTPTimeout, float, Tuple[float, float]]
 HTTPAuthentication = HTTPMiddleware
+
 
 def build_timeout(timeout: ClientTimeout) -> HTTPTimeout:
     """Build the timeout from the convenient timeout."""
@@ -134,10 +135,12 @@ class RouteProxy:
         req: HTTPRequest,
         auth: HTTPAuthentication,
         timeout: HTTPTimeout,
+        path: Path,
     ) -> HTTPResponse:
-
-        async def handle_req(req: HTTPRequest) -> HTTPResponse:
-            return (await self.transport.request(method, req, timeout))
+        async def handle_req(
+            req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
+        ) -> HTTPResponse:
+            return await self.transport.request(method, req, timeout)
 
         next = cast(Middleware, handle_req)
 
@@ -145,7 +148,7 @@ class RouteProxy:
             next = middleware(next)
         next = auth(next)
 
-        resp = await next(req)
+        resp = await next(req, method, self.client_name, path)
         return resp
 
     async def _yield_collection_request(
@@ -154,9 +157,10 @@ class RouteProxy:
         params: Union[Optional[Request], Dict[Any, Any]],
         auth: HTTPAuthentication,
         timeout: HTTPTimeout,
+        path: Path,
     ) -> CollectionIterator:
         req, resp_schema = self._prepare_request(method, params, self.routes.collection)
-        resp = await self._handle_req_with_middlewares(method, req, auth, timeout)
+        resp = await self._handle_req_with_middlewares(method, req, auth, timeout, path)
         return self._prepare_collection_response(
             resp, resp_schema, self.routes.collection.collection_parser
         )
@@ -174,7 +178,9 @@ class RouteProxy:
             req, resp_schema = self._prepare_request(
                 method, params, self.routes.collection
             )
-            resp = await self._handle_req_with_middlewares(method, req, auth, timeout)
+            resp = await self._handle_req_with_middlewares(
+                method, req, auth, timeout, self.routes.collection.path
+            )
             status_code = resp.status_code
             resp = self._prepare_response(
                 resp, resp_schema, method, self.routes.collection
@@ -206,7 +212,13 @@ class RouteProxy:
             req, resp_schema = self._prepare_request(
                 method, params, self.routes.resource
             )
-            resp = await self._handle_req_with_middlewares(method, req, auth, timeout)
+            resp = await self._handle_req_with_middlewares(
+                method,
+                req,
+                auth,
+                timeout,
+                self.routes.resource.path,
+            )
             status_code = resp.status_code
             resp = self._prepare_response(
                 resp, resp_schema, method, self.routes.resource
@@ -242,7 +254,11 @@ class RouteProxy:
         timeout: Optional[ClientTimeout] = None,
     ) -> CollectionIterator:
         return await self._yield_collection_request(
-            "GET", params, auth or self.auth, build_timeout(timeout or self.timeout)
+            "GET",
+            params,
+            auth or self.auth,
+            build_timeout(timeout or self.timeout),
+            self.routes.collection.path,
         )
 
     async def collection_post(

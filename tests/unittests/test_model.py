@@ -27,6 +27,7 @@ from aioli.domain.model.http import (
     Middleware,
     parse_header_links,
 )
+from aioli.typing import ClientName, HttpMethod, Path
 
 
 class GetResponse(Response):
@@ -54,11 +55,11 @@ def test_authorization_header():
 async def test_empty_middleware(middleware, dummy_http_request):
     auth = middleware()
 
-    async def handle_req(req: HTTPRequest) -> HTTPResponse:
+    async def handle_req(req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path) -> HTTPResponse:
         return HTTPResponse(200, req.headers, json=req)
 
     next = auth(handle_req)
-    resp = await next(dummy_http_request)
+    resp = await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
 
     assert resp.headers == dummy_http_request.headers
 
@@ -79,11 +80,11 @@ async def test_headers_middleware(middleware, dummy_http_request):
     middleware_cls, middleware_params, expected_headers = middleware
     auth = middleware_cls(*middleware_params)
 
-    async def handle_req(req: HTTPRequest) -> HTTPResponse:
+    async def handle_req(req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path) -> HTTPResponse:
         return HTTPResponse(200, req.headers, json=req)
 
     next = auth(handle_req)
-    resp = await next(dummy_http_request)
+    resp = await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
 
     assert resp.headers == expected_headers
 
