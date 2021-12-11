@@ -1,4 +1,4 @@
-"""Collect metrics based on prometheus."""
+"""Cut the circuit in case a service is down."""
 from datetime import timedelta
 from typing import Any, Callable, Iterable, Optional, TYPE_CHECKING, Type, Union, cast
 
@@ -45,6 +45,7 @@ class CircuitBreaker(HTTPMiddleware):
     ):
         import aiobreaker
 
+        # FIXME, should have one circuit breaker per service name
         self.breaker = aiobreaker.CircuitBreaker(
             fail_max=fail_max,
             timeout_duration=timeout_duration,
