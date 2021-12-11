@@ -3,10 +3,9 @@ from types import TracebackType
 from typing import Optional, Type, cast
 
 import aiozipkin as az
-from aiozipkin.helpers import TraceContext, make_context, make_headers
+from aiozipkin.helpers import make_context, make_headers
 from aiozipkin.mypy_types import Headers
 from aiozipkin.span import SpanAbc
-from aiozipkin.tracer import Tracer as ZkTracer
 from starlette.datastructures import MutableHeaders
 from starlette.requests import Request
 from starlette.types import ASGIApp, Message, Receive, Scope, Send

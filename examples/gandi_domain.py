@@ -8,9 +8,16 @@ from pydantic.fields import Field
 from pydantic.main import BaseModel
 
 import aioli
-from aioli import HTTPAuthorization, PathInfoField, QueryStringField, Request, Response
-from aioli.sd.adapters import StaticDiscovery
-from aioli.service.client import ClientFactory, CollectionIterator
+from aioli import (
+    ClientFactory,
+    CollectionIterator,
+    HTTPAuthorization,
+    PathInfoField,
+    QueryStringField,
+    Request,
+    Response,
+    StaticDiscovery,
+)
 
 
 class Dates(BaseModel):

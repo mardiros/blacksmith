@@ -7,20 +7,27 @@ except pkg_resources.DistributionNotFound:
     pass
 
 from .domain.model import (
+    CollectionIterator,
     HeaderField,
-    HTTPAuthorization,
-    HTTPUnauthenticated,
     PathInfoField,
     PostBodyField,
     QueryStringField,
     Request,
     Response,
+    ResponseBox,
 )
 from .domain.registry import register
 from .domain.scanner import scan
-from .monitoring import AbstractMetricsCollector
-from .monitoring.adapters import PrometheusMetrics
+from .middleware import (
+    HTTPAddHeaderdMiddleware,
+    HTTPAuthorization,
+    HTTPBearerAuthorization,
+    HTTPMiddleware,
+    HTTPUnauthenticated,
+    Middleware,
+    PrometheusMetrics,
+)
 from .sd.adapters.consul import ConsulDiscovery
 from .sd.adapters.router import RouterDiscovery
 from .sd.adapters.static import StaticDiscovery
-from .service.client import ClientFactory, CollectionIterator
+from .service.client import ClientFactory

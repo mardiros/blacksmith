@@ -24,6 +24,7 @@ httpx = "^0.20.0"
 prometheus-client = {version = "^0.12.0", optional = true}
 pydantic = "^1.8.2"
 python = "^3.7"
+typing-extensions = "^4.0.1"
 
 [tool.poetry.extras]
 prometheus = ["prometheus-client"]
@@ -52,6 +53,7 @@ exclude_lines = [
     "if TYPE_CHECKING:",
     "except ImportError:",
     "except pkg_resources.DistributionNotFound:",
+    "...",
 ]
 
 [build-system]

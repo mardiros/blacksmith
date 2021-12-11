@@ -2,47 +2,64 @@ import json
 from datetime import datetime
 from typing import Optional
 
+import pytest
+
+from aioli.domain.exceptions import NoResponseSchemaException
 from aioli.domain.model import (
+    CollectionIterator,
     CollectionParser,
     HeaderField,
-    HTTPAuthentication,
-    HTTPAuthorization,
     HTTPRequest,
     HTTPResponse,
-    HTTPUnauthenticated,
     PathInfoField,
     PostBodyField,
     QueryStringField,
     Request,
     Response,
-    parse_header_links,
+    ResponseBox,
 )
+from aioli.domain.model.http import HTTPTimeout, parse_header_links
+from aioli.middleware.auth import HTTPAuthorization, HTTPUnauthenticated
+from aioli.middleware.base import HTTPMiddleware
+from aioli.typing import ClientName, HttpMethod, Path
 
 
-def test_authotization_header():
+class GetResponse(Response):
+    name: str
+    age: int
+
+
+def test_timeout_eq():
+    assert HTTPTimeout() == HTTPTimeout()
+    assert HTTPTimeout(10) == HTTPTimeout(10)
+    assert HTTPTimeout(10, 20) == HTTPTimeout(10, 20)
+
+
+def test_timeout_neq():
+    assert HTTPTimeout() != HTTPTimeout(42)
+    assert HTTPTimeout(42) != HTTPTimeout(42, 42)
+    assert HTTPTimeout(42, 42) != HTTPTimeout(42, 43)
+
+
+def test_authorization_header():
     auth = HTTPAuthorization("Bearer", "abc")
     assert auth.headers == {"Authorization": "Bearer abc"}
 
 
-def test_authotization_http_unauthenticated():
-    auth = HTTPUnauthenticated()
-    assert auth.headers == {}
+@pytest.mark.asyncio
+@pytest.mark.parametrize("middleware", [HTTPMiddleware, HTTPUnauthenticated])
+async def test_empty_middleware(middleware, dummy_http_request):
+    auth = middleware()
 
+    async def handle_req(
+        req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
+    ) -> HTTPResponse:
+        return HTTPResponse(200, req.headers, json=req)
 
-def test_merge_middleware():
-    req = HTTPRequest(
-        "/",
-        path={},
-        querystring={},
-        headers={"H": "h"},
-        body="",
-    )
-    auth = HTTPAuthentication(headers={"X-Auth": "abc"})
-    authreq = req.merge_middleware(auth)
-    assert authreq.headers == {"H": "h", "X-Auth": "abc"}
-    auth = HTTPAuthentication(headers={"X-Auth": "abcd"})
-    authreq = req.merge_middleware(auth)
-    assert authreq.headers == {"H": "h", "X-Auth": "abcd"}
+    next = auth(handle_req)
+    resp = await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
+
+    assert resp.headers == dummy_http_request.headers
 
 
 def test_request_url():
@@ -116,3 +133,84 @@ def test_collection_parser():
         "last": {"rel": "last", "url": "https://dummy/?page=4"},
         "next": {"rel": "next", "url": "https://dummy/?page=2"},
     }
+
+
+def test_response_box():
+    resp = ResponseBox(
+        HTTPResponse(
+            200,
+            {},
+            {
+                "name": "Alice",
+                "age": 24,
+                "useless": True,
+            },
+        ),
+        GetResponse,
+        "",
+        "",
+        "",
+        "",
+    )
+    assert resp.response.dict() == {"age": 24, "name": "Alice"}
+    assert resp.json == {"age": 24, "name": "Alice", "useless": True}
+
+
+def test_response_box_no_schema():
+    resp = ResponseBox(
+        HTTPResponse(
+            200,
+            {},
+            {
+                "name": "Alice",
+                "age": 24,
+                "useless": True,
+            },
+        ),
+        None,
+        "GET",
+        "/dummies",
+        "Dummy",
+        "api",
+    )
+    with pytest.raises(NoResponseSchemaException) as ctx:
+        assert resp.response
+    assert (
+        str(ctx.value)
+        == "No response schema in route 'GET /dummies' in resource'Dummy' in client 'api'"
+    )
+
+
+def test_collection_iterator():
+    collec = CollectionIterator(
+        HTTPResponse(
+            200,
+            {"Total-Count": "5"},
+            [
+                {
+                    "name": "Alice",
+                    "age": 24,
+                    "useless": True,
+                },
+                {
+                    "name": "Bob",
+                    "age": 42,
+                },
+            ],
+        ),
+        GetResponse,
+        CollectionParser,
+    )
+    assert collec.meta.count == 2
+    assert collec.meta.total_count == 5
+    list_collec = list(collec)
+    assert list_collec == [
+        {
+            "name": "Alice",
+            "age": 24,
+        },
+        {
+            "name": "Bob",
+            "age": 42,
+        },
+    ]

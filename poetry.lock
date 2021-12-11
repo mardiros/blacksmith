@@ -733,7 +733,7 @@ prometheus = ["prometheus-client"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "7331dcfbd5120880d4492d5b72b14ab6981d81db0535bd4c344b9d10b77607e6"
+content-hash = "dd87b4f1d0532c2938ccab4e6b116f424a6c398c40f9c57ab005486788867008"
 
 [metadata.files]
 alabaster = [

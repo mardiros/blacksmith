@@ -12,7 +12,6 @@ from starlette.responses import JSONResponse
 
 import aioli
 from aioli import ClientFactory, ConsulDiscovery
-from aioli.domain.model import HTTPAuthentication
 
 app = Starlette(debug=True)
 

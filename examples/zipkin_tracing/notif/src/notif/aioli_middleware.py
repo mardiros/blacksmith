@@ -4,7 +4,7 @@ from notif.zk_middleware import Trace
 from starlette.types import ASGIApp, Receive, Scope, Send
 
 from aioli import ClientFactory, ConsulDiscovery
-from aioli.domain.model import HTTPMiddleware
+from aioli.domain.model import HTTPAddHeaderdMiddleware
 
 
 class AioliMiddleware:
@@ -22,7 +22,7 @@ class AioliMiddleware:
         self.app = app
         self.sd = ConsulDiscovery()
         self.cli = ClientFactory(self.sd)
-        self.middleware = HTTPMiddleware(headers={})
+        self.middleware = HTTPAddHeaderdMiddleware(headers={})
         self.cli.add_middleware(self.middleware)
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
