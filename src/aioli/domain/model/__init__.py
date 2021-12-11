@@ -1,8 +1,4 @@
-from .http import (
-    HTTPRequest,
-    HTTPResponse,
-    HTTPTimeout,
-)
+from .http import HTTPRequest, HTTPResponse, HTTPTimeout
 from .params import (
     CollectionIterator,
     CollectionParser,

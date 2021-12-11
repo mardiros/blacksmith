@@ -22,7 +22,6 @@ def static_sd():
     return StaticDiscovery(dummy_endpoints)
 
 
-
 class FakeConsulTransport(AbstractTransport):
     async def request(
         self, method: HttpMethod, request: HTTPRequest, timeout: HTTPTimeout
@@ -70,6 +69,7 @@ def echo_middleware():
         req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
     ) -> HTTPResponse:
         return HTTPResponse(200, req.headers, json=req)
+
     return next
 
 
@@ -80,7 +80,9 @@ def slow_middleware():
     ) -> HTTPResponse:
         time.sleep(0.06)
         return HTTPResponse(200, req.headers, json=req)
+
     return next
+
 
 @pytest.fixture
 def boom_middleware():
@@ -90,6 +92,7 @@ def boom_middleware():
         raise HTTPError(
             "Boom", req, HTTPResponse(500, {}, json={"detail": "I am bored"})
         )
+
     return next
 
 

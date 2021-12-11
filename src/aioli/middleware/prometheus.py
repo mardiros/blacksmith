@@ -3,9 +3,9 @@ import time
 from typing import TYPE_CHECKING, Any, Optional
 
 import pkg_resources
+
 from aioli.domain.exceptions import HTTPError
 from aioli.domain.model.http import HTTPRequest, HTTPResponse
-
 from aioli.typing import ClientName, HttpMethod, Path
 
 from .base import HTTPMiddleware, Middleware
@@ -83,4 +83,5 @@ class PrometheusMetrics(HTTPMiddleware):
                         client_name, method, path, status_code
                     ).observe(latency)
             return resp
+
         return handle

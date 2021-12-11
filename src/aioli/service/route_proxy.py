@@ -168,15 +168,11 @@ class RouteProxy:
         auth: HTTPAuthentication,
         timeout: HTTPTimeout,
     ) -> ResponseBox:
-        req, resp_schema = self._prepare_request(
-            method, params, self.routes.collection
-        )
+        req, resp_schema = self._prepare_request(method, params, self.routes.collection)
         resp = await self._handle_req_with_middlewares(
             method, req, auth, timeout, self.routes.collection.path
         )
-        return self._prepare_response(
-            resp, resp_schema, method, self.routes.collection
-        )
+        return self._prepare_response(resp, resp_schema, method, self.routes.collection)
 
     async def _request(
         self,
@@ -185,9 +181,7 @@ class RouteProxy:
         auth: HTTPAuthentication,
         timeout: HTTPTimeout,
     ) -> ResponseBox:
-        req, resp_schema = self._prepare_request(
-            method, params, self.routes.resource
-        )
+        req, resp_schema = self._prepare_request(method, params, self.routes.resource)
         resp = await self._handle_req_with_middlewares(
             method,
             req,
@@ -195,9 +189,7 @@ class RouteProxy:
             timeout,
             self.routes.resource.path,
         )
-        return self._prepare_response(
-            resp, resp_schema, method, self.routes.resource
-        )
+        return self._prepare_response(resp, resp_schema, method, self.routes.resource)
 
     async def collection_head(
         self,

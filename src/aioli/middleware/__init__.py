@@ -1,4 +1,4 @@
-from .base import Middleware, HTTPMiddleware, HTTPAddHeaderdMiddleware
-from .auth import HTTPAuthorization, HTTPUnauthenticated, HTTPBearerAuthorization
-from .prometheus import PrometheusMetrics
+from .auth import HTTPAuthorization, HTTPBearerAuthorization, HTTPUnauthenticated
+from .base import HTTPAddHeaderdMiddleware, HTTPMiddleware, Middleware
 from .circuit_breaker import CircuitBreaker
+from .prometheus import PrometheusMetrics

@@ -1,6 +1,6 @@
-from datetime import timedelta
 import email as emaillib
 import smtplib
+from datetime import timedelta
 from textwrap import dedent
 from typing import cast
 
@@ -10,7 +10,7 @@ from starlette.applications import Starlette
 from starlette.responses import JSONResponse, Response
 
 import aioli
-from aioli import ClientFactory, ConsulDiscovery, PrometheusMetrics, CircuitBreaker
+from aioli import CircuitBreaker, ClientFactory, ConsulDiscovery, PrometheusMetrics
 
 app = Starlette(debug=True)
 

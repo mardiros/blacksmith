@@ -1,7 +1,9 @@
-from typing import Coroutine, Any, Dict
+from typing import Any, Coroutine, Dict
+
 from typing_extensions import Protocol
 
 from aioli.domain.model.http import HTTPRequest, HTTPResponse
+
 from ..typing import ClientName, HttpMethod, Path
 
 
