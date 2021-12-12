@@ -16,6 +16,11 @@ Install it using the following command, using pip.
 
    pip install blacksmith[circuit-breaker]
 
+Or, using poetry:
+
+::
+
+   poetry add blacksmith -E circuit-breaker
 
 ..note::
 

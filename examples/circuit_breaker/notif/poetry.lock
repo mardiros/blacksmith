@@ -12,22 +12,6 @@ redis = ["redis"]
 test = ["fakeredis", "pytest (>4)", "pytest-asyncio", "mypy", "pylint", "safety", "bandit", "codecov", "pytest-cov"]
 
 [[package]]
-name = "blacksmith"
-version = "0.2.1"
-description = "REST API Client"
-category = "main"
-optional = false
-python-versions = ">=3.7,<4.0"
-
-[package.dependencies]
-httpx = ">=0.20.0,<0.21.0"
-prometheus-client = {version = ">=0.12.0,<0.13.0", optional = true, markers = "extra == \"prometheus\""}
-pydantic = ">=1.8.2,<2.0.0"
-
-[package.extras]
-prometheus = ["prometheus-client (>=0.12.0,<0.13.0)"]
-
-[[package]]
 name = "anyio"
 version = "3.4.0"
 description = "High level compatibility layer for multiple asynchronous event loop implementations"
@@ -54,6 +38,25 @@ python-versions = ">=3.6"
 
 [package.extras]
 tests = ["pytest", "pytest-asyncio", "mypy (>=0.800)"]
+
+[[package]]
+name = "blacksmith"
+version = "0.4.0"
+description = "REST API Client"
+category = "main"
+optional = false
+python-versions = ">=3.7,<4.0"
+
+[package.dependencies]
+aiobreaker = {version = ">=1.2.0,<2.0.0", optional = true, markers = "extra == \"circuit-breaker\""}
+httpx = ">=0.20.0,<0.21.0"
+prometheus-client = {version = ">=0.12.0,<0.13.0", optional = true, markers = "extra == \"prometheus\""}
+pydantic = ">=1.8.2,<2.0.0"
+typing-extensions = ">=4.0.1,<5.0.0"
+
+[package.extras]
+circuit-breaker = ["aiobreaker (>=1.2.0,<2.0.0)"]
+prometheus = ["prometheus-client (>=0.12.0,<0.13.0)"]
 
 [[package]]
 name = "certifi"
@@ -234,16 +237,12 @@ standard = ["websockets (>=9.1)", "httptools (>=0.2.0,<0.3.0)", "watchgod (>=0.6
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "e9c4dfbb9f63937948d92e4179f4f7956a35677e40344b01c99e3c919d819dd6"
+content-hash = "48da902adbbda10551854e5c99455253b52b5b24604a7d3117e5d849de718558"
 
 [metadata.files]
 aiobreaker = [
     {file = "aiobreaker-1.2.0-py3-none-any.whl", hash = "sha256:f275decad78bdd161715afeee67e5dde7967de54c836648b44f4eea1b5e41d60"},
     {file = "aiobreaker-1.2.0.tar.gz", hash = "sha256:217a9cfa12e520bb2dd1934bace281d1d7deb8d7630dd183a6295fd22e323ce7"},
-]
-blacksmith = [
-    {file = "blacksmith-0.2.1.tar.gz", hash = "sha256:fc7ec638ac777324a4d0bb4c742efce5556a081c195b96544f56211aa9c92535"},
-    {file = "blacksmith_client-0.2.1-py3-none-any.whl", hash = "sha256:fc2e6bef69727cfe55bf6056055321afa51dc3c1fdc7a17d95ccbf0a729cc446"},
 ]
 anyio = [
     {file = "anyio-3.4.0-py3-none-any.whl", hash = "sha256:2855a9423524abcdd652d942f8932fda1735210f77a6b392eafd9ff34d3fe020"},
@@ -252,6 +251,10 @@ anyio = [
 asgiref = [
     {file = "asgiref-3.4.1-py3-none-any.whl", hash = "sha256:ffc141aa908e6f175673e7b1b3b7af4fdb0ecb738fc5c8b88f69f055c2415214"},
     {file = "asgiref-3.4.1.tar.gz", hash = "sha256:4ef1ab46b484e3c706329cedeff284a5d40824200638503f5768edb6de7d58e9"},
+]
+blacksmith = [
+    {file = "blacksmith-0.4.0-py3-none-any.whl", hash = "sha256:89c97aadbd3094231b6bfa31d7e63c16edf485b8c52bfbc160041c6a242460b3"},
+    {file = "blacksmith-0.4.0.tar.gz", hash = "sha256:91faa50f2c7d3df395d3a9d3e44eb7e8416692e08d8acbcc99c4de37b84365c8"},
 ]
 certifi = [
     {file = "certifi-2021.10.8-py2.py3-none-any.whl", hash = "sha256:d62a0163eb4c2344ac042ab2bdf75399a71a2d8c7d47eac2e2ee91b9d6339569"},
