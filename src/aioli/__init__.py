@@ -24,7 +24,6 @@ from .middleware import (
     HTTPAuthorization,
     HTTPBearerAuthorization,
     HTTPMiddleware,
-    HTTPUnauthenticated,
     Middleware,
     PrometheusMetrics,
 )

@@ -1,5 +1,5 @@
-from prometheus_client import CollectorRegistry
 import pytest
+from prometheus_client import CollectorRegistry
 
 from aioli import PathInfoField, Request, Response
 from aioli.domain.exceptions import (
@@ -19,7 +19,7 @@ from aioli.domain.model import (
     ResponseBox,
 )
 from aioli.domain.registry import ApiRoutes, Registry
-from aioli.middleware.auth import HTTPAuthorization, HTTPUnauthenticated
+from aioli.middleware.auth import HTTPAuthorization
 from aioli.middleware.prometheus import PrometheusMetrics
 from aioli.service.base import AbstractTransport
 from aioli.service.client import Client, ClientFactory

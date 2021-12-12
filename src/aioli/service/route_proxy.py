@@ -21,8 +21,7 @@ from aioli.domain.model import (
     TResponse,
 )
 from aioli.domain.registry import ApiRoutes, HttpResource
-from aioli.middleware.auth import HTTPMiddleware
-from aioli.middleware.base import Middleware
+from aioli.middleware.base import HTTPMiddleware, Middleware
 from aioli.typing import ClientName, HttpMethod, Path, ResourceName, Url
 
 from .base import AbstractTransport

@@ -5,7 +5,6 @@ from aioli.domain.model.http import HTTPTimeout
 from aioli.domain.model.params import CollectionParser
 from aioli.domain.registry import Registry, Resources
 from aioli.domain.registry import registry as default_registry
-from aioli.middleware.auth import HTTPUnauthenticated
 from aioli.middleware.base import HTTPMiddleware
 from aioli.sd.base import AbstractServiceDiscovery
 from aioli.service.adapters.httpx import HttpxTransport

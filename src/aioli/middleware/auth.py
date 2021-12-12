@@ -1,14 +1,6 @@
 """Authentication Middlewares."""
 
-from .base import HTTPAddHeaderdMiddleware, HTTPMiddleware
-
-
-class HTTPUnauthenticated(HTTPMiddleware):
-    """
-    Empty Authentication Mechanism.
-
-    This is the default value for every call.
-    """
+from .base import HTTPAddHeaderdMiddleware
 
 
 class HTTPAuthorization(HTTPAddHeaderdMiddleware):

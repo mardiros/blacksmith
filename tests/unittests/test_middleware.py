@@ -1,12 +1,12 @@
+import prometheus_client
 import pytest
 from aiobreaker.state import CircuitBreakerError
-import prometheus_client
 from prometheus_client import REGISTRY, CollectorRegistry
 
 from aioli import __version__
 from aioli.domain.exceptions import HTTPError
 from aioli.domain.model.http import HTTPRequest, HTTPResponse
-from aioli.middleware.auth import HTTPAuthorization, HTTPUnauthenticated
+from aioli.middleware.auth import HTTPAuthorization
 from aioli.middleware.base import HTTPAddHeaderdMiddleware, HTTPMiddleware
 from aioli.middleware.circuit_breaker import CircuitBreaker, exclude_httpx_4xx
 from aioli.middleware.prometheus import PrometheusMetrics
@@ -19,7 +19,7 @@ def test_authorization_header():
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("middleware", [HTTPMiddleware, HTTPUnauthenticated])
+@pytest.mark.parametrize("middleware", [HTTPMiddleware])
 async def test_empty_middleware(middleware, dummy_http_request):
     auth = middleware()
 
@@ -32,6 +32,7 @@ async def test_empty_middleware(middleware, dummy_http_request):
     resp = await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
 
     assert resp.headers == dummy_http_request.headers
+
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
