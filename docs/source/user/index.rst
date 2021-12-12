@@ -13,9 +13,9 @@ User manual of Aioli.
    instanciating_client
    service_discovery
    authorization
-   errors
    monitor_metrics
    http_middleware
    circuit_breaker_middleware
    generic_middleware
+   errors
    changelog

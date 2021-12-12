@@ -13,6 +13,7 @@ and response.
 Example of middleware:
 
 ::
+
    from aioli import HTTPMiddleware, Middleware
 
    class HTTPPrintMiddleware(HTTPMiddleware):

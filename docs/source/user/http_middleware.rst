@@ -57,8 +57,8 @@ to achieve this, lets create a simple middleware that forward the headers.
          await self.app(scope, receive, send)
 
 
-Full example
-------------
+Full example of the zipkin middleware
+-------------------------------------
 
 You will find an example using prometheus in the examples directory:
 
