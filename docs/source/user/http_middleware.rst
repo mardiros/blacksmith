@@ -28,7 +28,7 @@ to achieve this, lets create a simple middleware that forward the headers.
 
    class BlacksmithMiddleware:
       """
-      Middleware to inject a aoili client factory in the asgi scope.
+      Middleware to inject a blacksmith client factory in the asgi scope.
       
       
       The client is fowarding zipkin header to track api calls.

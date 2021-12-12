@@ -210,4 +210,4 @@ Then to load all the resources, use the `blacksmith.scan` method:
    import blacksmith
 
    # Fully load the registry with all resources
-   aoili.scan("mypkg.resources")
+   blacksmith.scan("mypkg.resources")

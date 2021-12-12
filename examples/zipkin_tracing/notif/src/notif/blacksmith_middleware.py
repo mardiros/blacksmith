@@ -3,13 +3,12 @@ from typing import cast
 from notif.zk_middleware import Trace
 from starlette.types import ASGIApp, Receive, Scope, Send
 
-from blacksmith import ClientFactory, ConsulDiscovery
-from blacksmith.domain.model import HTTPAddHeadersMiddleware
+from blacksmith import ClientFactory, ConsulDiscovery, HTTPAddHeadersMiddleware
 
 
 class BlacksmithMiddleware:
     """
-    Middleware to inject a aoili client factory in the asgi scope.
+    Middleware to inject a blacksmith client factory in the asgi scope.
 
 
     The client is fowarding zipkin header to track api calls.
