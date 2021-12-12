@@ -8,7 +8,7 @@ classifiers = [
   "Topic :: Software Development :: Libraries :: Python Modules",
   "Topic :: Internet :: WWW/HTTP",
 ]
-description = "REST API Client"
+description = "REST API Client designed for microservices"
 homepage = "https://github.com/mardiros/blacksmith"
 license = "BSD-derived"
 name = "blacksmith"
