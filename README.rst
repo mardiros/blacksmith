@@ -1,8 +1,8 @@
 Blacksmith
 ==========
 
-.. image:: https://readthedocs.org/projects/blacksmith/badge/?version=latest
-   :target: https://blacksmith.readthedocs.io/en/latest/?badge=latest
+.. image:: https://readthedocs.org/projects/python-blacksmith/badge/?version=latest
+   :target: https://python-blacksmith.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status
 
 .. image:: https://github.com/mardiros/blacksmith/actions/workflows/main.yml/badge.svg
