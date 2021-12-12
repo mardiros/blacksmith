@@ -1,13 +1,13 @@
 HTTP Middlewares
 ================
 
-Aioli let permit to inject headers on every requests.
+Blacksmith let permit to inject headers on every requests.
 
 Here is a dummy example.
 
 ::
 
-   from aioli import HTTPAddHeadersMiddleware
+   from blacksmith import HTTPAddHeadersMiddleware
    dummy_middleware = HTTPAddHeadersMiddleware({"x-request-header": "foo"})
 
    sd = StaticDiscovery({("api", None): "http://srv:8000/"})
@@ -26,7 +26,7 @@ to achieve this, lets create a simple middleware that forward the headers.
 
 ::
 
-   class AioliMiddleware:
+   class BlacksmithMiddleware:
       """
       Middleware to inject a aoili client factory in the asgi scope.
       
@@ -53,7 +53,7 @@ to achieve this, lets create a simple middleware that forward the headers.
          trace = cast(Trace, scope.get("trace"))
          if trace is not None:
                self.middleware.headers=trace.http_headers
-         scope["aioli_client"] = self.cli
+         scope["blacksmith_client"] = self.cli
          await self.app(scope, receive, send)
 
 
@@ -62,7 +62,7 @@ Full example of the zipkin middleware
 
 You will find an example using prometheus in the examples directory:
 
-   https://github.com/mardiros/aioli/tree/master/examples/zipkin_tracing
+   https://github.com/mardiros/blacksmith/tree/master/examples/zipkin_tracing
 
 
 .. figure:: ../screenshots/zipkin.png

@@ -1,5 +1,5 @@
 Exceptions
 ==========
 
-.. automodule:: aioli.domain.exceptions
+.. automodule:: blacksmith.domain.exceptions
    :members:

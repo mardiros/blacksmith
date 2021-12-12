@@ -12,7 +12,7 @@ The default connect timeout is at 15 seconds.
 
 ::
 
-   from aioli.domain.exception import HTTPTimeout
+   from blacksmith.domain.exception import HTTPTimeout
 
    # read timeout at 5 seconds
    # and connect timeout at 5 seconds
@@ -40,7 +40,7 @@ The default connect timeout is at 15 seconds.
 Raised Exceptions
 -----------------
 
-Aioli does not declare schema for errors. It raised exceptions instead.
+Blacksmith does not declare schema for errors. It raised exceptions instead.
 The exception raised is `HTTPError` and get the `status_code` of the 
 error. The error is supposed to be a json document, under attribute `json`.
 If it is not the case, the content of the document will be in plain text under the key "detail".

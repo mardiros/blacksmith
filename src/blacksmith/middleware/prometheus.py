@@ -4,9 +4,9 @@ from typing import TYPE_CHECKING, Any, Optional
 
 import pkg_resources
 
-from aioli.domain.exceptions import HTTPError
-from aioli.domain.model.http import HTTPRequest, HTTPResponse
-from aioli.typing import ClientName, HttpMethod, Path
+from blacksmith.domain.exceptions import HTTPError
+from blacksmith.domain.model.http import HTTPRequest, HTTPResponse
+from blacksmith.typing import ClientName, HttpMethod, Path
 
 from .base import HTTPMiddleware, Middleware
 
@@ -24,10 +24,10 @@ class PrometheusMetrics(HTTPMiddleware):
     """
     Collect the api calls made in a prometheus registry.
 
-    It expose a `aioli_info` Gauge to get the aioli version, as a label, and a
-    `aioli_request_latency_seconds_count` Counter to get the number of http requests
+    It expose a `blacksmith_info` Gauge to get the blacksmith version, as a label, and a
+    `blacksmith_request_latency_seconds_count` Counter to get the number of http requests
     made.
-    The counter `aioli_request_latency_seconds_count` as client_name, method, path and
+    The counter `blacksmith_request_latency_seconds_count` as client_name, method, path and
     status_code labels.
 
     .. note::
@@ -46,18 +46,18 @@ class PrometheusMetrics(HTTPMiddleware):
         if buckets is None:
             buckets = [0.05 * 2 ** x for x in range(10)]
         version_info = {
-            "version": pkg_resources.get_distribution("aioli-client").version
+            "version": pkg_resources.get_distribution("blacksmith").version
         }
-        self.aioli_info = Gauge(
-            "aioli_info",
-            "Aioli Information",
+        self.blacksmith_info = Gauge(
+            "blacksmith_info",
+            "Blacksmith Information",
             registry=registry,
             labelnames=list(version_info.keys()),
         )
-        self.aioli_info.labels(**version_info).set(1)
+        self.blacksmith_info.labels(**version_info).set(1)
 
-        self.aioli_request_latency_seconds = Histogram(
-            "aioli_request_latency_seconds",
+        self.blacksmith_request_latency_seconds = Histogram(
+            "blacksmith_request_latency_seconds",
             "Latency of http requests in seconds",
             buckets=buckets,
             registry=registry,
@@ -79,7 +79,7 @@ class PrometheusMetrics(HTTPMiddleware):
             finally:
                 if status_code > 0:
                     latency = time.perf_counter() - start
-                    self.aioli_request_latency_seconds.labels(
+                    self.blacksmith_request_latency_seconds.labels(
                         client_name, method, path, status_code
                     ).observe(latency)
             return resp

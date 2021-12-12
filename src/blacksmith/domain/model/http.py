@@ -2,7 +2,7 @@ import re
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Union
 
-from aioli.typing import Url
+from blacksmith.typing import Url
 
 simpletypes = Union[str, int, float, bool]
 Links = Dict[Optional[str], Dict[str, str]]

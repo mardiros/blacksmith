@@ -1,7 +1,7 @@
 import pytest
 
-from aioli.domain.exceptions import HTTPError
-from aioli.domain.model.http import HTTPResponse
+from blacksmith.domain.exceptions import HTTPError
+from blacksmith.domain.model.http import HTTPResponse
 
 
 @pytest.mark.parametrize("status_code", [400, 401, 422, 499])

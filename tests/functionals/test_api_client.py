@@ -3,8 +3,8 @@ from typing import Optional
 
 import pytest
 
-import aioli
-from aioli import (
+import blacksmith
+from blacksmith import (
     ClientFactory,
     PathInfoField,
     PostBodyField,
@@ -13,7 +13,7 @@ from aioli import (
     Response,
     StaticDiscovery,
 )
-from aioli.domain.exceptions import HTTPError, NoContractException
+from blacksmith.domain.exceptions import HTTPError, NoContractException
 
 
 class SizeEnum(str, Enum):
@@ -48,7 +48,7 @@ class UpdateItem(GetItem):
 DeleteItem = GetItem
 
 
-aioli.register(
+blacksmith.register(
     "api",
     "item",
     "api",

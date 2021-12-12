@@ -1,5 +1,5 @@
 [[package]]
-name = "aioli-client"
+name = "blacksmith"
 version = "0.2.1"
 description = "REST API Client"
 category = "main"
@@ -212,9 +212,9 @@ python-versions = "^3.9"
 content-hash = "95037d56c258dd666856ee54ae4cd542e48a12c2c6d4b9618388c38ded6a9ef1"
 
 [metadata.files]
-aioli-client = [
-    {file = "aioli-client-0.2.1.tar.gz", hash = "sha256:fc7ec638ac777324a4d0bb4c742efce5556a081c195b96544f56211aa9c92535"},
-    {file = "aioli_client-0.2.1-py3-none-any.whl", hash = "sha256:fc2e6bef69727cfe55bf6056055321afa51dc3c1fdc7a17d95ccbf0a729cc446"},
+blacksmith = [
+    {file = "blacksmith-0.2.1.tar.gz", hash = "sha256:fc7ec638ac777324a4d0bb4c742efce5556a081c195b96544f56211aa9c92535"},
+    {file = "blacksmith_client-0.2.1-py3-none-any.whl", hash = "sha256:fc2e6bef69727cfe55bf6056055321afa51dc3c1fdc7a17d95ccbf0a729cc446"},
 ]
 anyio = [
     {file = "anyio-3.4.0-py3-none-any.whl", hash = "sha256:2855a9423524abcdd652d942f8932fda1735210f77a6b392eafd9ff34d3fe020"},

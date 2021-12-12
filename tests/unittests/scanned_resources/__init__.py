@@ -1,3 +1,3 @@
-from aioli.domain.registry import Registry
+from blacksmith.domain.registry import Registry
 
 registry = Registry()

@@ -1,5 +1,5 @@
 Static Discovery
 ================
 
-.. automodule:: aioli.sd.adapters.static
+.. automodule:: blacksmith.sd.adapters.static
    :members:

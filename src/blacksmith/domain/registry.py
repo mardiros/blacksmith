@@ -5,7 +5,7 @@ from collections import defaultdict
 from dataclasses import dataclass
 from typing import Mapping, MutableMapping, Optional, Tuple, Type
 
-from aioli.typing import (
+from blacksmith.typing import (
     ClientName,
     HttpMethod,
     Path,
@@ -152,7 +152,7 @@ def register(
     """
     Register a resource in a client in the default registry.
 
-    See :func:`aioli.domain.registry.Registry.register` for the signature.
+    See :func:`blacksmith.domain.registry.Registry.register` for the signature.
     """
     registry.register(
         client_name,

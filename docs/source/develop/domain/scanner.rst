@@ -1,5 +1,5 @@
 Scanner
 =======
 
-.. automodule:: aioli.domain.scanner
+.. automodule:: blacksmith.domain.scanner
    :members:

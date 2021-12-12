@@ -7,8 +7,8 @@ For instance, a short list of services with static endpoint.
 """
 from typing import Mapping
 
-from aioli.domain.exceptions import UnregisteredServiceException
-from aioli.typing import Service, ServiceName, Version
+from blacksmith.domain.exceptions import UnregisteredServiceException
+from blacksmith.typing import Service, ServiceName, Version
 
 from ..base import AbstractServiceDiscovery, Url
 

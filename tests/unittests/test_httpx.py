@@ -4,9 +4,9 @@ import pytest
 from httpx import Headers, Response
 from httpx import TimeoutException as HttpxTimeoutException
 
-from aioli.domain.exceptions import HTTPError
-from aioli.domain.model import HTTPRequest, HTTPTimeout
-from aioli.service.adapters.httpx import HttpxTransport
+from blacksmith.domain.exceptions import HTTPError
+from blacksmith.domain.model import HTTPRequest, HTTPTimeout
+from blacksmith.service.adapters.httpx import HttpxTransport
 
 headers = Headers()
 headers["Content-Type"] = "application/json"

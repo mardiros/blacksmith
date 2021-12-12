@@ -1,5 +1,5 @@
 Service Base Classes
 ====================
 
-.. automodule:: aioli.service.base
+.. automodule:: blacksmith.service.base
    :members:

@@ -1,5 +1,5 @@
 Base Middlewares
 ================
 
-.. automodule:: aioli.middleware.base
+.. automodule:: blacksmith.middleware.base
    :members:

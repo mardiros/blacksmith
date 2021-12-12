@@ -1,5 +1,5 @@
 Authentication Middlewares
 ==========================
 
-.. automodule:: aioli.middleware.auth
+.. automodule:: blacksmith.middleware.auth
    :members:

@@ -14,7 +14,7 @@ Install it using the following command, using pip.
 
 ::
 
-   pip install aioli-client[circuit-breaker]
+   pip install blacksmith[circuit-breaker]
 
 
 ..note::
@@ -29,7 +29,7 @@ middleware stack.
 
    from time import timedelta
 
-   from aioli import ClientFactory, CircuitBreaker, StaticDiscovery
+   from blacksmith import ClientFactory, CircuitBreaker, StaticDiscovery
 
    sd = StaticDiscovery({("api", None): "http://srv:8000/"})
    cli = ClientFactory(sd).add_middleware(
@@ -56,4 +56,4 @@ Full example of the circuit_breaker
 
 You will find an example using prometheus in the examples directory:
 
-   https://github.com/mardiros/aioli/tree/master/examples/circuit_breaker
+   https://github.com/mardiros/blacksmith/tree/master/examples/circuit_breaker

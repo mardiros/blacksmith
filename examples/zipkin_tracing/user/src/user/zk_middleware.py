@@ -11,12 +11,12 @@ from starlette.requests import Request
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 try:
-    from aioli import ConsulDiscovery
+    from blacksmith import ConsulDiscovery
 except ImportError:
 
     class ConsulDiscovery:
         async def get_endpoint(self, service, version):
-            raise RuntimeError("aioli package is not installed")
+            raise RuntimeError("blacksmith package is not installed")
 
 
 class Trace:

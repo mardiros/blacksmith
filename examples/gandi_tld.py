@@ -2,10 +2,10 @@ import asyncio
 import os
 import sys
 
-import aioli
-from aioli import HTTPAuthorization, PathInfoField, Request, Response
-from aioli.sd.adapters import StaticDiscovery
-from aioli.service.client import ClientFactory
+import blacksmith
+from blacksmith import HTTPAuthorization, PathInfoField, Request, Response
+from blacksmith.sd.adapters import StaticDiscovery
+from blacksmith.service.client import ClientFactory
 
 
 class TLDInfoGetParam(Request):
@@ -25,7 +25,7 @@ class TLDResponse(Response):
     # 'href': 'https://api.gandi.net/v5/domain/tlds/eu'
 
 
-aioli.register(
+blacksmith.register(
     "gandi",
     "tld",
     "gandi",

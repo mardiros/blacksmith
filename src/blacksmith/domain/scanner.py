@@ -2,12 +2,12 @@
 Scanning Resources
 ==================
 
-Convenient method to fillout an aioli registry.
+Convenient method to fillout an blacksmith registry.
 
 ::
 
-  import aioli
-  aioli.scan('mypkg.resources', 'other.resources')
+  import blacksmith
+  blacksmith.scan('mypkg.resources', 'other.resources')
 """
 import importlib
 import pkgutil
@@ -17,7 +17,7 @@ def scan(*modules: str):
     """
     Collect all resources to fillout the registry.
 
-    Basically, it import modules containins :func:`aioli.register` calls.
+    Basically, it import modules containins :func:`blacksmith.register` calls.
 
     """
     for mod in modules:

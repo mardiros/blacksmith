@@ -5,7 +5,7 @@ Generic Middleware
 implementation of the `HTTPMiddleware` that can be used to create own
 middleware.
 
-The middleware pattern is very common on http framework, in aioli, this
+The middleware pattern is very common on http framework, in blacksmith, this
 is the same concept, the middleware is injected after the serialization
 of the request, before sending the http query, to intercept request
 and response.
@@ -14,7 +14,7 @@ Example of middleware:
 
 ::
 
-   from aioli import HTTPMiddleware, Middleware
+   from blacksmith import HTTPMiddleware, Middleware
 
    class HTTPPrintMiddleware(HTTPMiddleware):
       """Inject data in http query on every requests."""

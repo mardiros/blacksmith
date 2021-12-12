@@ -1,7 +1,7 @@
 import abc
 
-from aioli.domain.model import HTTPRequest, HTTPResponse, HTTPTimeout
-from aioli.typing import HttpMethod
+from blacksmith.domain.model import HTTPRequest, HTTPResponse, HTTPTimeout
+from blacksmith.typing import HttpMethod
 
 
 class AbstractTransport(abc.ABC):

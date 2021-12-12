@@ -1,5 +1,5 @@
 Service Discovery Base Classes
 ==============================
 
-.. automodule:: aioli.sd.base
+.. automodule:: blacksmith.sd.base
    :members:

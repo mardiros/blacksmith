@@ -1,7 +1,7 @@
 Middlewares
 ===========
 
-.. automodule:: aioli.middleware
+.. automodule:: blacksmith.middleware
 
 .. toctree::
    :maxdepth: 2

@@ -1,5 +1,5 @@
 Prometheus
 ==========
 
-.. automodule:: aioli.middleware.prometheus
+.. automodule:: blacksmith.middleware.prometheus
    :members:

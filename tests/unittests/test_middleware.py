@@ -3,14 +3,14 @@ import pytest
 from aiobreaker.state import CircuitBreakerError
 from prometheus_client import REGISTRY, CollectorRegistry
 
-from aioli import __version__
-from aioli.domain.exceptions import HTTPError
-from aioli.domain.model.http import HTTPRequest, HTTPResponse
-from aioli.middleware.auth import HTTPAuthorization
-from aioli.middleware.base import HTTPAddHeadersMiddleware, HTTPMiddleware
-from aioli.middleware.circuit_breaker import CircuitBreaker, exclude_httpx_4xx
-from aioli.middleware.prometheus import PrometheusMetrics
-from aioli.typing import ClientName, HttpMethod, Path
+from blacksmith import __version__
+from blacksmith.domain.exceptions import HTTPError
+from blacksmith.domain.model.http import HTTPRequest, HTTPResponse
+from blacksmith.middleware.auth import HTTPAuthorization
+from blacksmith.middleware.base import HTTPAddHeadersMiddleware, HTTPMiddleware
+from blacksmith.middleware.circuit_breaker import CircuitBreaker, exclude_httpx_4xx
+from blacksmith.middleware.prometheus import PrometheusMetrics
+from blacksmith.typing import ClientName, HttpMethod, Path
 
 
 def test_authorization_header():
@@ -61,13 +61,13 @@ async def test_prom_default_registry(echo_middleware, dummy_http_request):
     metrics = PrometheusMetrics()
     next = metrics(echo_middleware)
 
-    val = REGISTRY.get_sample_value("aioli_info", labels={"version": __version__})
+    val = REGISTRY.get_sample_value("blacksmith_info", labels={"version": __version__})
     assert val == 1.0
 
     await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
 
     val = REGISTRY.get_sample_value(
-        "aioli_request_latency_seconds_count",
+        "blacksmith_request_latency_seconds_count",
         labels={
             "client_name": "dummy",
             "method": "GET",
@@ -86,11 +86,11 @@ async def test_prom_metrics(slow_middleware, dummy_http_request):
     metrics = PrometheusMetrics(registry=registry)
     next = metrics(slow_middleware)
 
-    val = registry.get_sample_value("aioli_info", labels={"version": __version__})
+    val = registry.get_sample_value("blacksmith_info", labels={"version": __version__})
     assert val == 1.0
 
     val = registry.get_sample_value(
-        "aioli_request_latency_seconds_bucket",
+        "blacksmith_request_latency_seconds_bucket",
         labels={
             "le": "0.1",
             "client_name": "dummy",
@@ -104,7 +104,7 @@ async def test_prom_metrics(slow_middleware, dummy_http_request):
     await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
 
     val = registry.get_sample_value(
-        "aioli_request_latency_seconds_count",
+        "blacksmith_request_latency_seconds_count",
         labels={
             "client_name": "dummy",
             "method": "GET",
@@ -115,7 +115,7 @@ async def test_prom_metrics(slow_middleware, dummy_http_request):
     assert val == 1
 
     val = registry.get_sample_value(
-        "aioli_request_latency_seconds_bucket",
+        "blacksmith_request_latency_seconds_bucket",
         labels={
             "le": "0.05",
             "client_name": "dummy",
@@ -127,7 +127,7 @@ async def test_prom_metrics(slow_middleware, dummy_http_request):
     assert val == 0.0
 
     val = registry.get_sample_value(
-        "aioli_request_latency_seconds_bucket",
+        "blacksmith_request_latency_seconds_bucket",
         labels={
             "le": "0.1",
             "client_name": "dummy",
@@ -139,7 +139,7 @@ async def test_prom_metrics(slow_middleware, dummy_http_request):
     assert val == 1.0
 
     val = registry.get_sample_value(
-        "aioli_request_latency_seconds_bucket",
+        "blacksmith_request_latency_seconds_bucket",
         labels={
             "le": "3.2",
             "client_name": "dummy",
@@ -161,7 +161,7 @@ async def test_prom_metrics_error(boom_middleware, dummy_http_request):
         await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
 
     val = registry.get_sample_value(
-        "aioli_request_latency_seconds_bucket",
+        "blacksmith_request_latency_seconds_bucket",
         labels={
             "le": "0.1",
             "client_name": "dummy",

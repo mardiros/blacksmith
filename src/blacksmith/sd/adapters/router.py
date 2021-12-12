@@ -2,7 +2,7 @@
 The Server-Side Service discovery strategy.
 
 """
-from aioli.typing import Service, ServiceName, Version
+from blacksmith.typing import Service, ServiceName, Version
 
 from ..base import AbstractServiceDiscovery, Url
 
@@ -11,7 +11,7 @@ class RouterDiscovery(AbstractServiceDiscovery):
     """
     Router that implement a :term:`Server-Side Service discovery`.
 
-    This implementatin never raise :class:`aioli.domain.exceptions.UnregisteredServiceException`
+    This implementatin never raise :class:`blacksmith.domain.exceptions.UnregisteredServiceException`
     when service are unknown, because it only passe very request to the router server
     that is connected to the :term:`service registry`.
 

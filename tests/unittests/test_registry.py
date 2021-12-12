@@ -1,10 +1,10 @@
 import pytest
 
-import aioli
-from aioli.domain import registry
-from aioli.domain.exceptions import ConfigurationError, UnregisteredClientException
-from aioli.domain.model import PathInfoField, PostBodyField, Request, Response
-from aioli.domain.registry import Registry
+import blacksmith
+from blacksmith.domain import registry
+from blacksmith.domain.exceptions import ConfigurationError, UnregisteredClientException
+from blacksmith.domain.model import PathInfoField, PostBodyField, Request, Response
+from blacksmith.domain.registry import Registry
 
 
 def test_default_registry():
@@ -16,7 +16,7 @@ def test_default_registry():
 
     default_registry = registry.registry = Registry()
 
-    aioli.register(
+    blacksmith.register(
         "dummies_api",
         "dummies",
         "api",
@@ -40,7 +40,7 @@ def test_default_registry():
         assert api["dummies"].collection is None
     finally:
         # cleanup side effects
-        from aioli.domain import registry as registry_module
+        from blacksmith.domain import registry as registry_module
 
         registry_module.registry = Registry()
 

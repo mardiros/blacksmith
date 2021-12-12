@@ -12,7 +12,7 @@ redis = ["redis"]
 test = ["fakeredis", "pytest (>4)", "pytest-asyncio", "mypy", "pylint", "safety", "bandit", "codecov", "pytest-cov"]
 
 [[package]]
-name = "aioli-client"
+name = "blacksmith"
 version = "0.2.1"
 description = "REST API Client"
 category = "main"
@@ -241,9 +241,9 @@ aiobreaker = [
     {file = "aiobreaker-1.2.0-py3-none-any.whl", hash = "sha256:f275decad78bdd161715afeee67e5dde7967de54c836648b44f4eea1b5e41d60"},
     {file = "aiobreaker-1.2.0.tar.gz", hash = "sha256:217a9cfa12e520bb2dd1934bace281d1d7deb8d7630dd183a6295fd22e323ce7"},
 ]
-aioli-client = [
-    {file = "aioli-client-0.2.1.tar.gz", hash = "sha256:fc7ec638ac777324a4d0bb4c742efce5556a081c195b96544f56211aa9c92535"},
-    {file = "aioli_client-0.2.1-py3-none-any.whl", hash = "sha256:fc2e6bef69727cfe55bf6056055321afa51dc3c1fdc7a17d95ccbf0a729cc446"},
+blacksmith = [
+    {file = "blacksmith-0.2.1.tar.gz", hash = "sha256:fc7ec638ac777324a4d0bb4c742efce5556a081c195b96544f56211aa9c92535"},
+    {file = "blacksmith_client-0.2.1-py3-none-any.whl", hash = "sha256:fc2e6bef69727cfe55bf6056055321afa51dc3c1fdc7a17d95ccbf0a729cc446"},
 ]
 anyio = [
     {file = "anyio-3.4.0-py3-none-any.whl", hash = "sha256:2855a9423524abcdd652d942f8932fda1735210f77a6b392eafd9ff34d3fe020"},

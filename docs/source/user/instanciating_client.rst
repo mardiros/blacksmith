@@ -1,7 +1,7 @@
 Instanciating client
 ====================
 
-After registrating resources in aioli, to consume API, a client must be
+After registrating resources in blacksmith, to consume API, a client must be
 created. To create a client, service has to be discoverable using a
 service discovery strategy, then resources can be consumed.
 
@@ -16,7 +16,7 @@ to build client for every registrated resources.
 
 ::
 
-   from aioli import ClientFactory, StaticDiscovery
+   from blacksmith import ClientFactory, StaticDiscovery
 
    async def main():
        sd = StaticDiscovery({("api", None): "http://srv:8000/"})
@@ -45,7 +45,7 @@ example bellow:
 
 ::
 
-   from aioli import ClientFactory, StaticDiscovery, CollectionIterator
+   from blacksmith import ClientFactory, StaticDiscovery, CollectionIterator
 
    async def main():
        sd = StaticDiscovery({("api", None): "http://srv:8000/"})

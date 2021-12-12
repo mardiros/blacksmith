@@ -8,12 +8,12 @@ from prometheus_client import CONTENT_TYPE_LATEST, REGISTRY, generate_latest
 from starlette.applications import Starlette
 from starlette.responses import JSONResponse, Response
 
-import aioli
-from aioli import ClientFactory, ConsulDiscovery, PrometheusMetrics
+import blacksmith
+from blacksmith import ClientFactory, ConsulDiscovery, PrometheusMetrics
 
 app = Starlette(debug=True)
 
-aioli.scan("notif.resources")
+blacksmith.scan("notif.resources")
 sd = ConsulDiscovery()
 cli = ClientFactory(sd).add_middleware(PrometheusMetrics())
 

@@ -43,4 +43,4 @@ to view the email has been properly received.
 
 The api calls count are stored in the prometheus after scrapping:
 
-http://prometheus.localhost/graph?g0.expr=aioli_request_latency_seconds_count
+http://prometheus.localhost/graph?g0.expr=blacksmith_request_latency_seconds_count

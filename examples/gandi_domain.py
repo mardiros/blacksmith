@@ -7,8 +7,8 @@ from typing import Iterable, cast
 from pydantic.fields import Field
 from pydantic.main import BaseModel
 
-import aioli
-from aioli import (
+import blacksmith
+from blacksmith import (
     ClientFactory,
     CollectionIterator,
     HTTPAuthorization,
@@ -45,7 +45,7 @@ class CollectionDomainParam(Request):
     per_page: int = QueryStringField(2)
 
 
-aioli.register(
+blacksmith.register(
     "gandi",
     "domain",
     "gandi",

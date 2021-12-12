@@ -88,7 +88,7 @@ services:
       - "internal"
     # volumes:
     #   - "./notif:/srv/notif"
-    #   - "../../src/aioli:/home/notif/.cache/pypoetry/virtualenvs/notif-E5XGZiq1-py3.10/lib/python3.10/site-packages/aioli"
+    #   - "../../src/blacksmith:/home/notif/.cache/pypoetry/virtualenvs/notif-E5XGZiq1-py3.10/lib/python3.10/site-packages/blacksmith"
 
   mailhog:
     image: mailhog/mailhog

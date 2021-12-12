@@ -9,14 +9,12 @@ classifiers = [
   "Topic :: Internet :: WWW/HTTP",
 ]
 description = "REST API Client"
-homepage = "https://github.com/mardiros/aioli"
+homepage = "https://github.com/mardiros/blacksmith"
 license = "BSD-derived"
-name = "aioli-client"
-packages = [
-  {include = "aioli", from = "src"},
-]
+name = "blacksmith"
+
 readme = "README.rst"
-repository = "https://github.com/mardiros/aioli"
+repository = "https://github.com/mardiros/blacksmith"
 version = "0.3.0"
 
 [tool.poetry.dependencies]

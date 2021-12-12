@@ -51,7 +51,7 @@ Glossary
       list by receiving notification of the term:`service registry` to maintain.
 
    service
-      A process that expose an API. In Aioli, service are always REST HTTP API
+      A process that expose an API. In Blacksmith, service are always REST HTTP API
       that serve Json documents.
 
    service discovery

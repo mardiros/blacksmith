@@ -1,5 +1,5 @@
 Router Discovery
 ================
 
-.. automodule:: aioli.sd.adapters.router
+.. automodule:: blacksmith.sd.adapters.router
    :members:

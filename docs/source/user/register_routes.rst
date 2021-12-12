@@ -6,13 +6,13 @@ The example below, that has been copy paste from the test suite show
 how to register a resource.
 
 
-Full example of aioli regitration
+Full example of blacksmith regitration
 ---------------------------------
 
 ::
 
-   import aioli
-   from aioli import Request, Response, PathInfoField, PostBodyField, QueryStringField
+   import blacksmith
+   from blacksmith import Request, Response, PathInfoField, PostBodyField, QueryStringField
 
    class SizeEnum(str, Enum):
       s = "S"
@@ -45,7 +45,7 @@ Full example of aioli regitration
 
    DeleteItem = GetItem
 
-   aioli.register(
+   blacksmith.register(
       "api",
       "item",
       "api",
@@ -124,7 +124,7 @@ a client for a specific usage and you may have different schema for that.
 
 ::
 
-   aioli.register(
+   blacksmith.register(
       client_name="api",
       resource="item",
       service="api",
@@ -149,7 +149,7 @@ This is completely valid to register only a single route.
 
 ::
 
-   aioli.register(
+   blacksmith.register(
       client_name="api",
       resource="item",
       service="api",
@@ -164,7 +164,7 @@ or event a collection to bind an api that return a list.
 
 ::
 
-   aioli.register(
+   blacksmith.register(
       client_name="api",
       resource="item",
       service="datastore",
@@ -202,12 +202,12 @@ Something like this:
    mypkg/resources/serviceB/resourceD.py
 
 
-Then to load all the resources, use the `aioli.scan` method:
+Then to load all the resources, use the `blacksmith.scan` method:
 
 
 ::
 
-   import aioli
+   import blacksmith
 
    # Fully load the registry with all resources
    aoili.scan("mypkg.resources")

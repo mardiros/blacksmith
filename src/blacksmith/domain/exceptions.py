@@ -1,6 +1,6 @@
 from typing import Type
 
-from aioli.typing import (
+from blacksmith.typing import (
     ClientName,
     HttpMethod,
     Path,

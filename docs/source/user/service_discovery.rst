@@ -21,7 +21,7 @@ Static Discovery
 
 ::
 
-   from aioli import StaticDiscovery
+   from blacksmith import StaticDiscovery
 
    sd = StaticDiscovery(
        {
@@ -52,7 +52,7 @@ registered client side, this is a :term:`client-side service discovery`.
 
 ::
 
-   from aioli import ConsulDiscovery
+   from blacksmith import ConsulDiscovery
 
    # all parameters here are optional, the value
    # here are the defaults one for the example.
@@ -77,7 +77,7 @@ registered client side, this is a :term:`client-side service discovery`.
 
    **Take a look at the example!**
 
-   https://github.com/mardiros/aioli/tree/master/examples/consul_sd
+   https://github.com/mardiros/blacksmith/tree/master/examples/consul_sd
 
 
 
@@ -93,7 +93,7 @@ that is connected to the :term:`service registry` to update is configuration.
 
 ::
 
-   from aioli import RouterDiscovery
+   from blacksmith import RouterDiscovery
 
    sd = RouterDiscovery(
         service_url_fmt = "http://router/{service}/{version}",
@@ -112,5 +112,5 @@ that is connected to the :term:`service registry` to update is configuration.
 
    **Take a look at the example!**
 
-   https://github.com/mardiros/aioli/tree/master/examples/consul_template_sd
+   https://github.com/mardiros/blacksmith/tree/master/examples/consul_template_sd
 

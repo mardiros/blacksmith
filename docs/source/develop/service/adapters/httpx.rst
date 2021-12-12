@@ -1,5 +1,5 @@
 Client implementation using httpx 
 =================================
 
-.. automodule:: aioli.service.adapters.httpx
+.. automodule:: blacksmith.service.adapters.httpx
    :members:

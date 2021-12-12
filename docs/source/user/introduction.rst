@@ -1,7 +1,7 @@
 Introduction
 ============
 
-Aioli is a high level HTTP Client to consume REST APIs in json.
+Blacksmith is a high level HTTP Client to consume REST APIs in json.
 
 The aim of this library is to improve the design of application that
 consume REST APIs in application. Every services are bound in client,

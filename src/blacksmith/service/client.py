@@ -1,14 +1,14 @@
 from typing import List, Optional, Type
 
-from aioli.domain.exceptions import UnregisteredResourceException
-from aioli.domain.model.http import HTTPTimeout
-from aioli.domain.model.params import CollectionParser
-from aioli.domain.registry import Registry, Resources
-from aioli.domain.registry import registry as default_registry
-from aioli.middleware.base import HTTPMiddleware
-from aioli.sd.base import AbstractServiceDiscovery
-from aioli.service.adapters.httpx import HttpxTransport
-from aioli.typing import ClientName, ResourceName, Url
+from blacksmith.domain.exceptions import UnregisteredResourceException
+from blacksmith.domain.model.http import HTTPTimeout
+from blacksmith.domain.model.params import CollectionParser
+from blacksmith.domain.registry import Registry, Resources
+from blacksmith.domain.registry import registry as default_registry
+from blacksmith.middleware.base import HTTPMiddleware
+from blacksmith.sd.base import AbstractServiceDiscovery
+from blacksmith.service.adapters.httpx import HttpxTransport
+from blacksmith.typing import ClientName, ResourceName, Url
 
 from .base import AbstractTransport
 from .route_proxy import ClientTimeout, HTTPAuthentication, RouteProxy, build_timeout
@@ -51,7 +51,7 @@ class Client:
         """
         The client has attributes that are the registered resource.
 
-        The resource are registered using the :func:`aioli.register` function.
+        The resource are registered using the :func:`blacksmith.register` function.
         """
         try:
             return RouteProxy(
@@ -74,9 +74,9 @@ class ClientFactory:
 
     :param sd: Service Discovery instance.
     :param transport: HTTP Client that process the call,
-        default use :class:`aioli.service.adapters.httpx.HttpxTransport`
+        default use :class:`blacksmith.service.adapters.httpx.HttpxTransport`
     :param registry: :registy where the resources has been registered.
-        default use :data:`aioli.domain.registry.registry`
+        default use :data:`blacksmith.domain.registry.registry`
     :param metrics: a metrics collector.
     """
 

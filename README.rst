@@ -1,20 +1,20 @@
-Aioli
+Blacksmith
 =====
 
-.. image:: https://readthedocs.org/projects/aioli-client/badge/?version=latest
-   :target: https://aioli-client.readthedocs.io/en/latest/?badge=latest
+.. image:: https://readthedocs.org/projects/blacksmith/badge/?version=latest
+   :target: https://blacksmith.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status
 
-.. image:: https://github.com/mardiros/aioli/actions/workflows/main.yml/badge.svg
-   :target: https://github.com/mardiros/aioli/actions/workflows/main.yml
+.. image:: https://github.com/mardiros/blacksmith/actions/workflows/main.yml/badge.svg
+   :target: https://github.com/mardiros/blacksmith/actions/workflows/main.yml
    :alt: Continuous Integration
 
-.. image:: https://codecov.io/gh/mardiros/aioli/branch/master/graph/badge.svg?token=17KAC0LW9H
-   :target: https://codecov.io/gh/mardiros/aioli
+.. image:: https://codecov.io/gh/mardiros/blacksmith/branch/master/graph/badge.svg?token=17KAC0LW9H
+   :target: https://codecov.io/gh/mardiros/blacksmith
    :alt: Coverage Report
 
 
-Aioli is a library to build a solid microservices architecture based on REST API.
+Blacksmith is a library to build a solid microservices architecture based on REST API.
 
 Todays, developers have lots of choices to create microservices,
 plenty of framework are available, but when it comes to consume them,
@@ -22,19 +22,19 @@ there is a lack of clients.
 
 Consuming an API, is not just about doing HTTP requests, it has to be designed
 for failure, monitoring, and service discovery with an elegant abstraction.
-aioli aims to provide a solution for developers to write clean client code,
+blacksmith aims to provide a solution for developers to write clean client code,
 and for ops to monitor api calls on the client side.
 
 
-What is Aioli
+What is Blacksmith
 -------------
 
-Aioli is a declarative tool for REST Api.
+Blacksmith is a declarative tool for REST Api.
 
 In a REST API, resources are declared under HTTP routes, and every http verb
 as its own definition.
 
-In Aioli, every resources are bound to schemas that define request and response,
+In Blacksmith, every resources are bound to schemas that define request and response,
 in order abstract HTTP.
 
 This is a common concept for SQL table with ORM, where tables are bound to models,
@@ -45,12 +45,12 @@ Handling API resources using an http client, such as `requests`_ does not handle
 that abstraction, and does not handle bindings to object, and can be compared to
 a raw connection because it is just a transport.
 
-This is the problem aioli is solving, having a nice abstraction of a service.
+This is the problem blacksmith is solving, having a nice abstraction of a service.
 
 .. note::
 
-   | Aioli is not an HTTP Client or a model validator.
-   | Aioli use `httpx`_ to perform http query, and use `Pydantic`_ to validate models.
+   | Blacksmith is not an HTTP Client or a model validator.
+   | Blacksmith use `httpx`_ to perform http query, and use `Pydantic`_ to validate models.
 
 .. _`requests`: https://docs.python-requests.org/
 .. _`httpx`: https://www.python-httpx.org/
@@ -82,7 +82,7 @@ Building SDK
 ------------
 
 By the way, public API provider comes with an SDK, which is a good case,
-and aioli can be used to build SDK for Python / asyncio. 
+and blacksmith can be used to build SDK for Python / asyncio. 
 
 
 Read More
@@ -90,7 +90,7 @@ Read More
 
 You can read the `full documentation of this library here`_.
 
-.. _`full documentation of this library here`: https://aioli-client.readthedocs.io/en/latest/user/index.html
+.. _`full documentation of this library here`: https://blacksmith.readthedocs.io/en/latest/user/index.html
 
 
 Contributing

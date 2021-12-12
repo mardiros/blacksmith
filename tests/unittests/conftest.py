@@ -4,16 +4,16 @@ from typing import Dict, List, Tuple
 
 import pytest
 
-from aioli.domain.exceptions import HTTPError
-from aioli.domain.model import HTTPRequest, HTTPResponse, HTTPTimeout
-from aioli.middleware.auth import HTTPAuthorization
-from aioli.middleware.base import HTTPAddHeadersMiddleware
-from aioli.sd.adapters.consul import ConsulDiscovery, _registry
-from aioli.sd.adapters.router import RouterDiscovery
-from aioli.sd.adapters.static import Endpoints, StaticDiscovery
-from aioli.service.base import AbstractTransport
-from aioli.service.client import ClientFactory
-from aioli.typing import ClientName, HttpMethod, Path
+from blacksmith.domain.exceptions import HTTPError
+from blacksmith.domain.model import HTTPRequest, HTTPResponse, HTTPTimeout
+from blacksmith.middleware.auth import HTTPAuthorization
+from blacksmith.middleware.base import HTTPAddHeadersMiddleware
+from blacksmith.sd.adapters.consul import ConsulDiscovery, _registry
+from blacksmith.sd.adapters.router import RouterDiscovery
+from blacksmith.sd.adapters.static import Endpoints, StaticDiscovery
+from blacksmith.service.base import AbstractTransport
+from blacksmith.service.client import ClientFactory
+from blacksmith.typing import ClientName, HttpMethod, Path
 
 
 @pytest.fixture

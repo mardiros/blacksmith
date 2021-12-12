@@ -4,9 +4,9 @@ from datetime import timedelta
 from functools import partial
 from typing import TYPE_CHECKING, Any, Dict, Iterable, Optional, cast
 
-from aioli.domain.exceptions import HTTPError
-from aioli.domain.model.http import HTTPRequest, HTTPResponse
-from aioli.typing import ClientName, HttpMethod, Path
+from blacksmith.domain.exceptions import HTTPError
+from blacksmith.domain.model.http import HTTPRequest, HTTPResponse
+from blacksmith.typing import ClientName, HttpMethod, Path
 
 from .base import HTTPMiddleware, Middleware
 
@@ -43,7 +43,7 @@ class CircuitBreaker(HTTPMiddleware):
 
     ::
 
-        pip install aioli[circuit-breaker]
+        pip install blacksmith[circuit-breaker]
 
     The circuit breaker is based on `aiobreaker`_, the middleware create
     one circuit breaker per client_name. The parameters ares forwarded

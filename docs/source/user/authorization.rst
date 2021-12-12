@@ -9,7 +9,7 @@ but generally for a whole service or even for the whole registry.
 For concistency, every service should use the same authorization
 pattern.
 
-With aioli, the authentication mechanism is declared in the
+With blacksmith, the authentication mechanism is declared in the
 `ClientFactory` to get the authentication working.
 It also can be overridden on every api call.
 
@@ -18,7 +18,7 @@ Example
 -------
 
 ::
-   from aioli import ClientFactory, ConsulDiscovery, HTTPBearerAuthorization
+   from blacksmith import ClientFactory, ConsulDiscovery, HTTPBearerAuthorization
 
    sd = ConsulDiscovery()
    # By default, every call will have a header
@@ -38,7 +38,7 @@ Imagine that you have an api that consume a basic authentication header.
 ::
 
    import base64
-   from aioli.domain.model import HTTPAuthorization
+   from blacksmith.domain.model import HTTPAuthorization
 
    class BasicAuthorization(HTTPAuthorization):
        def __init__(self, username, password):
@@ -57,7 +57,7 @@ Imagine that you have an api that consume a "X-Secret" header to validate call.
 ::
 
    import base64
-   from aioli.domain.model import HTTPAddHeadersMiddleware
+   from blacksmith.domain.model import HTTPAddHeadersMiddleware
 
    class BasicAuthorization(HTTPAddHeadersMiddleware):
        def __init__(self, secret):
@@ -73,7 +73,7 @@ Create a custom authentication based on querystring parameter
 
 It is not recommended to pass server in a querystring, because
 get parameter are oftenly logged by server, and secret should never
-be logged. So aioli does not provide a middleware to handle this
+be logged. So blacksmith does not provide a middleware to handle this
 query, but, you can still implementing it by yourself.
 
 See how to implement it in the section :ref:`Generic Middleware`.

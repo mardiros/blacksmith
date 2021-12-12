@@ -1,19 +1,19 @@
 import pytest
 
-from aioli import PathInfoField, PostBodyField, Request, Response
-from aioli.domain.exceptions import (
+from blacksmith import PathInfoField, PostBodyField, Request, Response
+from blacksmith.domain.exceptions import (
     HTTPError,
     NoContractException,
     UnregisteredRouteException,
     WrongRequestTypeException,
 )
-from aioli.domain.model import CollectionParser, HTTPRequest, HTTPResponse, HTTPTimeout
-from aioli.domain.registry import ApiRoutes
-from aioli.middleware.auth import HTTPAuthorization
-from aioli.middleware.base import HTTPAddHeadersMiddleware
-from aioli.service.base import AbstractTransport
-from aioli.service.route_proxy import RouteProxy, build_timeout
-from aioli.typing import HttpMethod
+from blacksmith.domain.model import CollectionParser, HTTPRequest, HTTPResponse, HTTPTimeout
+from blacksmith.domain.registry import ApiRoutes
+from blacksmith.middleware.auth import HTTPAuthorization
+from blacksmith.middleware.base import HTTPAddHeadersMiddleware
+from blacksmith.service.base import AbstractTransport
+from blacksmith.service.route_proxy import RouteProxy, build_timeout
+from blacksmith.typing import HttpMethod
 
 
 class FakeTransport(AbstractTransport):

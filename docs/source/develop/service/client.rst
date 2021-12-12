@@ -1,5 +1,5 @@
 Client
 ======
 
-.. automodule:: aioli.service.client
+.. automodule:: blacksmith.service.client
    :members:

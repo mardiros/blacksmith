@@ -3,9 +3,9 @@ from httpx import AsyncClient
 from httpx import Response as HttpxRepsonse
 from httpx import Timeout as HttpxTimeout
 
-from aioli.domain.exceptions import HTTPError
-from aioli.domain.model import HTTPRequest, HTTPResponse, HTTPTimeout
-from aioli.typing import HttpMethod
+from blacksmith.domain.exceptions import HTTPError
+from blacksmith.domain.model import HTTPRequest, HTTPResponse, HTTPTimeout
+from blacksmith.typing import HttpMethod
 
 from ..base import AbstractTransport
 

@@ -8,14 +8,14 @@ from typing import Callable, cast
 
 from pydantic.fields import Field
 
-from aioli.domain.exceptions import HTTPError, UnregisteredServiceException
-from aioli.domain.model import PathInfoField, Request, Response
-from aioli.domain.registry import Registry
-from aioli.middleware.auth import HTTPBearerAuthorization
-from aioli.sd.adapters.static import StaticDiscovery
-from aioli.sd.base import AbstractServiceDiscovery, Url
-from aioli.service.client import ClientFactory
-from aioli.typing import Service, ServiceName, Version
+from blacksmith.domain.exceptions import HTTPError, UnregisteredServiceException
+from blacksmith.domain.model import PathInfoField, Request, Response
+from blacksmith.domain.registry import Registry
+from blacksmith.middleware.auth import HTTPBearerAuthorization
+from blacksmith.sd.adapters.static import StaticDiscovery
+from blacksmith.sd.base import AbstractServiceDiscovery, Url
+from blacksmith.service.client import ClientFactory
+from blacksmith.typing import Service, ServiceName, Version
 
 
 class ConsulApiError(HTTPError):
@@ -52,7 +52,7 @@ _registry.register(
 )
 
 
-def aioli_cli(endpoint: Url, consul_token: str) -> ClientFactory:
+def blacksmith_cli(endpoint: Url, consul_token: str) -> ClientFactory:
     sd = StaticDiscovery({("consul", "v1"): endpoint})
     kwargs = {}
     fact = ClientFactory(sd, registry=_registry, **kwargs)
@@ -85,9 +85,9 @@ class ConsulDiscovery(AbstractServiceDiscovery):
         unversioned_service_name_fmt: str = "{service}",
         unversioned_service_url_fmt: str = "http://{address}:{port}",
         consul_token: str = "",
-        _client_factory: Callable[[Url, str], ClientFactory] = aioli_cli,
+        _client_factory: Callable[[Url, str], ClientFactory] = blacksmith_cli,
     ) -> None:
-        self.aioli_cli = _client_factory(addr, consul_token)
+        self.blacksmith_cli = _client_factory(addr, consul_token)
         self.service_name_fmt = service_name_fmt
         self.service_url_fmt = service_url_fmt
         self.unversioned_service_name_fmt = unversioned_service_name_fmt
@@ -120,7 +120,7 @@ class ConsulDiscovery(AbstractServiceDiscovery):
         If many instances host the service, the host is choosen randomly.
         """
         name = self.format_service_name(service, version)
-        consul = await self.aioli_cli("consul")
+        consul = await self.blacksmith_cli("consul")
         try:
             resp = await consul.services.collection_get(ServiceRequest(name=name))
         except HTTPError as exc:

@@ -1,8 +1,8 @@
 import pytest
 from prometheus_client import CollectorRegistry
 
-from aioli import PathInfoField, Request, Response
-from aioli.domain.exceptions import (
+from blacksmith import PathInfoField, Request, Response
+from blacksmith.domain.exceptions import (
     HTTPError,
     NoContractException,
     TimeoutError,
@@ -10,7 +10,7 @@ from aioli.domain.exceptions import (
     UnregisteredRouteException,
     WrongRequestTypeException,
 )
-from aioli.domain.model import (
+from blacksmith.domain.model import (
     CollectionParser,
     HTTPRequest,
     HTTPResponse,
@@ -18,12 +18,12 @@ from aioli.domain.model import (
     PostBodyField,
     ResponseBox,
 )
-from aioli.domain.registry import ApiRoutes, Registry
-from aioli.middleware.auth import HTTPAuthorization
-from aioli.middleware.prometheus import PrometheusMetrics
-from aioli.service.base import AbstractTransport
-from aioli.service.client import Client, ClientFactory
-from aioli.typing import HttpMethod
+from blacksmith.domain.registry import ApiRoutes, Registry
+from blacksmith.middleware.auth import HTTPAuthorization
+from blacksmith.middleware.prometheus import PrometheusMetrics
+from blacksmith.service.base import AbstractTransport
+from blacksmith.service.client import Client, ClientFactory
+from blacksmith.typing import HttpMethod
 
 
 class FakeTransport(AbstractTransport):

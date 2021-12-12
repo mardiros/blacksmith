@@ -69,8 +69,8 @@ services:
       - "internal"
     volumes:
       - "./user:/srv/user"
-      - "../../src/aioli:/home/user/.cache/pypoetry/virtualenvs/user-Ke4Ke9U3-py3.10/lib/python3.10/site-packages/aioli"
-      - "../../../../../.cache/pypoetry/virtualenvs/aioli-client-E8d2VA8r-py3.9/lib/python3.9/site-packages/aiozipkin:/home/user/.cache/pypoetry/virtualenvs/user-Ke4Ke9U3-py3.10/lib/python3.10/site-packages/aiozipkin"
+      - "../../src/blacksmith:/home/user/.cache/pypoetry/virtualenvs/user-Ke4Ke9U3-py3.10/lib/python3.10/site-packages/blacksmith"
+      - "../../../../../.cache/pypoetry/virtualenvs/blacksmith-E8d2VA8r-py3.9/lib/python3.9/site-packages/aiozipkin:/home/user/.cache/pypoetry/virtualenvs/user-Ke4Ke9U3-py3.10/lib/python3.10/site-packages/aiozipkin"
 
   api_notif:
     build: ./notif
@@ -85,8 +85,8 @@ services:
       - "internal"
     volumes:
       - "./notif:/srv/notif"
-      - "../../src/aioli:/home/notif/.cache/pypoetry/virtualenvs/notif-E5XGZiq1-py3.10/lib/python3.10/site-packages/aioli"
-      - "../../../../../.cache/pypoetry/virtualenvs/aioli-client-E8d2VA8r-py3.9/lib/python3.9/site-packages/aiozipkin:/home/notif/.cache/pypoetry/virtualenvs/notif-E5XGZiq1-py3.10/lib/python3.10/site-packages/aiozipkin"
+      - "../../src/blacksmith:/home/notif/.cache/pypoetry/virtualenvs/notif-E5XGZiq1-py3.10/lib/python3.10/site-packages/blacksmith"
+      - "../../../../../.cache/pypoetry/virtualenvs/blacksmith-E8d2VA8r-py3.9/lib/python3.9/site-packages/aiozipkin:/home/notif/.cache/pypoetry/virtualenvs/notif-E5XGZiq1-py3.10/lib/python3.10/site-packages/aiozipkin"
 
   mailhog:
     image: mailhog/mailhog

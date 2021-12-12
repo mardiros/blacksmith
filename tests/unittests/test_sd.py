@@ -1,9 +1,9 @@
 import pytest
 
-from aioli.domain.exceptions import UnregisteredServiceException
-from aioli.sd.adapters.consul import ConsulDiscovery, Service, ServiceRequest, aioli_cli
-from aioli.sd.adapters.router import RouterDiscovery
-from aioli.sd.adapters.static import StaticDiscovery
+from blacksmith.domain.exceptions import UnregisteredServiceException
+from blacksmith.sd.adapters.consul import ConsulDiscovery, Service, ServiceRequest, blacksmith_cli
+from blacksmith.sd.adapters.router import RouterDiscovery
+from blacksmith.sd.adapters.static import StaticDiscovery
 
 
 @pytest.mark.asyncio
@@ -21,7 +21,7 @@ async def test_static_discovery_raise(static_sd: StaticDiscovery):
 
 @pytest.mark.asyncio
 async def test_consul_sd_cli():
-    cli = aioli_cli("http://consul:8888", "abc")
+    cli = blacksmith_cli("http://consul:8888", "abc")
     assert cli.registry.client_service == {"consul": ("consul", "v1")}
     assert (
         cli.registry.clients["consul"]["services"].collection.path
@@ -90,7 +90,7 @@ async def test_consul_discovery_get_endpoint_unregistered(consul_sd: ConsulDisco
     assert str(ctx.value) == "Unregistered service 'dummy/v2'"
 
 
-from aioli.sd.adapters.consul import ConsulApiError
+from blacksmith.sd.adapters.consul import ConsulApiError
 
 
 @pytest.mark.asyncio

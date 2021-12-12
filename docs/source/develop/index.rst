@@ -1,9 +1,9 @@
 Developer's Documentation
 =========================
 
-Documents internal API of Aioli.
+Documents internal API of Blacksmith.
 
-This is usefull for contributing to aioli.
+This is usefull for contributing to blacksmith.
 
 
 .. toctree::

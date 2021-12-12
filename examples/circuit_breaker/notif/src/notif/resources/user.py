@@ -1,5 +1,5 @@
-import aioli
-from aioli import PathInfoField, Request, Response
+import blacksmith
+from blacksmith import PathInfoField, Request, Response
 
 
 class UserRequest(Request):
@@ -12,7 +12,7 @@ class User(Response):
     lastname: str
 
 
-aioli.register(
+blacksmith.register(
     client_name="api_user",
     resource="users",
     service="user",

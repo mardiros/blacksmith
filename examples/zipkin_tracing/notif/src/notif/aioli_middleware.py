@@ -3,11 +3,11 @@ from typing import cast
 from notif.zk_middleware import Trace
 from starlette.types import ASGIApp, Receive, Scope, Send
 
-from aioli import ClientFactory, ConsulDiscovery
-from aioli.domain.model import HTTPAddHeadersMiddleware
+from blacksmith import ClientFactory, ConsulDiscovery
+from blacksmith.domain.model import HTTPAddHeadersMiddleware
 
 
-class AioliMiddleware:
+class BlacksmithMiddleware:
     """
     Middleware to inject a aoili client factory in the asgi scope.
 
@@ -33,5 +33,5 @@ class AioliMiddleware:
         trace = cast(Trace, scope.get("trace"))
         if trace is not None:
             self.middleware.headers = trace.http_headers
-        scope["aioli_client"] = self.cli
+        scope["blacksmith_client"] = self.cli
         await self.app(scope, receive, send)

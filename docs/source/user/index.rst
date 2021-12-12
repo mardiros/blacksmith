@@ -1,7 +1,7 @@
 Users's Documentation
 =====================
 
-User manual of Aioli.
+User manual of Blacksmith.
 
 
 .. toctree::

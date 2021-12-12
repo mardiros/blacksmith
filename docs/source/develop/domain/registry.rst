@@ -1,5 +1,5 @@
 Registry
 ========
 
-.. automodule:: aioli.domain.registry
+.. automodule:: blacksmith.domain.registry
    :members:

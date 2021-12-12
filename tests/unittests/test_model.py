@@ -4,8 +4,8 @@ from typing import Optional
 
 import pytest
 
-from aioli.domain.exceptions import NoResponseSchemaException
-from aioli.domain.model import (
+from blacksmith.domain.exceptions import NoResponseSchemaException
+from blacksmith.domain.model import (
     CollectionIterator,
     CollectionParser,
     HeaderField,
@@ -18,7 +18,7 @@ from aioli.domain.model import (
     Response,
     ResponseBox,
 )
-from aioli.domain.model.http import HTTPTimeout, parse_header_links
+from blacksmith.domain.model.http import HTTPTimeout, parse_header_links
 
 
 class GetResponse(Response):

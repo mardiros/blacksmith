@@ -1,5 +1,5 @@
 Models
 ======
 
-.. automodule:: aioli.domain.model
+.. automodule:: blacksmith.domain.model
    :members:

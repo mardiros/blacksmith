@@ -10,8 +10,8 @@ from notif.zk_middleware import Trace
 from starlette.applications import Starlette
 from starlette.responses import JSONResponse
 
-import aioli
-from aioli import ClientFactory, ConsulDiscovery
+import blacksmith
+from blacksmith import ClientFactory, ConsulDiscovery
 
 app = Starlette(debug=True)
 
@@ -45,7 +45,7 @@ async def get_notif(request):
 
 @app.route("/v1/notification", methods=["POST"])
 async def post_notif(request):
-    cli = cast(ClientFactory, request.scope.get("aioli_client"))
+    cli = cast(ClientFactory, request.scope.get("blacksmith_client"))
     body = await request.json()
 
     root_trace: Trace = request.scope["trace"]

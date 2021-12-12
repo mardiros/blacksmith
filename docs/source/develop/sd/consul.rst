@@ -1,5 +1,5 @@
 Consul
 ======
 
-.. automodule:: aioli.sd.adapters.consul
+.. automodule:: blacksmith.sd.adapters.consul
    :members:

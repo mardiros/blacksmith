@@ -3,13 +3,13 @@ from typing import Any, Dict, List, Optional, Tuple, Type, Union, cast
 
 from pydantic.typing import NoneType
 
-from aioli.domain.exceptions import (
+from blacksmith.domain.exceptions import (
     HTTPError,
     NoContractException,
     UnregisteredRouteException,
     WrongRequestTypeException,
 )
-from aioli.domain.model import (
+from blacksmith.domain.model import (
     CollectionIterator,
     CollectionParser,
     HTTPRequest,
@@ -20,9 +20,9 @@ from aioli.domain.model import (
     ResponseBox,
     TResponse,
 )
-from aioli.domain.registry import ApiRoutes, HttpResource
-from aioli.middleware.base import HTTPMiddleware, Middleware
-from aioli.typing import ClientName, HttpMethod, Path, ResourceName, Url
+from blacksmith.domain.registry import ApiRoutes, HttpResource
+from blacksmith.middleware.base import HTTPMiddleware, Middleware
+from blacksmith.typing import ClientName, HttpMethod, Path, ResourceName, Url
 
 from .base import AbstractTransport
 
