@@ -18,7 +18,7 @@ aioli.scan("notif.resources")
 sd = ConsulDiscovery()
 cli = (
     ClientFactory(sd)
-    .add_middleware(CircuitBreaker(5, timedelta(5.0)))
+    .add_middleware(CircuitBreaker(2, timedelta(5.0)))
     .add_middleware(PrometheusMetrics())
 )
 
