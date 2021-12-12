@@ -1,5 +1,5 @@
 Blacksmith
-=====
+==========
 
 .. image:: https://readthedocs.org/projects/blacksmith/badge/?version=latest
    :target: https://blacksmith.readthedocs.io/en/latest/?badge=latest
@@ -27,7 +27,7 @@ and for ops to monitor api calls on the client side.
 
 
 What is Blacksmith
--------------
+------------------
 
 Blacksmith is a declarative tool for REST Api.
 

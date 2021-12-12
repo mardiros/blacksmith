@@ -7,7 +7,7 @@ how to register a resource.
 
 
 Full example of blacksmith regitration
----------------------------------
+--------------------------------------
 
 ::
 

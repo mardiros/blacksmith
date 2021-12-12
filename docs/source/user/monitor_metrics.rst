@@ -29,7 +29,7 @@ There is `blacksmith_request_latency_seconds` Histogram and `blacksmith_info` Ga
 
 
 blacksmith_request_latency_seconds Histogram
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Histogram have 3 metrics that are `blacksmith_request_latency_seconds_count`,
 `blacksmith_request_latency_seconds_sum` and `blacksmith_request_latency_seconds_bucket`.
@@ -62,7 +62,7 @@ You may configure the buckets using the parameter buckets
 
 
 blacksmith_info Gauge
-~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
 
 The metrics is `blacksmith_info` which is a Gauge that always return 1, it is usefull
 to get the version of the blacksmith client installed, in its label `version`.
