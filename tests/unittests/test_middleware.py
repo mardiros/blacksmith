@@ -4,9 +4,10 @@ from prometheus_client import REGISTRY, CollectorRegistry
 
 from aioli import __version__
 from aioli.domain.exceptions import HTTPError
+from aioli.domain.model.http import HTTPRequest, HTTPResponse
 from aioli.middleware.auth import HTTPAuthorization
 from aioli.middleware.base import HTTPAddHeaderdMiddleware
-from aioli.middleware.circuit_breaker import CircuitBreaker
+from aioli.middleware.circuit_breaker import CircuitBreaker, exclude_httpx_4xx
 from aioli.middleware.prometheus import PrometheusMetrics
 
 
@@ -147,14 +148,42 @@ async def test_prom_metrics_error(boom_middleware, dummy_http_request):
     assert val == 1
 
 
+@pytest.mark.parametrize(
+    "exc",
+    [
+        HTTPError("Mmm", HTTPRequest("/", {}, {}, {}), HTTPResponse(400, {}, {})),
+        HTTPError("Mmm", HTTPRequest("/", {}, {}, {}), HTTPResponse(401, {}, {})),
+        HTTPError("Mmm", HTTPRequest("/", {}, {}, {}), HTTPResponse(403, {}, {})),
+        HTTPError("Mmm", HTTPRequest("/", {}, {}, {}), HTTPResponse(422, {}, {})),
+    ],
+)
+def test_excluded_list(exc):
+    assert exclude_httpx_4xx(exc) is True
+
+
+@pytest.mark.parametrize(
+    "exc",
+    [
+        RuntimeError("Boom"),
+        ValueError("Boom"),
+        HTTPError("Mmm", HTTPRequest("/", {}, {}, {}), HTTPResponse(500, {}, {})),
+        HTTPError("Mmm", HTTPRequest("/", {}, {}, {}), HTTPResponse(503, {}, {})),
+    ],
+)
+def test_included_list(exc):
+    assert exclude_httpx_4xx(exc) is False
+
+
 @pytest.mark.asyncio
-async def test_circuit_breaker(echo_middleware, boom_middleware, dummy_http_request):
-    metrics = CircuitBreaker(fail_max=2)
-    next = metrics(echo_middleware)
+async def test_circuit_breaker_5xx(
+    echo_middleware, boom_middleware, dummy_http_request
+):
+    cbreaker = CircuitBreaker(fail_max=2)
+    next = cbreaker(echo_middleware)
     resp = await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
     assert resp.status_code == 200
 
-    next = metrics(boom_middleware)
+    next = cbreaker(boom_middleware)
 
     with pytest.raises(HTTPError) as exc:
         await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
@@ -166,10 +195,27 @@ async def test_circuit_breaker(echo_middleware, boom_middleware, dummy_http_requ
     assert exc.value.message == "Failures threshold reached, circuit breaker opened."
 
     # Event if it works, the circuit breaker is open
-    next = metrics(echo_middleware)
+    next = cbreaker(echo_middleware)
     with pytest.raises(CircuitBreakerError) as exc:
         await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
 
     # Other service is still working
-    await next(dummy_http_request, "GET", "foo", "/dummies/{name}")
+    resp = await next(dummy_http_request, "GET", "foo", "/dummies/{name}")
+    assert resp.status_code == 200
+
+
+@pytest.mark.asyncio
+async def test_circuit_breaker_4xx(
+    echo_middleware, invalid_middleware, dummy_http_request
+):
+    cbreaker = CircuitBreaker(fail_max=2)
+    next = cbreaker(invalid_middleware)
+    with pytest.raises(HTTPError) as exc:
+        await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
+    with pytest.raises(HTTPError) as exc:
+        await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
+
+    next = cbreaker(echo_middleware)
+    # Other service is still working
+    resp = await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
     assert resp.status_code == 200

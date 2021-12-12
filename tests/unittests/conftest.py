@@ -97,6 +97,20 @@ def boom_middleware():
 
 
 @pytest.fixture
+def invalid_middleware():
+    async def next(
+        req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
+    ) -> HTTPResponse:
+        raise HTTPError(
+            "Boom",
+            req,
+            HTTPResponse(422, {}, json={"detail": "What are you talking about?"}),
+        )
+
+    return next
+
+
+@pytest.fixture
 def dummy_http_request():
     return HTTPRequest(
         "/dummy/{name}",

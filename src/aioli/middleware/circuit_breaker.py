@@ -14,6 +14,7 @@ from typing import (
     cast,
 )
 
+from aioli.domain.exceptions import HTTPError
 from aioli.domain.model.http import HTTPRequest, HTTPResponse
 from aioli.typing import ClientName, HttpMethod, Path
 
@@ -36,6 +37,13 @@ else:
     CircuitBreakers = Any
 
 
+def exclude_httpx_4xx(exc):
+    if isinstance(exc, HTTPError):
+        err = cast(HTTPError, exc)
+        return err.is_client_error
+    return False
+
+
 class CircuitBreaker(HTTPMiddleware):
     """
     Prevent the domino's effect using a circuit breaker.
@@ -54,11 +62,12 @@ class CircuitBreaker(HTTPMiddleware):
         self,
         fail_max=5,
         timeout_duration: Optional[timedelta] = None,
-        exclude: Optional[Iterable[Union[Callable, Type[Exception]]]] = None,
         listeners: Listeners = None,
         state_storage: StateStorage = None,
     ):
         import aiobreaker
+
+        exclude = [exclude_httpx_4xx]
 
         self.CircuitBreaker = partial(
             aiobreaker.CircuitBreaker,
