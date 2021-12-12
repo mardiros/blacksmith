@@ -19,7 +19,7 @@ sd = ConsulDiscovery()
 prom = PrometheusMetrics()
 cli = (
     ClientFactory(sd)
-    .add_middleware(CircuitBreaker(3, timedelta(seconds=5.0), prometheus_metrics=prom))
+    .add_middleware(CircuitBreaker(3, timedelta(seconds=30.0), prometheus_metrics=prom))
     .add_middleware(prom)
 )
 

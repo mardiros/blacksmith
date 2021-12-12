@@ -10,6 +10,12 @@ following command.
 
    pip install blacksmith[prometheus]
 
+Or using poetry
+
+::
+
+   poetry add blacksmith -E prometheus
+
 
 To use the prometheus middlware, it has to be added to the `ClientFactory`.
 
@@ -61,6 +67,37 @@ You may configure the buckets using the parameter buckets
    clients to distingate them.
 
 
+
+.. figure:: ../screenshots/prometheus_request_latency_seconds.png
+
+   Example of `blacksmith_request_latency_seconds` Histogram
+
+
+blacksmith_circuit_breaker_state Gauge
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+While combining with the :ref:`Circuit Breaker Middleware`,
+a metrics `blacksmith_circuit_breaker_state` Gauge is added to get the
+states of circuit breakers per :term:`client_name`.
+
+ * `0` - the circuit breaker is `closed`.
+ * `1` - the circuit breaker is `half-open`.
+ * `2` - the circuit breaker is `open`.
+
+.. figure:: ../screenshots/prometheus_circuit_breaker_gauge.png
+
+   Example of `blacksmith_circuit_breaker_state` Gauge
+
+blacksmith_circuit_breaker_error Counter
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+While combining with the :ref:`Circuit Breaker Middleware`,
+a metrics `blacksmith_circuit_breaker_error_total`
+
+.. figure:: ../screenshots/prometheus_circuit_breaker_counter.png
+
+   Example of `blacksmith_circuit_breaker_error` Counter
+
 blacksmith_info Gauge
 ~~~~~~~~~~~~~~~~~~~~~
 
@@ -110,14 +147,11 @@ Example using starlette
       metric = PrometheusMetrics(registry=my_registry)
 
 
-Full example of prometheus metrics
-----------------------------------
+Full examples of prometheus metrics
+-----------------------------------
 
 You will find an example using prometheus in the examples directory:
 
-   https://github.com/mardiros/blacksmith/tree/master/examples/prometheus_metrics
+ * https://github.com/mardiros/blacksmith/tree/master/examples/prometheus_metrics
 
-
-.. figure:: ../screenshots/prometheus.png
-
-   Example of querying the prometheus instance on http://prometheus.localhost/
+ * https://github.com/mardiros/blacksmith/tree/master/examples/circuit_breaker
