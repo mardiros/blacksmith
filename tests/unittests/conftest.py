@@ -137,9 +137,8 @@ def consul_sd():
         return ClientFactory(
             sd=StaticDiscovery({("consul", "v1"): url}),
             registry=_registry,
-            auth=HTTPAuthorization("Bearer", tok),
             transport=FakeConsulTransport(),
-        )
+        ).add_middleware(HTTPAuthorization("Bearer", tok))
 
     return ConsulDiscovery(_client_factory=cli)
 

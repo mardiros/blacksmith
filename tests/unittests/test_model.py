@@ -19,9 +19,6 @@ from aioli.domain.model import (
     ResponseBox,
 )
 from aioli.domain.model.http import HTTPTimeout, parse_header_links
-from aioli.middleware.auth import HTTPAuthorization, HTTPUnauthenticated
-from aioli.middleware.base import HTTPMiddleware
-from aioli.typing import ClientName, HttpMethod, Path
 
 
 class GetResponse(Response):
@@ -39,27 +36,6 @@ def test_timeout_neq():
     assert HTTPTimeout() != HTTPTimeout(42)
     assert HTTPTimeout(42) != HTTPTimeout(42, 42)
     assert HTTPTimeout(42, 42) != HTTPTimeout(42, 43)
-
-
-def test_authorization_header():
-    auth = HTTPAuthorization("Bearer", "abc")
-    assert auth.headers == {"Authorization": "Bearer abc"}
-
-
-@pytest.mark.asyncio
-@pytest.mark.parametrize("middleware", [HTTPMiddleware, HTTPUnauthenticated])
-async def test_empty_middleware(middleware, dummy_http_request):
-    auth = middleware()
-
-    async def handle_req(
-        req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
-    ) -> HTTPResponse:
-        return HTTPResponse(200, req.headers, json=req)
-
-    next = auth(handle_req)
-    resp = await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
-
-    assert resp.headers == dummy_http_request.headers
 
 
 def test_request_url():
