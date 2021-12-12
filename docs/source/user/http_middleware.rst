@@ -7,8 +7,8 @@ Here is a dummy example.
 
 ::
 
-   from aioli import HTTPAddHeaderdMiddleware
-   dummy_middleware = HTTPAddHeaderdMiddleware({"x-request-header": "foo"})
+   from aioli import HTTPAddHeadersMiddleware
+   dummy_middleware = HTTPAddHeadersMiddleware({"x-request-header": "foo"})
 
    sd = StaticDiscovery({("api", None): "http://srv:8000/"})
    cli = ClientFactory(sd)
@@ -41,7 +41,7 @@ to achieve this, lets create a simple middleware that forward the headers.
          self.app = app
          self.sd = ConsulDiscovery()
          self.cli = ClientFactory(self.sd)
-         self.middleware = HTTPAddHeaderdMiddleware(headers={})
+         self.middleware = HTTPAddHeadersMiddleware(headers={})
          self.cli.add_middleware(self.middleware)
 
       async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:

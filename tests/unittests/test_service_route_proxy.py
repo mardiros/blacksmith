@@ -10,7 +10,7 @@ from aioli.domain.exceptions import (
 from aioli.domain.model import CollectionParser, HTTPRequest, HTTPResponse, HTTPTimeout
 from aioli.domain.registry import ApiRoutes
 from aioli.middleware.auth import HTTPAuthorization
-from aioli.middleware.base import HTTPAddHeaderdMiddleware
+from aioli.middleware.base import HTTPAddHeadersMiddleware
 from aioli.service.base import AbstractTransport
 from aioli.service.route_proxy import RouteProxy, build_timeout
 from aioli.typing import HttpMethod
@@ -58,8 +58,8 @@ async def test_route_proxy_prepare_middleware(dummy_http_request, echo_transport
         collection_parser=CollectionParser,
         middlewares=[
             HTTPAuthorization("Bearer", "abc"),
-            HTTPAddHeaderdMiddleware({"foo": "bar"}),
-            HTTPAddHeaderdMiddleware({"Eggs": "egg"}),
+            HTTPAddHeadersMiddleware({"foo": "bar"}),
+            HTTPAddHeadersMiddleware({"Eggs": "egg"}),
         ],
     )
     resp = await proxy._handle_req_with_middlewares(

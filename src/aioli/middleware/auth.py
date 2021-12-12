@@ -1,9 +1,9 @@
 """Authentication Middlewares."""
 
-from .base import HTTPAddHeaderdMiddleware
+from .base import HTTPAddHeadersMiddleware
 
 
-class HTTPAuthorization(HTTPAddHeaderdMiddleware):
+class HTTPAuthorization(HTTPAddHeadersMiddleware):
     """
     Authentication Mechanism based on the header `Authorization`.
 

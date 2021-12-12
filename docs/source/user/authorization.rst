@@ -57,9 +57,9 @@ Imagine that you have an api that consume a "X-Secret" header to validate call.
 ::
 
    import base64
-   from aioli.domain.model import HTTPAddHeaderdMiddleware
+   from aioli.domain.model import HTTPAddHeadersMiddleware
 
-   class BasicAuthorization(HTTPAddHeaderdMiddleware):
+   class BasicAuthorization(HTTPAddHeadersMiddleware):
        def __init__(self, secret):
            return super().__init__(headers={"X-Secret": secret})
 

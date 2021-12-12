@@ -1,7 +1,7 @@
 Generic Middleware
 ==================
 
-`PrometheusMetrics`, `CircuitBreaker`, `HTTPAddHeaderdMiddleware` are 
+`PrometheusMetrics`, `CircuitBreaker`, `HTTPAddHeadersMiddleware` are 
 implementation of the `HTTPMiddleware` that can be used to create own
 middleware.
 

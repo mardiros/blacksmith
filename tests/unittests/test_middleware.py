@@ -7,7 +7,7 @@ from aioli import __version__
 from aioli.domain.exceptions import HTTPError
 from aioli.domain.model.http import HTTPRequest, HTTPResponse
 from aioli.middleware.auth import HTTPAuthorization
-from aioli.middleware.base import HTTPAddHeaderdMiddleware, HTTPMiddleware
+from aioli.middleware.base import HTTPAddHeadersMiddleware, HTTPMiddleware
 from aioli.middleware.circuit_breaker import CircuitBreaker, exclude_httpx_4xx
 from aioli.middleware.prometheus import PrometheusMetrics
 from aioli.typing import ClientName, HttpMethod, Path
@@ -38,7 +38,7 @@ async def test_empty_middleware(middleware, dummy_http_request):
 @pytest.mark.parametrize(
     "middleware",
     [
-        (HTTPAddHeaderdMiddleware, [{"foo": "bar"}], {"X-Req-Id": "42", "foo": "bar"}),
+        (HTTPAddHeadersMiddleware, [{"foo": "bar"}], {"X-Req-Id": "42", "foo": "bar"}),
         (
             HTTPAuthorization,
             ["Bearer", "abc"],

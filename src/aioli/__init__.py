@@ -20,7 +20,7 @@ from .domain.registry import register
 from .domain.scanner import scan
 from .middleware import (
     CircuitBreaker,
-    HTTPAddHeaderdMiddleware,
+    HTTPAddHeadersMiddleware,
     HTTPAuthorization,
     HTTPBearerAuthorization,
     HTTPMiddleware,
