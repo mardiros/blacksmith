@@ -3,14 +3,21 @@ Monitoring metrics
 
 Aioli can expose api calls metrics using :term:`Prometheus`.
 
-This is accomplished during the instantiation of the `ClientFactory`.
+It requires an extra dependency `prometheus_client` installed using the
+following command.
 
+::
+
+   pip install aioli-client[prometheus]
+
+
+To use the prometheus middlware, it has to be added to the `ClientFactory`.
 
 ::
 
    from aioli import ClientFactory, PrometheusMetrics, StaticDiscovery
    sd = StaticDiscovery({("api", None): "http://srv:8000/"})
-   cli = ClientFactory(sd, metrics=PrometheusMetrics())
+   cli = ClientFactory(sd).add_middleware(PrometheusMetrics())
 
 
 Metrics

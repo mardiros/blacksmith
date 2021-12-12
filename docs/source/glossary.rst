@@ -3,6 +3,23 @@ Glossary
 
 .. glossary::
 
+   aiobreaker
+      An asyncio library implement the :term:`Circuit Breaker` pattern.
+      https://github.com/arlyon/aiobreaker
+
+   cascading failure
+      A cascading failure is a process in a system of interconnected parts in
+      which the failure of one or few parts can trigger the failure of other
+      parts and so on.
+      https://en.wikipedia.org/wiki/Cascading_failure
+
+   Circuit Breaker
+      Design pattern used in software development.
+      It is used to detect failures and encapsulates the logic of preventing
+      a failure from constantly recurring, during maintenance, temporary
+      external system failure or unexpected system difficulties. 
+      https://en.wikipedia.org/wiki/Circuit_breaker_design_pattern
+
    client_name
       A name for your client.
 
@@ -13,6 +30,12 @@ Glossary
    Consul
       A software made to designed for service discovery.
       Website: https://www.consul.io/
+
+   Fail Fast Model
+      In systems design, a fail-fast system is one which immediately reports at
+      its interface any condition that is likely to indicate a failure.
+      Fail-fast systems are usually designed to stop normal operation rather than
+      attempt to continue a possibly flawed process.
 
    Prometheus
       A software used for event monitoring and alerting.

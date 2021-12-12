@@ -7,16 +7,8 @@ Here is a dummy example.
 
 ::
 
-   class DummyMiddleware(Middleware):
-
-      def __call__(self, next: Middleware) -> Middleware:
-         async def handle(req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path) -> HTTPResponse:
-               req.headers["x-request-header"] "foo"
-               return await next(req, method, client_name, path)
-
-        return handle
-
-   dummy_middleware = DummyMiddleware()
+   from aioli import HTTPAddHeaderdMiddleware
+   dummy_middleware = HTTPAddHeaderdMiddleware({"x-request-header": "foo"})
 
    sd = StaticDiscovery({("api", None): "http://srv:8000/"})
    cli = ClientFactory(sd)
@@ -49,7 +41,7 @@ to achieve this, lets create a simple middleware that forward the headers.
          self.app = app
          self.sd = ConsulDiscovery()
          self.cli = ClientFactory(self.sd)
-         self.middleware = HTTPMiddleware(headers={})
+         self.middleware = HTTPAddHeaderdMiddleware(headers={})
          self.cli.add_middleware(self.middleware)
 
       async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
@@ -75,4 +67,5 @@ You will find an example using prometheus in the examples directory:
 
 .. figure:: ../screenshots/zipkin.png
 
-   Example of querying the prometheus instance on http://prometheus.localhost/
+   Example of querying the zipkin instance on http://zipkin.localhost/
+

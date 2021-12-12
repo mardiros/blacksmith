@@ -104,6 +104,14 @@ class HTTPError(Exception):
     def json(self):
         return self.response.json
 
+    @property
+    def is_client_error(self):
+        return 400 <= self.status_code < 500
+
+    @property
+    def is_server_error(self):
+        return 500 <= self.status_code < 600
+
 
 class TimeoutError(Exception):
     """Represent the http timeout error."""
