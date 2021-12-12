@@ -49,6 +49,8 @@ class CircuitBreaker(HTTPMiddleware):
     one circuit breaker per client_name. The parameters ares forwarded
     to all the clients. This middleware does not give the possibility to
     adapt `fail_max` and `timeout_duration` per clients.
+
+    .. _`aiobreaker`: https://pypi.org/project/aiobreaker/
     """
 
     breakers: CircuitBreakers
