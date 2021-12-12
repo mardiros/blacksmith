@@ -1,18 +1,8 @@
 """Cut the circuit in case a service is down."""
+
 from datetime import timedelta
 from functools import partial
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    DefaultDict,
-    Dict,
-    Iterable,
-    Optional,
-    Type,
-    Union,
-    cast,
-)
+from typing import TYPE_CHECKING, Any, Dict, Iterable, Optional, cast
 
 from aioli.domain.exceptions import HTTPError
 from aioli.domain.model.http import HTTPRequest, HTTPResponse
@@ -38,6 +28,7 @@ else:
 
 
 def exclude_httpx_4xx(exc):
+    """Exclude client side http errors."""
     if isinstance(exc, HTTPError):
         err = cast(HTTPError, exc)
         return err.is_client_error
@@ -54,6 +45,10 @@ class CircuitBreaker(HTTPMiddleware):
 
         pip install aioli[circuit-breaker]
 
+    The circuit breaker is based on `aiobreaker`_, the middleware create
+    one circuit breaker per client_name. The parameters ares forwarded
+    to all the clients. This middleware does not give the possibility to
+    adapt `fail_max` and `timeout_duration` per clients.
     """
 
     breakers: CircuitBreakers
