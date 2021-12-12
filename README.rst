@@ -14,9 +14,16 @@ Aioli
    :alt: Coverage Report
 
 
-Aioli is REST API client designed for microservices.
+Aioli is a library to build a solid microservices architecture based on REST API.
 
-The goal of this http client is to create consumer driven contracts.
+Todays, developers have lots of choices to create microservices,
+plenty of framework are available, but when it comes to consume them,
+there is a lack of clients.
+
+Consuming an API, is not just about doing HTTP requests, it has to be designed
+for failure, monitoring, and service discovery with an elegant abstraction.
+aioli aims to provide a solution for developers to write clean client code,
+and for ops to monitor api calls on the client side.
 
 
 What is Aioli
@@ -40,8 +47,10 @@ a raw connection because it is just a transport.
 
 This is the problem aioli is solving, having a nice abstraction of a service.
 
-Aioli is using `httpx`_ to perform http query, and use `Pydantic`_ to validate
-schema.
+.. note::
+
+   | Aioli is not an HTTP Client or a model validator.
+   | Aioli use `httpx`_ to perform http query, and use `Pydantic`_ to validate models.
 
 .. _`requests`: https://docs.python-requests.org/
 .. _`httpx`: https://www.python-httpx.org/
@@ -67,6 +76,13 @@ contracts to get a better view of which service use what.
 
    TLDR; SDK are fine in public API, by the way, but not in a microservices
    architecture.
+
+
+Building SDK
+------------
+
+By the way, public API provider comes with an SDK, which is a good case,
+and aioli can be used to build SDK for Python / asyncio. 
 
 
 Read More

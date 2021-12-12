@@ -16,4 +16,6 @@ User manual of Aioli.
    errors
    monitor_metrics
    http_middleware
+   circuit_breaker_middleware
+   generic_middleware
    changelog
