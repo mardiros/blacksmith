@@ -15,7 +15,7 @@ name = "blacksmith"
 
 readme = "README.rst"
 repository = "https://github.com/mardiros/blacksmith"
-version = "0.3.0"
+version = "0.4.0"
 
 [tool.poetry.dependencies]
 aiobreaker = {version = "^1.2.0", optional = true}
