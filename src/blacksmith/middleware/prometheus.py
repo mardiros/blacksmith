@@ -39,7 +39,7 @@ class PrometheusMetrics(HTTPMiddleware):
     """
 
     def __init__(self, buckets=None, registry: Registry = None):
-        from prometheus_client import REGISTRY, Gauge, Histogram
+        from prometheus_client import REGISTRY, Counter, Gauge, Histogram
 
         if registry is None:
             registry = REGISTRY
@@ -62,6 +62,20 @@ class PrometheusMetrics(HTTPMiddleware):
             buckets=buckets,
             registry=registry,
             labelnames=["client_name", "method", "path", "status_code"],
+        )
+
+        self.blacksmith_circuit_breaker_error = Counter(
+            "blacksmith_circuit_breaker_error",
+            "Count the circuit breaker exception raised",
+            registry=registry,
+            labelnames=["client_name"],
+        )
+
+        self.blacksmith_circuit_breaker_state = Gauge(
+            "blacksmith_circuit_breaker_state",
+            "State of the circuit breaker. 0 is closed, 1 is half-opened, 2 is opened.",
+            registry=registry,
+            labelnames=["client_name"],
         )
 
     def __call__(self, next: Middleware) -> Middleware:

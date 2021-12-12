@@ -1,15 +1,15 @@
 [tool.poetry]
+authors = ["Guillaume Gauvrit <guillaume@gauvr.it>"]
+description = ""
 name = "notif"
 version = "0.1.0"
-description = ""
-authors = ["Guillaume Gauvrit <guillaume@gauvr.it>"]
 
 [tool.poetry.dependencies]
+blacksmith = {version = "^0.4.0", extras = ["prometheus"]}
 python = "^3.9"
 starlette = "^0.17.0"
 uvicorn = "^0.15.0"
-blacksmith = {version = "^0.4.0", extras = ["circuit-breaker", "prometheus"]}
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core>=1.0.0"]

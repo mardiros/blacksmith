@@ -16,10 +16,11 @@ app = Starlette(debug=True)
 
 blacksmith.scan("notif.resources")
 sd = ConsulDiscovery()
+prom = PrometheusMetrics()
 cli = (
     ClientFactory(sd)
-    .add_middleware(CircuitBreaker(2, timedelta(5.0)))
-    .add_middleware(PrometheusMetrics())
+    .add_middleware(CircuitBreaker(3, timedelta(seconds=5.0), prometheus_metrics=prom))
+    .add_middleware(prom)
 )
 
 
