@@ -1,7 +1,4 @@
 """
-Scanning Resources
-==================
-
 Convenient method to fillout an blacksmith registry.
 
 ::

@@ -1,5 +1,5 @@
-Service Discovery
-=================
+Implementing Service Discovery
+==============================
 
 While consuming a lot of different API, the problem to solve is to 
 simplify the registration of services and its discoverability.
@@ -16,8 +16,8 @@ the :term:`service registry`, and build a :term:`client-side service discovery`
 or a server-side discovery to have a dynamic approach.
 
 
-Static Discovery
-----------------
+Static Discovery Example
+------------------------
 
 ::
 
@@ -44,8 +44,8 @@ In that case we have a registry of public service.
 Client Side Service Discovery
 -----------------------------
 
-Consul
-~~~~~~
+Consul Example
+~~~~~~~~~~~~~~
 
 ConsulDiscovery is consuming the Consul API to fetch host that are
 registered client side, this is a :term:`client-side service discovery`.
@@ -84,8 +84,8 @@ registered client side, this is a :term:`client-side service discovery`.
 Server Side Service Discovery
 -----------------------------
 
-Router
-~~~~~~
+Router Example
+~~~~~~~~~~~~~~
 
 RouterDiscovery is calling every service behind a service gateway, a proxy,
 that is connected to the :term:`service registry` to update is configuration.

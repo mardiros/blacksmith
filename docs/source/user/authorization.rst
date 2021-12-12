@@ -18,6 +18,7 @@ Example
 -------
 
 ::
+
    from blacksmith import ClientFactory, ConsulDiscovery, HTTPBearerAuthorization
 
    sd = ConsulDiscovery()
