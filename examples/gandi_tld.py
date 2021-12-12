@@ -1,7 +1,6 @@
 import asyncio
 import os
 import sys
-from typing import Optional
 
 import aioli
 from aioli import HTTPAuthorization, PathInfoField, Request, Response
