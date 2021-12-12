@@ -1,3 +1,5 @@
+import time
+from datetime import timedelta
 import prometheus_client
 import pytest
 from aiobreaker.state import CircuitBreakerError
@@ -244,3 +246,55 @@ async def test_circuit_breaker_4xx(
     # Other service is still working
     resp = await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
     assert resp.status_code == 200
+
+
+@pytest.mark.asyncio
+async def test_circuit_breaker_prometheus_metrics(
+    echo_middleware, invalid_middleware, boom_middleware, dummy_http_request
+):
+    OPEN = 2.0
+    HALF_OPEN = 1.0
+    CLOSED = 0.0
+    registry = CollectorRegistry()
+    prom = PrometheusMetrics(registry=registry)
+    cbreaker = CircuitBreaker(
+        fail_max=2,
+        timeout_duration=timedelta(milliseconds=100),
+        prometheus_metrics=prom,
+    )
+    echo_next = cbreaker(echo_middleware)
+    invalid_next = cbreaker(invalid_middleware)
+    boom_next = cbreaker(boom_middleware)
+    with pytest.raises(HTTPError):
+        await boom_next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
+    with pytest.raises(CircuitBreakerError):
+        await boom_next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
+
+    registry.get_sample_value("blacksmith_circuit_breaker_error", labels=["dummy"]) == 1
+    registry.get_sample_value(
+        "blacksmith_circuit_breaker_state", labels=["dummy"]
+    ) == OPEN
+
+    with pytest.raises(CircuitBreakerError):
+        await echo_next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
+    registry.get_sample_value("blacksmith_circuit_breaker_error", labels=["dummy"]) == 2
+
+    time.sleep(0.110)
+    await echo_next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
+    registry.get_sample_value("blacksmith_circuit_breaker_error", labels=["dummy"]) == 2
+    registry.get_sample_value(
+        "blacksmith_circuit_breaker_state", labels=["dummy"]
+    ) == HALF_OPEN
+    with pytest.raises(HTTPError):
+        await invalid_next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
+    registry.get_sample_value("blacksmith_circuit_breaker_error", labels=["dummy"]) == 2
+    registry.get_sample_value(
+        "blacksmith_circuit_breaker_state", labels=["dummy"]
+    ) == HALF_OPEN
+
+    time.sleep(0.110)
+    next = cbreaker(echo_middleware)
+    registry.get_sample_value("blacksmith_circuit_breaker_error", labels=["dummy"]) == 2
+    registry.get_sample_value(
+        "blacksmith_circuit_breaker_state", labels=["dummy"]
+    ) == CLOSED

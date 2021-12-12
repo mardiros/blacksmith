@@ -10,18 +10,6 @@ require an extra dependency.
 .. _`aiobreaker`: https://pypi.org/project/aiobreaker/
 
 
-Install it using the following command, using pip.
-
-::
-
-   pip install blacksmith[circuit-breaker]
-
-Or, using poetry:
-
-::
-
-   poetry add blacksmith -E circuit-breaker
-
 ..note::
 
    circuit-breaker is optional, but it is highly recommended to use it.
@@ -59,6 +47,6 @@ automatically be rejected, throwing a `aiobreaker.state.CircuitBreakerError`.
 Full example of the circuit_breaker
 -----------------------------------
 
-You will find an example using prometheus in the examples directory:
+You will find an example using prometheus and the circuit breaker in the examples directory:
 
    https://github.com/mardiros/blacksmith/tree/master/examples/circuit_breaker
