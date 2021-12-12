@@ -110,8 +110,8 @@ Example using starlette
       metric = PrometheusMetrics(registry=my_registry)
 
 
-Full example
-------------
+Full example of prometheus metrics
+----------------------------------
 
 You will find an example using prometheus in the examples directory:
 

@@ -51,8 +51,8 @@ automatically be rejected, throwing a `aiobreaker.state.CircuitBreakerError`.
 
 
 
-Full example
-------------
+Full example of the circuit_breaker
+-----------------------------------
 
 You will find an example using prometheus in the examples directory:
 

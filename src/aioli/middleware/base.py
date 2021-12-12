@@ -29,7 +29,7 @@ class HTTPMiddleware:
         return handle
 
 
-class HTTPAddHeaderdMiddleware(HTTPMiddleware):
+class HTTPAddHeadersMiddleware(HTTPMiddleware):
     """Generic middleware that inject header."""
 
     headers: Dict[str, str]

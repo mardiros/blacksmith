@@ -6,8 +6,8 @@ The example below, that has been copy paste from the test suite show
 how to register a resource.
 
 
-Full example
-------------
+Full example of aioli regitration
+---------------------------------
 
 ::
 

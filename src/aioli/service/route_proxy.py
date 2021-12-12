@@ -21,8 +21,7 @@ from aioli.domain.model import (
     TResponse,
 )
 from aioli.domain.registry import ApiRoutes, HttpResource
-from aioli.middleware.auth import HTTPMiddleware
-from aioli.middleware.base import Middleware
+from aioli.middleware.base import HTTPMiddleware, Middleware
 from aioli.typing import ClientName, HttpMethod, Path, ResourceName, Url
 
 from .base import AbstractTransport
@@ -48,7 +47,6 @@ class RouteProxy:
     endpoint: Url
     routes: ApiRoutes
     transport: AbstractTransport
-    auth: HTTPAuthentication
     timeout: HTTPTimeout
     collection_parser: Type[CollectionParser]
     middlewares: List[HTTPMiddleware]
@@ -60,7 +58,6 @@ class RouteProxy:
         endpoint: Url,
         routes: ApiRoutes,
         transport: AbstractTransport,
-        auth: HTTPAuthentication,
         timeout: HTTPTimeout,
         collection_parser: Type[CollectionParser],
         middlewares: List[HTTPMiddleware],
@@ -70,7 +67,6 @@ class RouteProxy:
         self.endpoint = endpoint
         self.routes = routes
         self.transport = transport
-        self.auth = auth
         self.timeout = timeout
         self.collection_parser = collection_parser
         self.middlewares = middlewares
@@ -129,7 +125,6 @@ class RouteProxy:
         self,
         method: HttpMethod,
         req: HTTPRequest,
-        auth: HTTPAuthentication,
         timeout: HTTPTimeout,
         path: Path,
     ) -> HTTPResponse:
@@ -142,7 +137,6 @@ class RouteProxy:
 
         for middleware in self.middlewares:
             next = middleware(next)
-        next = auth(next)
 
         resp = await next(req, method, self.client_name, path)
         return resp
@@ -151,12 +145,11 @@ class RouteProxy:
         self,
         method: HttpMethod,
         params: Union[Optional[Request], Dict[Any, Any]],
-        auth: HTTPAuthentication,
         timeout: HTTPTimeout,
         path: Path,
     ) -> CollectionIterator:
         req, resp_schema = self._prepare_request(method, params, self.routes.collection)
-        resp = await self._handle_req_with_middlewares(method, req, auth, timeout, path)
+        resp = await self._handle_req_with_middlewares(method, req, timeout, path)
         return self._prepare_collection_response(
             resp, resp_schema, self.routes.collection.collection_parser
         )
@@ -165,12 +158,11 @@ class RouteProxy:
         self,
         method: HttpMethod,
         params: Union[Request, Dict[Any, Any]],
-        auth: HTTPAuthentication,
         timeout: HTTPTimeout,
     ) -> ResponseBox:
         req, resp_schema = self._prepare_request(method, params, self.routes.collection)
         resp = await self._handle_req_with_middlewares(
-            method, req, auth, timeout, self.routes.collection.path
+            method, req, timeout, self.routes.collection.path
         )
         return self._prepare_response(resp, resp_schema, method, self.routes.collection)
 
@@ -178,14 +170,12 @@ class RouteProxy:
         self,
         method: HttpMethod,
         params: Union[Request, Dict[Any, Any]],
-        auth: HTTPAuthentication,
         timeout: HTTPTimeout,
     ) -> ResponseBox:
         req, resp_schema = self._prepare_request(method, params, self.routes.resource)
         resp = await self._handle_req_with_middlewares(
             method,
             req,
-            auth,
             timeout,
             self.routes.resource.path,
         )
@@ -194,23 +184,20 @@ class RouteProxy:
     async def collection_head(
         self,
         params: Union[Request, Dict[Any, Any]],
-        auth: Optional[HTTPAuthentication] = None,
         timeout: Optional[ClientTimeout] = None,
     ) -> ResponseBox:
         return await self._collection_request(
-            "HEAD", params, auth or self.auth, build_timeout(timeout or self.timeout)
+            "HEAD", params, build_timeout(timeout or self.timeout)
         )
 
     async def collection_get(
         self,
         params: Union[Optional[Request], Dict[Any, Any]] = None,
-        auth: Optional[HTTPAuthentication] = None,
         timeout: Optional[ClientTimeout] = None,
     ) -> CollectionIterator:
         return await self._yield_collection_request(
             "GET",
             params,
-            auth or self.auth,
             build_timeout(timeout or self.timeout),
             self.routes.collection.path,
         )
@@ -218,120 +205,108 @@ class RouteProxy:
     async def collection_post(
         self,
         params: Union[Request, Dict[Any, Any]],
-        auth: Optional[HTTPAuthentication] = None,
         timeout: Optional[ClientTimeout] = None,
     ) -> ResponseBox:
         return await self._collection_request(
-            "POST", params, auth or self.auth, build_timeout(timeout or self.timeout)
+            "POST", params, build_timeout(timeout or self.timeout)
         )
 
     async def collection_put(
         self,
         params: Union[Request, Dict[Any, Any]],
-        auth: Optional[HTTPAuthentication] = None,
         timeout: Optional[ClientTimeout] = None,
     ) -> ResponseBox:
         return await self._collection_request(
-            "PUT", params, auth or self.auth, build_timeout(timeout or self.timeout)
+            "PUT", params, build_timeout(timeout or self.timeout)
         )
 
     async def collection_patch(
         self,
         params: Union[Request, Dict[Any, Any]],
-        auth: Optional[HTTPAuthentication] = None,
         timeout: Optional[ClientTimeout] = None,
     ) -> ResponseBox:
         return await self._collection_request(
-            "PATCH", params, auth or self.auth, build_timeout(timeout or self.timeout)
+            "PATCH", params, build_timeout(timeout or self.timeout)
         )
 
     async def collection_delete(
         self,
         params: Union[Request, Dict[Any, Any]],
-        auth: Optional[HTTPAuthentication] = None,
         timeout: Optional[ClientTimeout] = None,
     ) -> ResponseBox:
         return await self._collection_request(
-            "DELETE", params, auth or self.auth, build_timeout(timeout or self.timeout)
+            "DELETE", params, build_timeout(timeout or self.timeout)
         )
 
     async def collection_options(
         self,
         params: Union[Request, Dict[Any, Any]],
-        auth: Optional[HTTPAuthentication] = None,
         timeout: Optional[ClientTimeout] = None,
     ) -> ResponseBox:
         return await self._collection_request(
-            "OPTIONS", params, auth or self.auth, build_timeout(timeout or self.timeout)
+            "OPTIONS", params, build_timeout(timeout or self.timeout)
         )
 
     async def head(
         self,
         params: Union[Request, Dict[Any, Any]],
-        auth: Optional[HTTPAuthentication] = None,
         timeout: Optional[ClientTimeout] = None,
     ) -> ResponseBox:
         return await self._request(
-            "HEAD", params, auth or self.auth, build_timeout(timeout or self.timeout)
+            "HEAD", params, build_timeout(timeout or self.timeout)
         )
 
     async def get(
         self,
         params: Union[Request, Dict[Any, Any]],
-        auth: Optional[HTTPAuthentication] = None,
         timeout: Optional[ClientTimeout] = None,
     ) -> ResponseBox:
         resp = await self._request(
-            "GET", params, auth or self.auth, build_timeout(timeout or self.timeout)
+            "GET", params, build_timeout(timeout or self.timeout)
         )
         return resp
 
     async def post(
         self,
         params: Union[Request, Dict[Any, Any]],
-        auth: Optional[HTTPAuthentication] = None,
         timeout: Optional[ClientTimeout] = None,
     ) -> ResponseBox:
         return await self._request(
-            "POST", params, auth or self.auth, build_timeout(timeout or self.timeout)
+            "POST", params, build_timeout(timeout or self.timeout)
         )
 
     async def put(
         self,
         params: Union[Request, Dict[Any, Any]],
-        auth: Optional[HTTPAuthentication] = None,
         timeout: Optional[ClientTimeout] = None,
     ) -> ResponseBox:
         return await self._request(
-            "PUT", params, auth or self.auth, build_timeout(timeout or self.timeout)
+            "PUT", params, build_timeout(timeout or self.timeout)
         )
 
     async def patch(
         self,
         params: Union[Request, Dict[Any, Any]],
-        auth: Optional[HTTPAuthentication] = None,
         timeout: Optional[ClientTimeout] = None,
     ) -> ResponseBox:
         return await self._request(
-            "PATCH", params, auth or self.auth, build_timeout(timeout or self.timeout)
+            "PATCH", params, build_timeout(timeout or self.timeout)
         )
 
     async def delete(
         self,
         params: Union[Request, Dict[Any, Any]],
-        auth: Optional[HTTPAuthentication] = None,
         timeout: Optional[ClientTimeout] = None,
     ) -> ResponseBox:
         return await self._request(
-            "DELETE", params, auth or self.auth, build_timeout(timeout or self.timeout)
+            "DELETE", params, build_timeout(timeout or self.timeout)
         )
 
     async def options(
         self,
         params: Union[Request, Dict[Any, Any]],
-        auth: Optional[HTTPAuthentication] = None,
         timeout: Optional[ClientTimeout] = None,
     ) -> ResponseBox:
         return await self._request(
-            "OPTIONS", params, auth or self.auth, build_timeout(timeout or self.timeout)
+            "OPTIONS", params, build_timeout(timeout or self.timeout)
         )

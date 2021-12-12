@@ -7,7 +7,7 @@ import pytest
 from aioli.domain.exceptions import HTTPError
 from aioli.domain.model import HTTPRequest, HTTPResponse, HTTPTimeout
 from aioli.middleware.auth import HTTPAuthorization
-from aioli.middleware.base import HTTPAddHeaderdMiddleware
+from aioli.middleware.base import HTTPAddHeadersMiddleware
 from aioli.sd.adapters.consul import ConsulDiscovery, _registry
 from aioli.sd.adapters.router import RouterDiscovery
 from aioli.sd.adapters.static import Endpoints, StaticDiscovery
@@ -121,7 +121,7 @@ def dummy_http_request():
     )
 
 
-class DummyMiddleware(HTTPAddHeaderdMiddleware):
+class DummyMiddleware(HTTPAddHeadersMiddleware):
     def __init__(self):
         super().__init__(headers={"x-dummy": "test"})
 
@@ -137,9 +137,8 @@ def consul_sd():
         return ClientFactory(
             sd=StaticDiscovery({("consul", "v1"): url}),
             registry=_registry,
-            auth=HTTPAuthorization("Bearer", tok),
             transport=FakeConsulTransport(),
-        )
+        ).add_middleware(HTTPAuthorization("Bearer", tok))
 
     return ConsulDiscovery(_client_factory=cli)
 

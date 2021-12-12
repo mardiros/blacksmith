@@ -70,7 +70,7 @@ async def main():
     apikey = os.environ["GANDIV5_API_KEY"]
     sd = StaticDiscovery({("gandi", "v5"): "https://api.gandi.net/v5"})
     auth = HTTPAuthorization("Apikey", apikey)
-    cli = ClientFactory(sd, auth, timeout=(10.0))
+    cli = ClientFactory(sd, timeout=(10.0)).add_middleware(auth)
     api = await cli("gandi")
     if len(sys.argv) == 2:
         domain = sys.argv[1]
@@ -79,7 +79,7 @@ async def main():
     else:
         domains: CollectionIterator[
             ListDomainResponse
-        ] = await api.domain.collection_get(auth=auth)
+        ] = await api.domain.collection_get()
 
         print(domains.meta)
         print()

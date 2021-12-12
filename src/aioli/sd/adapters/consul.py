@@ -55,9 +55,10 @@ _registry.register(
 def aioli_cli(endpoint: Url, consul_token: str) -> ClientFactory:
     sd = StaticDiscovery({("consul", "v1"): endpoint})
     kwargs = {}
+    fact = ClientFactory(sd, registry=_registry, **kwargs)
     if consul_token:
-        kwargs["auth"] = HTTPBearerAuthorization(consul_token)
-    return ClientFactory(sd, registry=_registry, **kwargs)
+        fact.add_middleware(HTTPBearerAuthorization(consul_token))
+    return fact
 
 
 class ConsulDiscovery(AbstractServiceDiscovery):

@@ -1,3 +1,4 @@
+import prometheus_client
 import pytest
 from aiobreaker.state import CircuitBreakerError
 from prometheus_client import REGISTRY, CollectorRegistry
@@ -6,16 +7,38 @@ from aioli import __version__
 from aioli.domain.exceptions import HTTPError
 from aioli.domain.model.http import HTTPRequest, HTTPResponse
 from aioli.middleware.auth import HTTPAuthorization
-from aioli.middleware.base import HTTPAddHeaderdMiddleware
+from aioli.middleware.base import HTTPAddHeadersMiddleware, HTTPMiddleware
 from aioli.middleware.circuit_breaker import CircuitBreaker, exclude_httpx_4xx
 from aioli.middleware.prometheus import PrometheusMetrics
+from aioli.typing import ClientName, HttpMethod, Path
+
+
+def test_authorization_header():
+    auth = HTTPAuthorization("Bearer", "abc")
+    assert auth.headers == {"Authorization": "Bearer abc"}
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("middleware", [HTTPMiddleware])
+async def test_empty_middleware(middleware, dummy_http_request):
+    auth = middleware()
+
+    async def handle_req(
+        req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
+    ) -> HTTPResponse:
+        return HTTPResponse(200, req.headers, json=req)
+
+    next = auth(handle_req)
+    resp = await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
+
+    assert resp.headers == dummy_http_request.headers
 
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
     "middleware",
     [
-        (HTTPAddHeaderdMiddleware, [{"foo": "bar"}], {"X-Req-Id": "42", "foo": "bar"}),
+        (HTTPAddHeadersMiddleware, [{"foo": "bar"}], {"X-Req-Id": "42", "foo": "bar"}),
         (
             HTTPAuthorization,
             ["Bearer", "abc"],
@@ -53,6 +76,8 @@ async def test_prom_default_registry(echo_middleware, dummy_http_request):
         },
     )
     assert val == 1
+    # reset the registry
+    prometheus_client.REGISTRY = CollectorRegistry()
 
 
 @pytest.mark.asyncio

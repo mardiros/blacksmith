@@ -1,4 +1,5 @@
 import pytest
+from prometheus_client import CollectorRegistry
 
 from aioli import PathInfoField, Request, Response
 from aioli.domain.exceptions import (
@@ -18,7 +19,8 @@ from aioli.domain.model import (
     ResponseBox,
 )
 from aioli.domain.registry import ApiRoutes, Registry
-from aioli.middleware.auth import HTTPAuthorization, HTTPUnauthenticated
+from aioli.middleware.auth import HTTPAuthorization
+from aioli.middleware.prometheus import PrometheusMetrics
 from aioli.service.base import AbstractTransport
 from aioli.service.client import Client, ClientFactory
 from aioli.typing import HttpMethod
@@ -91,7 +93,6 @@ async def test_client(static_sd):
         "https://dummies.v1",
         {"dummies": routes},
         transport=FakeTransport(resp),
-        auth=HTTPUnauthenticated(),
         timeout=HTTPTimeout(),
         collection_parser=CollectionParser,
         middlewares=[],
@@ -161,7 +162,6 @@ async def test_client_timeout(static_sd):
         "http://dummies.v1",
         {"dummies": routes},
         transport=FakeTimeoutTransport(),
-        auth=HTTPUnauthenticated(),
         timeout=HTTPTimeout(),
         collection_parser=CollectionParser,
         middlewares=[],
@@ -178,17 +178,21 @@ async def test_client_timeout(static_sd):
 async def test_client_factory(static_sd, dummy_middleware):
     tp = FakeTimeoutTransport()
     auth = HTTPAuthorization("Bearer", "abc")
-    client = ClientFactory(static_sd, auth, tp, registry=dummy_registry)
-    assert client.middlewares == []
+    prom = PrometheusMetrics(registry=CollectorRegistry())
+    client_factory = (
+        ClientFactory(static_sd, tp, registry=dummy_registry)
+        .add_middleware(auth)
+        .add_middleware(prom)
+    )
+    assert client_factory.middlewares == [auth, prom]
 
-    cli = await client("api")
+    cli = await client_factory("api")
 
     assert cli.name == "api"
     assert cli.endpoint == "https://dummy.v1/"
     assert set(cli.resources.keys()) == {"dummies"}
     assert cli.transport == tp
-    assert cli.auth == auth
-    assert cli.middlewares == []
+    assert cli.middlewares == [auth, prom]
 
-    client.add_middleware(dummy_middleware)
-    assert cli.middlewares == [dummy_middleware]
+    client_factory.add_middleware(dummy_middleware)
+    assert cli.middlewares == [auth, prom, dummy_middleware]

@@ -5,7 +5,6 @@ from aioli.domain.model.http import HTTPTimeout
 from aioli.domain.model.params import CollectionParser
 from aioli.domain.registry import Registry, Resources
 from aioli.domain.registry import registry as default_registry
-from aioli.middleware.auth import HTTPUnauthenticated
 from aioli.middleware.base import HTTPMiddleware
 from aioli.sd.base import AbstractServiceDiscovery
 from aioli.service.adapters.httpx import HttpxTransport
@@ -26,7 +25,6 @@ class Client:
     endpoint: Url
     resources: Resources
     transport: AbstractTransport
-    auth: HTTPAuthentication
     timeout: HTTPTimeout
     collection_parser: Type[CollectionParser]
     middlewares: List[HTTPMiddleware]
@@ -37,7 +35,6 @@ class Client:
         endpoint: Url,
         resources: Resources,
         transport: AbstractTransport,
-        auth: HTTPAuthentication,
         timeout: HTTPTimeout,
         collection_parser: Type[CollectionParser],
         middlewares: List[HTTPMiddleware],
@@ -46,7 +43,6 @@ class Client:
         self.endpoint = endpoint
         self.resources = resources
         self.transport = transport
-        self.auth = auth
         self.timeout = timeout
         self.collection_parser = collection_parser
         self.middlewares = middlewares
@@ -64,7 +60,6 @@ class Client:
                 self.endpoint,
                 self.resources[name],
                 self.transport,
-                self.auth,
                 self.timeout,
                 self.collection_parser,
                 self.middlewares,
@@ -96,7 +91,6 @@ class ClientFactory:
     def __init__(
         self,
         sd: AbstractServiceDiscovery,
-        auth: HTTPAuthentication = HTTPUnauthenticated(),
         transport: AbstractTransport = None,
         registry: Registry = default_registry,
         timeout: ClientTimeout = HTTPTimeout(),
@@ -105,7 +99,6 @@ class ClientFactory:
         self.sd = sd
         self.registry = registry
         self.transport = transport or HttpxTransport()
-        self.auth = auth
         self.timeout = build_timeout(timeout)
         self.collection_parser = collection_parser
         self.middlewares = []
@@ -130,7 +123,6 @@ class ClientFactory:
             endpoint,
             resources,
             self.transport,
-            auth or self.auth,
             self.timeout,
             self.collection_parser,
             self.middlewares,

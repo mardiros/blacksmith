@@ -37,10 +37,13 @@ The default connect timeout is at 15 seconds.
    resources = await api.resource.collection_get(timeout=(42.0, 7.0))
 
 
-Exceptions
-----------
+Raised Exceptions
+-----------------
 
 Aioli does not declare schema for errors. It raised exceptions instead.
 The exception raised is `HTTPError` and get the `status_code` of the 
 error. The error is supposed to be a json document, under attribute `json`.
 If it is not the case, the content of the document will be in plain text under the key "detail".
+
+While using the :ref:`Circuit Breaker`, the CircuitBreakerError exception is
+raised when a service is down, and the circuit has been opened.
