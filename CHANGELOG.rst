@@ -1,3 +1,11 @@
+0.4.2 - Released at 2021-12-13
+------------------------------
+* Update httpx version ^0.21.1
+
+0.4.1 - Released at 2021-12-12
+------------------------------
+* Collect circuit breaker metrics in prometheus
+
 0.4.0 - Released at 2021-12-12
 ------------------------------
  * Rename project to blacksmith (prometheus metrics name updated too)
