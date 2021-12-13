@@ -110,7 +110,7 @@ class ClientFactory:
         ..note:: Clients created before the call of this method will also be
             altered. The middleware stack is a reference for all clients.
         """
-        self.middlewares.append(middleware)
+        self.middlewares.insert(0, middleware)
         return self
 
     async def __call__(

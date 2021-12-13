@@ -181,8 +181,8 @@ async def test_client_factory(static_sd, dummy_middleware):
     prom = PrometheusMetrics(registry=CollectorRegistry())
     client_factory = (
         ClientFactory(static_sd, tp, registry=dummy_registry)
-        .add_middleware(auth)
         .add_middleware(prom)
+        .add_middleware(auth)
     )
     assert client_factory.middlewares == [auth, prom]
 
@@ -195,4 +195,4 @@ async def test_client_factory(static_sd, dummy_middleware):
     assert cli.middlewares == [auth, prom]
 
     client_factory.add_middleware(dummy_middleware)
-    assert cli.middlewares == [auth, prom, dummy_middleware]
+    assert cli.middlewares == [dummy_middleware, auth, prom]

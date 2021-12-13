@@ -16,6 +16,7 @@ from .domain.model import (
     Response,
     ResponseBox,
 )
+from .domain.exceptions import HTTPError, TimeoutError 
 from .domain.registry import register
 from .domain.scanner import scan
 from .middleware import (
