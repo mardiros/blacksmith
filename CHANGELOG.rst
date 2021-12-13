@@ -1,3 +1,7 @@
+0.5.0 - Released at 2021-12-13
+------------------------------
+* Reverse order of middleware to be natural and intuitive on insert.
+
 0.4.2 - Released at 2021-12-13
 ------------------------------
 * Update httpx version ^0.21.1
