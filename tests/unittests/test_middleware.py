@@ -4,6 +4,10 @@ from datetime import timedelta
 import prometheus_client
 import pytest
 from aiobreaker.state import CircuitBreakerError
+from aiozipkin.helpers import Endpoint
+from aiozipkin.sampler import Sampler
+from aiozipkin.tracer import Tracer
+from aiozipkin.transport import TransportABC
 from prometheus_client import REGISTRY, CollectorRegistry
 
 from blacksmith import __version__
@@ -13,6 +17,7 @@ from blacksmith.middleware.auth import HTTPAuthorization
 from blacksmith.middleware.base import HTTPAddHeadersMiddleware, HTTPMiddleware
 from blacksmith.middleware.circuit_breaker import CircuitBreaker, exclude_httpx_4xx
 from blacksmith.middleware.prometheus import PrometheusMetrics
+from blacksmith.middleware.zipkin import ZipkinMiddleware
 from blacksmith.typing import ClientName, HttpMethod, Path
 
 
@@ -299,3 +304,47 @@ async def test_circuit_breaker_prometheus_metrics(
     registry.get_sample_value(
         "blacksmith_circuit_breaker_state", labels=["dummy"]
     ) == CLOSED
+
+
+class Transport(TransportABC):
+    def __init__(self):
+        self.records = []
+
+    def send(self, record) -> None:
+        """Sends data to zipkin collector."""
+        self.records.append(record.asdict())
+
+    async def close(self) -> None:
+        """Performs additional cleanup actions if required."""
+
+
+@pytest.mark.asyncio
+async def test_zipkin_middleware(echo_middleware, dummy_http_request):
+    transport = Transport()
+    tracer = Tracer(transport, Sampler(), Endpoint("srv", None, None, None))
+    span = tracer.new_trace()
+    middleware = ZipkinMiddleware(lambda: span, lambda: tracer)
+    next = middleware(echo_middleware)
+    await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
+
+    assert transport.records == [
+        {
+            "annotations": [],
+            "debug": False,
+            "duration": transport.records[0]["duration"],
+            "id": transport.records[0]["id"],
+            "localEndpoint": {"serviceName": "srv"},
+            "name": "GET /dummies/42",
+            "parentId": span.context.span_id,
+            "remoteEndpoint": None,
+            "shared": False,
+            "tags": {
+                "blacksmith.client_name": "dummy",
+                "http.path": "/dummies/{name}",
+                "http.querystring": "{'foo': 'bar'}",
+                "kind": "CLIENT",
+            },
+            "timestamp": transport.records[0]["timestamp"],
+            "traceId": transport.records[0]["traceId"],
+        },
+    ]
