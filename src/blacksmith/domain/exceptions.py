@@ -10,8 +10,6 @@ from blacksmith.typing import (
     Version,
 )
 
-from .model import HTTPRequest, HTTPResponse
-
 
 class ConfigurationError(Exception):
     """Raised if there is a conflict for client and service."""
@@ -90,6 +88,8 @@ class WrongRequestTypeException(TypeError):
 
 class HTTPError(Exception):
     """Represent the http error."""
+
+    from .model.http import HTTPRequest, HTTPResponse
 
     def __init__(self, message: str, request: HTTPRequest, response: HTTPResponse):
         super().__init__(message)

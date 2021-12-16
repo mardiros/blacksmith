@@ -1,5 +1,6 @@
 import time
 from datetime import timedelta
+
 import prometheus_client
 import pytest
 from aiobreaker.state import CircuitBreakerError
