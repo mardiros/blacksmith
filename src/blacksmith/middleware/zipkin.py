@@ -2,11 +2,14 @@
 
 from typing import TYPE_CHECKING, Any, Callable
 
+from aiozipkin import span
+
 from blacksmith.domain.exceptions import HTTPError
 from blacksmith.domain.model.http import HTTPRequest, HTTPResponse
 from blacksmith.typing import ClientName, HttpMethod, Path
 
 from .base import HTTPMiddleware, Middleware
+
 
 if TYPE_CHECKING:
     try:
@@ -16,8 +19,8 @@ if TYPE_CHECKING:
     GetRootSpan = Callable[[], "SpanAbc"]
     GetTracer = Callable[[], "Tracer"]
 else:
-    GetRootSpan = Any
-    GetTracer = Any
+    GetRootSpan = Callable[[], Any]
+    GetTracer = Callable[[], Any]
 
 
 class ZipkinMiddleware(HTTPMiddleware):
@@ -36,10 +39,8 @@ class ZipkinMiddleware(HTTPMiddleware):
             root_span = self.get_root_span()
             tracer = self.get_tracer()
             with tracer.new_child(root_span.context) as child_span:
-                # from typing import cast
-                # child_span = cast(SpanAbc, child_span)
                 headers = child_span.context.make_headers()
-                child_span.tag("kind", "CLIENT")
+                child_span.kind("CLIENT")
                 req.headers.update(headers)
                 try:
                     child_span.name(f"{method} {path.format(**req.path)}")
@@ -52,6 +53,9 @@ class ZipkinMiddleware(HTTPMiddleware):
                 if req.querystring:
                     child_span.tag("http.querystring", repr(req.querystring))
                 resp = await next(req, method, client_name, path)
+                child_span.tag("http.status_code", str(resp.status_code))
+                if resp.status_code >= 400:
+                    child_span.tag("error", "true")
                 return resp
 
         return handle
