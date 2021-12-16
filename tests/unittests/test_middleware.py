@@ -338,11 +338,12 @@ async def test_zipkin_middleware(echo_middleware, dummy_http_request):
             "parentId": span.context.span_id,
             "remoteEndpoint": None,
             "shared": False,
+            "kind": "CLIENT",
             "tags": {
                 "blacksmith.client_name": "dummy",
                 "http.path": "/dummies/{name}",
                 "http.querystring": "{'foo': 'bar'}",
-                "kind": "CLIENT",
+                "http.status_code": "200",
             },
             "timestamp": transport.records[0]["timestamp"],
             "traceId": transport.records[0]["traceId"],
