@@ -6,6 +6,7 @@ except pkg_resources.DistributionNotFound:
     # read the doc does not support poetry
     pass
 
+from .domain.exceptions import HTTPError, TimeoutError
 from .domain.model import (
     CollectionIterator,
     HeaderField,
@@ -16,7 +17,6 @@ from .domain.model import (
     Response,
     ResponseBox,
 )
-from .domain.exceptions import HTTPError, TimeoutError 
 from .domain.registry import register
 from .domain.scanner import scan
 from .middleware import (

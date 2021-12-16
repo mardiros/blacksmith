@@ -7,7 +7,12 @@ from blacksmith.domain.exceptions import (
     UnregisteredRouteException,
     WrongRequestTypeException,
 )
-from blacksmith.domain.model import CollectionParser, HTTPRequest, HTTPResponse, HTTPTimeout
+from blacksmith.domain.model import (
+    CollectionParser,
+    HTTPRequest,
+    HTTPResponse,
+    HTTPTimeout,
+)
 from blacksmith.domain.registry import ApiRoutes
 from blacksmith.middleware.auth import HTTPAuthorization
 from blacksmith.middleware.base import HTTPAddHeadersMiddleware

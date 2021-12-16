@@ -2,7 +2,13 @@
 
 from datetime import timedelta
 from functools import partial
-from typing import List, TYPE_CHECKING, Any, Dict, Iterable, Optional, cast
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, cast
+
+import aiobreaker
+from aiobreaker import CircuitBreaker as AioBreaker
+from aiobreaker import CircuitBreakerListener
+from aiobreaker.state import CircuitBreakerBaseState, CircuitBreakerState
+from aiobreaker.storage.base import CircuitBreakerStorage
 
 from blacksmith.domain.exceptions import HTTPError
 from blacksmith.domain.model.http import HTTPRequest, HTTPResponse
@@ -10,12 +16,6 @@ from blacksmith.typing import ClientName, HttpMethod, Path
 
 from .base import HTTPMiddleware, Middleware
 from .prometheus import PrometheusMetrics
-
-import aiobreaker
-from aiobreaker import CircuitBreakerListener
-from aiobreaker import CircuitBreaker as AioBreaker
-from aiobreaker.state import CircuitBreakerBaseState, CircuitBreakerState
-from aiobreaker.storage.base import CircuitBreakerStorage
 
 Listeners = Optional[Iterable["CircuitBreakerListener"]]
 StateStorage = Optional["CircuitBreakerStorage"]

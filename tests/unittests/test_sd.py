@@ -1,7 +1,12 @@
 import pytest
 
 from blacksmith.domain.exceptions import UnregisteredServiceException
-from blacksmith.sd.adapters.consul import ConsulDiscovery, Service, ServiceRequest, blacksmith_cli
+from blacksmith.sd.adapters.consul import (
+    ConsulDiscovery,
+    Service,
+    ServiceRequest,
+    blacksmith_cli,
+)
 from blacksmith.sd.adapters.router import RouterDiscovery
 from blacksmith.sd.adapters.static import StaticDiscovery
 
