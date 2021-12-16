@@ -4,18 +4,24 @@ from textwrap import dedent
 from typing import Dict, cast
 
 import aiozipkin
+import starlette_zipkin
 from aiozipkin.helpers import make_headers
 from notif.resources.user import User
-from notif.zk_middleware import Trace
 from starlette.applications import Starlette
 from starlette.responses import JSONResponse
 
-import blacksmith
 from blacksmith import ClientFactory, ConsulDiscovery
+from blacksmith.middleware.zipkin import ZipkinMiddleware
 
 app = Starlette(debug=True)
 
 smtp_sd = ConsulDiscovery()
+
+sd = ConsulDiscovery()
+cli = ClientFactory(sd)
+cli.add_middleware(
+    ZipkinMiddleware(starlette_zipkin.get_root_span, starlette_zipkin.get_tracer)
+)
 
 
 async def send_email(user: User, message: str):
@@ -45,19 +51,11 @@ async def get_notif(request):
 
 @app.route("/v1/notification", methods=["POST"])
 async def post_notif(request):
-    cli = cast(ClientFactory, request.scope.get("blacksmith_client"))
     body = await request.json()
 
-    root_trace: Trace = request.scope["trace"]
-
-    async with root_trace.new_child("resolve_api_user") as trace:
-        api_user = await cli("api_user")
-
-    async with trace.new_child("get_user"):
-        user: User = (await api_user.users.get({"username": body["username"]})).response
-
-    async with root_trace.new_child("send_email"):
-        await send_email(user, body["message"])
+    api_user = await cli("api_user")
+    user: User = (await api_user.users.get({"username": body["username"]})).response
+    await send_email(user, body["message"])
 
     return JSONResponse(
         {"detail": f"{user.email} accepted"},

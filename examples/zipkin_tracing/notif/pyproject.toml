@@ -6,11 +6,11 @@ authors = ["Guillaume Gauvrit <guillaume@gauvr.it>"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
-starlette = "^0.17.0"
+starlette = "^0.16.0"
 uvicorn = "^0.15.0"
-blacksmith = "0.2.1"
-aiohttp = "^3.8.1"
-aiozipkin = "^1.1.1"
+blacksmith = "0.5.0"
+"starlette-zipkin" = {git = "https://github.com/mardiros/starlette-zipkin.git"}
+
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
