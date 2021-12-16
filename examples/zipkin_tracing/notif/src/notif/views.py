@@ -1,17 +1,14 @@
 import email as emaillib
 import smtplib
 from textwrap import dedent
-from typing import Dict, cast
 
-import aiozipkin
 import starlette_zipkin
-from aiozipkin.helpers import make_headers
-from notif.resources.user import User
+from blacksmith import ClientFactory, ConsulDiscovery
+from blacksmith.middleware.zipkin import ZipkinMiddleware
 from starlette.applications import Starlette
 from starlette.responses import JSONResponse
 
-from blacksmith import ClientFactory, ConsulDiscovery
-from blacksmith.middleware.zipkin import ZipkinMiddleware
+from notif.resources.user import User
 
 app = Starlette(debug=True)
 

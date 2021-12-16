@@ -14,6 +14,7 @@ User manual of Blacksmith.
    service_discovery
    authorization
    monitor_metrics
+   zipkin_middleware
    http_middleware
    circuit_breaker_middleware
    generic_middleware

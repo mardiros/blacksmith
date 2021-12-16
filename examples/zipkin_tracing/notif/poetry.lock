@@ -44,7 +44,7 @@ frozenlist = ">=1.1.0"
 
 [[package]]
 name = "aiozipkin"
-version = "1.0.0"
+version = "1.1.1"
 description = "Distributed tracing instrumentation for asyncio application with zipkin"
 category = "main"
 optional = false
@@ -269,7 +269,7 @@ python-versions = ">=3.5"
 
 [[package]]
 name = "starlette"
-version = "0.16.0"
+version = "0.17.1"
 description = "The little ASGI library that shines."
 category = "main"
 optional = false
@@ -279,26 +279,19 @@ python-versions = ">=3.6"
 anyio = ">=3.0.0,<4"
 
 [package.extras]
-full = ["itsdangerous", "jinja2", "python-multipart", "pyyaml", "requests", "graphene"]
+full = ["itsdangerous", "jinja2", "python-multipart", "pyyaml", "requests"]
 
 [[package]]
 name = "starlette-zipkin"
-version = "0.1.2"
+version = "0.1.4"
 description = "Zipkin integration for ASGI frameworks."
 category = "main"
 optional = false
 python-versions = "*"
-develop = false
 
 [package.dependencies]
-aiozipkin = "1.0.0"
-starlette = "0.16.0"
-
-[package.source]
-type = "git"
-url = "https://github.com/mardiros/starlette-zipkin.git"
-reference = "master"
-resolved_reference = "343c61ce7dead71fd70e8bf5e9c62da1b129f892"
+aiozipkin = "<2"
+starlette = ">0.14,<18"
 
 [[package]]
 name = "typing-extensions"
@@ -339,7 +332,7 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "cd23b4db591fecd560c4ae2b95ed3241753b1240b769911c6613ab75f298f05e"
+content-hash = "355895816ef3c1da89ba592af5cffbc7138f4f9a8454c821ad0174b8b86ace7e"
 
 [metadata.files]
 aiobreaker = [
@@ -425,8 +418,8 @@ aiosignal = [
     {file = "aiosignal-1.2.0.tar.gz", hash = "sha256:78ed67db6c7b7ced4f98e495e572106d5c432a93e1ddd1bf475e1dc05f5b7df2"},
 ]
 aiozipkin = [
-    {file = "aiozipkin-1.0.0-py3-none-any.whl", hash = "sha256:06eb23a1b31d8a332ea660de2771c1a77195894229e47c41c12ce7f731831598"},
-    {file = "aiozipkin-1.0.0.tar.gz", hash = "sha256:59714f1214043368a9c00df8646a64fc369355046690a60e42addc3621d01af2"},
+    {file = "aiozipkin-1.1.1-py3-none-any.whl", hash = "sha256:6f891d35dfe2e517d4ca7155701a38766c56cdb19459e6c637b78ba2efb7fbc7"},
+    {file = "aiozipkin-1.1.1.tar.gz", hash = "sha256:9b82619d9ef309e72627a81ab3fda0c9b83e530844cf59f2e9a011e9a2a1293f"},
 ]
 anyio = [
     {file = "anyio-3.4.0-py3-none-any.whl", hash = "sha256:2855a9423524abcdd652d942f8932fda1735210f77a6b392eafd9ff34d3fe020"},
@@ -661,10 +654,13 @@ sniffio = [
     {file = "sniffio-1.2.0.tar.gz", hash = "sha256:c4666eecec1d3f50960c6bdf61ab7bc350648da6c126e3cf6898d8cd4ddcd3de"},
 ]
 starlette = [
-    {file = "starlette-0.16.0-py3-none-any.whl", hash = "sha256:38eb24bf705a2c317e15868e384c1b8a12ca396e5a3c3a003db7e667c43f939f"},
-    {file = "starlette-0.16.0.tar.gz", hash = "sha256:e1904b5d0007aee24bdd3c43994be9b3b729f4f58e740200de1d623f8c3a8870"},
+    {file = "starlette-0.17.1-py3-none-any.whl", hash = "sha256:26a18cbda5e6b651c964c12c88b36d9898481cd428ed6e063f5f29c418f73050"},
+    {file = "starlette-0.17.1.tar.gz", hash = "sha256:57eab3cc975a28af62f6faec94d355a410634940f10b30d68d31cb5ec1b44ae8"},
 ]
-starlette-zipkin = []
+starlette-zipkin = [
+    {file = "starlette-zipkin-0.1.4.tar.gz", hash = "sha256:8f4c34ee5ba5ffe711d42749ef09d681151a5c0013a6478339f103aef4580d6e"},
+    {file = "starlette_zipkin-0.1.4-py3-none-any.whl", hash = "sha256:c7b8b3c5f59e83053860a2a1a475bf195c581486e3a74ab8391964854b4bfb05"},
+]
 typing-extensions = [
     {file = "typing_extensions-4.0.1-py3-none-any.whl", hash = "sha256:7f001e5ac290a0c0401508864c7ec868be4e701886d5b573a9528ed3973d9d3b"},
     {file = "typing_extensions-4.0.1.tar.gz", hash = "sha256:4ca091dea149f945ec56afb48dae714f21e8692ef22a395223bcd328961b6a0e"},
