@@ -3,7 +3,6 @@ from typing import Any, Dict, List, Optional, Tuple, Type, Union, cast
 from pydantic.typing import NoneType
 
 from blacksmith.domain.exceptions import (
-    HTTPError,
     NoContractException,
     UnregisteredRouteException,
     WrongRequestTypeException,
