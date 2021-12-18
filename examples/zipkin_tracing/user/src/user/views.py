@@ -1,11 +1,21 @@
-from typing import cast
+import json
 
-import uvicorn
-from asgiref.typing import ASGI3Application
 from starlette.applications import Starlette
 from starlette.responses import JSONResponse
+from starlette_zipkin import B3Headers, ZipkinConfig, ZipkinMiddleware
 
 app = Starlette(debug=True)
+config = ZipkinConfig(
+    host="zipkin",
+    port=9411,
+    service_name="user-v1",
+    sample_rate=1.0,
+    inject_response_headers=True,
+    force_new_trace=False,
+    json_encoder=json.dumps,
+    header_formatter=B3Headers,
+)
+app.add_middleware(ZipkinMiddleware, config=config)
 
 USERS = {
     "naruto": {

@@ -70,7 +70,6 @@ services:
     volumes:
       - "./user:/srv/user"
       - "../../src/blacksmith:/home/user/.cache/pypoetry/virtualenvs/user-Ke4Ke9U3-py3.10/lib/python3.10/site-packages/blacksmith"
-      - "../../../../../.cache/pypoetry/virtualenvs/blacksmith-E8d2VA8r-py3.9/lib/python3.9/site-packages/aiozipkin:/home/user/.cache/pypoetry/virtualenvs/user-Ke4Ke9U3-py3.10/lib/python3.10/site-packages/aiozipkin"
 
   api_notif:
     build: ./notif
@@ -86,7 +85,7 @@ services:
     volumes:
       - "./notif:/srv/notif"
       - "../../src/blacksmith:/home/notif/.cache/pypoetry/virtualenvs/notif-E5XGZiq1-py3.10/lib/python3.10/site-packages/blacksmith"
-      - "../../../../../.cache/pypoetry/virtualenvs/blacksmith-E8d2VA8r-py3.9/lib/python3.9/site-packages/aiozipkin:/home/notif/.cache/pypoetry/virtualenvs/notif-E5XGZiq1-py3.10/lib/python3.10/site-packages/aiozipkin"
+      - "/home/guillaume/workspace/git/starlette-zipkin/starlette_zipkin:/home/notif/.cache/pypoetry/virtualenvs/notif-E5XGZiq1-py3.10/lib/python3.10/site-packages/starlette_zipkin"
 
   mailhog:
     image: mailhog/mailhog
