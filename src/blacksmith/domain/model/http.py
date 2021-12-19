@@ -36,7 +36,9 @@ class HTTPRequest:
     url_pattern: Url
     # the property match with the "location" of feaut
     path: Dict[str, simpletypes] = field(default_factory=dict)
-    querystring: Dict[str, simpletypes] = field(default_factory=dict)
+    querystring: Dict[str, Union[simpletypes, List[simpletypes]]] = field(
+        default_factory=dict
+    )
     headers: Dict[str, str] = field(default_factory=dict)
     body: str = ""
 
