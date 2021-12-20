@@ -1,6 +1,6 @@
-from datetime import timedelta
 import time
 from collections import Counter, defaultdict
+from datetime import timedelta
 from typing import Dict, List, Optional, Tuple
 
 import pytest
@@ -80,7 +80,9 @@ def cachable_response():
     async def next(
         req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
     ) -> HTTPResponse:
-        return HTTPResponse(200, {"cache-control": "max-age=42, public"}, json="Cache Me")
+        return HTTPResponse(
+            200, {"cache-control": "max-age=42, public"}, json="Cache Me"
+        )
 
     return next
 
@@ -136,6 +138,10 @@ def dummy_http_request():
 class DummyMiddleware(HTTPAddHeadersMiddleware):
     def __init__(self):
         super().__init__(headers={"x-dummy": "test"})
+        self.initialized = 0
+
+    async def initialize(self):
+        self.initialized += 1
 
 
 @pytest.fixture
@@ -162,9 +168,13 @@ def router_sd():
 
 class FakeHttpMiddlewareCache(AbstractCache):
     """Abstract Redis Client."""
+
     def __init__(self) -> None:
         super().__init__()
-        self.val: Dict[str, Tuple[int, str]]  = {}
+        self.val: Dict[str, Tuple[int, str]] = {}
+
+    async def initialize(self):
+        pass
 
     async def get(self, key: str) -> Optional[str]:
         """Get a value from redis"""
@@ -176,7 +186,6 @@ class FakeHttpMiddlewareCache(AbstractCache):
     async def set(self, key: str, val: str, ex: timedelta):
         """Get a value from redis"""
         self.val[key] = (ex.seconds, val)
-
 
 
 @pytest.fixture

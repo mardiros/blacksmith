@@ -17,6 +17,10 @@ class AbstractCache(abc.ABC):
     """Abstract Redis Client."""
 
     @abc.abstractmethod
+    async def initialize(self):
+        """Initialize the cache"""
+
+    @abc.abstractmethod
     async def get(self, key: str) -> str:
         """Get a value from redis"""
 
