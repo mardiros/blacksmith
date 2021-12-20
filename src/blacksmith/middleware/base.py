@@ -20,6 +20,9 @@ class HTTPMiddleware:
     def __init__(self) -> None:
         pass
 
+    async def initialize(self):
+        pass
+
     def __call__(self, next: Middleware) -> Middleware:
         async def handle(
             req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path

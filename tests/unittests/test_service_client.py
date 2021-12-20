@@ -196,3 +196,18 @@ async def test_client_factory(static_sd, dummy_middleware):
 
     client_factory.add_middleware(dummy_middleware)
     assert cli.middlewares == [dummy_middleware, auth, prom]
+
+
+@pytest.mark.asyncio
+async def test_client_factory_initialize_middlewares(
+    echo_transport, static_sd, dummy_middleware
+):
+    client_factory = ClientFactory(
+        static_sd, echo_transport, registry=dummy_registry
+    ).add_middleware(dummy_middleware)
+    assert dummy_middleware.initialized == 0
+    cli = await client_factory("api")
+    await cli.dummies.get({"name": "foo"})
+    assert dummy_middleware.initialized == 1
+    cli = await client_factory("api")
+    assert dummy_middleware.initialized == 1
