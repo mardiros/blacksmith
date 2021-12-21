@@ -1,5 +1,5 @@
-Example using Consul
-====================
+Cache response in redis
+=======================
 
 This example is a dummy microservice stack that send email to a user.
 
@@ -10,6 +10,9 @@ to send.
 
 The "notification" service retrieve the "email" of the "user" and
 send the message to the email address.
+
+The "user" service is slow and respond with a 'Cache-Control' header, and the notif service,
+cache the reponse of the user using this amount of time.
 
 
 Requirements
