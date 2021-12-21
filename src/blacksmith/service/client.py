@@ -102,6 +102,7 @@ class ClientFactory:
         self.timeout = build_timeout(timeout)
         self.collection_parser = collection_parser
         self.middlewares = []
+        self._initialized = False
 
     def add_middleware(self, middleware: HTTPMiddleware) -> "ClientFactory":
         """
@@ -113,9 +114,16 @@ class ClientFactory:
         self.middlewares.insert(0, middleware)
         return self
 
+    async def initialize(self):
+        for middleware in self.middlewares:
+            await middleware.initialize()
+
     async def __call__(
         self, client_name: ClientName, auth: Optional[HTTPAuthentication] = None
     ):
+        if not self._initialized:
+            self._initialized = True
+            await self.initialize()
         srv, resources = self.registry.get_service(client_name)
         endpoint = await self.sd.get_endpoint(srv[0], srv[1])
         return Client(

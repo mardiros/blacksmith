@@ -1,6 +1,7 @@
 import time
 from collections import Counter, defaultdict
-from typing import Dict, List, Tuple
+from datetime import timedelta
+from typing import Dict, List, Optional, Tuple
 
 import pytest
 
@@ -8,6 +9,7 @@ from blacksmith.domain.exceptions import HTTPError
 from blacksmith.domain.model import HTTPRequest, HTTPResponse, HTTPTimeout
 from blacksmith.middleware.auth import HTTPAuthorization
 from blacksmith.middleware.base import HTTPAddHeadersMiddleware
+from blacksmith.middleware.http_caching import AbstractCache
 from blacksmith.sd.adapters.consul import ConsulDiscovery, _registry
 from blacksmith.sd.adapters.router import RouterDiscovery
 from blacksmith.sd.adapters.static import Endpoints, StaticDiscovery
@@ -74,6 +76,18 @@ def echo_middleware():
 
 
 @pytest.fixture
+def cachable_response():
+    async def next(
+        req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
+    ) -> HTTPResponse:
+        return HTTPResponse(
+            200, {"cache-control": "max-age=42, public"}, json="Cache Me"
+        )
+
+    return next
+
+
+@pytest.fixture
 def slow_middleware():
     async def next(
         req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
@@ -124,6 +138,10 @@ def dummy_http_request():
 class DummyMiddleware(HTTPAddHeadersMiddleware):
     def __init__(self):
         super().__init__(headers={"x-dummy": "test"})
+        self.initialized = 0
+
+    async def initialize(self):
+        self.initialized += 1
 
 
 @pytest.fixture
@@ -146,3 +164,30 @@ def consul_sd():
 @pytest.fixture
 def router_sd():
     return RouterDiscovery()
+
+
+class FakeHttpMiddlewareCache(AbstractCache):
+    """Abstract Redis Client."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.val: Dict[str, Tuple[int, str]] = {}
+
+    async def initialize(self):
+        pass
+
+    async def get(self, key: str) -> Optional[str]:
+        """Get a value from redis"""
+        try:
+            return self.val[key][1]
+        except KeyError:
+            return None
+
+    async def set(self, key: str, val: str, ex: timedelta):
+        """Get a value from redis"""
+        self.val[key] = (ex.seconds, val)
+
+
+@pytest.fixture
+def fake_http_middleware_cache():
+    return FakeHttpMiddlewareCache()
