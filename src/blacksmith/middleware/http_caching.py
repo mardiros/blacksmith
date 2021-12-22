@@ -3,11 +3,10 @@ import abc
 import json
 from dataclasses import asdict
 from datetime import timedelta
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple
+from typing import List, Optional, Tuple
 from urllib.parse import urlencode
 
 from blacksmith.domain.model.http import HTTPRequest, HTTPResponse
-from blacksmith.domain.model.params import Request
 from blacksmith.typing import ClientName, HttpMethod, Path
 
 from .base import HTTPMiddleware, Middleware
