@@ -50,7 +50,8 @@ class UnregisteredRouteException(RuntimeError):
         self, route: HttpMethod, resource: ResourceName, client: ClientName
     ) -> None:
         super().__init__(
-            f"Unregistered route '{route}' in resource '{resource}' in client '{client}'"
+            f"Unregistered route '{route}' in resource '{resource}' in "
+            f"client '{client}'"
         )
 
 
@@ -61,7 +62,8 @@ class NoContractException(RuntimeError):
         self, method: HttpMethod, resource: ResourceName, client: ClientName
     ) -> None:
         super().__init__(
-            f"Unregistered route '{method}' in resource '{resource}' in client '{client}'"
+            f"Unregistered route '{method}' in resource '{resource}' in "
+            f"client '{client}'"
         )
 
 
@@ -72,7 +74,8 @@ class NoResponseSchemaException(RuntimeError):
         self, method: HttpMethod, path: Path, resource: ResourceName, client: ClientName
     ) -> None:
         super().__init__(
-            f"No response schema in route '{method} {path}' in resource'{resource}' in client '{client}'"
+            f"No response schema in route '{method} {path}' in resource'{resource}' "
+            f"in client '{client}'"
         )
 
 

@@ -2,7 +2,6 @@ import asyncio
 import datetime
 import os
 import sys
-from typing import Iterable, cast
 
 from pydantic.fields import Field
 from pydantic.main import BaseModel

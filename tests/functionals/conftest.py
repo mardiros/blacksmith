@@ -10,9 +10,6 @@ from pydantic import BaseModel
 from pydantic.fields import Field
 from starlette.responses import Response
 
-from blacksmith.sd.adapters import StaticDiscovery
-from blacksmith.sd.adapters.static import Endpoints
-
 app = FastAPI()
 
 

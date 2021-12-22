@@ -24,11 +24,11 @@ class PrometheusMetrics(HTTPMiddleware):
     """
     Collect the api calls made in a prometheus registry.
 
-    It expose a `blacksmith_info` Gauge to get the blacksmith version, as a label, and a
-    `blacksmith_request_latency_seconds_count` Counter to get the number of http requests
-    made.
-    The counter `blacksmith_request_latency_seconds_count` as client_name, method, path and
-    status_code labels.
+    It expose a `blacksmith_info` Gauge to get the blacksmith version, as a label,
+    and a `blacksmith_request_latency_seconds_count` Counter to get the number of
+    http requests made.
+    The counter `blacksmith_request_latency_seconds_count` as client_name, method,
+    path and status_code labels.
 
     .. note::
 

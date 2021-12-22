@@ -1,7 +1,7 @@
 """Trace with zipkin of jaegger."""
 
 import abc
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from blacksmith.domain.model.http import HTTPRequest, HTTPResponse
 from blacksmith.typing import ClientName, HttpMethod, Path
@@ -21,12 +21,18 @@ class AbtractTraceContext(abc.ABC):
         """Build headers for the sub requests."""
 
     @abc.abstractmethod
-    def __call__(self, name: str, type: str) -> "AbtractTraceContext":
+    def __init__(self, name: str, kind: str = "SERVER") -> None:
         """Create a trace span for the current context."""
 
     @abc.abstractmethod
-    def tag(self, tag_name: str, tag_val: str) -> None:
+    def tag(self, key: str, value: str) -> "AbtractTraceContext":
         """Tag the span"""
+
+    @abc.abstractmethod
+    def annotate(
+        self, value: Optional[str], ts: Optional[float] = None
+    ) -> "AbtractTraceContext":
+        """Annotate the span"""
 
     @abc.abstractmethod
     def __enter__(self) -> "AbtractTraceContext":
@@ -34,7 +40,9 @@ class AbtractTraceContext(abc.ABC):
 
     @abc.abstractmethod
     def __exit__(self, *exc: Any):
-        """Ends the created trace span of the context, it parents become the active span."""
+        """
+        Ends the created trace span of the context, it parents become the active span.
+        """
 
 
 class ZipkinMiddleware(HTTPMiddleware):

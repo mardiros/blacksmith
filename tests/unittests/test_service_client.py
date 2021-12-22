@@ -136,22 +136,13 @@ async def test_client(static_sd):
         await client.dummies.get(PostParam(name="barbie", age=42))
     assert (
         str(ctx.value)
-        == "Invalid type 'tests.unittests.test_service_client.PostParam' for route 'GET' "
-        "in resource 'dummies' in client 'api'"
+        == "Invalid type 'tests.unittests.test_service_client.PostParam' "
+        "for route 'GET' in resource 'dummies' in client 'api'"
     )
 
 
 @pytest.mark.asyncio
 async def test_client_timeout(static_sd):
-
-    resp = HTTPResponse(
-        200,
-        {},
-        {
-            "name": "timeout",
-            "age": 42,
-        },
-    )
 
     routes = ApiRoutes(
         "/dummies/{name}", {"GET": (GetParam, GetResponse)}, None, None, None

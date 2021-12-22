@@ -166,7 +166,8 @@ class ResponseBox(Generic[TResponse]):
         """
         Parse the response using the schema.
 
-        :raises NoResponseSchemaException: if the response_schema has not been set in the contract.
+        :raises NoResponseSchemaException: if the response_schema has not been
+            set in the contract.
         """
         if self.response_schema is None:
             raise NoResponseSchemaException(
