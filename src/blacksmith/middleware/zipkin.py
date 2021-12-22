@@ -1,11 +1,8 @@
-"""Collect metrics based on prometheus."""
+"""Trace with zipkin of jaegger."""
 
 import abc
-from typing import TYPE_CHECKING, Any, Callable, Dict, Type
+from typing import Any, Dict
 
-from aiozipkin import span
-
-from blacksmith.domain.exceptions import HTTPError
 from blacksmith.domain.model.http import HTTPRequest, HTTPResponse
 from blacksmith.typing import ClientName, HttpMethod, Path
 
@@ -13,30 +10,38 @@ from .base import HTTPMiddleware, Middleware
 
 
 class AbtractTraceContext(abc.ABC):
+    """
+    Interface of the trace context for the middleware.
+
+    See examples with starlette-zipking for an implementation.
+    """
+
     @abc.abstractclassmethod
     def make_headers(cls) -> Dict[str, str]:
         """Build headers for the sub requests."""
 
     @abc.abstractmethod
     def __call__(self, name: str, type: str) -> "AbtractTraceContext":
-        pass
+        """Create a trace span for the current context."""
 
     @abc.abstractmethod
-    def tag(self, tab_name: str, tag_val: str) -> None:
-        pass
+    def tag(self, tag_name: str, tag_val: str) -> None:
+        """Tag the span"""
 
     @abc.abstractmethod
     def __enter__(self) -> "AbtractTraceContext":
-        pass
+        """Make the created trace span of the current context the active span."""
 
     @abc.abstractmethod
     def __exit__(self, *exc: Any):
-        pass
+        """Ends the created trace span of the context, it parents become the active span."""
 
 
 class ZipkinMiddleware(HTTPMiddleware):
     """
-    Zipkin Middleware based on aiozipkin
+    Zipkin Middleware based on an abstract context manager.
+
+    :param trace: A deferred context manager that manage the trace span stack.
     """
 
     def __init__(self, trace: AbtractTraceContext) -> None:
