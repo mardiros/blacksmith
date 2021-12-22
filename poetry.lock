@@ -754,7 +754,7 @@ full = ["itsdangerous", "jinja2", "python-multipart", "pyyaml", "requests", "gra
 
 [[package]]
 name = "starlette-zipkin"
-version = "0.1.4"
+version = "0.2.0"
 description = "Zipkin integration for ASGI frameworks."
 category = "dev"
 optional = false
@@ -866,7 +866,7 @@ prometheus = ["prometheus-client"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "e6e31d7fa5f0b32c19997986a6de3eb8449b5ec2beed9fe8d236a6c3aff76068"
+content-hash = "3ddfe0891c133a635d8341fcff1f064826ca573732b1507ed13409c0df414b08"
 
 [metadata.files]
 aiobreaker = [
@@ -1417,8 +1417,8 @@ starlette = [
     {file = "starlette-0.16.0.tar.gz", hash = "sha256:e1904b5d0007aee24bdd3c43994be9b3b729f4f58e740200de1d623f8c3a8870"},
 ]
 starlette-zipkin = [
-    {file = "starlette-zipkin-0.1.4.tar.gz", hash = "sha256:8f4c34ee5ba5ffe711d42749ef09d681151a5c0013a6478339f103aef4580d6e"},
-    {file = "starlette_zipkin-0.1.4-py3-none-any.whl", hash = "sha256:c7b8b3c5f59e83053860a2a1a475bf195c581486e3a74ab8391964854b4bfb05"},
+    {file = "starlette-zipkin-0.2.0.tar.gz", hash = "sha256:c8bf550219aa8460f0082812daf654a2ede9470fff94e49e944453d301a9156c"},
+    {file = "starlette_zipkin-0.2.0-py3-none-any.whl", hash = "sha256:0a00f56753c96089dbc6dbbec06a36cfc3c65abf217d20021008d4d28fe70fec"},
 ]
 toml = [
     {file = "toml-0.10.2-py2.py3-none-any.whl", hash = "sha256:806143ae5bfb6a3c6e736a764057db0e6a0e05e338b5630894a5f779cabb4f9b"},

@@ -1,6 +1,7 @@
 """Collect metrics based on prometheus."""
 
-from typing import TYPE_CHECKING, Any, Callable
+import abc
+from typing import Dict, TYPE_CHECKING, Any, Callable, Type
 
 from aiozipkin import span
 
@@ -11,16 +12,26 @@ from blacksmith.typing import ClientName, HttpMethod, Path
 from .base import HTTPMiddleware, Middleware
 
 
-if TYPE_CHECKING:
-    try:
-        from aiozipkin import SpanAbc, Tracer
-    except ImportError:
+class AbtractTraceContext(abc.ABC):
+    @abc.abstractclassmethod
+    def make_headers(cls) -> Dict[str, str]:
+        """Build headers for the sub requests."""
+
+    @abc.abstractmethod
+    def __call__(self, name: str, type: str) -> "AbtractTraceContext":
         pass
-    GetRootSpan = Callable[[], "SpanAbc"]
-    GetTracer = Callable[[], "Tracer"]
-else:
-    GetRootSpan = Callable[[], Any]
-    GetTracer = Callable[[], Any]
+
+    @abc.abstractmethod
+    def tag(self, tab_name: str, tag_val: str) -> None:
+        pass
+
+    @abc.abstractmethod
+    def __enter__(self) -> "AbtractTraceContext":
+        pass
+
+    @abc.abstractmethod
+    def __exit__(self, *exc: Any):
+        pass
 
 
 class ZipkinMiddleware(HTTPMiddleware):
@@ -28,24 +39,22 @@ class ZipkinMiddleware(HTTPMiddleware):
     Zipkin Middleware based on aiozipkin
     """
 
-    def __init__(self, get_root_span: GetRootSpan, get_tracer: GetTracer) -> None:
-        self.get_root_span = get_root_span
-        self.get_tracer = get_tracer
+    def __init__(self, trace: AbtractTraceContext) -> None:
+        self.trace = trace
 
     def __call__(self, next: Middleware) -> Middleware:
         async def handle(
             req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
         ) -> HTTPResponse:
-            root_span = self.get_root_span()
-            tracer = self.get_tracer()
-            with tracer.new_child(root_span.context) as child_span:
-                headers = child_span.context.make_headers()
-                child_span.kind("CLIENT")
+
+            try:
+                name = f"{method} {path.format(**req.path)}"
+            except KeyError:
+                name = f"{method} {path}"
+
+            with self.trace(name, "CLIENT") as child_span:
+                headers = self.trace.make_headers()
                 req.headers.update(headers)
-                try:
-                    child_span.name(f"{method} {path.format(**req.path)}")
-                except KeyError:
-                    child_span.name(f"{method} {path}")
 
                 child_span.tag("blacksmith.client_name", client_name)
 
