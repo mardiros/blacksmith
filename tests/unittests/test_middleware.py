@@ -5,7 +5,6 @@ from typing import Any, Dict, Optional, cast
 import prometheus_client
 import pytest
 from aiobreaker.state import CircuitBreakerError
-from aiozipkin.transport import TransportABC
 from prometheus_client import REGISTRY, CollectorRegistry
 
 from blacksmith import __version__
@@ -302,18 +301,6 @@ async def test_circuit_breaker_prometheus_metrics(
     registry.get_sample_value(
         "blacksmith_circuit_breaker_state", labels=["dummy"]
     ) == CLOSED
-
-
-class Transport(TransportABC):
-    def __init__(self):
-        self.records = []
-
-    def send(self, record) -> None:
-        """Sends data to zipkin collector."""
-        self.records.append(record.asdict())
-
-    async def close(self) -> None:
-        """Performs additional cleanup actions if required."""
 
 
 @pytest.mark.asyncio
