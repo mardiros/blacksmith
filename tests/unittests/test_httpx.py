@@ -60,9 +60,7 @@ async def test_query_http_204(patch):
 async def test_query_http_422(patch):
     transport = HttpxTransport()
     with pytest.raises(HTTPError) as ctx:
-        resp = await transport.request(
-            "POST", HTTPRequest("/", body="{}"), HTTPTimeout()
-        )
+        await transport.request("POST", HTTPRequest("/", body="{}"), HTTPTimeout())
 
     assert str(ctx.value) == "422 Unprocessable Entity"
     assert ctx.value.status_code == 422
@@ -89,9 +87,7 @@ async def test_query_http_timeout(patch):
 async def test_query_http_no_json(patch):
     transport = HttpxTransport()
     with pytest.raises(HTTPError) as ctx:
-        resp = await transport.request(
-            "POST", HTTPRequest("/", body="{}"), HTTPTimeout()
-        )
+        await transport.request("POST", HTTPRequest("/", body="{}"), HTTPTimeout())
 
     assert str(ctx.value) == "500 Internal Server Error"
     assert ctx.value.status_code == 500

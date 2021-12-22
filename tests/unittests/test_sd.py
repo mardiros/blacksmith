@@ -2,6 +2,7 @@ import pytest
 
 from blacksmith.domain.exceptions import UnregisteredServiceException
 from blacksmith.sd.adapters.consul import (
+    ConsulApiError,
     ConsulDiscovery,
     Service,
     ServiceRequest,
@@ -93,9 +94,6 @@ async def test_consul_discovery_get_endpoint_unregistered(consul_sd: ConsulDisco
     with pytest.raises(UnregisteredServiceException) as ctx:
         await consul_sd.get_endpoint("dummy", "v2")
     assert str(ctx.value) == "Unregistered service 'dummy/v2'"
-
-
-from blacksmith.sd.adapters.consul import ConsulApiError
 
 
 @pytest.mark.asyncio

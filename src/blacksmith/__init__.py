@@ -32,3 +32,29 @@ from .sd.adapters.consul import ConsulDiscovery
 from .sd.adapters.router import RouterDiscovery
 from .sd.adapters.static import StaticDiscovery
 from .service.client import ClientFactory
+
+__all__ = [
+    "CircuitBreaker",
+    "ClientFactory",
+    "CollectionIterator",
+    "ConsulDiscovery",
+    "HeaderField",
+    "HTTPAddHeadersMiddleware",
+    "HTTPAuthorization",
+    "HTTPBearerAuthorization",
+    "HTTPError",
+    "HTTPMiddleware",
+    "Middleware",
+    "PathInfoField",
+    "PostBodyField",
+    "PrometheusMetrics",
+    "QueryStringField",
+    "register",
+    "Request",
+    "Response",
+    "ResponseBox",
+    "RouterDiscovery",
+    "scan",
+    "StaticDiscovery",
+    "TimeoutError",
+]

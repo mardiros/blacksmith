@@ -1,7 +1,6 @@
 import time
-from collections import Counter, defaultdict
 from datetime import timedelta
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, Optional, Tuple
 
 import pytest
 
@@ -33,7 +32,7 @@ class FakeConsulTransport(AbstractTransport):
 
         if request.path["name"] == "dummy-v3":
             raise HTTPError(
-                f"422 Unprocessable entity",
+                "422 Unprocessable entity",
                 request,
                 HTTPResponse(422, {}, {"detail": "error"}),
             )

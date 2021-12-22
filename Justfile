@@ -7,7 +7,7 @@ doc:
 cleandoc:
     cd docs && poetry run make clean
 
-test: unittest functest
+test: unittest functest lint
 
 lf:
     poetry run pytest -sxvvv --lf
@@ -17,6 +17,9 @@ unittest test_suite=default_test_suite:
 
 functest:
     poetry run pytest -sxv tests/functionals
+
+lint:
+    poetry run flake8
 
 black:
     poetry run isort .

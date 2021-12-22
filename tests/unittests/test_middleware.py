@@ -5,9 +5,6 @@ from typing import Any, Dict, Optional, cast
 import prometheus_client
 import pytest
 from aiobreaker.state import CircuitBreakerError
-from aiozipkin.helpers import Endpoint
-from aiozipkin.sampler import Sampler
-from aiozipkin.tracer import Tracer
 from aiozipkin.transport import TransportABC
 from prometheus_client import REGISTRY, CollectorRegistry
 
@@ -18,7 +15,7 @@ from blacksmith.middleware.auth import HTTPAuthorization
 from blacksmith.middleware.base import HTTPAddHeadersMiddleware, HTTPMiddleware
 from blacksmith.middleware.circuit_breaker import CircuitBreaker, exclude_httpx_4xx
 from blacksmith.middleware.prometheus import PrometheusMetrics
-from blacksmith.middleware.zipkin import ZipkinMiddleware, AbtractTraceContext
+from blacksmith.middleware.zipkin import AbtractTraceContext, ZipkinMiddleware
 from blacksmith.typing import ClientName, HttpMethod, Path
 
 
@@ -244,9 +241,9 @@ async def test_circuit_breaker_4xx(
 ):
     cbreaker = CircuitBreaker(fail_max=2)
     next = cbreaker(invalid_middleware)
-    with pytest.raises(HTTPError) as exc:
+    with pytest.raises(HTTPError):
         await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
-    with pytest.raises(HTTPError) as exc:
+    with pytest.raises(HTTPError):
         await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
 
     next = cbreaker(echo_middleware)
@@ -300,7 +297,7 @@ async def test_circuit_breaker_prometheus_metrics(
     ) == HALF_OPEN
 
     time.sleep(0.110)
-    next = cbreaker(echo_middleware)
+    cbreaker(echo_middleware)
     registry.get_sample_value("blacksmith_circuit_breaker_error", labels=["dummy"]) == 2
     registry.get_sample_value(
         "blacksmith_circuit_breaker_state", labels=["dummy"]

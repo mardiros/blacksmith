@@ -98,7 +98,8 @@ def test_collection_parser():
         200,
         {
             "Total-Count": "20",
-            "link": '<https://dummy/?page=2>; rel="next", <https://dummy/?page=4>; rel="last"',
+            "link": '<https://dummy/?page=2>; rel="next", '
+            '<https://dummy/?page=4>; rel="last"',
         },
         [{"id": 1}, {"id": 1}],
     )
@@ -153,7 +154,8 @@ def test_response_box_no_schema():
         assert resp.response
     assert (
         str(ctx.value)
-        == "No response schema in route 'GET /dummies' in resource'Dummy' in client 'api'"
+        == "No response schema in route 'GET /dummies' in resource'Dummy' "
+        "in client 'api'"
     )
 
 

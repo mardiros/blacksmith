@@ -2,7 +2,7 @@
 The Server-Side Service discovery strategy.
 
 """
-from blacksmith.typing import Service, ServiceName, Version
+from blacksmith.typing import ServiceName, Version
 
 from ..base import AbstractServiceDiscovery, Url
 
@@ -11,15 +11,17 @@ class RouterDiscovery(AbstractServiceDiscovery):
     """
     Router that implement a :term:`Server-Side Service discovery`.
 
-    This implementatin never raise :class:`blacksmith.domain.exceptions.UnregisteredServiceException`
-    when service are unknown, because it only passe very request to the router server
-    that is connected to the :term:`service registry`.
+    This implementation never raise
+    :class:`blacksmith.domain.exceptions.UnregisteredServiceException`
+    when service are unknown, because it only passe very request to the router
+    server that is connected to the :term:`service registry`.
 
     .. note::
         Given pattern in parameter have to match the format of the router server.
 
     :param service_url_fmt: A pattern used to create endpoint of versionned services.
-    :param unversioned_service_url_fmt: A pattern used to create endpoint of unversionned services.
+    :param unversioned_service_url_fmt: A pattern used to create endpoint of
+        unversionned services.
     """
 
     service_url_fmt: str

@@ -102,7 +102,7 @@ def test_registry_without_response():
     assert api["dummies"].resource.path == "/dummies/{name}"
     assert set(api["dummies"].resource.contract.keys()) == {"GET"}
     assert api["dummies"].resource.contract["GET"][0] == DummyRequest
-    assert api["dummies"].resource.contract["GET"][1] == None
+    assert api["dummies"].resource.contract["GET"][1] is None
 
 
 def test_registry_only_collection():
@@ -176,7 +176,7 @@ def test_registry_complete():
     assert api["dummies"].collection.contract["GET"][0] == Request
     assert api["dummies"].collection.contract["GET"][1] == Dummy
     assert api["dummies"].collection.contract["POST"][0] == CreateDummyRequest
-    assert api["dummies"].collection.contract["POST"][1] == None
+    assert api["dummies"].collection.contract["POST"][1] is None
 
     assert api["dummies"].resource.path == "/dummies/{name}"
     assert set(api["dummies"].resource.contract.keys()) == {"GET", "DELETE"}

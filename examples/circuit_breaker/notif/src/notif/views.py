@@ -2,7 +2,6 @@ import email as emaillib
 import smtplib
 from datetime import timedelta
 from textwrap import dedent
-from typing import cast
 
 from notif.resources.user import User
 from prometheus_client import CONTENT_TYPE_LATEST, REGISTRY, generate_latest

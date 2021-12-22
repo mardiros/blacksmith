@@ -15,7 +15,7 @@ from blacksmith.middleware.auth import HTTPBearerAuthorization
 from blacksmith.sd.adapters.static import StaticDiscovery
 from blacksmith.sd.base import AbstractServiceDiscovery, Url
 from blacksmith.service.client import ClientFactory
-from blacksmith.typing import Service, ServiceName, Version
+from blacksmith.typing import ServiceName, Version
 
 
 class ConsulApiError(HTTPError):

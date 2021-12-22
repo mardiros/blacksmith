@@ -1,5 +1,3 @@
-import json
-
 import pytest
 
 from blacksmith.domain.model.http import HTTPRequest, HTTPResponse

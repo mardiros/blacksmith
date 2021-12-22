@@ -16,7 +16,7 @@ from blacksmith.typing import (
 )
 
 from .exceptions import ConfigurationError, UnregisteredClientException
-from .model import CollectionParser, Request, Response, TResponse
+from .model import CollectionParser, Request, Response
 
 Schemas = Tuple[Type[Request], Optional[Type[Response]]]
 Contract = Mapping[HttpMethod, Schemas]
@@ -95,15 +95,17 @@ class Registry:
         """
         Register the resource in the registry.
 
-        :param client_name: Used to identify the client in your code.
-        :param resource: Name of the resource in your code.
-        :param service: Name of the service in the service discovery.
-        :param version: Version Number of the service.
-        :param path: Endpoint of the resource in the given service.
+        :param client_name: used to identify the client in your code.
+        :param resource: name of the resource in your code.
+        :param service: name of the service in the service discovery.
+        :param version: version number of the service.
+        :param path: endpoint of the resource in the given service.
         :param contract: contract for the resource, define request and response.
 
-        :param collection_path: Endpoint of the resource collection in the given service.
-        :param collection_contract: contract for the resource collection, define request and response.
+        :param collection_path: endpoint of the resource collection
+            in the given service.
+        :param collection_contract: contract for the resource collection,
+            define request and response.
         """
         if client_name in self.client_service and self.client_service[client_name] != (
             service,
@@ -130,7 +132,7 @@ class Registry:
         """
         try:
             return self.client_service[client_name], self.clients[client_name]
-        except KeyError as k:
+        except KeyError:
             raise UnregisteredClientException(client_name)
 
 
