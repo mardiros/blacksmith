@@ -5,12 +5,12 @@ from textwrap import dedent
 from notif.resources.user import User
 from starlette.applications import Starlette
 from starlette.responses import JSONResponse
+from starlette_zipkin import trace
 
 from blacksmith import ClientFactory, ConsulDiscovery
 from blacksmith.middleware.zipkin import AbtractTraceContext, ZipkinMiddleware
-from starlette_zipkin import trace
-AbtractTraceContext.register(trace)
 
+AbtractTraceContext.register(trace)
 
 
 app = Starlette(debug=True)
@@ -19,9 +19,8 @@ smtp_sd = ConsulDiscovery()
 
 sd = ConsulDiscovery()
 cli = ClientFactory(sd)
-cli.add_middleware(
-    ZipkinMiddleware(trace)
-)
+cli.add_middleware(ZipkinMiddleware(trace))
+
 
 @trace("send email")
 async def send_email(user: User, message: str):
