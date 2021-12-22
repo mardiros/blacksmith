@@ -2,7 +2,7 @@
 
 from datetime import timedelta
 from functools import partial
-from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, cast
+from typing import  Dict, Iterable, List, Optional, cast
 
 import aiobreaker
 from aiobreaker import CircuitBreaker as AioBreaker
