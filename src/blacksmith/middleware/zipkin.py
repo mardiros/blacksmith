@@ -1,7 +1,7 @@
 """Collect metrics based on prometheus."""
 
 import abc
-from typing import Dict, TYPE_CHECKING, Any, Callable, Type
+from typing import TYPE_CHECKING, Any, Callable, Dict, Type
 
 from aiozipkin import span
 
