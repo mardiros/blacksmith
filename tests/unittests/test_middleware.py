@@ -1,5 +1,6 @@
 import time
 from datetime import timedelta
+from typing import Any, Dict, Optional, cast
 
 import prometheus_client
 import pytest
@@ -17,7 +18,7 @@ from blacksmith.middleware.auth import HTTPAuthorization
 from blacksmith.middleware.base import HTTPAddHeadersMiddleware, HTTPMiddleware
 from blacksmith.middleware.circuit_breaker import CircuitBreaker, exclude_httpx_4xx
 from blacksmith.middleware.prometheus import PrometheusMetrics
-from blacksmith.middleware.zipkin import ZipkinMiddleware
+from blacksmith.middleware.zipkin import ZipkinMiddleware, AbtractTraceContext
 from blacksmith.typing import ClientName, HttpMethod, Path
 
 
@@ -320,32 +321,44 @@ class Transport(TransportABC):
 
 @pytest.mark.asyncio
 async def test_zipkin_middleware(echo_middleware, dummy_http_request):
-    transport = Transport()
-    tracer = Tracer(transport, Sampler(), Endpoint("srv", None, None, None))
-    span = tracer.new_trace()
-    middleware = ZipkinMiddleware(lambda: span, lambda: tracer)
+    class Trace(AbtractTraceContext):
+        name = ""
+        kind = ""
+        tags = {}
+        annotations = []
+
+        def __init__(self, name: str, kind: str) -> None:
+            Trace.name = name
+            Trace.kind = kind
+            Trace.tags = {}
+            Trace.annotations = []
+
+        @classmethod
+        def make_headers(cls) -> Dict[str, str]:
+            return {}
+
+        def __enter__(self) -> "Trace":
+            return self
+
+        def __exit__(self, *exc: Any):
+            pass
+
+        def tag(self, key: str, value: str) -> "Trace":
+            Trace.tags[key] = value
+            return self
+
+        def annotate(self, value: Optional[str], ts: Optional[float]) -> "Trace":
+            Trace.annotations.append((value, ts))
+            return self
+
+    middleware = ZipkinMiddleware(cast(AbtractTraceContext, Trace))
     next = middleware(echo_middleware)
     await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
-
-    assert transport.records == [
-        {
-            "annotations": [],
-            "debug": False,
-            "duration": transport.records[0]["duration"],
-            "id": transport.records[0]["id"],
-            "localEndpoint": {"serviceName": "srv"},
-            "name": "GET /dummies/42",
-            "parentId": span.context.span_id,
-            "remoteEndpoint": None,
-            "shared": False,
-            "kind": "CLIENT",
-            "tags": {
-                "blacksmith.client_name": "dummy",
-                "http.path": "/dummies/{name}",
-                "http.querystring": "{'foo': 'bar'}",
-                "http.status_code": "200",
-            },
-            "timestamp": transport.records[0]["timestamp"],
-            "traceId": transport.records[0]["traceId"],
-        },
-    ]
+    assert Trace.name == "GET /dummies/42"
+    assert Trace.kind == "CLIENT"
+    assert Trace.tags == {
+        "blacksmith.client_name": "dummy",
+        "http.path": "/dummies/{name}",
+        "http.querystring": "{'foo': 'bar'}",
+        "http.status_code": "200",
+    }
