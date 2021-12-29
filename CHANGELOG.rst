@@ -1,3 +1,7 @@
+0.6.1 - Released at 2021-12-29
+------------------------------
+* make http caching serializer in middleware configurable
+
 0.6.0 - Released at 2021-12-29
 ------------------------------
 * Add a http caching middleware based on redis
