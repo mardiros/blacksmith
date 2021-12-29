@@ -12,11 +12,6 @@ User manual of Blacksmith.
    register_routes
    instanciating_client
    service_discovery
-   authorization
-   monitor_metrics
-   zipkin_middleware
-   http_middleware
-   circuit_breaker_middleware
-   generic_middleware
+   middleware/index
    errors
    changelog

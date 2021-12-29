@@ -30,7 +30,7 @@ You will find an example using prometheus in the examples directory:
    https://github.com/mardiros/blacksmith/tree/master/examples/zipkin_tracing
 
 
-.. figure:: ../screenshots/zipkin.png
+.. figure:: ../../screenshots/zipkin.png
 
    Example of querying the zipkin instance on http://zipkin.localhost/
 

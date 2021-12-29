@@ -11,3 +11,4 @@ Middlewares
    auth
    prometheus
    circuit_breaker
+   http_caching

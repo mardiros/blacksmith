@@ -25,6 +25,7 @@ from .middleware import (
     HTTPAuthorization,
     HTTPBearerAuthorization,
     HTTPMiddleware,
+    HttpCachingMiddleware,
     Middleware,
     PrometheusMetrics,
 )
@@ -44,6 +45,7 @@ __all__ = [
     "HTTPBearerAuthorization",
     "HTTPError",
     "HTTPMiddleware",
+    "HttpCachingMiddleware",
     "Middleware",
     "PathInfoField",
     "PostBodyField",

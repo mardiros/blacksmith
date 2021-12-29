@@ -11,8 +11,7 @@ from starlette.applications import Starlette
 from starlette.responses import JSONResponse
 
 import blacksmith
-from blacksmith import ClientFactory, ConsulDiscovery
-from blacksmith.middleware.http_caching import HttpCachingMiddleware
+from blacksmith import ClientFactory, ConsulDiscovery, HttpCachingMiddleware
 
 app = Starlette(debug=True)
 

@@ -7,6 +7,12 @@ Glossary
       An asyncio library implement the :term:`Circuit Breaker` pattern.
       https://github.com/arlyon/aiobreaker
 
+   Cache-Control
+      The cache control is a response header of an http request defined by
+      `HTTP/1.1`. If contains caching directive used by browsers, CDN and any
+      proxy that consume HTTP.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
+
    cascading failure
       A cascading failure is a process in a system of interconnected parts in
       which the failure of one or few parts can trigger the failure of other
