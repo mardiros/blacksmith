@@ -1,3 +1,7 @@
+0.6.3 - Released at 2021-12-29
+------------------------------
+* Expose the HttpCachingMiddleware in blacksmith namespace
+
 0.6.2 - Released at 2021-12-29
 ------------------------------
 * Fix case sensitivity in cache header
@@ -13,7 +17,7 @@
 
 0.5.0 - Released at 2021-12-13
 ------------------------------
-* Reverse order of middleware to be natural and intuitive on insert.
+* Reverse order of middleware to be natural and intuitive on insert
 
 0.4.2 - Released at 2021-12-13
 ------------------------------
@@ -26,7 +30,7 @@
 0.4.0 - Released at 2021-12-12
 ------------------------------
  * Rename project to blacksmith (prometheus metrics name updated too)
- * Implement middleware as a pattern to inject data in http request and response.
+ * Implement middleware as a pattern to inject data in http request and response
 
     * Breaking changes: auth keyword is replace by middleware. (Documentation updated)
     * Breaking changes: auth keyword is replace by middleware. (Documentation updated)
