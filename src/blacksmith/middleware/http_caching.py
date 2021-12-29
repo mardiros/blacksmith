@@ -7,6 +7,7 @@ from typing import Any, List, Optional, Tuple
 from urllib.parse import urlencode
 
 from typing_extensions import Protocol
+from httpx import Headers
 
 from blacksmith.domain.model.http import HTTPRequest, HTTPResponse
 from blacksmith.typing import ClientName, HttpMethod, Path
@@ -149,8 +150,9 @@ class CacheControlPolicy(AbstractCachingPolicy):
         req: HTTPRequest,
         vary: List[str],
     ) -> str:
+        headers = Headers(req.headers)
         vary_key = self.get_vary_key(client_name, path, req)
-        vary_vals = [f"{key}={req.headers.get(key, '')}" for key in vary]
+        vary_vals = [f"{key}={headers.get(key, '')}" for key in vary]
         response_cache_key = f"{vary_key}{self.sep}{'|'.join(vary_vals)}"
         return response_cache_key
 

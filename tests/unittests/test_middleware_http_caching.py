@@ -249,7 +249,7 @@ def test_policy_get_cache_info_for_response(params):
         ),
         (
             "/",
-            HTTPRequest("", headers={"a": "A", "b": "B", "c": "C"}),
+            HTTPRequest("", headers={"a": "A", "B": "B", "c": "C"}),
             HTTPResponse(
                 200,
                 {"cache-control": "max-age=42, public", "vary": "a, b"},
