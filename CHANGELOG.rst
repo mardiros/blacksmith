@@ -1,3 +1,8 @@
+0.6.0 - Released at 2021-12-29
+------------------------------
+* Add a http caching middleware based on redis
+* Update zipkin integration for starlette-zipkin 0.2
+
 0.5.0 - Released at 2021-12-13
 ------------------------------
 * Reverse order of middleware to be natural and intuitive on insert.
