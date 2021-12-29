@@ -131,21 +131,21 @@ def test_policy_get_vary_key(params):
             "/",
             HTTPRequest("", headers={"Accept-Encoding": "gzip"}),
             [],
-            "dummies$/${}",
+            "dummies$/$",
         ),
         (
             "dummies",
             "/",
             HTTPRequest("", headers={"Accept-Encoding": "gzip"}),
             ["Accept-Encoding"],
-            'dummies$/${"Accept-Encoding": "gzip"}',
+            "dummies$/$Accept-Encoding=gzip",
         ),
         (
             "dummies",
             "/",
             HTTPRequest("", headers={}),
             ["Accept-Encoding"],
-            'dummies$/${"Accept-Encoding": ""}',
+            "dummies$/$Accept-Encoding=",
         ),
     ],
 )
@@ -204,7 +204,7 @@ def test_policy_get_cache_info_for_response(params):
             HTTPResponse(200, {"cache-control": "max-age=42, public"}, ""),
             {
                 "dummies$/": (42, "[]"),
-                "dummies$/${}": (
+                "dummies$/$": (
                     42,
                     '{"status_code": 200, "headers": {"cache-control": "max-age=42, '
                     'public"}, "json": ""}',
@@ -221,7 +221,7 @@ def test_policy_get_cache_info_for_response(params):
             ),
             {
                 "dummies$/": (42, '["x-country-code"]'),
-                'dummies$/${"x-country-code": "FR"}': (
+                "dummies$/$x-country-code=FR": (
                     42,
                     '{"status_code": 200, "headers": '
                     '{"cache-control": "max-age=42, public", "vary": '
@@ -239,7 +239,7 @@ def test_policy_get_cache_info_for_response(params):
             ),
             {
                 "dummies$/": (42, '["x-country-code"]'),
-                'dummies$/${"x-country-code": ""}': (
+                "dummies$/$x-country-code=": (
                     42,
                     '{"status_code": 200, "headers": '
                     '{"cache-control": "max-age=42, public", "vary": '
@@ -257,7 +257,7 @@ def test_policy_get_cache_info_for_response(params):
             ),
             {
                 "dummies$/": (42, '["a", "b"]'),
-                'dummies$/${"a": "A", "b": "B"}': (
+                "dummies$/$a=A|b=B": (
                     42,
                     '{"status_code": 200, "headers": '
                     '{"cache-control": "max-age=42, public", "vary": '

@@ -3,8 +3,10 @@ import abc
 import json
 from dataclasses import asdict
 from datetime import timedelta
-from typing import List, Optional, Tuple
+from typing import Any, List, Optional, Tuple
 from urllib.parse import urlencode
+
+from typing_extensions import Protocol
 
 from blacksmith.domain.model.http import HTTPRequest, HTTPResponse
 from blacksmith.typing import ClientName, HttpMethod, Path
@@ -75,6 +77,18 @@ except ImportError:
     pass
 
 
+class AbstractSerializer(Protocol):
+    @staticmethod
+    def loads(s: str) -> Any:
+        """Load a string to an object"""
+        ...
+
+    @staticmethod
+    def dumps(obj: Any) -> str:
+        """Get a value from redis"""
+        ...
+
+
 def int_or_0(val: str) -> int:
     try:
         ival = int(val)
@@ -136,8 +150,8 @@ class CacheControlPolicy(AbstractCachingPolicy):
         vary: List[str],
     ) -> str:
         vary_key = self.get_vary_key(client_name, path, req)
-        vary_dict = {key: req.headers.get(key, "") for key in vary}
-        response_cache_key = f"{vary_key}${json.dumps(vary_dict)}"
+        vary_vals = [f"{key}={req.headers.get(key, '')}" for key in vary]
+        response_cache_key = f"{vary_key}{self.sep}{'|'.join(vary_vals)}"
         return response_cache_key
 
     def get_cache_info_for_response(
@@ -164,9 +178,11 @@ class HttpCachingMiddleware(HTTPMiddleware):
         self,
         cache: AbstractCache,
         policy: AbstractCachingPolicy = CacheControlPolicy(sep="$"),
+        serializer: AbstractSerializer = json,
     ) -> None:
         self._cache = cache
         self._policy = policy
+        self._serializer = serializer
 
     async def initialize(self):
         await self._cache.initialize()
@@ -186,14 +202,14 @@ class HttpCachingMiddleware(HTTPMiddleware):
         if ttl <= 0:
             return
         ttld = timedelta(seconds=ttl)
-        vary_val = json.dumps(vary)
+        vary_val = self._serializer.dumps(vary)
         await self._cache.set(vary_key, vary_val, ttld)
 
         response_cache_key = self._policy.get_response_cache_key(
             client_name, path, req, vary
         )
         resp.headers = dict(resp.headers)
-        response_cache = json.dumps(asdict(resp))
+        response_cache = self._serializer.dumps(asdict(resp))
         await self._cache.set(response_cache_key, response_cache, ttld)
 
     async def get_from_cache(
@@ -203,14 +219,14 @@ class HttpCachingMiddleware(HTTPMiddleware):
         vary_val = await self._cache.get(vary_key)
         if not vary_val:
             return None
-        vary = json.loads(vary_val)
+        vary = self._serializer.loads(vary_val)
         response_cache_key = self._policy.get_response_cache_key(
             client_name, path, req, vary
         )
         val = await self._cache.get(response_cache_key)
         if not val:
             return None
-        resp = json.loads(val)
+        resp = self._serializer.loads(val)
         return HTTPResponse(**resp)
 
     def __call__(self, next: Middleware) -> Middleware:
