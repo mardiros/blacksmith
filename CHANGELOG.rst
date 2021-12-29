@@ -1,3 +1,7 @@
+0.6.2 - Released at 2021-12-29
+------------------------------
+* Fix case sensitivity in cache header
+
 0.6.1 - Released at 2021-12-29
 ------------------------------
 * make http caching serializer in middleware configurable
