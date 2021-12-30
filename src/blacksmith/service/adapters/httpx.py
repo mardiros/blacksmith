@@ -31,8 +31,8 @@ class HttpxTransport(AbstractTransport):
         headers = request.headers.copy()
         if request.body:
             headers["Content-Type"] = "application/json"
-        async with AsyncClient() as client:
-            try:
+        try:
+            async with AsyncClient() as client:
                 r = await client.request(
                     method,
                     request.url,
@@ -41,10 +41,10 @@ class HttpxTransport(AbstractTransport):
                     content=request.body,
                     timeout=HttpxTimeout(timeout.request, connect=timeout.connect),
                 )
-            except httpx.TimeoutException as exc:
-                raise TimeoutError(
-                    f"{exc.__class__.__name__} while calling {method} {request.url}"
-                )
+        except httpx.TimeoutException as exc:
+            raise TimeoutError(
+                f"{exc.__class__.__name__} while calling {method} {request.url}"
+            )
 
         json = "" if r.status_code == 204 else safe_json(r)
         resp = HTTPResponse(r.status_code, r.headers, json=json)
