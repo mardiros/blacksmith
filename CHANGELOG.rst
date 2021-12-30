@@ -1,3 +1,7 @@
+0.6.4 - Released at 2021-12-29
+------------------------------
+* Change the timeout exception outside httpx context manager 
+
 0.6.3 - Released at 2021-12-29
 ------------------------------
 * Expose the HttpCachingMiddleware in blacksmith namespace
