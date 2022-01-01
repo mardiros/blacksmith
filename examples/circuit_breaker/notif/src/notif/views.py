@@ -1,6 +1,5 @@
 import email as emaillib
 import smtplib
-from datetime import timedelta
 from textwrap import dedent
 
 from notif.resources.user import User
@@ -10,6 +9,7 @@ from starlette.responses import JSONResponse, Response
 
 import blacksmith
 from blacksmith import CircuitBreaker, ClientFactory, ConsulDiscovery, PrometheusMetrics
+from purgatory import RedisUnitOfWork
 
 app = Starlette(debug=True)
 
@@ -18,7 +18,11 @@ sd = ConsulDiscovery()
 prom = PrometheusMetrics()
 cli = (
     ClientFactory(sd)
-    .add_middleware(CircuitBreaker(3, timedelta(seconds=30.0), prometheus_metrics=prom))
+    .add_middleware(
+        CircuitBreaker(
+            3, 30, prometheus_metrics=prom, uow=RedisUnitOfWork("redis://redis/0")
+        ),
+    )
     .add_middleware(prom)
 )
 

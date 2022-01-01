@@ -8,7 +8,9 @@ version = "0.1.0"
 blacksmith = {version = "^0.5.0", extras = ["prometheus"]}
 python = "^3.9"
 starlette = "^0.17.0"
-uvicorn = "^0.15.0"
+aioredis = "^2.0.1"
+hypercorn = "^0.13.2"
+purgatory-circuitbreaker = "^0.5.0"
 
 [build-system]
 build-backend = "poetry.core.masonry.api"
