@@ -1,11 +1,10 @@
 import time
-from datetime import timedelta
 from typing import Any, Dict, Optional, cast
 
 import prometheus_client
 import pytest
-from aiobreaker.state import CircuitBreakerError
 from prometheus_client import REGISTRY, CollectorRegistry
+from purgatory.domain.model import OpenedState
 
 from blacksmith import __version__
 from blacksmith.domain.exceptions import HTTPError
@@ -194,8 +193,6 @@ def test_excluded_list(exc):
 @pytest.mark.parametrize(
     "exc",
     [
-        RuntimeError("Boom"),
-        ValueError("Boom"),
         HTTPError("Mmm", HTTPRequest("/", {}, {}, {}), HTTPResponse(500, {}, {})),
         HTTPError("Mmm", HTTPRequest("/", {}, {}, {}), HTTPResponse(503, {}, {})),
     ],
@@ -208,7 +205,7 @@ def test_included_list(exc):
 async def test_circuit_breaker_5xx(
     echo_middleware, boom_middleware, dummy_http_request
 ):
-    cbreaker = CircuitBreaker(fail_max=2)
+    cbreaker = CircuitBreaker(threshold=2)
     next = cbreaker(echo_middleware)
     resp = await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
     assert resp.status_code == 200
@@ -217,16 +214,16 @@ async def test_circuit_breaker_5xx(
 
     with pytest.raises(HTTPError) as exc:
         await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
-    # with pytest.raises(HTTPError) as exc:
-    #     await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
-
-    with pytest.raises(CircuitBreakerError) as exc:
+    with pytest.raises(HTTPError) as exc:
         await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
-    assert exc.value.message == "Failures threshold reached, circuit breaker opened."
+
+    with pytest.raises(OpenedState) as exc:
+        await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
+    assert str(exc.value) == "Circuit breaker is open"
 
     # Event if it works, the circuit breaker is open
     next = cbreaker(echo_middleware)
-    with pytest.raises(CircuitBreakerError) as exc:
+    with pytest.raises(OpenedState) as exc:
         await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
 
     # Other service is still working
@@ -238,7 +235,7 @@ async def test_circuit_breaker_5xx(
 async def test_circuit_breaker_4xx(
     echo_middleware, invalid_middleware, dummy_http_request
 ):
-    cbreaker = CircuitBreaker(fail_max=2)
+    cbreaker = CircuitBreaker(threshold=2)
     next = cbreaker(invalid_middleware)
     with pytest.raises(HTTPError):
         await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
@@ -261,8 +258,8 @@ async def test_circuit_breaker_prometheus_metrics(
     registry = CollectorRegistry()
     prom = PrometheusMetrics(registry=registry)
     cbreaker = CircuitBreaker(
-        fail_max=2,
-        timeout_duration=timedelta(milliseconds=100),
+        threshold=2,
+        ttl=.100,
         prometheus_metrics=prom,
     )
     echo_next = cbreaker(echo_middleware)
@@ -270,7 +267,9 @@ async def test_circuit_breaker_prometheus_metrics(
     boom_next = cbreaker(boom_middleware)
     with pytest.raises(HTTPError):
         await boom_next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
-    with pytest.raises(CircuitBreakerError):
+    with pytest.raises(HTTPError):
+        await boom_next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
+    with pytest.raises(OpenedState):
         await boom_next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
 
     registry.get_sample_value("blacksmith_circuit_breaker_error", labels=["dummy"]) == 1
@@ -278,7 +277,7 @@ async def test_circuit_breaker_prometheus_metrics(
         "blacksmith_circuit_breaker_state", labels=["dummy"]
     ) == OPEN
 
-    with pytest.raises(CircuitBreakerError):
+    with pytest.raises(OpenedState):
         await echo_next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
     registry.get_sample_value("blacksmith_circuit_breaker_error", labels=["dummy"]) == 2
 
