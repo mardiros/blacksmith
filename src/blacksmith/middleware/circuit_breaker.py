@@ -1,14 +1,9 @@
 """Cut the circuit in case a service is down."""
 
-from datetime import timedelta
-from functools import partial
-from typing import Dict, Iterable, List, Optional, cast
+from typing import Any, Iterable, Optional, cast
 
-import aiobreaker
-from aiobreaker import CircuitBreaker as AioBreaker
-from aiobreaker import CircuitBreakerListener
-from aiobreaker.state import CircuitBreakerBaseState, CircuitBreakerState
-from aiobreaker.storage.base import CircuitBreakerStorage
+from purgatory import CircuitBreakerFactory, AbstractUnitOfWork
+from purgatory.typing import Hook, TTL, Threshold
 
 from blacksmith.domain.exceptions import HTTPError
 from blacksmith.domain.model.http import HTTPRequest, HTTPResponse
@@ -17,17 +12,12 @@ from blacksmith.typing import ClientName, HttpMethod, Path
 from .base import HTTPMiddleware, Middleware
 from .prometheus import PrometheusMetrics
 
-Listeners = Optional[Iterable["CircuitBreakerListener"]]
-StateStorage = Optional["CircuitBreakerStorage"]
-CircuitBreakers = Dict[str, "AioBreaker"]
+Listeners = Optional[Iterable[Hook]]
 
 
-def exclude_httpx_4xx(exc):
+def exclude_httpx_4xx(exc: HTTPError):
     """Exclude client side http errors."""
-    if isinstance(exc, HTTPError):
-        err = cast(HTTPError, exc)
-        return err.is_client_error
-    return False
+    return exc.is_client_error
 
 
 class GaugeStateValue:
@@ -36,96 +26,68 @@ class GaugeStateValue:
     OPEN = 2
 
 
-class CircuitBreakerPrometheusListener(CircuitBreakerListener):
+class PrometheusHook:
     def __init__(self, prometheus_metrics: PrometheusMetrics):
         self.prometheus_metrics = prometheus_metrics
 
-    def failure(self, breaker: "AioBreaker", exception: Exception) -> None:
-        self.prometheus_metrics.blacksmith_circuit_breaker_error.labels(
-            breaker.name
-        ).inc()
-
-    def state_change(
-        self,
-        breaker: "AioBreaker",
-        old: "CircuitBreakerBaseState",
-        new: "CircuitBreakerBaseState",
-    ) -> None:
-        state = new.state
-        if state == CircuitBreakerState.CLOSED:
+    def __call__(self, circuit_name: str, evt_type: str, payload: Any) -> None:
+        if evt_type == "state_changed":
+            state = {
+                "closed": GaugeStateValue.CLOSED,
+                "half-opened": GaugeStateValue.HALF_OPEN,
+                "opened": GaugeStateValue.OPEN,
+            }[payload.state]
             self.prometheus_metrics.blacksmith_circuit_breaker_state.labels(
-                breaker.name
-            ).set(GaugeStateValue.CLOSED)
-        elif state == CircuitBreakerState.HALF_OPEN:
-            self.prometheus_metrics.blacksmith_circuit_breaker_state.labels(
-                breaker.name
-            ).set(GaugeStateValue.HALF_OPEN)
-        elif state == CircuitBreakerState.OPEN:
-            self.prometheus_metrics.blacksmith_circuit_breaker_state.labels(
-                breaker.name
-            ).set(GaugeStateValue.OPEN)
+                circuit_name
+            ).set(state)
+        elif evt_type == "failed":
+            self.prometheus_metrics.blacksmith_circuit_breaker_error.labels(
+                circuit_name
+            ).inc()
 
 
 class CircuitBreaker(HTTPMiddleware):
     """
-    Prevent the domino's effect using a circuit breaker.
+    Prevent cascading failure.
 
-    Requires to have the extra `circuit-breaker` installed.
-
-    ::
-
-        pip install blacksmith[circuit-breaker]
-
-    The circuit breaker is based on `aiobreaker`_, the middleware create
-    one circuit breaker per client_name. The parameters ares forwarded
+    The circuit breaker is based on `purgatory`_, the middleware create
+    one circuit breaker per client_name. The parameters are forwarded
     to all the clients. This middleware does not give the possibility to
-    adapt `fail_max` and `timeout_duration` per clients.
+    adapt a threshold or the time the circuit is opened per clients.
 
-    .. _`aiobreaker`: https://pypi.org/project/aiobreaker/
+    .. _`purgatory`: https://pypi.org/project/purgatory-circuitbreaker/
     """
-
-    breakers: CircuitBreakers
 
     def __init__(
         self,
-        fail_max=5,
-        timeout_duration: Optional[timedelta] = None,
+        threshold: Threshold = 5,
+        ttl: TTL = 30,
         listeners: Listeners = None,
-        state_storage: StateStorage = None,
+        uow: Optional[AbstractUnitOfWork] = None,
         prometheus_metrics: Optional[PrometheusMetrics] = None,
     ):
-
-        exclude = [exclude_httpx_4xx]
-        cbllisteners: List["CircuitBreakerListener"] = (
-            list(listeners) if listeners else []
+        self.circuit_breaker = CircuitBreakerFactory(
+            default_threshold=threshold,
+            default_ttl=ttl,
+            exclude=[(HTTPError, exclude_httpx_4xx)],
+            uow=uow,
         )
         if prometheus_metrics:
-            cbllisteners.append(CircuitBreakerPrometheusListener(prometheus_metrics))
+            self.circuit_breaker.add_listener(PrometheusHook(prometheus_metrics))
+        if listeners:
+            for listener in listeners:
+                self.circuit_breaker.add_listener(listener)
 
-        self.CircuitBreaker = partial(
-            aiobreaker.CircuitBreaker,
-            fail_max=fail_max,
-            timeout_duration=timeout_duration,
-            exclude=exclude,
-            listeners=cbllisteners,
-            state_storage=state_storage,
-        )
-        self.breakers = {}
-
-    def get_breaker(self, client_name: str) -> "AioBreaker":
-        if client_name not in self.breakers:
-            self.breakers[client_name] = self.CircuitBreaker(
-                name=client_name,
-            )
-        return self.breakers[client_name]
+    async def initialize(self):
+        await self.circuit_breaker.initialize()
 
     def __call__(self, next: Middleware) -> Middleware:
         async def handle(
             req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
         ) -> HTTPResponse:
 
-            breaker = self.get_breaker(client_name)
-            resp = await breaker.call_async(next, req, method, client_name, path)
+            async with await self.circuit_breaker.get_breaker(client_name):
+                resp = await next(req, method, client_name, path)
             return cast(HTTPResponse, resp)
 
         return handle

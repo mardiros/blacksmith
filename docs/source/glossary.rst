@@ -3,10 +3,6 @@ Glossary
 
 .. glossary::
 
-   aiobreaker
-      An asyncio library implement the :term:`Circuit Breaker` pattern.
-      https://github.com/arlyon/aiobreaker
-
    Cache-Control
       The cache control is a response header of an http request defined by
       `HTTP/1.1`. If contains caching directive used by browsers, CDN and any
@@ -24,18 +20,20 @@ Glossary
       It is used to detect failures and encapsulates the logic of preventing
       a failure from constantly recurring, during maintenance, temporary
       external system failure or unexpected system difficulties. 
-      https://en.wikipedia.org/wiki/Circuit_breaker_design_pattern
+
+      Source: https://en.wikipedia.org/wiki/Circuit_breaker_design_pattern
 
    client_name
-      A name for your client.
+      A **unique** name for your client. The client_name is the identifier of
+      the client. It should be reuse in the resource declaration.
 
    client-side service discovery
       The term:`service registry` is called by the client to find a host of a
       service.
 
    Consul
-      A software made to designed for service discovery.
-      Website: https://www.consul.io/
+      | A software made to designed for service discovery.
+      | Website: https://www.consul.io/
 
    Fail Fast Model
       In systems design, a fail-fast system is one which immediately reports at
@@ -44,21 +42,21 @@ Glossary
       attempt to continue a possibly flawed process.
 
    Prometheus
-      A software used for event monitoring and alerting.
-      https://prometheus.io/
+      | A software used for event monitoring and alerting.
+      | Website: https://prometheus.io/
    
    Pydantic
-      Data validation using python type annotations.
-      Type hints provides user friendly errors when data is invalid.
-      https://pydantic-docs.helpmanual.io/
+      | Data validation using python type annotations.
+      | Type hints provides user friendly errors when data is invalid.
+      | Website: https://pydantic-docs.helpmanual.io/
 
    server-side service discovery
       The client is calling a proxy server that maintain its backends server
       list by receiving notification of the term:`service registry` to maintain.
 
    service
-      A process that expose an API. In Blacksmith, service are always REST HTTP API
-      that serve Json documents.
+      | A process that expose an API.
+      | In Blacksmith, service are always REST HTTP API that serve Json documents.
 
    service discovery
       A service discovery is a mechanism to determin the endpoint of a service,

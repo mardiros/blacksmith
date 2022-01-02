@@ -87,6 +87,11 @@ services:
       - "./user:/srv/user"
       - "../../src/blacksmith:/home/notif/.cache/pypoetry/virtualenvs/notif-E5XGZiq1-py3.10/lib/python3.10/site-packages/blacksmith"
 
+  redis:
+    image: "redis"
+    networks:
+      - "internal"
+
   api_notif:
     build: ./notif
     labels:
