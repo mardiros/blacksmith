@@ -1,8 +1,9 @@
 """Cut the circuit in case a service is down."""
 
-from typing import Any, Callable, Iterable, Optional, cast
+from typing import Any, Iterable, Optional, cast
 
 from purgatory import CircuitBreakerFactory, AbstractUnitOfWork
+from purgatory.typing import Hook, TTL, Threshold
 
 from blacksmith.domain.exceptions import HTTPError
 from blacksmith.domain.model.http import HTTPRequest, HTTPResponse
@@ -11,7 +12,7 @@ from blacksmith.typing import ClientName, HttpMethod, Path
 from .base import HTTPMiddleware, Middleware
 from .prometheus import PrometheusMetrics
 
-Listeners = Optional[Iterable[Callable]]
+Listeners = Optional[Iterable[Hook]]
 
 
 def exclude_httpx_4xx(exc: HTTPError):
@@ -54,13 +55,13 @@ class CircuitBreaker(HTTPMiddleware):
     to all the clients. This middleware does not give the possibility to
     adapt a threshold or the time the circuit is opened per clients.
 
-    .. _`aiobreaker`: https://pypi.org/project/aiobreaker/
+    .. _`purgatory`: https://pypi.org/project/purgatory-circuitbreaker/
     """
 
     def __init__(
         self,
-        threshold=5,
-        ttl: float = 30,
+        threshold: Threshold = 5,
+        ttl: TTL = 30,
         listeners: Listeners = None,
         uow: Optional[AbstractUnitOfWork] = None,
         prometheus_metrics: Optional[PrometheusMetrics] = None,

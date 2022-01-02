@@ -4,15 +4,15 @@ Circuit Breaker Middleware
 In microservices, the :term:`Circuit Breaker` is used to implement a
 :term:`Fail Fast Model` to avoid :term:`cascading failure`.
 
-The :term:`Circuit Breaker` is a middleware based on `aiobreaker`_ that
-require an extra dependency.
+The :term:`Circuit Breaker` is a middleware based on `purgatory`_.
 
-.. _`aiobreaker`: https://pypi.org/project/aiobreaker/
+.. _`purgatory`: https://pypi.org/project/purgatory-circuitbreaker/
 
 
-..note::
+.. note::
 
-   circuit-breaker is optional, but it is highly recommended to use it.
+   circuit breaker is not installed by default,
+   but it is highly recommended to use it.
 
 
 To use the circuit breaker, it must be added to the client factory
@@ -26,22 +26,38 @@ middleware stack.
 
    sd = StaticDiscovery({("api", None): "http://srv:8000/"})
    cli = ClientFactory(sd).add_middleware(
-      CircuitBreaker(fail_max=5, timedelta(seconds=60))
+      CircuitBreaker(threshold=5, ttl=60)
    )
 
+The middleware create one circuit per client, identified by its
+:term:`client_name`.
+If alll consecutive call to routes of that clients happen more than
+the ``threshold``, the circuit will be open for an ellapsed time `ttl` (in seconds).
+When the cirtuit is open,  then all the incomming request will automatically
+be rejected, throwing a `purgatory.OpenedState`.
+
+.. note:: HTTPError 4xx are excluded by the circuit breaker.
+
+
+By default, the circuits breaker states are stored in memory, but, it is
+possible to share circuit breaker state using a redis server as a storage
+backend.
+
+To use a redis storage, a unit of work parameter is expected.
+
+::
+
+   from purgatory import RedisUnitOfWork
+   from blacksmith import CircuitBreaker
+
+   breaker = CircuitBreaker(
+      5, 30, uow=RedisUnitOfWork("redis://redis/0")
+   )
 
 .. note::
 
-   if `aiobreaker` is not install, an ImportError will be raised
-   at the instanciation of the class `CircuitBreaker`.
-
-
-The `CircuitBreaker` will affect all the clients, and in case one client,
-identified by its :term:`client_name` failed more than the `fail_max`, during
-an ellapsed time `timeout_duration` then all the incomming request will
-automatically be rejected, throwing a `aiobreaker.state.CircuitBreakerError`.
-
-
+   | The circuit breaker state can also be monitored using prometheus.
+   | Take a look at the full example for usage.
 
 
 Full example of the circuit_breaker
