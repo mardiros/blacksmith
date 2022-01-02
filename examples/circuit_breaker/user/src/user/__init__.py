@@ -30,7 +30,6 @@ USERS = {
 @app.route("/v1/users/{username}", methods=["GET"])
 async def show_user(request):
     username = request.path_params["username"]
-    await asyncio.sleep(random.random() * 3)
     try:
         return JSONResponse(USERS[username])
     except KeyError:
