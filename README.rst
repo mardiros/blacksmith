@@ -90,7 +90,7 @@ Read More
 
 You can read the `full documentation of this library here`_.
 
-.. _`full documentation of this library here`: https://purgatory.readthedocs.io/en/latest/user/introduction.html
+.. _`full documentation of this library here`: https://python-blacksmith.readthedocs.io/en/latest/user/introduction.html
 
 
 Contributing
