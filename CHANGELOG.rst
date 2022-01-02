@@ -1,3 +1,14 @@
+0.7.0 - Released at 2022-01-02
+------------------------------
+* Replace circuit breaker implementation.
+
+..important:
+
+   Breaking change in the middleware.
+  
+   Parameter fail_max is now named threshold
+   Parameter timeout_duration is now named ttl and is a float (number of second).
+
 0.6.3 - Released at 2021-12-29
 ------------------------------
 * Expose the HttpCachingMiddleware in blacksmith namespace
