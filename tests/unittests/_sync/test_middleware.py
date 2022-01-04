@@ -1,4 +1,3 @@
-import time
 from typing import Any, Dict, Optional, cast
 
 import prometheus_client
@@ -21,6 +20,7 @@ from blacksmith.middleware._sync.circuit_breaker import (
 from blacksmith.middleware._sync.prometheus import SyncPrometheusMetrics
 from blacksmith.middleware._sync.zipkin import AbtractTraceContext, SyncZipkinMiddleware
 from blacksmith.typing import ClientName, HttpMethod, Path
+from tests.unittests.time import SyncSleep
 
 
 def test_authorization_header():
@@ -287,7 +287,7 @@ def test_circuit_breaker_prometheus_metrics(
         echo_next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
     registry.get_sample_value("blacksmith_circuit_breaker_error", labels=["dummy"]) == 2
 
-    time.sleep(0.110)
+    SyncSleep(0.110)
     echo_next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
     registry.get_sample_value("blacksmith_circuit_breaker_error", labels=["dummy"]) == 2
     registry.get_sample_value(
@@ -300,7 +300,7 @@ def test_circuit_breaker_prometheus_metrics(
         "blacksmith_circuit_breaker_state", labels=["dummy"]
     ) == HALF_OPEN
 
-    time.sleep(0.110)
+    SyncSleep(0.110)
     cbreaker(echo_middleware)
     registry.get_sample_value("blacksmith_circuit_breaker_error", labels=["dummy"]) == 2
     registry.get_sample_value(

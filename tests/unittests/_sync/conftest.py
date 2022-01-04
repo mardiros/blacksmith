@@ -1,4 +1,3 @@
-import time
 from datetime import timedelta
 from typing import Dict, Optional, Tuple
 
@@ -15,6 +14,7 @@ from blacksmith.sd._sync.adapters.static import Endpoints, SyncStaticDiscovery
 from blacksmith.service._sync.base import SyncAbstractTransport
 from blacksmith.service._sync.client import SyncClientFactory
 from blacksmith.typing import ClientName, HttpMethod, Path
+from tests.unittests.time import SyncSleep
 
 
 @pytest.fixture
@@ -91,7 +91,7 @@ def slow_middleware():
     def next(
         req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
     ) -> HTTPResponse:
-        time.sleep(0.06)
+        SyncSleep(0.06)
         return HTTPResponse(200, req.headers, json=req)
 
     return next

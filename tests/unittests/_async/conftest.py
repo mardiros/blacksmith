@@ -1,4 +1,4 @@
-import time
+from tests.unittests.time import AsyncSleep
 from datetime import timedelta
 from typing import Dict, Optional, Tuple
 
@@ -91,7 +91,7 @@ def slow_middleware():
     async def next(
         req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
     ) -> HTTPResponse:
-        time.sleep(0.06)
+        await AsyncSleep(0.06)
         return HTTPResponse(200, req.headers, json=req)
 
     return next

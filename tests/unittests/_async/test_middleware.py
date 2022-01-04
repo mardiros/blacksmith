@@ -1,4 +1,4 @@
-import time
+from tests.unittests.time import AsyncSleep
 from typing import Any, Dict, Optional, cast
 
 import prometheus_client
@@ -294,7 +294,7 @@ async def test_circuit_breaker_prometheus_metrics(
         await echo_next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
     registry.get_sample_value("blacksmith_circuit_breaker_error", labels=["dummy"]) == 2
 
-    time.sleep(0.110)
+    await AsyncSleep(0.110)
     await echo_next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
     registry.get_sample_value("blacksmith_circuit_breaker_error", labels=["dummy"]) == 2
     registry.get_sample_value(
@@ -307,7 +307,7 @@ async def test_circuit_breaker_prometheus_metrics(
         "blacksmith_circuit_breaker_state", labels=["dummy"]
     ) == HALF_OPEN
 
-    time.sleep(0.110)
+    await AsyncSleep(0.110)
     cbreaker(echo_middleware)
     registry.get_sample_value("blacksmith_circuit_breaker_error", labels=["dummy"]) == 2
     registry.get_sample_value(
