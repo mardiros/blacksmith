@@ -115,8 +115,7 @@ async def test_client(static_sd):
     with pytest.raises(WrongRequestTypeException) as ctx:
         await client.dummies.get(PostParam(name="barbie", age=42))
     assert (
-        str(ctx.value)
-        == "Invalid type 'tests.unittests.dummy_registry.PostParam' "
+        str(ctx.value) == "Invalid type 'tests.unittests.dummy_registry.PostParam' "
         "for route 'GET' in resource 'dummies' in client 'api'"
     )
 

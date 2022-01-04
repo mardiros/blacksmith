@@ -84,13 +84,17 @@ async def test_consul_discovery_resolve_unregistered(consul_sd: AsyncConsulDisco
 
 
 @pytest.mark.asyncio
-async def test_consul_discovery_get_unversionned_endpoint(consul_sd: AsyncConsulDiscovery):
+async def test_consul_discovery_get_unversionned_endpoint(
+    consul_sd: AsyncConsulDiscovery,
+):
     endpoint = await consul_sd.get_endpoint("dummy", None)
     assert endpoint == "http://8.8.8.8:1234"
 
 
 @pytest.mark.asyncio
-async def test_consul_discovery_get_endpoint_unregistered(consul_sd: AsyncConsulDiscovery):
+async def test_consul_discovery_get_endpoint_unregistered(
+    consul_sd: AsyncConsulDiscovery,
+):
     with pytest.raises(UnregisteredServiceException) as ctx:
         await consul_sd.get_endpoint("dummy", "v2")
     assert str(ctx.value) == "Unregistered service 'dummy/v2'"

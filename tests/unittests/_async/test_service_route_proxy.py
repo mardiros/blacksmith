@@ -226,8 +226,7 @@ async def test_route_proxy_prepare_wrong_type():
         )
 
     assert (
-        str(exc.value)
-        == "Invalid type 'tests.unittests.dummy_registry.PostParam' "
+        str(exc.value) == "Invalid type 'tests.unittests.dummy_registry.PostParam' "
         "for route 'GET' in resource 'dummies' in client 'dummy'"
     )
 
