@@ -2,7 +2,7 @@
 
 from typing import Any, Iterable, Optional, cast
 
-from purgatory import CircuitBreakerFactory, AbstractUnitOfWork
+from purgatory import AsyncCircuitBreakerFactory, AsyncAbstractUnitOfWork
 from purgatory.typing import Hook, TTL, Threshold
 
 from blacksmith.domain.exceptions import HTTPError
@@ -63,10 +63,10 @@ class CircuitBreaker(HTTPMiddleware):
         threshold: Threshold = 5,
         ttl: TTL = 30,
         listeners: Listeners = None,
-        uow: Optional[AbstractUnitOfWork] = None,
+        uow: Optional[AsyncAbstractUnitOfWork] = None,
         prometheus_metrics: Optional[PrometheusMetrics] = None,
     ):
-        self.circuit_breaker = CircuitBreakerFactory(
+        self.circuit_breaker = AsyncCircuitBreakerFactory(
             default_threshold=threshold,
             default_ttl=ttl,
             exclude=[(HTTPError, exclude_httpx_4xx)],

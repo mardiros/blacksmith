@@ -219,7 +219,7 @@ async def test_circuit_breaker_5xx(
 
     with pytest.raises(OpenedState) as exc:
         await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
-    assert str(exc.value) == "Circuit breaker is open"
+    assert str(exc.value) == "Circuit dummy is open"
 
     # Event if it works, the circuit breaker is open
     next = cbreaker(echo_middleware)
@@ -259,7 +259,7 @@ async def test_circuit_breaker_prometheus_metrics(
     prom = PrometheusMetrics(registry=registry)
     cbreaker = CircuitBreaker(
         threshold=2,
-        ttl=.100,
+        ttl=0.100,
         prometheus_metrics=prom,
     )
     echo_next = cbreaker(echo_middleware)

@@ -1,5 +1,4 @@
 import asyncio
-from typing import cast
 
 from hypercorn.asyncio import serve
 from hypercorn.config import Config
