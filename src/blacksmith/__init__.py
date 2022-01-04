@@ -34,6 +34,21 @@ from .sd._async.adapters.router import AsyncRouterDiscovery
 from .sd._async.adapters.static import AsyncStaticDiscovery
 from .service._async.client import AsyncClientFactory
 
+from .middleware._sync import (
+    SyncCircuitBreaker,
+    SyncHTTPAddHeadersMiddleware,
+    SyncHTTPAuthorization,
+    SyncHTTPBearerAuthorization,
+    SyncHttpCachingMiddleware,
+    SyncHTTPMiddleware,
+    SyncMiddleware,
+    SyncPrometheusMetrics,
+)
+from .sd._sync.adapters.consul import SyncConsulDiscovery
+from .sd._sync.adapters.router import SyncRouterDiscovery
+from .sd._sync.adapters.static import SyncStaticDiscovery
+from .service._sync.client import SyncClientFactory
+
 __all__ = [
     "AsyncCircuitBreaker",
     "AsyncClientFactory",
@@ -58,5 +73,17 @@ __all__ = [
     "Response",
     "ResponseBox",
     "scan",
+    "SyncCircuitBreaker",
+    "SyncHTTPAddHeadersMiddleware",
+    "SyncHTTPAuthorization",
+    "SyncHTTPBearerAuthorization",
+    "SyncHttpCachingMiddleware",
+    "SyncHTTPMiddleware",
+    "SyncMiddleware",
+    "SyncPrometheusMetrics",
+    "SyncConsulDiscovery",
+    "SyncRouterDiscovery",
+    "SyncStaticDiscovery",
+    "SyncClientFactory",
     "TimeoutError",
 ]
