@@ -3,9 +3,14 @@ import os
 import sys
 
 import blacksmith
-from blacksmith import HTTPAuthorization, PathInfoField, Request, Response
-from blacksmith.sd._async.adapters import StaticDiscovery
-from blacksmith.service.client import ClientFactory
+from blacksmith import (
+    AsyncClientFactory,
+    AsyncHTTPAuthorization,
+    AsyncStaticDiscovery,
+    PathInfoField,
+    Request,
+    Response,
+)
 
 
 class TLDInfoGetParam(Request):
@@ -42,9 +47,9 @@ async def main():
         print("Missing environment var GANDIV5_API_KEY", file=sys.stderr)
         sys.exit(-1)
     apikey = os.environ["GANDIV5_API_KEY"]
-    sd = StaticDiscovery({("gandi", "v5"): "https://api.gandi.net/v5"})
-    auth = HTTPAuthorization("Apikey", apikey)
-    cli = ClientFactory(sd).add_middleware(auth)
+    sd = AsyncStaticDiscovery({("gandi", "v5"): "https://api.gandi.net/v5"})
+    auth = AsyncHTTPAuthorization("Apikey", apikey)
+    cli = AsyncClientFactory(sd).add_middleware(auth)
     api = await cli("gandi")
     tld: TLDResponse = (await api.tld.get(TLDInfoGetParam(name="eu"))).response
     print(tld)

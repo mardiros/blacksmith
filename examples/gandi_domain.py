@@ -8,14 +8,14 @@ from pydantic.main import BaseModel
 
 import blacksmith
 from blacksmith import (
-    ClientFactory,
+    AsyncClientFactory,
+    AsyncHTTPAuthorization,
+    AsyncStaticDiscovery,
     CollectionIterator,
-    HTTPAuthorization,
     PathInfoField,
     QueryStringField,
     Request,
     Response,
-    StaticDiscovery,
 )
 
 
@@ -67,9 +67,9 @@ async def main():
         print("Missing environment var GANDIV5_API_KEY", file=sys.stderr)
         sys.exit(-1)
     apikey = os.environ["GANDIV5_API_KEY"]
-    sd = StaticDiscovery({("gandi", "v5"): "https://api.gandi.net/v5"})
-    auth = HTTPAuthorization("Apikey", apikey)
-    cli = ClientFactory(sd, timeout=(10.0)).add_middleware(auth)
+    sd = AsyncStaticDiscovery({("gandi", "v5"): "https://api.gandi.net/v5"})
+    auth = AsyncHTTPAuthorization("Apikey", apikey)
+    cli = AsyncClientFactory(sd, timeout=(10.0)).add_middleware(auth)
     api = await cli("gandi")
     if len(sys.argv) == 2:
         domain = sys.argv[1]

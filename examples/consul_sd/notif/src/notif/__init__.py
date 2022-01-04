@@ -10,16 +10,16 @@ from starlette.applications import Starlette
 from starlette.responses import JSONResponse
 
 import blacksmith
-from blacksmith import ClientFactory, ConsulDiscovery
+from blacksmith import AsyncClientFactory, AsyncConsulDiscovery
 
 app = Starlette(debug=True)
 
 blacksmith.scan("notif.resources")
-sd = ConsulDiscovery()
-cli = ClientFactory(sd)
+sd = AsyncConsulDiscovery()
+cli = AsyncClientFactory(sd)
 
 
-smtp_sd = ConsulDiscovery(unversioned_service_url_fmt="{address} {port}")
+smtp_sd = AsyncConsulDiscovery(unversioned_service_url_fmt="{address} {port}")
 
 
 async def send_email(user: User, message: str):

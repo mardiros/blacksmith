@@ -11,17 +11,21 @@ from starlette.applications import Starlette
 from starlette.responses import JSONResponse
 
 import blacksmith
-from blacksmith import ClientFactory, ConsulDiscovery, HttpCachingMiddleware
+from blacksmith import (
+    AsyncClientFactory,
+    AsyncConsulDiscovery,
+    AsyncHttpCachingMiddleware,
+)
 
 app = Starlette(debug=True)
 
 cache = aioredis.from_url("redis://redis/0")
 blacksmith.scan("notif.resources")
-sd = ConsulDiscovery()
-cli = ClientFactory(sd).add_middleware(HttpCachingMiddleware(cache))
+sd = AsyncConsulDiscovery()
+cli = AsyncClientFactory(sd).add_middleware(AsyncHttpCachingMiddleware(cache))
 
 
-smtp_sd = ConsulDiscovery(unversioned_service_url_fmt="{address} {port}")
+smtp_sd = AsyncConsulDiscovery(unversioned_service_url_fmt="{address} {port}")
 
 
 async def send_email(user: User, message: str):

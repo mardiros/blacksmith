@@ -5,8 +5,8 @@ import pytest
 
 import blacksmith
 from blacksmith import (
-    AsyncStaticDiscovery,
     AsyncClientFactory,
+    AsyncStaticDiscovery,
     PathInfoField,
     PostBodyField,
     QueryStringField,
