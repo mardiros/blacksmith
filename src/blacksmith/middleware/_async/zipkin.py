@@ -1,7 +1,7 @@
 """Trace with zipkin of jaegger."""
 
 import abc
-from typing import Any, Dict, Optional
+from typing import Any, Callable, Dict, Optional, Type
 
 from blacksmith.domain.model.http import HTTPRequest, HTTPResponse
 from blacksmith.typing import ClientName, HttpMethod, Path
@@ -52,7 +52,7 @@ class AsyncZipkinMiddleware(AsyncHTTPMiddleware):
     :param trace: A deferred context manager that manage the trace span stack.
     """
 
-    def __init__(self, trace: AbtractTraceContext) -> None:
+    def __init__(self, trace: Type[AbtractTraceContext]) -> None:
         self.trace = trace
 
     def __call__(self, next: AsyncMiddleware) -> AsyncMiddleware:
