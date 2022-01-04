@@ -4,7 +4,7 @@ import sys
 
 import blacksmith
 from blacksmith import HTTPAuthorization, PathInfoField, Request, Response
-from blacksmith.sd.adapters import StaticDiscovery
+from blacksmith.sd._async.adapters import StaticDiscovery
 from blacksmith.service.client import ClientFactory
 
 

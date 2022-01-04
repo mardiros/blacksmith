@@ -6,7 +6,7 @@ from blacksmith.domain.model.params import CollectionParser
 from blacksmith.domain.registry import Registry, Resources
 from blacksmith.domain.registry import registry as default_registry
 from blacksmith.middleware._async.base import AsyncHTTPMiddleware
-from blacksmith.sd.base import AbstractServiceDiscovery
+from blacksmith.sd._async.base import AsyncAbstractServiceDiscovery
 from blacksmith.service.adapters.httpx import HttpxTransport
 from blacksmith.typing import ClientName, ResourceName, Url
 
@@ -80,7 +80,7 @@ class ClientFactory:
     :param metrics: a metrics collector.
     """
 
-    sd: AbstractServiceDiscovery
+    sd: AsyncAbstractServiceDiscovery
     registry: Registry
     transport: AbstractTransport
     auth: HTTPAuthentication
@@ -90,7 +90,7 @@ class ClientFactory:
 
     def __init__(
         self,
-        sd: AbstractServiceDiscovery,
+        sd: AsyncAbstractServiceDiscovery,
         transport: AbstractTransport = None,
         registry: Registry = default_registry,
         timeout: ClientTimeout = HTTPTimeout(),

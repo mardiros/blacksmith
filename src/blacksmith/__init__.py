@@ -29,9 +29,9 @@ from .middleware._async import (
     AsyncMiddleware,
     AsyncPrometheusMetrics,
 )
-from .sd.adapters.consul import ConsulDiscovery
-from .sd.adapters.router import RouterDiscovery
-from .sd.adapters.static import StaticDiscovery
+from .sd._async.adapters.consul import AsyncConsulDiscovery
+from .sd._async.adapters.router import AsyncRouterDiscovery
+from .sd._async.adapters.static import AsyncStaticDiscovery
 from .service.client import ClientFactory
 
 __all__ = [

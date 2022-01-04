@@ -12,8 +12,8 @@ from blacksmith.domain.exceptions import HTTPError, UnregisteredServiceException
 from blacksmith.domain.model import PathInfoField, Request, Response
 from blacksmith.domain.registry import Registry
 from blacksmith.middleware._async.auth import AsyncHTTPBearerAuthorization
-from blacksmith.sd.adapters.static import StaticDiscovery
-from blacksmith.sd.base import AbstractServiceDiscovery, Url
+from blacksmith.sd._async.adapters.static import AsyncStaticDiscovery
+from blacksmith.sd._async.base import AsyncAbstractServiceDiscovery, Url
 from blacksmith.service.client import ClientFactory
 from blacksmith.typing import ServiceName, Version
 
@@ -53,7 +53,7 @@ _registry.register(
 
 
 def blacksmith_cli(endpoint: Url, consul_token: str) -> ClientFactory:
-    sd = StaticDiscovery({("consul", "v1"): endpoint})
+    sd = AsyncStaticDiscovery({("consul", "v1"): endpoint})
     kwargs = {}
     fact = ClientFactory(sd, registry=_registry, **kwargs)
     if consul_token:
@@ -61,7 +61,7 @@ def blacksmith_cli(endpoint: Url, consul_token: str) -> ClientFactory:
     return fact
 
 
-class ConsulDiscovery(AbstractServiceDiscovery):
+class AsyncConsulDiscovery(AsyncAbstractServiceDiscovery):
     """
     A discovery instance based on a :term:`Consul` server.
 

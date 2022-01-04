@@ -10,12 +10,12 @@ from typing import Mapping
 from blacksmith.domain.exceptions import UnregisteredServiceException
 from blacksmith.typing import Service, ServiceName, Version
 
-from ..base import AbstractServiceDiscovery, Url
+from ..base import AsyncAbstractServiceDiscovery, Url
 
 Endpoints = Mapping[Service, Url]
 
 
-class StaticDiscovery(AbstractServiceDiscovery):
+class AsyncStaticDiscovery(AsyncAbstractServiceDiscovery):
     """
     A discovery instance based on a static dictionary.
     """

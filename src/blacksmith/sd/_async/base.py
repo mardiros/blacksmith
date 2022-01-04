@@ -1,9 +1,9 @@
 import abc
 
-from ..typing import ServiceName, Url, Version
+from blacksmith.typing import ServiceName, Url, Version
 
 
-class AbstractServiceDiscovery(abc.ABC):
+class AsyncAbstractServiceDiscovery(abc.ABC):
     """Define the Service Discovery interface."""
 
     @abc.abstractmethod

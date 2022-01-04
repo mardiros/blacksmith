@@ -9,9 +9,9 @@ from blacksmith.domain.model import HTTPRequest, HTTPResponse, HTTPTimeout
 from blacksmith.middleware._async.auth import AsyncHTTPAuthorization
 from blacksmith.middleware._async.base import AsyncHTTPAddHeadersMiddleware
 from blacksmith.middleware._async.http_caching import AsyncAbstractCache
-from blacksmith.sd.adapters.consul import ConsulDiscovery, _registry
-from blacksmith.sd.adapters.router import RouterDiscovery
-from blacksmith.sd.adapters.static import Endpoints, StaticDiscovery
+from blacksmith.sd._async.adapters.consul import AsyncConsulDiscovery, _registry
+from blacksmith.sd._async.adapters.router import AsyncRouterDiscovery
+from blacksmith.sd._async.adapters.static import Endpoints, AsyncStaticDiscovery
 from blacksmith.service.base import AbstractTransport
 from blacksmith.service.client import ClientFactory
 from blacksmith.typing import ClientName, HttpMethod, Path
@@ -20,7 +20,7 @@ from blacksmith.typing import ClientName, HttpMethod, Path
 @pytest.fixture
 def static_sd():
     dummy_endpoints: Endpoints = {("dummy", "v1"): "https://dummy.v1/"}
-    return StaticDiscovery(dummy_endpoints)
+    return AsyncStaticDiscovery(dummy_endpoints)
 
 
 class FakeConsulTransport(AbstractTransport):
@@ -141,17 +141,17 @@ def dummy_middleware():
 def consul_sd():
     def cli(url: str, tok: str) -> ClientFactory:
         return ClientFactory(
-            sd=StaticDiscovery({("consul", "v1"): url}),
+            sd=AsyncStaticDiscovery({("consul", "v1"): url}),
             registry=_registry,
             transport=FakeConsulTransport(),
         ).add_middleware(AsyncHTTPAuthorization("Bearer", tok))
 
-    return ConsulDiscovery(_client_factory=cli)
+    return AsyncConsulDiscovery(_client_factory=cli)
 
 
 @pytest.fixture
 def router_sd():
-    return RouterDiscovery()
+    return AsyncRouterDiscovery()
 
 
 class AsyncFakeHttpMiddlewareCache(AsyncAbstractCache):

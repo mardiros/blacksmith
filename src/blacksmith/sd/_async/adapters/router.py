@@ -4,10 +4,10 @@ The Server-Side Service discovery strategy.
 """
 from blacksmith.typing import ServiceName, Version
 
-from ..base import AbstractServiceDiscovery, Url
+from ..base import AsyncAbstractServiceDiscovery, Url
 
 
-class RouterDiscovery(AbstractServiceDiscovery):
+class AsyncRouterDiscovery(AsyncAbstractServiceDiscovery):
     """
     Router that implement a :term:`Server-Side Service discovery`.
 
