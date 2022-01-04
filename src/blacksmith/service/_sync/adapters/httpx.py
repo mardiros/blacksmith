@@ -4,10 +4,10 @@ from httpx import Timeout as HttpxTimeout
 
 from blacksmith.domain.exceptions import HTTPError
 from blacksmith.domain.model import HTTPRequest, HTTPResponse, HTTPTimeout
-from blacksmith.service.ports import AsyncClient
+from blacksmith.service.ports import SyncClient
 from blacksmith.typing import HttpMethod
 
-from ..base import AsyncAbstractTransport
+from ..base import SyncAbstractTransport
 
 
 def safe_json(r: HttpxRepsonse):
@@ -17,7 +17,7 @@ def safe_json(r: HttpxRepsonse):
         return {"error": r.text}
 
 
-class AsyncHttpxTransport(AsyncAbstractTransport):
+class SyncHttpxTransport(SyncAbstractTransport):
     """
     Transport implemented using `httpx`_.
 
@@ -25,15 +25,15 @@ class AsyncHttpxTransport(AsyncAbstractTransport):
 
     """
 
-    async def request(
+    def request(
         self, method: HttpMethod, request: HTTPRequest, timeout: HTTPTimeout
     ) -> HTTPResponse:
         headers = request.headers.copy()
         if request.body:
             headers["Content-Type"] = "application/json"
-        async with AsyncClient() as client:
+        with SyncClient() as client:
             try:
-                r = await client.request(
+                r = client.request(
                     method,
                     request.url,
                     params=request.querystring,
