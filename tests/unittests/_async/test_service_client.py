@@ -1,7 +1,6 @@
 import pytest
 from prometheus_client import CollectorRegistry
 
-from blacksmith import PathInfoField, Request, Response
 from blacksmith.domain.exceptions import (
     HTTPError,
     NoContractException,
@@ -15,15 +14,21 @@ from blacksmith.domain.model import (
     HTTPRequest,
     HTTPResponse,
     HTTPTimeout,
-    PostBodyField,
     ResponseBox,
 )
-from blacksmith.domain.registry import ApiRoutes, Registry
+from blacksmith.domain.registry import ApiRoutes
 from blacksmith.middleware.auth import HTTPAuthorization
 from blacksmith.middleware.prometheus import PrometheusMetrics
 from blacksmith.service.base import AbstractTransport
 from blacksmith.service.client import Client, ClientFactory
 from blacksmith.typing import HttpMethod
+
+from tests.unittests.dummy_registry import (
+    GetParam,
+    GetResponse,
+    PostParam,
+    dummy_registry,
+)
 
 
 class FakeTransport(AbstractTransport):
@@ -44,31 +49,6 @@ class FakeTimeoutTransport(AbstractTransport):
         self, method: HttpMethod, request: HTTPRequest, timeout: HTTPTimeout
     ) -> HTTPResponse:
         raise TimeoutError(f"ReadTimeout while calling {method} {request.url}")
-
-
-class GetParam(Request):
-    name: str = PathInfoField(str)
-
-
-class PostParam(Request):
-    name: str = PostBodyField(str)
-    age: int = PostBodyField(int)
-
-
-class GetResponse(Response):
-    name: str
-    age: int
-
-
-dummy_registry = Registry()
-dummy_registry.register(
-    "api",
-    "dummies",
-    "dummy",
-    "v1",
-    "/dummies/{name}",
-    {"GET": (GetParam, GetResponse)},
-)
 
 
 @pytest.mark.asyncio
@@ -136,7 +116,7 @@ async def test_client(static_sd):
         await client.dummies.get(PostParam(name="barbie", age=42))
     assert (
         str(ctx.value)
-        == "Invalid type 'tests.unittests.test_service_client.PostParam' "
+        == "Invalid type 'tests.unittests.dummy_registry.PostParam' "
         "for route 'GET' in resource 'dummies' in client 'api'"
     )
 

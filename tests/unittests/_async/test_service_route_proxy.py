@@ -1,6 +1,6 @@
 import pytest
 
-from blacksmith import PathInfoField, PostBodyField, Request, Response
+from blacksmith import Request
 from blacksmith.domain.exceptions import (
     HTTPError,
     NoContractException,
@@ -19,6 +19,8 @@ from blacksmith.middleware.base import HTTPAddHeadersMiddleware
 from blacksmith.service.base import AbstractTransport
 from blacksmith.service.route_proxy import RouteProxy, build_timeout
 from blacksmith.typing import HttpMethod
+
+from tests.unittests.dummy_registry import GetParam, GetResponse, PostParam
 
 
 class FakeTransport(AbstractTransport):
@@ -202,17 +204,6 @@ async def test_route_proxy_prepare_wrong_type():
     resp = HTTPResponse(200, {}, "")
     tp = FakeTransport(resp)
 
-    class GetParam(Request):
-        name: str = PathInfoField(str)
-
-    class GetResponse(Response):
-        name: str
-        age: int
-
-    class PostParam(Request):
-        name: str = PostBodyField(str)
-        age: int = PostBodyField(int)
-
     proxy = RouteProxy(
         "dummy",
         "dummies",
@@ -236,7 +227,7 @@ async def test_route_proxy_prepare_wrong_type():
 
     assert (
         str(exc.value)
-        == "Invalid type 'tests.unittests.test_service_route_proxy.PostParam' "
+        == "Invalid type 'tests.unittests.dummy_registry.PostParam' "
         "for route 'GET' in resource 'dummies' in client 'dummy'"
     )
 
