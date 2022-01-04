@@ -4,12 +4,12 @@ from textwrap import dedent
 
 from notif.resources.user import User
 from prometheus_client import CONTENT_TYPE_LATEST, REGISTRY, generate_latest
+from purgatory import RedisUnitOfWork
 from starlette.applications import Starlette
 from starlette.responses import JSONResponse, Response
 
 import blacksmith
 from blacksmith import CircuitBreaker, ClientFactory, ConsulDiscovery, PrometheusMetrics
-from purgatory import RedisUnitOfWork
 
 app = Starlette(debug=True)
 

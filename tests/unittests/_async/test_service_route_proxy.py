@@ -16,14 +16,13 @@ from blacksmith.domain.model import (
 from blacksmith.domain.registry import ApiRoutes
 from blacksmith.middleware._async.auth import AsyncHTTPAuthorization
 from blacksmith.middleware._async.base import AsyncHTTPAddHeadersMiddleware
-from blacksmith.service.base import AbstractTransport
-from blacksmith.service.route_proxy import RouteProxy, build_timeout
+from blacksmith.service._async.base import AsyncAbstractTransport
+from blacksmith.service._async.route_proxy import AsyncRouteProxy, build_timeout
 from blacksmith.typing import HttpMethod
-
 from tests.unittests.dummy_registry import GetParam, GetResponse, PostParam
 
 
-class FakeTransport(AbstractTransport):
+class FakeTransport(AsyncAbstractTransport):
     def __init__(self, resp: HTTPResponse) -> None:
         super().__init__()
         self.resp = resp
@@ -49,7 +48,7 @@ def test_build_timeout():
 async def test_route_proxy_prepare_middleware(dummy_http_request, echo_transport):
     resp = HTTPResponse(200, {}, "")
 
-    proxy = RouteProxy(
+    proxy = AsyncRouteProxy(
         "dummy",
         "dummies",
         "http://dummy/",
@@ -88,7 +87,7 @@ async def test_route_proxy_prepare_unregistered_method_resource():
     resp = HTTPResponse(200, {}, "")
     tp = FakeTransport(resp)
 
-    proxy = RouteProxy(
+    proxy = AsyncRouteProxy(
         "dummy",
         "dummies",
         "http://dummy/",
@@ -117,7 +116,7 @@ async def test_route_proxy_prepare_unregistered_method_collection():
     resp = HTTPResponse(200, {}, "")
     tp = FakeTransport(resp)
 
-    proxy = RouteProxy(
+    proxy = AsyncRouteProxy(
         "dummy",
         "dummies",
         "http://dummy/",
@@ -146,7 +145,7 @@ async def test_route_proxy_prepare_unregistered_resource():
     resp = HTTPResponse(200, {}, "")
     tp = FakeTransport(resp)
 
-    proxy = RouteProxy(
+    proxy = AsyncRouteProxy(
         "dummy",
         "dummies",
         "http://dummy/",
@@ -175,7 +174,7 @@ async def test_route_proxy_prepare_unregistered_collection():
     resp = HTTPResponse(200, {}, "")
     tp = FakeTransport(resp)
 
-    proxy = RouteProxy(
+    proxy = AsyncRouteProxy(
         "dummy",
         "dummies",
         "http://dummy/",
@@ -204,7 +203,7 @@ async def test_route_proxy_prepare_wrong_type():
     resp = HTTPResponse(200, {}, "")
     tp = FakeTransport(resp)
 
-    proxy = RouteProxy(
+    proxy = AsyncRouteProxy(
         "dummy",
         "dummies",
         "http://dummy/",
@@ -235,7 +234,7 @@ async def test_route_proxy_prepare_wrong_type():
 async def test_route_proxy_collection_head():
     resp = HTTPResponse(200, {}, "")
     tp = FakeTransport(resp)
-    proxy = RouteProxy(
+    proxy = AsyncRouteProxy(
         "dummy",
         "dummies",
         "http://dummy/",
@@ -262,7 +261,7 @@ async def test_route_proxy_collection_get():
     )
     tp = FakeTransport(resp)
 
-    proxy = RouteProxy(
+    proxy = AsyncRouteProxy(
         "dummy",
         "dummies",
         "http://dummy/",
@@ -295,7 +294,7 @@ async def test_route_proxy_collection_get_with_parser():
     )
     tp = FakeTransport(resp)
 
-    proxy = RouteProxy(
+    proxy = AsyncRouteProxy(
         "dummy",
         "dummies",
         "http://dummy/",
@@ -323,7 +322,7 @@ async def test_route_proxy_collection_post():
     resp = HTTPResponse(202, {}, {"detail": "accepted"})
     tp = FakeTransport(resp)
 
-    proxy = RouteProxy(
+    proxy = AsyncRouteProxy(
         "dummy",
         "dummies",
         "http://dummy/",
@@ -348,7 +347,7 @@ async def test_route_proxy_collection_put():
     resp = HTTPResponse(202, {}, {"detail": "accepted"})
     tp = FakeTransport(resp)
 
-    proxy = RouteProxy(
+    proxy = AsyncRouteProxy(
         "dummy",
         "dummies",
         "http://dummy/",
@@ -373,7 +372,7 @@ async def test_route_proxy_collection_patch():
     resp = HTTPResponse(202, {}, {"detail": "accepted"})
     tp = FakeTransport(resp)
 
-    proxy = RouteProxy(
+    proxy = AsyncRouteProxy(
         "dummy",
         "dummies",
         "http://dummy/",
@@ -398,7 +397,7 @@ async def test_route_proxy_collection_delete():
     resp = HTTPResponse(202, {}, {"detail": "accepted"})
     tp = FakeTransport(resp)
 
-    proxy = RouteProxy(
+    proxy = AsyncRouteProxy(
         "dummy",
         "dummies",
         "http://dummy/",
@@ -423,7 +422,7 @@ async def test_route_proxy_collection_options():
     resp = HTTPResponse(202, {}, {"detail": "accepted"})
     tp = FakeTransport(resp)
 
-    proxy = RouteProxy(
+    proxy = AsyncRouteProxy(
         "dummy",
         "dummies",
         "http://dummy/",
@@ -447,7 +446,7 @@ async def test_route_proxy_collection_options():
 async def test_route_proxy_head():
     resp = HTTPResponse(200, {}, "")
     tp = FakeTransport(resp)
-    proxy = RouteProxy(
+    proxy = AsyncRouteProxy(
         "dummy",
         "dummies",
         "http://dummy/",
@@ -472,7 +471,7 @@ async def test_route_proxy_get():
     resp = HTTPResponse(200, {}, [{"name": "alice"}, {"name": "bob"}])
     tp = FakeTransport(resp)
 
-    proxy = RouteProxy(
+    proxy = AsyncRouteProxy(
         "dummy",
         "dummies",
         "http://dummy/",
@@ -497,7 +496,7 @@ async def test_route_proxy_post():
     resp = HTTPResponse(202, {}, {"detail": "accepted"})
     tp = FakeTransport(resp)
 
-    proxy = RouteProxy(
+    proxy = AsyncRouteProxy(
         "dummy",
         "dummies",
         "http://dummy/",
@@ -522,7 +521,7 @@ async def test_route_proxy_put():
     resp = HTTPResponse(202, {}, {"detail": "accepted"})
     tp = FakeTransport(resp)
 
-    proxy = RouteProxy(
+    proxy = AsyncRouteProxy(
         "dummy",
         "dummies",
         "http://dummy/",
@@ -547,7 +546,7 @@ async def test_route_proxy_patch():
     resp = HTTPResponse(202, {}, {"detail": "accepted"})
     tp = FakeTransport(resp)
 
-    proxy = RouteProxy(
+    proxy = AsyncRouteProxy(
         "dummy",
         "dummies",
         "http://dummy/",
@@ -572,7 +571,7 @@ async def test_route_proxy_delete():
     resp = HTTPResponse(202, {}, {"detail": "accepted"})
     tp = FakeTransport(resp)
 
-    proxy = RouteProxy(
+    proxy = AsyncRouteProxy(
         "dummy",
         "dummies",
         "http://dummy/",
@@ -597,7 +596,7 @@ async def test_route_proxy_options():
     resp = HTTPResponse(202, {}, {"detail": "accepted"})
     tp = FakeTransport(resp)
 
-    proxy = RouteProxy(
+    proxy = AsyncRouteProxy(
         "dummy",
         "dummies",
         "http://dummy/",

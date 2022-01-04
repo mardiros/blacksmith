@@ -14,7 +14,7 @@ from blacksmith.domain.registry import Registry
 from blacksmith.middleware._async.auth import AsyncHTTPBearerAuthorization
 from blacksmith.sd._async.adapters.static import AsyncStaticDiscovery
 from blacksmith.sd._async.base import AsyncAbstractServiceDiscovery, Url
-from blacksmith.service.client import ClientFactory
+from blacksmith.service._async.client import AsyncClientFactory
 from blacksmith.typing import ServiceName, Version
 
 
@@ -52,10 +52,10 @@ _registry.register(
 )
 
 
-def blacksmith_cli(endpoint: Url, consul_token: str) -> ClientFactory:
+def blacksmith_cli(endpoint: Url, consul_token: str) -> AsyncClientFactory:
     sd = AsyncStaticDiscovery({("consul", "v1"): endpoint})
     kwargs = {}
-    fact = ClientFactory(sd, registry=_registry, **kwargs)
+    fact = AsyncClientFactory(sd, registry=_registry, **kwargs)
     if consul_token:
         fact.add_middleware(AsyncHTTPBearerAuthorization(consul_token))
     return fact
@@ -85,7 +85,7 @@ class AsyncConsulDiscovery(AsyncAbstractServiceDiscovery):
         unversioned_service_name_fmt: str = "{service}",
         unversioned_service_url_fmt: str = "http://{address}:{port}",
         consul_token: str = "",
-        _client_factory: Callable[[Url, str], ClientFactory] = blacksmith_cli,
+        _client_factory: Callable[[Url, str], AsyncClientFactory] = blacksmith_cli,
     ) -> None:
         self.blacksmith_cli = _client_factory(addr, consul_token)
         self.service_name_fmt = service_name_fmt

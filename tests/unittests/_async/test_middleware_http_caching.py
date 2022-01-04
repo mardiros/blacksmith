@@ -2,8 +2,8 @@ import pytest
 
 from blacksmith.domain.model.http import HTTPRequest, HTTPResponse
 from blacksmith.middleware._async.http_caching import (
-    CacheControlPolicy,
     AsyncHttpCachingMiddleware,
+    CacheControlPolicy,
     get_max_age,
     get_vary_header_split,
     int_or_0,

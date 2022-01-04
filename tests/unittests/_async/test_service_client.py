@@ -19,10 +19,9 @@ from blacksmith.domain.model import (
 from blacksmith.domain.registry import ApiRoutes
 from blacksmith.middleware._async.auth import AsyncHTTPAuthorization
 from blacksmith.middleware._async.prometheus import AsyncPrometheusMetrics
-from blacksmith.service.base import AbstractTransport
-from blacksmith.service.client import Client, ClientFactory
+from blacksmith.service._async.base import AsyncAbstractTransport
+from blacksmith.service._async.client import AsyncClient, AsyncClientFactory
 from blacksmith.typing import HttpMethod
-
 from tests.unittests.dummy_registry import (
     GetParam,
     GetResponse,
@@ -31,7 +30,7 @@ from tests.unittests.dummy_registry import (
 )
 
 
-class FakeTransport(AbstractTransport):
+class FakeTransport(AsyncAbstractTransport):
     def __init__(self, resp: HTTPResponse) -> None:
         super().__init__()
         self.resp = resp
@@ -44,7 +43,7 @@ class FakeTransport(AbstractTransport):
         return self.resp
 
 
-class FakeTimeoutTransport(AbstractTransport):
+class FakeTimeoutTransport(AsyncAbstractTransport):
     async def request(
         self, method: HttpMethod, request: HTTPRequest, timeout: HTTPTimeout
     ) -> HTTPResponse:
@@ -68,7 +67,7 @@ async def test_client(static_sd):
         "/dummies/{name}", {"GET": (GetParam, GetResponse)}, None, None, None
     )
 
-    client = Client(
+    client = AsyncClient(
         "api",
         "https://dummies.v1",
         {"dummies": routes},
@@ -127,7 +126,7 @@ async def test_client_timeout(static_sd):
         "/dummies/{name}", {"GET": (GetParam, GetResponse)}, None, None, None
     )
 
-    client = Client(
+    client = AsyncClient(
         "api",
         "http://dummies.v1",
         {"dummies": routes},
@@ -150,7 +149,7 @@ async def test_client_factory(static_sd, dummy_middleware):
     auth = AsyncHTTPAuthorization("Bearer", "abc")
     prom = AsyncPrometheusMetrics(registry=CollectorRegistry())
     client_factory = (
-        ClientFactory(static_sd, tp, registry=dummy_registry)
+        AsyncClientFactory(static_sd, tp, registry=dummy_registry)
         .add_middleware(prom)
         .add_middleware(auth)
     )
@@ -172,7 +171,7 @@ async def test_client_factory(static_sd, dummy_middleware):
 async def test_client_factory_initialize_middlewares(
     echo_transport, static_sd, dummy_middleware
 ):
-    client_factory = ClientFactory(
+    client_factory = AsyncClientFactory(
         static_sd, echo_transport, registry=dummy_registry
     ).add_middleware(dummy_middleware)
     assert dummy_middleware.initialized == 0

@@ -7,7 +7,7 @@ from blacksmith.domain.exceptions import HTTPError
 from blacksmith.domain.model import HTTPRequest, HTTPResponse, HTTPTimeout
 from blacksmith.typing import HttpMethod
 
-from ..base import AbstractTransport
+from ..base import AsyncAbstractTransport
 
 
 def safe_json(r: HttpxRepsonse):
@@ -17,7 +17,7 @@ def safe_json(r: HttpxRepsonse):
         return {"error": r.text}
 
 
-class HttpxTransport(AbstractTransport):
+class AsyncHttpxTransport(AsyncAbstractTransport):
     """
     Transport implemented using `httpx`_.
 

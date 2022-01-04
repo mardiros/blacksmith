@@ -22,7 +22,7 @@ from blacksmith.domain.registry import ApiRoutes, HttpResource
 from blacksmith.middleware._async.base import AsyncHTTPMiddleware, AsyncMiddleware
 from blacksmith.typing import ClientName, HttpMethod, Path, ResourceName, Url
 
-from .base import AbstractTransport
+from .base import AsyncAbstractTransport
 
 ClientTimeout = Union[HTTPTimeout, float, Tuple[float, float]]
 HTTPAuthentication = AsyncHTTPMiddleware
@@ -37,14 +37,14 @@ def build_timeout(timeout: ClientTimeout) -> HTTPTimeout:
     return timeout
 
 
-class RouteProxy:
+class AsyncRouteProxy:
     """Proxy from resource to its associate routes."""
 
     client_name: ClientName
     name: ResourceName
     endpoint: Url
     routes: ApiRoutes
-    transport: AbstractTransport
+    transport: AsyncAbstractTransport
     timeout: HTTPTimeout
     collection_parser: Type[CollectionParser]
     middlewares: List[AsyncHTTPMiddleware]
@@ -55,7 +55,7 @@ class RouteProxy:
         name: ResourceName,
         endpoint: Url,
         routes: ApiRoutes,
-        transport: AbstractTransport,
+        transport: AsyncAbstractTransport,
         timeout: HTTPTimeout,
         collection_parser: Type[CollectionParser],
         middlewares: List[AsyncHTTPMiddleware],

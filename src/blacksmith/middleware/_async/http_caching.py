@@ -6,8 +6,8 @@ from datetime import timedelta
 from typing import Any, List, Optional, Tuple
 from urllib.parse import urlencode
 
-from typing_extensions import Protocol
 from httpx import Headers
+from typing_extensions import Protocol
 
 from blacksmith.domain.model.http import HTTPRequest, HTTPResponse
 from blacksmith.typing import ClientName, HttpMethod, Path

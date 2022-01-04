@@ -2,8 +2,8 @@ import pytest
 
 from blacksmith.domain.exceptions import UnregisteredServiceException
 from blacksmith.sd._async.adapters.consul import (
-    ConsulApiError,
     AsyncConsulDiscovery,
+    ConsulApiError,
     Service,
     ServiceRequest,
     blacksmith_cli,

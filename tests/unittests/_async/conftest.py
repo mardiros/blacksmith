@@ -11,9 +11,9 @@ from blacksmith.middleware._async.base import AsyncHTTPAddHeadersMiddleware
 from blacksmith.middleware._async.http_caching import AsyncAbstractCache
 from blacksmith.sd._async.adapters.consul import AsyncConsulDiscovery, _registry
 from blacksmith.sd._async.adapters.router import AsyncRouterDiscovery
-from blacksmith.sd._async.adapters.static import Endpoints, AsyncStaticDiscovery
-from blacksmith.service.base import AbstractTransport
-from blacksmith.service.client import ClientFactory
+from blacksmith.sd._async.adapters.static import AsyncStaticDiscovery, Endpoints
+from blacksmith.service._async.base import AsyncAbstractTransport
+from blacksmith.service._async.client import AsyncClientFactory
 from blacksmith.typing import ClientName, HttpMethod, Path
 
 
@@ -23,7 +23,7 @@ def static_sd():
     return AsyncStaticDiscovery(dummy_endpoints)
 
 
-class FakeConsulTransport(AbstractTransport):
+class FakeConsulTransport(AsyncAbstractTransport):
     async def request(
         self, method: HttpMethod, request: HTTPRequest, timeout: HTTPTimeout
     ) -> HTTPResponse:
@@ -49,7 +49,7 @@ class FakeConsulTransport(AbstractTransport):
         )
 
 
-class EchoTransport(AbstractTransport):
+class EchoTransport(AsyncAbstractTransport):
     def __init__(self) -> None:
         super().__init__()
 
@@ -139,8 +139,8 @@ def dummy_middleware():
 
 @pytest.fixture
 def consul_sd():
-    def cli(url: str, tok: str) -> ClientFactory:
-        return ClientFactory(
+    def cli(url: str, tok: str) -> AsyncClientFactory:
+        return AsyncClientFactory(
             sd=AsyncStaticDiscovery({("consul", "v1"): url}),
             registry=_registry,
             transport=FakeConsulTransport(),

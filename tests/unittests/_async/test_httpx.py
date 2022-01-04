@@ -6,7 +6,7 @@ from httpx import TimeoutException as HttpxTimeoutException
 
 from blacksmith.domain.exceptions import HTTPError
 from blacksmith.domain.model import HTTPRequest, HTTPTimeout
-from blacksmith.service.adapters.httpx import HttpxTransport
+from blacksmith.service._async.adapters.httpx import AsyncHttpxTransport
 
 headers = Headers()
 headers["Content-Type"] = "application/json"
@@ -29,7 +29,7 @@ def dummy_query_timeout():
 )
 @pytest.mark.asyncio
 async def test_query_http(patch):
-    transport = HttpxTransport()
+    transport = AsyncHttpxTransport()
     resp = await transport.request("GET", HTTPRequest("/"), HTTPTimeout())
     assert resp.status_code == 200
     assert dict(resp.headers) == {
@@ -45,7 +45,7 @@ async def test_query_http(patch):
 )
 @pytest.mark.asyncio
 async def test_query_http_204(patch):
-    transport = HttpxTransport()
+    transport = AsyncHttpxTransport()
     resp = await transport.request("GET", HTTPRequest("/"), HTTPTimeout())
     assert resp.status_code == 204
     assert dict(resp.headers) == {}
@@ -58,7 +58,7 @@ async def test_query_http_204(patch):
 )
 @pytest.mark.asyncio
 async def test_query_http_422(patch):
-    transport = HttpxTransport()
+    transport = AsyncHttpxTransport()
     with pytest.raises(HTTPError) as ctx:
         await transport.request("POST", HTTPRequest("/", body="{}"), HTTPTimeout())
 
@@ -73,7 +73,7 @@ async def test_query_http_422(patch):
 )
 @pytest.mark.asyncio
 async def test_query_http_timeout(patch):
-    transport = HttpxTransport()
+    transport = AsyncHttpxTransport()
     with pytest.raises(TimeoutError) as ctx:
         await transport.request("DELETE", HTTPRequest("/slow"), HTTPTimeout())
     assert str(ctx.value) == "TimeoutException while calling DELETE /slow"
@@ -85,7 +85,7 @@ async def test_query_http_timeout(patch):
 )
 @pytest.mark.asyncio
 async def test_query_http_no_json(patch):
-    transport = HttpxTransport()
+    transport = AsyncHttpxTransport()
     with pytest.raises(HTTPError) as ctx:
         await transport.request("POST", HTTPRequest("/", body="{}"), HTTPTimeout())
 

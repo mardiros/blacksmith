@@ -1,7 +1,5 @@
 from blacksmith import PathInfoField, Request, Response
-from blacksmith.domain.model import (
-    PostBodyField,
-)
+from blacksmith.domain.model import PostBodyField
 from blacksmith.domain.registry import Registry
 
 

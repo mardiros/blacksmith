@@ -32,10 +32,11 @@ from .middleware._async import (
 from .sd._async.adapters.consul import AsyncConsulDiscovery
 from .sd._async.adapters.router import AsyncRouterDiscovery
 from .sd._async.adapters.static import AsyncStaticDiscovery
-from .service.client import ClientFactory
+from .service._async.client import AsyncClientFactory
 
 __all__ = [
     "AsyncCircuitBreaker",
+    "AsyncClientFactory",
     "AsyncConsulDiscovery",
     "AsyncHTTPAddHeadersMiddleware",
     "AsyncHTTPAuthorization",
@@ -46,7 +47,6 @@ __all__ = [
     "AsyncPrometheusMetrics",
     "AsyncRouterDiscovery",
     "AsyncStaticDiscovery",
-    "ClientFactory",
     "CollectionIterator",
     "HeaderField",
     "HTTPError",

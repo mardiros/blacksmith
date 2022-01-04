@@ -4,7 +4,7 @@ from blacksmith.domain.model import HTTPRequest, HTTPResponse, HTTPTimeout
 from blacksmith.typing import HttpMethod
 
 
-class AbstractTransport(abc.ABC):
+class AsyncAbstractTransport(abc.ABC):
     @abc.abstractmethod
     async def request(
         self, method: HttpMethod, request: HTTPRequest, timeout: HTTPTimeout
