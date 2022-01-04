@@ -9,8 +9,8 @@ from blacksmith.domain.exceptions import HTTPError
 from blacksmith.domain.model.http import HTTPRequest, HTTPResponse
 from blacksmith.typing import ClientName, HttpMethod, Path
 
-from .base import HTTPMiddleware, Middleware
-from .prometheus import PrometheusMetrics
+from .base import AsyncHTTPMiddleware, AsyncMiddleware
+from .prometheus import AsyncPrometheusMetrics
 
 Listeners = Optional[Iterable[Hook]]
 
@@ -27,7 +27,7 @@ class GaugeStateValue:
 
 
 class PrometheusHook:
-    def __init__(self, prometheus_metrics: PrometheusMetrics):
+    def __init__(self, prometheus_metrics: AsyncPrometheusMetrics):
         self.prometheus_metrics = prometheus_metrics
 
     def __call__(self, circuit_name: str, evt_type: str, payload: Any) -> None:
@@ -46,7 +46,7 @@ class PrometheusHook:
             ).inc()
 
 
-class CircuitBreaker(HTTPMiddleware):
+class AsyncCircuitBreaker(AsyncHTTPMiddleware):
     """
     Prevent cascading failure.
 
@@ -64,7 +64,7 @@ class CircuitBreaker(HTTPMiddleware):
         ttl: TTL = 30,
         listeners: Listeners = None,
         uow: Optional[AsyncAbstractUnitOfWork] = None,
-        prometheus_metrics: Optional[PrometheusMetrics] = None,
+        prometheus_metrics: Optional[AsyncPrometheusMetrics] = None,
     ):
         self.circuit_breaker = AsyncCircuitBreakerFactory(
             default_threshold=threshold,
@@ -81,7 +81,7 @@ class CircuitBreaker(HTTPMiddleware):
     async def initialize(self):
         await self.circuit_breaker.initialize()
 
-    def __call__(self, next: Middleware) -> Middleware:
+    def __call__(self, next: AsyncMiddleware) -> AsyncMiddleware:
         async def handle(
             req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
         ) -> HTTPResponse:

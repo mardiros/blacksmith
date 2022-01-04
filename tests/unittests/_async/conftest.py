@@ -6,9 +6,9 @@ import pytest
 
 from blacksmith.domain.exceptions import HTTPError
 from blacksmith.domain.model import HTTPRequest, HTTPResponse, HTTPTimeout
-from blacksmith.middleware._async.auth import HTTPAuthorization
-from blacksmith.middleware._async.base import HTTPAddHeadersMiddleware
-from blacksmith.middleware._async.http_caching import AbstractCache
+from blacksmith.middleware._async.auth import AsyncHTTPAuthorization
+from blacksmith.middleware._async.base import AsyncHTTPAddHeadersMiddleware
+from blacksmith.middleware._async.http_caching import AsyncAbstractCache
 from blacksmith.sd.adapters.consul import ConsulDiscovery, _registry
 from blacksmith.sd.adapters.router import RouterDiscovery
 from blacksmith.sd.adapters.static import Endpoints, StaticDiscovery
@@ -123,7 +123,7 @@ def invalid_middleware():
     return next
 
 
-class DummyMiddleware(HTTPAddHeadersMiddleware):
+class AsyncDummyMiddleware(AsyncHTTPAddHeadersMiddleware):
     def __init__(self):
         super().__init__(headers={"x-dummy": "test"})
         self.initialized = 0
@@ -134,7 +134,7 @@ class DummyMiddleware(HTTPAddHeadersMiddleware):
 
 @pytest.fixture
 def dummy_middleware():
-    return DummyMiddleware()
+    return AsyncDummyMiddleware()
 
 
 @pytest.fixture
@@ -144,7 +144,7 @@ def consul_sd():
             sd=StaticDiscovery({("consul", "v1"): url}),
             registry=_registry,
             transport=FakeConsulTransport(),
-        ).add_middleware(HTTPAuthorization("Bearer", tok))
+        ).add_middleware(AsyncHTTPAuthorization("Bearer", tok))
 
     return ConsulDiscovery(_client_factory=cli)
 
@@ -154,7 +154,7 @@ def router_sd():
     return RouterDiscovery()
 
 
-class FakeHttpMiddlewareCache(AbstractCache):
+class AsyncFakeHttpMiddlewareCache(AsyncAbstractCache):
     """Abstract Redis Client."""
 
     def __init__(self) -> None:
@@ -178,4 +178,4 @@ class FakeHttpMiddlewareCache(AbstractCache):
 
 @pytest.fixture
 def fake_http_middleware_cache():
-    return FakeHttpMiddlewareCache()
+    return AsyncFakeHttpMiddlewareCache()

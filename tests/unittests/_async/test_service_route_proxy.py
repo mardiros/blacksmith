@@ -14,8 +14,8 @@ from blacksmith.domain.model import (
     HTTPTimeout,
 )
 from blacksmith.domain.registry import ApiRoutes
-from blacksmith.middleware._async.auth import HTTPAuthorization
-from blacksmith.middleware._async.base import HTTPAddHeadersMiddleware
+from blacksmith.middleware._async.auth import AsyncHTTPAuthorization
+from blacksmith.middleware._async.base import AsyncHTTPAddHeadersMiddleware
 from blacksmith.service.base import AbstractTransport
 from blacksmith.service.route_proxy import RouteProxy, build_timeout
 from blacksmith.typing import HttpMethod
@@ -64,9 +64,9 @@ async def test_route_proxy_prepare_middleware(dummy_http_request, echo_transport
         timeout=HTTPTimeout(),
         collection_parser=CollectionParser,
         middlewares=[
-            HTTPAuthorization("Bearer", "abc"),
-            HTTPAddHeadersMiddleware({"foo": "bar"}),
-            HTTPAddHeadersMiddleware({"Eggs": "egg"}),
+            AsyncHTTPAuthorization("Bearer", "abc"),
+            AsyncHTTPAddHeadersMiddleware({"foo": "bar"}),
+            AsyncHTTPAddHeadersMiddleware({"Eggs": "egg"}),
         ],
     )
     resp = await proxy._handle_req_with_middlewares(

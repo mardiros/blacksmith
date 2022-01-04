@@ -12,7 +12,7 @@ from httpx import Headers
 from blacksmith.domain.model.http import HTTPRequest, HTTPResponse
 from blacksmith.typing import ClientName, HttpMethod, Path
 
-from .base import HTTPMiddleware, Middleware
+from .base import AsyncHTTPMiddleware, AsyncMiddleware
 
 
 class AbstractCachingPolicy(abc.ABC):
@@ -54,7 +54,7 @@ class AbstractCachingPolicy(abc.ABC):
         """Return caching info. Tuple (ttl in seconds, vary key, vary list)."""
 
 
-class AbstractCache(abc.ABC):
+class AsyncAbstractCache(abc.ABC):
     """Abstract Redis Client."""
 
     @abc.abstractmethod
@@ -73,7 +73,7 @@ class AbstractCache(abc.ABC):
 try:
     from aioredis import Redis
 
-    AbstractCache.register(Redis)
+    AsyncAbstractCache.register(Redis)
 except ImportError:
     pass
 
@@ -171,14 +171,14 @@ class CacheControlPolicy(AbstractCachingPolicy):
         return (max_age, vary_key, vary)
 
 
-class HttpCachingMiddleware(HTTPMiddleware):
+class AsyncHttpCachingMiddleware(AsyncHTTPMiddleware):
     """
-    Zipkin Middleware based on aiozipkin
+    Http Cache Middleware based on Cache-Control and redis.
     """
 
     def __init__(
         self,
-        cache: AbstractCache,
+        cache: AsyncAbstractCache,
         policy: AbstractCachingPolicy = CacheControlPolicy(sep="$"),
         serializer: AbstractSerializer = json,
     ) -> None:
@@ -231,7 +231,7 @@ class HttpCachingMiddleware(HTTPMiddleware):
         resp = self._serializer.loads(val)
         return HTTPResponse(**resp)
 
-    def __call__(self, next: Middleware) -> Middleware:
+    def __call__(self, next: AsyncMiddleware) -> AsyncMiddleware:
         async def handle(
             req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
         ) -> HTTPResponse:

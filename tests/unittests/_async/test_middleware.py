@@ -9,21 +9,30 @@ from purgatory.domain.model import OpenedState
 from blacksmith import __version__
 from blacksmith.domain.exceptions import HTTPError
 from blacksmith.domain.model.http import HTTPRequest, HTTPResponse
-from blacksmith.middleware._async.auth import HTTPAuthorization
-from blacksmith.middleware._async.base import HTTPAddHeadersMiddleware, HTTPMiddleware
-from blacksmith.middleware._async.circuit_breaker import CircuitBreaker, exclude_httpx_4xx
-from blacksmith.middleware._async.prometheus import PrometheusMetrics
-from blacksmith.middleware._async.zipkin import AbtractTraceContext, ZipkinMiddleware
+from blacksmith.middleware._async.auth import AsyncHTTPAuthorization
+from blacksmith.middleware._async.base import (
+    AsyncHTTPAddHeadersMiddleware,
+    AsyncHTTPMiddleware,
+)
+from blacksmith.middleware._async.circuit_breaker import (
+    AsyncCircuitBreaker,
+    exclude_httpx_4xx,
+)
+from blacksmith.middleware._async.prometheus import AsyncPrometheusMetrics
+from blacksmith.middleware._async.zipkin import (
+    AbtractTraceContext,
+    AsyncZipkinMiddleware,
+)
 from blacksmith.typing import ClientName, HttpMethod, Path
 
 
 def test_authorization_header():
-    auth = HTTPAuthorization("Bearer", "abc")
+    auth = AsyncHTTPAuthorization("Bearer", "abc")
     assert auth.headers == {"Authorization": "Bearer abc"}
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("middleware", [HTTPMiddleware])
+@pytest.mark.parametrize("middleware", [AsyncHTTPMiddleware])
 async def test_empty_middleware(middleware, dummy_http_request):
     auth = middleware()
 
@@ -42,9 +51,13 @@ async def test_empty_middleware(middleware, dummy_http_request):
 @pytest.mark.parametrize(
     "middleware",
     [
-        (HTTPAddHeadersMiddleware, [{"foo": "bar"}], {"X-Req-Id": "42", "foo": "bar"}),
         (
-            HTTPAuthorization,
+            AsyncHTTPAddHeadersMiddleware,
+            [{"foo": "bar"}],
+            {"X-Req-Id": "42", "foo": "bar"},
+        ),
+        (
+            AsyncHTTPAuthorization,
             ["Bearer", "abc"],
             {"X-Req-Id": "42", "Authorization": "Bearer abc"},
         ),
@@ -62,7 +75,7 @@ async def test_headers_middleware(echo_middleware, middleware, dummy_http_reques
 
 @pytest.mark.asyncio
 async def test_prom_default_registry(echo_middleware, dummy_http_request):
-    metrics = PrometheusMetrics()
+    metrics = AsyncPrometheusMetrics()
     next = metrics(echo_middleware)
 
     val = REGISTRY.get_sample_value("blacksmith_info", labels={"version": __version__})
@@ -87,7 +100,7 @@ async def test_prom_default_registry(echo_middleware, dummy_http_request):
 @pytest.mark.asyncio
 async def test_prom_metrics(slow_middleware, dummy_http_request):
     registry = CollectorRegistry()
-    metrics = PrometheusMetrics(registry=registry)
+    metrics = AsyncPrometheusMetrics(registry=registry)
     next = metrics(slow_middleware)
 
     val = registry.get_sample_value("blacksmith_info", labels={"version": __version__})
@@ -158,7 +171,7 @@ async def test_prom_metrics(slow_middleware, dummy_http_request):
 @pytest.mark.asyncio
 async def test_prom_metrics_error(boom_middleware, dummy_http_request):
     registry = CollectorRegistry()
-    metrics = PrometheusMetrics(registry=registry)
+    metrics = AsyncPrometheusMetrics(registry=registry)
     next = metrics(boom_middleware)
 
     with pytest.raises(HTTPError):
@@ -205,7 +218,7 @@ def test_included_list(exc):
 async def test_circuit_breaker_5xx(
     echo_middleware, boom_middleware, dummy_http_request
 ):
-    cbreaker = CircuitBreaker(threshold=2)
+    cbreaker = AsyncCircuitBreaker(threshold=2)
     next = cbreaker(echo_middleware)
     resp = await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
     assert resp.status_code == 200
@@ -235,7 +248,7 @@ async def test_circuit_breaker_5xx(
 async def test_circuit_breaker_4xx(
     echo_middleware, invalid_middleware, dummy_http_request
 ):
-    cbreaker = CircuitBreaker(threshold=2)
+    cbreaker = AsyncCircuitBreaker(threshold=2)
     next = cbreaker(invalid_middleware)
     with pytest.raises(HTTPError):
         await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
@@ -256,8 +269,8 @@ async def test_circuit_breaker_prometheus_metrics(
     HALF_OPEN = 1.0
     CLOSED = 0.0
     registry = CollectorRegistry()
-    prom = PrometheusMetrics(registry=registry)
-    cbreaker = CircuitBreaker(
+    prom = AsyncPrometheusMetrics(registry=registry)
+    cbreaker = AsyncCircuitBreaker(
         threshold=2,
         ttl=0.100,
         prometheus_metrics=prom,
@@ -334,7 +347,7 @@ async def test_zipkin_middleware(echo_middleware, dummy_http_request):
             Trace.annotations.append((value, ts))
             return self
 
-    middleware = ZipkinMiddleware(cast(AbtractTraceContext, Trace))
+    middleware = AsyncZipkinMiddleware(cast(AbtractTraceContext, Trace))
     next = middleware(echo_middleware)
     await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
     assert Trace.name == "GET /dummies/42"

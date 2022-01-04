@@ -11,7 +11,7 @@ from pydantic.fields import Field
 from blacksmith.domain.exceptions import HTTPError, UnregisteredServiceException
 from blacksmith.domain.model import PathInfoField, Request, Response
 from blacksmith.domain.registry import Registry
-from blacksmith.middleware._async.auth import HTTPBearerAuthorization
+from blacksmith.middleware._async.auth import AsyncHTTPBearerAuthorization
 from blacksmith.sd.adapters.static import StaticDiscovery
 from blacksmith.sd.base import AbstractServiceDiscovery, Url
 from blacksmith.service.client import ClientFactory
@@ -57,7 +57,7 @@ def blacksmith_cli(endpoint: Url, consul_token: str) -> ClientFactory:
     kwargs = {}
     fact = ClientFactory(sd, registry=_registry, **kwargs)
     if consul_token:
-        fact.add_middleware(HTTPBearerAuthorization(consul_token))
+        fact.add_middleware(AsyncHTTPBearerAuthorization(consul_token))
     return fact
 
 

@@ -6,7 +6,7 @@ from typing import Any, Dict, Optional
 from blacksmith.domain.model.http import HTTPRequest, HTTPResponse
 from blacksmith.typing import ClientName, HttpMethod, Path
 
-from .base import HTTPMiddleware, Middleware
+from .base import AsyncHTTPMiddleware, AsyncMiddleware
 
 
 class AbtractTraceContext(abc.ABC):
@@ -45,7 +45,7 @@ class AbtractTraceContext(abc.ABC):
         """
 
 
-class ZipkinMiddleware(HTTPMiddleware):
+class AsyncZipkinMiddleware(AsyncHTTPMiddleware):
     """
     Zipkin Middleware based on an abstract context manager.
 
@@ -55,7 +55,7 @@ class ZipkinMiddleware(HTTPMiddleware):
     def __init__(self, trace: AbtractTraceContext) -> None:
         self.trace = trace
 
-    def __call__(self, next: Middleware) -> Middleware:
+    def __call__(self, next: AsyncMiddleware) -> AsyncMiddleware:
         async def handle(
             req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
         ) -> HTTPResponse:

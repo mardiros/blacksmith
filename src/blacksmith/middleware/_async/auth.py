@@ -1,9 +1,9 @@
 """Authentication Middlewares."""
 
-from .base import HTTPAddHeadersMiddleware
+from .base import AsyncHTTPAddHeadersMiddleware
 
 
-class HTTPAuthorization(HTTPAddHeadersMiddleware):
+class AsyncHTTPAuthorization(AsyncHTTPAddHeadersMiddleware):
     """
     Authentication Mechanism based on the header `Authorization`.
 
@@ -15,7 +15,7 @@ class HTTPAuthorization(HTTPAddHeadersMiddleware):
         return super().__init__({"Authorization": f"{scheme} {value}"})
 
 
-class HTTPBearerAuthorization(HTTPAuthorization):
+class AsyncHTTPBearerAuthorization(AsyncHTTPAuthorization):
     """
     Authentication Mechanism based on the header `Authorization` with the Bearer scheme.
 

@@ -19,13 +19,13 @@ from blacksmith.domain.model import (
     TResponse,
 )
 from blacksmith.domain.registry import ApiRoutes, HttpResource
-from blacksmith.middleware._async.base import HTTPMiddleware, Middleware
+from blacksmith.middleware._async.base import AsyncHTTPMiddleware, AsyncMiddleware
 from blacksmith.typing import ClientName, HttpMethod, Path, ResourceName, Url
 
 from .base import AbstractTransport
 
 ClientTimeout = Union[HTTPTimeout, float, Tuple[float, float]]
-HTTPAuthentication = HTTPMiddleware
+HTTPAuthentication = AsyncHTTPMiddleware
 
 
 def build_timeout(timeout: ClientTimeout) -> HTTPTimeout:
@@ -47,7 +47,7 @@ class RouteProxy:
     transport: AbstractTransport
     timeout: HTTPTimeout
     collection_parser: Type[CollectionParser]
-    middlewares: List[HTTPMiddleware]
+    middlewares: List[AsyncHTTPMiddleware]
 
     def __init__(
         self,
@@ -58,7 +58,7 @@ class RouteProxy:
         transport: AbstractTransport,
         timeout: HTTPTimeout,
         collection_parser: Type[CollectionParser],
-        middlewares: List[HTTPMiddleware],
+        middlewares: List[AsyncHTTPMiddleware],
     ) -> None:
         self.client_name = client_name
         self.name = name
@@ -131,7 +131,7 @@ class RouteProxy:
         ) -> HTTPResponse:
             return await self.transport.request(method, req, timeout)
 
-        next = cast(Middleware, handle_req)
+        next = cast(AsyncMiddleware, handle_req)
 
         for middleware in self.middlewares:
             next = middleware(next)

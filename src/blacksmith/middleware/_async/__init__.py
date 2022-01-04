@@ -1,16 +1,16 @@
-from .auth import HTTPAuthorization, HTTPBearerAuthorization
-from .base import HTTPAddHeadersMiddleware, HTTPMiddleware, Middleware
-from .circuit_breaker import CircuitBreaker
-from .http_caching import HttpCachingMiddleware
-from .prometheus import PrometheusMetrics
+from .auth import AsyncHTTPAuthorization, AsyncHTTPBearerAuthorization
+from .base import AsyncHTTPAddHeadersMiddleware, AsyncHTTPMiddleware, AsyncMiddleware
+from .circuit_breaker import AsyncCircuitBreaker
+from .http_caching import AsyncHttpCachingMiddleware
+from .prometheus import AsyncPrometheusMetrics
 
 __all__ = [
-    "CircuitBreaker",
-    "HTTPAddHeadersMiddleware",
-    "HTTPAuthorization",
-    "HTTPBearerAuthorization",
-    "HttpCachingMiddleware",
-    "HTTPMiddleware",
-    "Middleware",
-    "PrometheusMetrics",
+    "AsyncCircuitBreaker",
+    "AsyncHTTPAddHeadersMiddleware",
+    "AsyncHTTPAuthorization",
+    "AsyncHTTPBearerAuthorization",
+    "AsyncHttpCachingMiddleware",
+    "AsyncHTTPMiddleware",
+    "AsyncMiddleware",
+    "AsyncPrometheusMetrics",
 ]

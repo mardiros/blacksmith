@@ -20,14 +20,14 @@ from .domain.model import (
 from .domain.registry import register
 from .domain.scanner import scan
 from .middleware._async import (
-    CircuitBreaker,
-    HTTPAddHeadersMiddleware,
-    HTTPAuthorization,
-    HTTPBearerAuthorization,
-    HTTPMiddleware,
-    HttpCachingMiddleware,
-    Middleware,
-    PrometheusMetrics,
+    AsyncCircuitBreaker,
+    AsyncHTTPAddHeadersMiddleware,
+    AsyncHTTPAuthorization,
+    AsyncHTTPBearerAuthorization,
+    AsyncHTTPMiddleware,
+    AsyncHttpCachingMiddleware,
+    AsyncMiddleware,
+    AsyncPrometheusMetrics,
 )
 from .sd.adapters.consul import ConsulDiscovery
 from .sd.adapters.router import RouterDiscovery

@@ -8,7 +8,7 @@ from blacksmith.domain.exceptions import HTTPError
 from blacksmith.domain.model.http import HTTPRequest, HTTPResponse
 from blacksmith.typing import ClientName, HttpMethod, Path
 
-from .base import HTTPMiddleware, Middleware
+from .base import AsyncHTTPMiddleware, AsyncMiddleware
 
 if TYPE_CHECKING:
     try:
@@ -20,7 +20,7 @@ else:
     Registry = Any
 
 
-class PrometheusMetrics(HTTPMiddleware):
+class AsyncPrometheusMetrics(AsyncHTTPMiddleware):
     """
     Collect the api calls made in a prometheus registry.
 
@@ -76,7 +76,7 @@ class PrometheusMetrics(HTTPMiddleware):
             labelnames=["client_name"],
         )
 
-    def __call__(self, next: Middleware) -> Middleware:
+    def __call__(self, next: AsyncMiddleware) -> AsyncMiddleware:
         async def handle(
             req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
         ) -> HTTPResponse:

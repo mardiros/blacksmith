@@ -5,7 +5,7 @@ from blacksmith.domain.model.http import HTTPTimeout
 from blacksmith.domain.model.params import CollectionParser
 from blacksmith.domain.registry import Registry, Resources
 from blacksmith.domain.registry import registry as default_registry
-from blacksmith.middleware._async.base import HTTPMiddleware
+from blacksmith.middleware._async.base import AsyncHTTPMiddleware
 from blacksmith.sd.base import AbstractServiceDiscovery
 from blacksmith.service.adapters.httpx import HttpxTransport
 from blacksmith.typing import ClientName, ResourceName, Url
@@ -27,7 +27,7 @@ class Client:
     transport: AbstractTransport
     timeout: HTTPTimeout
     collection_parser: Type[CollectionParser]
-    middlewares: List[HTTPMiddleware]
+    middlewares: List[AsyncHTTPMiddleware]
 
     def __init__(
         self,
@@ -37,7 +37,7 @@ class Client:
         transport: AbstractTransport,
         timeout: HTTPTimeout,
         collection_parser: Type[CollectionParser],
-        middlewares: List[HTTPMiddleware],
+        middlewares: List[AsyncHTTPMiddleware],
     ) -> None:
         self.name = name
         self.endpoint = endpoint
@@ -86,7 +86,7 @@ class ClientFactory:
     auth: HTTPAuthentication
     timeout: HTTPTimeout
     collection_parser: Type[CollectionParser]
-    middlewares: List[HTTPMiddleware]
+    middlewares: List[AsyncHTTPMiddleware]
 
     def __init__(
         self,
@@ -104,7 +104,7 @@ class ClientFactory:
         self.middlewares = []
         self._initialized = False
 
-    def add_middleware(self, middleware: HTTPMiddleware) -> "ClientFactory":
+    def add_middleware(self, middleware: AsyncHTTPMiddleware) -> "ClientFactory":
         """
         Add a middleware to the client factory and return the client for chaining.
 
