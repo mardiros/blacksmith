@@ -1,8 +1,8 @@
 import httpx
-from httpx import AsyncClient
 from httpx import Response as HttpxRepsonse
 from httpx import Timeout as HttpxTimeout
 
+from blacksmith.service.ports import AsyncClient
 from blacksmith.domain.exceptions import HTTPError
 from blacksmith.domain.model import HTTPRequest, HTTPResponse, HTTPTimeout
 from blacksmith.typing import HttpMethod
