@@ -1,16 +1,8 @@
-from typing import Any, Coroutine, Dict
-
-from typing_extensions import Protocol
+from typing import Dict
 
 from blacksmith.domain.model.http import HTTPRequest, HTTPResponse
+from blacksmith.domain.typing import SyncMiddleware
 from blacksmith.typing import ClientName, HttpMethod, Path
-
-
-class SyncMiddleware(Protocol):
-    def __call__(
-        self, req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
-    ) -> Coroutine[Any, Any, HTTPResponse]:
-        ...
 
 
 class SyncHTTPMiddleware:
