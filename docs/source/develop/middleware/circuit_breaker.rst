@@ -1,5 +1,5 @@
 Circuit Breaker
 ===============
 
-.. automodule:: blacksmith.middleware.circuit_breaker
+.. automodule:: blacksmith.middleware._async.circuit_breaker
    :members:

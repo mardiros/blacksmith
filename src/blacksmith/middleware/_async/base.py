@@ -3,8 +3,7 @@ from typing import Any, Coroutine, Dict
 from typing_extensions import Protocol
 
 from blacksmith.domain.model.http import HTTPRequest, HTTPResponse
-
-from ..typing import ClientName, HttpMethod, Path
+from blacksmith.typing import ClientName, HttpMethod, Path
 
 
 class Middleware(Protocol):

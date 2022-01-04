@@ -5,7 +5,7 @@ from blacksmith.domain.model.http import HTTPTimeout
 from blacksmith.domain.model.params import CollectionParser
 from blacksmith.domain.registry import Registry, Resources
 from blacksmith.domain.registry import registry as default_registry
-from blacksmith.middleware.base import HTTPMiddleware
+from blacksmith.middleware._async.base import HTTPMiddleware
 from blacksmith.sd.base import AbstractServiceDiscovery
 from blacksmith.service.adapters.httpx import HttpxTransport
 from blacksmith.typing import ClientName, ResourceName, Url

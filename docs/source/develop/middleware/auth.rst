@@ -1,5 +1,5 @@
 Authentication Middlewares
 ==========================
 
-.. automodule:: blacksmith.middleware.auth
+.. automodule:: blacksmith.middleware._async.auth
    :members:

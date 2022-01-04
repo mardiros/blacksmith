@@ -17,8 +17,8 @@ from blacksmith.domain.model import (
     ResponseBox,
 )
 from blacksmith.domain.registry import ApiRoutes
-from blacksmith.middleware.auth import HTTPAuthorization
-from blacksmith.middleware.prometheus import PrometheusMetrics
+from blacksmith.middleware._async.auth import HTTPAuthorization
+from blacksmith.middleware._async.prometheus import PrometheusMetrics
 from blacksmith.service.base import AbstractTransport
 from blacksmith.service.client import Client, ClientFactory
 from blacksmith.typing import HttpMethod

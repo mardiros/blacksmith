@@ -1,7 +1,7 @@
 import pytest
 
 from blacksmith.domain.model.http import HTTPRequest, HTTPResponse
-from blacksmith.middleware.http_caching import (
+from blacksmith.middleware._async.http_caching import (
     CacheControlPolicy,
     HttpCachingMiddleware,
     get_max_age,

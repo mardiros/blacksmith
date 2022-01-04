@@ -1,5 +1,5 @@
 Prometheus
 ==========
 
-.. automodule:: blacksmith.middleware.prometheus
+.. automodule:: blacksmith.middleware._async.prometheus
    :members:

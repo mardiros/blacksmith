@@ -6,9 +6,9 @@ import pytest
 
 from blacksmith.domain.exceptions import HTTPError
 from blacksmith.domain.model import HTTPRequest, HTTPResponse, HTTPTimeout
-from blacksmith.middleware.auth import HTTPAuthorization
-from blacksmith.middleware.base import HTTPAddHeadersMiddleware
-from blacksmith.middleware.http_caching import AbstractCache
+from blacksmith.middleware._async.auth import HTTPAuthorization
+from blacksmith.middleware._async.base import HTTPAddHeadersMiddleware
+from blacksmith.middleware._async.http_caching import AbstractCache
 from blacksmith.sd.adapters.consul import ConsulDiscovery, _registry
 from blacksmith.sd.adapters.router import RouterDiscovery
 from blacksmith.sd.adapters.static import Endpoints, StaticDiscovery

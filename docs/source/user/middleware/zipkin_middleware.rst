@@ -13,7 +13,7 @@ Example using starlette_zipkin:
    import starlette_zipkin
 
    from blacksmith import ClientFactory, ConsulDiscovery
-   from blacksmith.middleware.zipkin import ZipkinMiddleware
+   from blacksmith.middleware._async.zipkin import ZipkinMiddleware
 
    sd = ConsulDiscovery()
    cli = ClientFactory(sd)

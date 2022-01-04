@@ -11,7 +11,7 @@ from pydantic.fields import Field
 from blacksmith.domain.exceptions import HTTPError, UnregisteredServiceException
 from blacksmith.domain.model import PathInfoField, Request, Response
 from blacksmith.domain.registry import Registry
-from blacksmith.middleware.auth import HTTPBearerAuthorization
+from blacksmith.middleware._async.auth import HTTPBearerAuthorization
 from blacksmith.sd.adapters.static import StaticDiscovery
 from blacksmith.sd.base import AbstractServiceDiscovery, Url
 from blacksmith.service.client import ClientFactory

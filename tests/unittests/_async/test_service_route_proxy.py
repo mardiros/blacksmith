@@ -14,8 +14,8 @@ from blacksmith.domain.model import (
     HTTPTimeout,
 )
 from blacksmith.domain.registry import ApiRoutes
-from blacksmith.middleware.auth import HTTPAuthorization
-from blacksmith.middleware.base import HTTPAddHeadersMiddleware
+from blacksmith.middleware._async.auth import HTTPAuthorization
+from blacksmith.middleware._async.base import HTTPAddHeadersMiddleware
 from blacksmith.service.base import AbstractTransport
 from blacksmith.service.route_proxy import RouteProxy, build_timeout
 from blacksmith.typing import HttpMethod

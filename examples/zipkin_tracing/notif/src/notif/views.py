@@ -8,7 +8,7 @@ from starlette.responses import JSONResponse
 from starlette_zipkin import trace
 
 from blacksmith import ClientFactory, ConsulDiscovery
-from blacksmith.middleware.zipkin import AbtractTraceContext, ZipkinMiddleware
+from blacksmith.middleware._async.zipkin import AbtractTraceContext, ZipkinMiddleware
 
 AbtractTraceContext.register(trace)
 

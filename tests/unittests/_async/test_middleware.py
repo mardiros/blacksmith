@@ -9,11 +9,11 @@ from purgatory.domain.model import OpenedState
 from blacksmith import __version__
 from blacksmith.domain.exceptions import HTTPError
 from blacksmith.domain.model.http import HTTPRequest, HTTPResponse
-from blacksmith.middleware.auth import HTTPAuthorization
-from blacksmith.middleware.base import HTTPAddHeadersMiddleware, HTTPMiddleware
-from blacksmith.middleware.circuit_breaker import CircuitBreaker, exclude_httpx_4xx
-from blacksmith.middleware.prometheus import PrometheusMetrics
-from blacksmith.middleware.zipkin import AbtractTraceContext, ZipkinMiddleware
+from blacksmith.middleware._async.auth import HTTPAuthorization
+from blacksmith.middleware._async.base import HTTPAddHeadersMiddleware, HTTPMiddleware
+from blacksmith.middleware._async.circuit_breaker import CircuitBreaker, exclude_httpx_4xx
+from blacksmith.middleware._async.prometheus import PrometheusMetrics
+from blacksmith.middleware._async.zipkin import AbtractTraceContext, ZipkinMiddleware
 from blacksmith.typing import ClientName, HttpMethod, Path
 
 

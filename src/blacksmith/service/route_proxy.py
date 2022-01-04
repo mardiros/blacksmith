@@ -19,7 +19,7 @@ from blacksmith.domain.model import (
     TResponse,
 )
 from blacksmith.domain.registry import ApiRoutes, HttpResource
-from blacksmith.middleware.base import HTTPMiddleware, Middleware
+from blacksmith.middleware._async.base import HTTPMiddleware, Middleware
 from blacksmith.typing import ClientName, HttpMethod, Path, ResourceName, Url
 
 from .base import AbstractTransport
