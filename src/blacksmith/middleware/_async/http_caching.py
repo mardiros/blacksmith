@@ -171,7 +171,7 @@ class CacheControlPolicy(AbstractCachingPolicy):
         return (max_age, vary_key, vary)
 
 
-class AsyncHttpCachingMiddleware(AsyncHTTPMiddleware):
+class AsyncHTTPCachingMiddleware(AsyncHTTPMiddleware):
     """
     Http Cache Middleware based on Cache-Control and redis.
     """

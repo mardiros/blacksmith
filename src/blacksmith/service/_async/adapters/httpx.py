@@ -6,6 +6,7 @@ from blacksmith.domain.exceptions import HTTPError
 from blacksmith.domain.model import HTTPRequest, HTTPResponse, HTTPTimeout
 from blacksmith.service.ports import AsyncClient
 from blacksmith.typing import HttpMethod
+from blacksmith.domain.exceptions import HTTPTimeoutError
 
 from ..base import AsyncAbstractTransport
 
@@ -42,7 +43,7 @@ class AsyncHttpxTransport(AsyncAbstractTransport):
                     timeout=HttpxTimeout(timeout.request, connect=timeout.connect),
                 )
             except httpx.TimeoutException as exc:
-                raise TimeoutError(
+                raise HTTPTimeoutError(
                     f"{exc.__class__.__name__} while calling {method} {request.url}"
                 )
 

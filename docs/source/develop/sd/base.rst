@@ -1,5 +1,5 @@
 Service Discovery Base Classes
 ==============================
 
-.. automodule:: blacksmith.sd.base
+.. automodule:: blacksmith.sd._async.base
    :members:

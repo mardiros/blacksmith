@@ -11,8 +11,10 @@ from .params import (
     ResponseBox,
     TResponse,
 )
+from .tracing import AbtractTraceContext
 
 __all__ = [
+    "AbtractTraceContext",
     "CollectionIterator",
     "CollectionParser",
     "HeaderField",

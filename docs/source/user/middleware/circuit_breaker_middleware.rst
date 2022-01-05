@@ -1,3 +1,5 @@
+.. _`Circuit Breaker Middleware`:
+
 Circuit Breaker Middleware
 ==========================
 
@@ -18,16 +20,16 @@ The :term:`Circuit Breaker` is a middleware based on `purgatory`_.
 To use the circuit breaker, it must be added to the client factory
 middleware stack.
 
-::
+Async
+~~~~~
 
-   from time import timedelta
+.. literalinclude:: circuit_breaker_middleware_async.py
 
-   from blacksmith import ClientFactory, CircuitBreaker, StaticDiscovery
+Sync
+~~~~
 
-   sd = StaticDiscovery({("api", None): "http://srv:8000/"})
-   cli = ClientFactory(sd).add_middleware(
-      CircuitBreaker(threshold=5, ttl=60)
-   )
+.. literalinclude:: circuit_breaker_middleware_sync.py
+
 
 The middleware create one circuit per client, identified by its
 :term:`client_name`.
@@ -45,14 +47,16 @@ backend.
 
 To use a redis storage, a unit of work parameter is expected.
 
-::
 
-   from purgatory import RedisUnitOfWork
-   from blacksmith import CircuitBreaker
+Async
+~~~~~
 
-   breaker = CircuitBreaker(
-      5, 30, uow=RedisUnitOfWork("redis://redis/0")
-   )
+.. literalinclude:: circuit_breaker_middleware_redis_async.py
+
+Sync
+~~~~
+
+.. literalinclude:: circuit_breaker_middleware_redis_sync.py
 
 .. note::
 

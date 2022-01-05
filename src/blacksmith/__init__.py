@@ -6,10 +6,12 @@ except pkg_resources.DistributionNotFound:
     # read the doc does not support poetry
     pass
 
-from .domain.exceptions import HTTPError, TimeoutError
+from .domain.exceptions import HTTPError, HTTPTimeoutError
 from .domain.model import (
+    AbtractTraceContext,
     CollectionIterator,
     HeaderField,
+    HTTPTimeout,
     PathInfoField,
     PostBodyField,
     QueryStringField,
@@ -24,10 +26,11 @@ from .middleware._async import (
     AsyncHTTPAddHeadersMiddleware,
     AsyncHTTPAuthorization,
     AsyncHTTPBearerAuthorization,
-    AsyncHttpCachingMiddleware,
+    AsyncHTTPCachingMiddleware,
     AsyncHTTPMiddleware,
     AsyncMiddleware,
     AsyncPrometheusMetrics,
+    AsyncZipkinMiddleware,
 )
 from .sd._async.adapters.consul import AsyncConsulDiscovery
 from .sd._async.adapters.router import AsyncRouterDiscovery
@@ -39,7 +42,7 @@ from .middleware._sync import (
     SyncHTTPAddHeadersMiddleware,
     SyncHTTPAuthorization,
     SyncHTTPBearerAuthorization,
-    SyncHttpCachingMiddleware,
+    SyncHTTPCachingMiddleware,
     SyncHTTPMiddleware,
     SyncMiddleware,
     SyncPrometheusMetrics,
@@ -50,40 +53,53 @@ from .sd._sync.adapters.static import SyncStaticDiscovery
 from .service._sync.client import SyncClientFactory
 
 __all__ = [
-    "AsyncCircuitBreaker",
-    "AsyncClientFactory",
-    "AsyncConsulDiscovery",
-    "AsyncHTTPAddHeadersMiddleware",
-    "AsyncHTTPAuthorization",
-    "AsyncHTTPBearerAuthorization",
-    "AsyncHttpCachingMiddleware",
-    "AsyncHTTPMiddleware",
-    "AsyncMiddleware",
-    "AsyncPrometheusMetrics",
-    "AsyncRouterDiscovery",
-    "AsyncStaticDiscovery",
-    "CollectionIterator",
-    "HeaderField",
-    "HTTPError",
-    "PathInfoField",
-    "PostBodyField",
-    "QueryStringField",
+    # Ordered for the doc
+    # Request / Response
+    "scan",
     "register",
     "Request",
     "Response",
+    "HeaderField",
+    "PathInfoField",
+    "PostBodyField",
+    "QueryStringField",
+    # Request / Response Boxing
     "ResponseBox",
-    "scan",
-    "SyncCircuitBreaker",
-    "SyncHTTPAddHeadersMiddleware",
-    "SyncHTTPAuthorization",
-    "SyncHTTPBearerAuthorization",
-    "SyncHttpCachingMiddleware",
-    "SyncHTTPMiddleware",
-    "SyncMiddleware",
-    "SyncPrometheusMetrics",
-    "SyncConsulDiscovery",
-    "SyncRouterDiscovery",
-    "SyncStaticDiscovery",
+    "CollectionIterator",
+    # Exceptions
+    "HTTPError",
+    "HTTPTimeoutError",
+    # Timeout Config
+    "HTTPTimeout",
+    # Factories
+    "AsyncClientFactory",
     "SyncClientFactory",
-    "TimeoutError",
+    # Service Discovery
+    "AsyncConsulDiscovery",
+    "SyncConsulDiscovery",
+    "AsyncRouterDiscovery",
+    "SyncRouterDiscovery",
+    "AsyncStaticDiscovery",
+    "SyncStaticDiscovery",
+    # Middlewares
+    "AsyncMiddleware",
+    "SyncMiddleware",
+    # Basic Middlewares
+    "AsyncHTTPMiddleware",
+    "SyncHTTPMiddleware",
+    "AsyncHTTPAddHeadersMiddleware",
+    "SyncHTTPAddHeadersMiddleware",
+    "AsyncHTTPAuthorization",
+    "SyncHTTPAuthorization",
+    "AsyncHTTPBearerAuthorization",
+    "SyncHTTPBearerAuthorization",
+    # Advanced Middlewares
+    "AsyncCircuitBreaker",
+    "SyncCircuitBreaker",
+    "AsyncPrometheusMetrics",
+    "SyncPrometheusMetrics",
+    "AsyncHTTPCachingMiddleware",
+    "SyncHTTPCachingMiddleware",
+    "AbtractTraceContext",
+    "AsyncZipkinMiddleware",
 ]

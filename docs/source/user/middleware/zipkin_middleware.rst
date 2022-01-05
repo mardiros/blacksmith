@@ -8,19 +8,7 @@ In blacksmith, the zipkin middleware can be added to trace all the sub requests.
 
 Example using starlette_zipkin:
 
-::
-
-   import starlette_zipkin
-
-   from blacksmith import ClientFactory, ConsulDiscovery
-   from blacksmith.middleware._async.zipkin import ZipkinMiddleware
-
-   sd = ConsulDiscovery()
-   cli = ClientFactory(sd)
-   cli.add_middleware(
-      ZipkinMiddleware(starlette_zipkin.get_root_span, starlette_zipkin.get_tracer)
-   )
-
+.. literalinclude:: zipkin_middleware.py
 
 Full example of the zipkin middleware
 -------------------------------------

@@ -5,7 +5,7 @@ Glossary
 
    Cache-Control
       The cache control is a response header of an http request defined by
-      `HTTP/1.1`. If contains caching directive used by browsers, CDN and any
+      ``HTTP/1.1``. If contains caching directive used by browsers, CDN and any
       proxy that consume HTTP.
       https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
 
@@ -28,7 +28,7 @@ Glossary
       the client. It should be reuse in the resource declaration.
 
    client-side service discovery
-      The term:`service registry` is called by the client to find a host of a
+      The :term:`service registry` is called by the client to find a host of a
       service.
 
    Consul
@@ -52,7 +52,7 @@ Glossary
 
    server-side service discovery
       The client is calling a proxy server that maintain its backends server
-      list by receiving notification of the term:`service registry` to maintain.
+      list by receiving notification of the :term:`service registry` to maintain.
 
    service
       | A process that expose an API.

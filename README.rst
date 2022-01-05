@@ -23,29 +23,30 @@ there is a lack of clients.
 Consuming an API, is not just about doing HTTP requests, it has to be designed
 for failure, monitoring, and service discovery with an elegant abstraction.
 blacksmith aims to provide a solution for developers to write clean client code,
-and for ops to monitor api calls on the client side.
+and for ops to monitor api calls also on the client side.
 
 
 What is Blacksmith
 ------------------
 
-Blacksmith is a declarative tool for REST Api.
+Blacksmith is a declarative tool for consuming REST Api.
 
 In a REST API, resources are declared under HTTP routes, and every http verb
 as its own definition.
 
 In Blacksmith, every resources are bound to schemas that define request and response,
-in order abstract HTTP.
+in order to abstract HTTP.
 
 This is a common concept for SQL table with ORM, where tables are bound to models,
 and then, operations are available on models. This is a usefull abstraction to 
 write maintainable code and to dive into a project easilly.
 
 Handling API resources using an http client, such as `requests`_ does not handle
-that abstraction, and does not handle bindings to object, and can be compared to
+that abstraction, and does not handle bindings to objects, and can be compared to
 a raw connection because it is just a transport.
 
-This is the problem blacksmith is solving, having a nice abstraction of a service.
+This is the problem blacksmith is trying to solve, having a nice abstraction of
+services that use REST in a microservices architecture.
 
 .. note::
 

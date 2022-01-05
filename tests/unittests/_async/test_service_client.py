@@ -4,7 +4,7 @@ from prometheus_client import CollectorRegistry
 from blacksmith.domain.exceptions import (
     HTTPError,
     NoContractException,
-    TimeoutError,
+    HTTPTimeoutError,
     UnregisteredResourceException,
     UnregisteredRouteException,
     WrongRequestTypeException,
@@ -47,7 +47,7 @@ class FakeTimeoutTransport(AsyncAbstractTransport):
     async def request(
         self, method: HttpMethod, request: HTTPRequest, timeout: HTTPTimeout
     ) -> HTTPResponse:
-        raise TimeoutError(f"ReadTimeout while calling {method} {request.url}")
+        raise HTTPTimeoutError(f"ReadTimeout while calling {method} {request.url}")
 
 
 @pytest.mark.asyncio
@@ -135,7 +135,7 @@ async def test_client_timeout(static_sd):
         collection_parser=CollectionParser,
         middlewares=[],
     )
-    with pytest.raises(TimeoutError) as exc:
+    with pytest.raises(HTTPTimeoutError) as exc:
         await client.dummies.get({"name": "barbie"})
     assert (
         str(exc.value)

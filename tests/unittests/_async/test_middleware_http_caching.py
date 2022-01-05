@@ -2,7 +2,7 @@ import pytest
 
 from blacksmith.domain.model.http import HTTPRequest, HTTPResponse
 from blacksmith.middleware._async.http_caching import (
-    AsyncHttpCachingMiddleware,
+    AsyncHTTPCachingMiddleware,
     CacheControlPolicy,
     get_max_age,
     get_vary_header_split,
@@ -269,7 +269,7 @@ def test_policy_get_cache_info_for_response(params):
 )
 @pytest.mark.asyncio
 async def test_http_cache_response(params, fake_http_middleware_cache):
-    middleware = AsyncHttpCachingMiddleware(fake_http_middleware_cache)
+    middleware = AsyncHTTPCachingMiddleware(fake_http_middleware_cache)
     path, req, resp, expected = params
     await middleware.cache_response("dummies", path, req, resp)
     assert fake_http_middleware_cache.val == expected
@@ -285,7 +285,7 @@ async def test_http_cache_response(params, fake_http_middleware_cache):
 async def test_cache_middleware(
     cachable_response, boom_middleware, fake_http_middleware_cache, dummy_http_request
 ):
-    caching = AsyncHttpCachingMiddleware(fake_http_middleware_cache)
+    caching = AsyncHTTPCachingMiddleware(fake_http_middleware_cache)
     next = caching(cachable_response)
     resp = await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
     assert resp == HTTPResponse(

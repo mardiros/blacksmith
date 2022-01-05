@@ -2,7 +2,7 @@ import httpx
 from httpx import Response as HttpxRepsonse
 from httpx import Timeout as HttpxTimeout
 
-from blacksmith.domain.exceptions import HTTPError
+from blacksmith.domain.exceptions import HTTPError, HTTPTimeoutError
 from blacksmith.domain.model import HTTPRequest, HTTPResponse, HTTPTimeout
 from blacksmith.service.ports import SyncClient
 from blacksmith.typing import HttpMethod
@@ -42,7 +42,7 @@ class SyncHttpxTransport(SyncAbstractTransport):
                     timeout=HttpxTimeout(timeout.request, connect=timeout.connect),
                 )
             except httpx.TimeoutException as exc:
-                raise TimeoutError(
+                raise HTTPTimeoutError(
                     f"{exc.__class__.__name__} while calling {method} {request.url}"
                 )
 

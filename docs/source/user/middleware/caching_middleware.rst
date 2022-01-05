@@ -25,17 +25,17 @@ Or using poetry
 
    poetry add blacksmith -E caching
 
+Usage using the async api
+-------------------------
 
-Usage
------
+.. literalinclude:: caching_middleware.py
 
-::
 
-   cache = aioredis.from_url("redis://redis/0")
-   from blacksmith import ClientFactory, HttpCachingMiddleware, StaticDiscovery
+Usage using the sync api
+------------------------
 
-   sd = StaticDiscovery({("api", None): "http://srv:8000/"})
-   cli = ClientFactory(sd).add_middleware(HttpCachingMiddleware(cache))
+.. literalinclude:: caching_middleware_sync.py
+
 
 
 Full example of the redis_caching

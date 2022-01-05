@@ -44,7 +44,6 @@ release = version
 # ones.
 extensions = [
     "sphinx.ext.autodoc",
-    "sphinx.ext.autosectionlabel",
 ]
 
 autodoc_default_options = {
@@ -60,7 +59,6 @@ templates_path = ["_templates"]
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = []
 
-
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
@@ -72,3 +70,11 @@ html_theme = "sphinx_rtd_theme"
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = []  # "_static"]
+
+
+# -- Hack --------------------------------------------------------------------
+
+# suppress warning...
+import pydantic  # noqa
+
+pydantic.Field.__doc__ = pydantic.Field.__doc__.replace("**extra", r"\*\*extra")

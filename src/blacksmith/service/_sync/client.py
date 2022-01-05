@@ -79,7 +79,7 @@ class SyncClientFactory:
 
     :param sd: Service Discovery instance.
     :param transport: HTTP Client that process the call,
-        default use :class:`blacksmith.service.adapters.httpx.HttpxTransport`
+        default use :class:`blacksmith.service._async.adapters.httpx.HttpxTransport`
     :param registry: :registy where the resources has been registered.
         default use :data:`blacksmith.domain.registry.registry`
     :param metrics: a metrics collector.

@@ -6,12 +6,29 @@
 .. include:: ../../README.rst
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+   :maxdepth: 1
+   :caption: Users Documentation:
 
-   user/index
-   develop/index
-   glossary
+   user/introduction
+   user/register_routes
+   user/instanciating_client
+   user/sd/service_discovery
+   user/middleware/index
+   user/errors
+   user/api
+   user/changelog
+   user/glossary
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Developers Documentation:
+
+   develop/sd/index
+   develop/domain/index
+   develop/service/index
+   develop/middleware/index
+
+
 
 Indices and tables
 ==================

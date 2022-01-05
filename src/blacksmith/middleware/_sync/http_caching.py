@@ -171,7 +171,7 @@ class CacheControlPolicy(AbstractCachingPolicy):
         return (max_age, vary_key, vary)
 
 
-class SyncHttpCachingMiddleware(SyncHTTPMiddleware):
+class SyncHTTPCachingMiddleware(SyncHTTPMiddleware):
     """
     Http Cache Middleware based on Cache-Control and redis.
     """
