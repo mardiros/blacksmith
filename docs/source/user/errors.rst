@@ -1,49 +1,51 @@
 Dealing with errors
 ===================
 
+.. note::
+
+   This chapter describe common error that may happen at runtime.
+   Some exception can happen during the registration phase, using 
+   the function :func:`blacksmith.scan` which are not par not
+   runtime desigated runtime errors here.
+
 Timeout
 -------
 
-If a service is too slow, an exception will be raised to avoid a process
-to be locked.
+If a service is too slow, a :class:`blacksmith.HTTPTimeoutError` exception
+will be raised to avoid a process to be locked.
 The default timeout is at 30 seconds but it can be configured on the client
 factory, and can be overriden on every http call.
 The default connect timeout is at 15 seconds.
 
-::
+.. literalinclude:: errors_timeout.py
 
-   from blacksmith.domain.exception import HTTPTimeout
+HTTP Errors
+-----------
 
-   # read timeout at 5 seconds
-   # and connect timeout at 5 seconds
-   cli = ClientFactory(sd, timeout=(10.0,5.0))
-   # Or
-   cli = ClientFactory(sd, timeout=HTTPTimeout(10.0, 5.0))
+Blacksmith does not declare schema for errors.
 
-   # All timeout at 10 seconds
-   cli = ClientFactory(sd, timeout=10.0)
-   # Or
-   cli = ClientFactory(sd, timeout=HTTPTimeout(10.0))
+It raised exceptions instead.
 
+The exception raised is :class:`blacksmith.HTTPError` and get the
+``status_code`` of the error.
 
-   api = await cli("api")
+.. note::
 
-   # user the default timeout
-   resources = await api.resource.collection_get()
+   Usually, a set of API share the same format for all the errors,
+   but sometime, errors may also be html, so it is not possible to
+   have a schema for errors.
 
-   # force the timeout
-   resources = await api.resource.collection_get(timeout=42.0)
-   # Or even with a connect timeout
-   resources = await api.resource.collection_get(timeout=(42.0, 7.0))
+The error is supposed to be a json document, under attribute ``json``.
+If it is not the case, the content of the document will be in plain text
+under the key ``detail``.
 
 
-Raised Exceptions
------------------
+Opened Circuit Breaker
+----------------------
 
-Blacksmith does not declare schema for errors. It raised exceptions instead.
-The exception raised is `HTTPError` and get the `status_code` of the 
-error. The error is supposed to be a json document, under attribute `json`.
-If it is not the case, the content of the document will be in plain text under the key "detail".
+While using the :ref:`Circuit Breaker Middleware`, the `OpenedState`_ exception is
+raised from the `Circuit Breaker library`_, when a service is detected down,
+and then, that circuit has been opened.
 
-While using the :ref:`Circuit Breaker`, the CircuitBreakerError exception is
-raised when a service is down, and the circuit has been opened.
+.. _`OpenedState`: https://purgatory.readthedocs.io/en/latest/develop/domain/model.html#purgatory.domain.model.OpenedState
+.. _`Circuit Breaker library`: https://purgatory.readthedocs.io/

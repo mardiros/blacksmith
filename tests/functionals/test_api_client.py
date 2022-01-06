@@ -5,13 +5,13 @@ import pytest
 
 import blacksmith
 from blacksmith import (
-    ClientFactory,
+    AsyncClientFactory,
+    AsyncStaticDiscovery,
     PathInfoField,
     PostBodyField,
     QueryStringField,
     Request,
     Response,
-    StaticDiscovery,
 )
 from blacksmith.domain.exceptions import HTTPError, NoContractException
 
@@ -69,8 +69,8 @@ blacksmith.register(
 
 @pytest.mark.asyncio
 async def test_crud(dummy_api_endpoint):
-    sd = StaticDiscovery({("api", None): dummy_api_endpoint})
-    cli = ClientFactory(sd)
+    sd = AsyncStaticDiscovery({("api", None): dummy_api_endpoint})
+    cli = AsyncClientFactory(sd)
     api = await cli("api")
 
     items = await api.item.collection_get()

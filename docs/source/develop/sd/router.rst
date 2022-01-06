@@ -1,5 +1,5 @@
 Router Discovery
 ================
 
-.. automodule:: blacksmith.sd.adapters.router
+.. automodule:: blacksmith.sd._async.adapters.router
    :members:

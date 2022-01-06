@@ -1,5 +1,5 @@
 Consul
 ======
 
-.. automodule:: blacksmith.sd.adapters.consul
+.. automodule:: blacksmith.sd._async.adapters.consul
    :members:

@@ -4,23 +4,28 @@ from textwrap import dedent
 
 from notif.resources.user import User
 from prometheus_client import CONTENT_TYPE_LATEST, REGISTRY, generate_latest
+from purgatory import AsyncRedisUnitOfWork
 from starlette.applications import Starlette
 from starlette.responses import JSONResponse, Response
 
 import blacksmith
-from blacksmith import CircuitBreaker, ClientFactory, ConsulDiscovery, PrometheusMetrics
-from purgatory import RedisUnitOfWork
+from blacksmith import (
+    AsyncCircuitBreaker,
+    AsyncClientFactory,
+    AsyncConsulDiscovery,
+    AsyncPrometheusMetrics,
+)
 
 app = Starlette(debug=True)
 
 blacksmith.scan("notif.resources")
-sd = ConsulDiscovery()
-prom = PrometheusMetrics()
+sd = AsyncConsulDiscovery()
+prom = AsyncPrometheusMetrics()
 cli = (
-    ClientFactory(sd)
+    AsyncClientFactory(sd)
     .add_middleware(
-        CircuitBreaker(
-            3, 30, prometheus_metrics=prom, uow=RedisUnitOfWork("redis://redis/0")
+        AsyncCircuitBreaker(
+            3, 30, prometheus_metrics=prom, uow=AsyncRedisUnitOfWork("redis://redis/0")
         ),
     )
     .add_middleware(prom)

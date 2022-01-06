@@ -30,7 +30,8 @@ class HTTPRequest:
     Note that the HTTP method is not present, because the method is
     the funcion called.
 
-    The HTTP Request is filled out using the :class:`.Request` schema.
+    The HTTP Request is filled out using the
+    :class:`blacksmith.domain.model.params.Request` schema.
     """
 
     url_pattern: Url

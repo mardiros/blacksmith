@@ -7,6 +7,17 @@ doc:
 cleandoc:
     cd docs && poetry run make clean
 
+gensync:
+    poetry run python scripts/gen_unasync.py
+    poetry run isort src/blacksmith/middleware/_sync
+    poetry run black src/blacksmith/middleware/_sync
+    poetry run isort src/blacksmith/sd/_sync
+    poetry run black src/blacksmith/sd/_sync
+    poetry run isort src/blacksmith/service/_sync
+    poetry run black src/blacksmith/service/_sync
+    poetry run isort tests/unittests/_sync
+    poetry run black tests/unittests/_sync
+
 test: unittest functest lint
 
 lf:

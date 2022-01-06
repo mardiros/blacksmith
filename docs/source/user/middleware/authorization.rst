@@ -1,3 +1,5 @@
+.. _`Authentication Middleware`:
+
 Authentication Middleware
 =========================
 
@@ -10,44 +12,23 @@ For concistency, every service should use the same authorization
 pattern.
 
 With blacksmith, the authentication mechanism is declared in the
-`ClientFactory` to get the authentication working.
+`AsyncClientFactory` to get the authentication working.
 It also can be overridden on every api call.
 
 
 Example
 -------
 
-::
-
-   from blacksmith import ClientFactory, ConsulDiscovery, HTTPBearerAuthorization
-
-   sd = ConsulDiscovery()
-   # By default, every call will have a header
-   # Authorization: Bearer {access_token}
-   auth = HTTPBearerAuthorization(access_token)
-   cli = ClientFactory(sd).add_middleware(auth)
-   api = await cli("api")
-   protected_resource = await api.protected_resource.get({...})
-
+.. literalinclude:: authorization_bearer.py
 
 Create a custom authorization
 -----------------------------
 
-
 Imagine that you have an api that consume a basic authentication header.
 
-::
 
-   import base64
-   from blacksmith.domain.model import HTTPAuthorization
+.. literalinclude:: authorization_basic.py
 
-   class BasicAuthorization(HTTPAuthorization):
-       def __init__(self, username, password):
-           b64head = base64.b64encode(f"{username}:{password}".encode("utf-8")).decode("ascii")
-           header = f"Basic {b64head}"
-           return super().__init__("Basic", header)
-
-   cli = ClientFactory(sd, auth=auth).add_middleware(BasicAuthorization("me", "secret"))
 
 
 Create a custom authentication based on http header
@@ -55,18 +36,7 @@ Create a custom authentication based on http header
 
 Imagine that you have an api that consume a "X-Secret" header to validate call.
 
-::
-
-   import base64
-   from blacksmith.domain.model import HTTPAddHeadersMiddleware
-
-   class BasicAuthorization(HTTPAddHeadersMiddleware):
-       def __init__(self, secret):
-           return super().__init__(headers={"X-Secret": secret})
-
-   auth = BasicAuthorization("me", "secret")
-   cli = ClientFactory(sd, auth=auth)
-
+.. literalinclude:: authorization_custom_header.py
 
 
 Create a custom authentication based on querystring parameter

@@ -116,5 +116,5 @@ class HTTPError(Exception):
         return 500 <= self.status_code < 600
 
 
-class TimeoutError(Exception):
+class HTTPTimeoutError(TimeoutError):
     """Represent the http timeout error."""

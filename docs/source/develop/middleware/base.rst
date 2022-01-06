@@ -1,5 +1,5 @@
 Base Middlewares
 ================
 
-.. automodule:: blacksmith.middleware.base
+.. automodule:: blacksmith.middleware._async.base
    :members:

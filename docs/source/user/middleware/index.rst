@@ -1,21 +1,25 @@
 Middleware
 ==========
 
-Blacksmith is extensible by adding middleware between the resource contracts
-and the real http query.
+Blacksmith is extensible by adding middleware between the resource 
+contracts and the real http query.
 
-Users can create their own middleware but blacksmith comes with its lists
-of usefull middlewares listed here.
+For example, requests may share a security secret that make not parts
+of the contract of a route.
+
+.. note::
+
+   Users can create their own middleware but blacksmith comes with its lists
+   of usefull middlewares listed here.
 
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Contents:
 
    authorization
+   circuit_breaker_middleware
    prometheus_middleware
    zipkin_middleware
    caching_middleware
-   http_middleware
-   circuit_breaker_middleware
    generic_middleware

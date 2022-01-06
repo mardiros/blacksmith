@@ -1,5 +1,5 @@
 Client
 ======
 
-.. automodule:: blacksmith.service.client
+.. automodule:: blacksmith.service._async.client
    :members:

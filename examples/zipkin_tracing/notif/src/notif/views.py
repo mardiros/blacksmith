@@ -7,19 +7,21 @@ from starlette.applications import Starlette
 from starlette.responses import JSONResponse
 from starlette_zipkin import trace
 
-from blacksmith import ClientFactory, ConsulDiscovery
-from blacksmith.middleware.zipkin import AbtractTraceContext, ZipkinMiddleware
+from blacksmith import AsyncClientFactory, AsyncConsulDiscovery
+from blacksmith.middleware._async.zipkin import (
+    AbtractTraceContext,
+    AsyncZipkinMiddleware,
+)
 
 AbtractTraceContext.register(trace)
 
 
 app = Starlette(debug=True)
 
-smtp_sd = ConsulDiscovery()
+smtp_sd = AsyncConsulDiscovery()
 
-sd = ConsulDiscovery()
-cli = ClientFactory(sd)
-cli.add_middleware(ZipkinMiddleware(trace))
+sd = AsyncConsulDiscovery()
+cli = AsyncClientFactory(sd).add_middleware(AsyncZipkinMiddleware(trace))
 
 
 @trace("send email")

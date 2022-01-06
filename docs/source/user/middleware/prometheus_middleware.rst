@@ -3,8 +3,10 @@ Prometheus Middleware
 
 Blacksmith can expose api calls metrics using :term:`Prometheus`.
 
-It requires an extra dependency `prometheus_client` installed using the
+It requires the extra dependency `prometheus_client`_ installed using the
 following command.
+
+.. _`prometheus_client`: https://pypi.org/project/prometheus-client/
 
 ::
 
@@ -19,18 +21,21 @@ Or using poetry
 
 To use the prometheus middlware, it has to be added to the `ClientFactory`.
 
-::
+Async
+~~~~~
 
-   from blacksmith import ClientFactory, PrometheusMetrics, StaticDiscovery
-   sd = StaticDiscovery({("api", None): "http://srv:8000/"})
-   cli = ClientFactory(sd).add_middleware(PrometheusMetrics())
+.. literalinclude:: prometheus_middleware_async.py
 
+Sync
+~~~~
+
+.. literalinclude:: prometheus_middleware_sync.py
 
 Metrics
 -------
 
-While installing the metrics collector, it will add metrics on api call
-made.
+While installing the metrics collector, it will add metrics on api call made.
+
 There is `blacksmith_request_latency_seconds` Histogram and `blacksmith_info` Gauge.
 
 
@@ -47,9 +52,9 @@ You may configure the buckets using the parameter buckets
 
 ::
 
-   from blacksmith import PrometheusMetrics
+   from blacksmith import AsyncPrometheusMetrics
    BUCKETS = [0.05, 0.1, 0.2, 0.4, 0.8, 1.6, 3.2, 6.4, 12.8, 25.6]
-   metric = PrometheusMetrics(buckets=BUCKETS)
+   metric = AsyncPrometheusMetrics(buckets=BUCKETS)
 
 
 `blacksmith_request_latency_seconds` labels are  `client_name`, `method`,
@@ -58,7 +63,7 @@ You may configure the buckets using the parameter buckets
 
 .. note::
 
-   The client_name can indicated the service at its version, and, because a
+   The :term:`client_name` can indicated the service at its version, and, because a
    service can register the same method/path many times, it can be usefull
    to get the monitoring on every binding.
 
@@ -143,8 +148,8 @@ Example using starlette
 
    ::
 
-      from blacksmith import PrometheusMetrics
-      metric = PrometheusMetrics(registry=my_registry)
+      from blacksmith import AsyncPrometheusMetrics
+      prom_middleware = AsyncPrometheusMetrics(registry=my_registry)
 
 
 Full examples of prometheus metrics

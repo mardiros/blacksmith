@@ -1,5 +1,5 @@
 Service Base Classes
 ====================
 
-.. automodule:: blacksmith.service.base
+.. automodule:: blacksmith.service._async.base
    :members:

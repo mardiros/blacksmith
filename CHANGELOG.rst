@@ -11,7 +11,7 @@
 
 0.6.3 - Released at 2021-12-29
 ------------------------------
-* Expose the HttpCachingMiddleware in blacksmith namespace
+* Expose the HTTPCachingMiddleware in blacksmith namespace
 
 0.6.2 - Released at 2021-12-29
 ------------------------------

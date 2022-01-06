@@ -1,3 +1,5 @@
+.. _`Generic Middleware`:
+
 Generic Middleware
 ==================
 
@@ -11,25 +13,18 @@ of the request, before sending the http query, to intercept request
 and response.
 
 Example of middleware:
+----------------------
 
-::
-
-   from blacksmith import HTTPMiddleware, Middleware
-
-   class HTTPPrintMiddleware(HTTPMiddleware):
-      """Inject data in http query on every requests."""
-
-      def __call__(self, next: Middleware) -> Middleware:
-         async def handle(
-               req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
-         ) -> HTTPResponse:
-               print(f">>> {req}")
-               resp = await next(req, method, client_name, path)
-               print(f"<<< {resp}")
-               return resp
-
-         return handle
+.. literalinclude:: generic_middleware.py
 
 
-`HTTPMiddleware` is a base class for all the middleware, Middleware is the
-signature of the function `handle` above.
+.. note::
+
+   :class:`blacksmith.AsyncHTTPMiddleware` is a base class for all the async 
+   middleware, :class:`AsyncMiddleware` is the signature of the function 
+   ``handle`` above.
+
+Example of middleware using the synchronous API:
+------------------------------------------------
+
+.. literalinclude:: generic_middleware_sync.py

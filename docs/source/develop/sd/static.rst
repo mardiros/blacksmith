@@ -1,5 +1,5 @@
 Static Discovery
 ================
 
-.. automodule:: blacksmith.sd.adapters.static
+.. automodule:: blacksmith.sd._async.adapters.static
    :members:
