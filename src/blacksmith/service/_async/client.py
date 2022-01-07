@@ -108,7 +108,7 @@ class AsyncClientFactory:
         self.sd = sd
         self.registry = registry
         self.transport = transport or AsyncHttpxTransport(
-            verify_verificate=verify_certificate,
+            verify_cerificate=verify_certificate,
             proxies=proxies,
         )
         self.timeout = build_timeout(timeout)
