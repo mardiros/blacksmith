@@ -144,7 +144,25 @@ def test_client_timeout(static_sd):
 
 
 @pytest.mark.asyncio
-def test_client_factory(static_sd, dummy_middleware):
+def test_client_factory_config(static_sd):
+    tp = FakeTimeoutTransport()
+    client_factory = SyncClientFactory(static_sd, tp, registry=dummy_registry)
+
+    cli = client_factory("api")
+
+    assert cli.name == "api"
+    assert cli.endpoint == "https://dummy.v1/"
+    assert set(cli.resources.keys()) == {"dummies"}
+    assert cli.transport == tp
+
+
+def test_client_factory_configure_transport(static_sd):
+    client_factory = SyncClientFactory(static_sd, verify_certificate=False)
+    assert client_factory.transport.verify_verificate is False
+
+
+@pytest.mark.asyncio
+def test_client_factory_add_middleware(static_sd, dummy_middleware):
     tp = FakeTimeoutTransport()
     auth = SyncHTTPAuthorization("Bearer", "abc")
     prom = SyncPrometheusMetrics(registry=CollectorRegistry())
@@ -156,11 +174,6 @@ def test_client_factory(static_sd, dummy_middleware):
     assert client_factory.middlewares == [auth, prom]
 
     cli = client_factory("api")
-
-    assert cli.name == "api"
-    assert cli.endpoint == "https://dummy.v1/"
-    assert set(cli.resources.keys()) == {"dummies"}
-    assert cli.transport == tp
     assert cli.middlewares == [auth, prom]
 
     client_factory.add_middleware(dummy_middleware)

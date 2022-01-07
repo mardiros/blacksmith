@@ -1,4 +1,4 @@
-from typing import List, Optional, Type
+from typing import List, Type
 
 from blacksmith.domain.exceptions import UnregisteredResourceException
 from blacksmith.domain.model.http import HTTPTimeout
@@ -11,12 +11,7 @@ from blacksmith.service._sync.adapters.httpx import SyncHttpxTransport
 from blacksmith.typing import ClientName, ResourceName, Url
 
 from .base import SyncAbstractTransport
-from .route_proxy import (
-    ClientTimeout,
-    HTTPAuthentication,
-    SyncRouteProxy,
-    build_timeout,
-)
+from .route_proxy import ClientTimeout, SyncRouteProxy, build_timeout
 
 
 class SyncClient:
@@ -77,18 +72,19 @@ class SyncClientFactory:
     """
     Client creator, for the given configuration.
 
-    :param sd: Service Discovery instance.
+    :param sd: Service Discovery instance
     :param transport: HTTP Client that process the call,
         default use :class:`blacksmith.service._async.adapters.httpx.HttpxTransport`
-    :param registry: :registy where the resources has been registered.
-        default use :data:`blacksmith.domain.registry.registry`
-    :param metrics: a metrics collector.
+    :param timeout: configure timeout,
+        this parameter is ignored if the transport has been passed
+    :param verify_certificate: Reject request if certificate are invalid for https
+    :param collection_parser: use to customize the collection parser
+        default use :class:`blacksmith.domain.model.params.CollectionParser`
     """
 
     sd: SyncAbstractServiceDiscovery
     registry: Registry
     transport: SyncAbstractTransport
-    auth: HTTPAuthentication
     timeout: HTTPTimeout
     collection_parser: Type[CollectionParser]
     middlewares: List[SyncHTTPMiddleware]
@@ -99,11 +95,14 @@ class SyncClientFactory:
         transport: SyncAbstractTransport = None,
         registry: Registry = default_registry,
         timeout: ClientTimeout = HTTPTimeout(),
+        verify_certificate: bool = False,
         collection_parser: Type[CollectionParser] = CollectionParser,
     ) -> None:
         self.sd = sd
         self.registry = registry
-        self.transport = transport or SyncHttpxTransport()
+        self.transport = transport or SyncHttpxTransport(
+            verify_verificate=verify_certificate
+        )
         self.timeout = build_timeout(timeout)
         self.collection_parser = collection_parser
         self.middlewares = []
@@ -123,9 +122,7 @@ class SyncClientFactory:
         for middleware in self.middlewares:
             middleware.initialize()
 
-    def __call__(
-        self, client_name: ClientName, auth: Optional[HTTPAuthentication] = None
-    ):
+    def __call__(self, client_name: ClientName):
         if not self._initialized:
             self._initialized = True
             self.initialize()

@@ -1,4 +1,4 @@
-from typing import List, Optional, Type
+from typing import List, Type
 
 from blacksmith.domain.exceptions import UnregisteredResourceException
 from blacksmith.domain.model.http import HTTPTimeout
@@ -14,7 +14,6 @@ from .base import AsyncAbstractTransport
 from .route_proxy import (
     AsyncRouteProxy,
     ClientTimeout,
-    HTTPAuthentication,
     build_timeout,
 )
 
@@ -77,18 +76,19 @@ class AsyncClientFactory:
     """
     Client creator, for the given configuration.
 
-    :param sd: Service Discovery instance.
+    :param sd: Service Discovery instance
     :param transport: HTTP Client that process the call,
         default use :class:`blacksmith.service._async.adapters.httpx.HttpxTransport`
-    :param registry: :registy where the resources has been registered.
-        default use :data:`blacksmith.domain.registry.registry`
-    :param metrics: a metrics collector.
+    :param timeout: configure timeout,
+        this parameter is ignored if the transport has been passed
+    :param verify_certificate: Reject request if certificate are invalid for https
+    :param collection_parser: use to customize the collection parser
+        default use :class:`blacksmith.domain.model.params.CollectionParser`
     """
 
     sd: AsyncAbstractServiceDiscovery
     registry: Registry
     transport: AsyncAbstractTransport
-    auth: HTTPAuthentication
     timeout: HTTPTimeout
     collection_parser: Type[CollectionParser]
     middlewares: List[AsyncHTTPMiddleware]
@@ -99,11 +99,14 @@ class AsyncClientFactory:
         transport: AsyncAbstractTransport = None,
         registry: Registry = default_registry,
         timeout: ClientTimeout = HTTPTimeout(),
+        verify_certificate: bool = False,
         collection_parser: Type[CollectionParser] = CollectionParser,
     ) -> None:
         self.sd = sd
         self.registry = registry
-        self.transport = transport or AsyncHttpxTransport()
+        self.transport = transport or AsyncHttpxTransport(
+            verify_verificate=verify_certificate
+        )
         self.timeout = build_timeout(timeout)
         self.collection_parser = collection_parser
         self.middlewares = []
@@ -123,9 +126,7 @@ class AsyncClientFactory:
         for middleware in self.middlewares:
             await middleware.initialize()
 
-    async def __call__(
-        self, client_name: ClientName, auth: Optional[HTTPAuthentication] = None
-    ):
+    async def __call__(self, client_name: ClientName):
         if not self._initialized:
             self._initialized = True
             await self.initialize()
