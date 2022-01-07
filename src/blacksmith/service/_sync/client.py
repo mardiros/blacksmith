@@ -104,7 +104,7 @@ class SyncClientFactory:
         self.sd = sd
         self.registry = registry
         self.transport = transport or SyncHttpxTransport(
-            verify_cerificate=verify_certificate,
+            verify_certificate=verify_certificate,
             proxies=proxies,
         )
         self.timeout = build_timeout(timeout)

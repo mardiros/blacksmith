@@ -158,7 +158,7 @@ async def test_client_factory_config(static_sd):
 
 def test_client_factory_configure_transport(static_sd):
     client_factory = AsyncClientFactory(static_sd, verify_certificate=False)
-    assert client_factory.transport.verify_cerificate is False
+    assert client_factory.transport.verify_certificate is False
 
 
 def test_client_factory_configure_proxies(static_sd):
