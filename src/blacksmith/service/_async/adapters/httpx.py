@@ -32,7 +32,9 @@ class AsyncHttpxTransport(AsyncAbstractTransport):
         headers = request.headers.copy()
         if request.body:
             headers["Content-Type"] = "application/json"
-        async with AsyncClient(verify=self.verify_verificate) as client:
+        async with AsyncClient(
+            verify=self.verify_verificate, proxies=self.proxies
+        ) as client:
             try:
                 r = await client.request(
                     method,

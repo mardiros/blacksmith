@@ -21,7 +21,7 @@ from blacksmith.middleware._async.auth import AsyncHTTPAuthorization
 from blacksmith.middleware._async.prometheus import AsyncPrometheusMetrics
 from blacksmith.service._async.base import AsyncAbstractTransport
 from blacksmith.service._async.client import AsyncClient, AsyncClientFactory
-from blacksmith.typing import HttpMethod
+from blacksmith.typing import HttpMethod, Proxies
 from tests.unittests.dummy_registry import (
     GetParam,
     GetResponse,
@@ -159,6 +159,15 @@ async def test_client_factory_config(static_sd):
 def test_client_factory_configure_transport(static_sd):
     client_factory = AsyncClientFactory(static_sd, verify_certificate=False)
     assert client_factory.transport.verify_verificate is False
+
+
+def test_client_factory_configure_proxies(static_sd):
+    proxies: Proxies = {
+        "http://": "http://localhost:8030",
+        "https://": "http://localhost:8031",
+    }
+    client_factory = AsyncClientFactory(static_sd, proxies=proxies)
+    assert client_factory.transport.proxies is proxies
 
 
 @pytest.mark.asyncio

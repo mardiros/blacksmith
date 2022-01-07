@@ -8,7 +8,7 @@ from blacksmith.domain.registry import registry as default_registry
 from blacksmith.middleware._async.base import AsyncHTTPMiddleware
 from blacksmith.sd._async.base import AsyncAbstractServiceDiscovery
 from blacksmith.service._async.adapters.httpx import AsyncHttpxTransport
-from blacksmith.typing import ClientName, ResourceName, Url
+from blacksmith.typing import ClientName, Proxies, ResourceName, Url
 
 from .base import AsyncAbstractTransport
 from .route_proxy import (
@@ -81,6 +81,8 @@ class AsyncClientFactory:
         default use :class:`blacksmith.service._async.adapters.httpx.HttpxTransport`
     :param timeout: configure timeout,
         this parameter is ignored if the transport has been passed
+    :param proxies: configure proxies,
+        this parameter is ignored if the transport has been passed
     :param verify_certificate: Reject request if certificate are invalid for https
     :param collection_parser: use to customize the collection parser
         default use :class:`blacksmith.domain.model.params.CollectionParser`
@@ -99,13 +101,15 @@ class AsyncClientFactory:
         transport: AsyncAbstractTransport = None,
         registry: Registry = default_registry,
         timeout: ClientTimeout = HTTPTimeout(),
+        proxies: Proxies = None,
         verify_certificate: bool = False,
         collection_parser: Type[CollectionParser] = CollectionParser,
     ) -> None:
         self.sd = sd
         self.registry = registry
         self.transport = transport or AsyncHttpxTransport(
-            verify_verificate=verify_certificate
+            verify_verificate=verify_certificate,
+            proxies=proxies,
         )
         self.timeout = build_timeout(timeout)
         self.collection_parser = collection_parser

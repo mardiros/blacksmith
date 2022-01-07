@@ -31,7 +31,7 @@ class SyncHttpxTransport(SyncAbstractTransport):
         headers = request.headers.copy()
         if request.body:
             headers["Content-Type"] = "application/json"
-        with SyncClient(verify=self.verify_verificate) as client:
+        with SyncClient(verify=self.verify_verificate, proxies=self.proxies) as client:
             try:
                 r = client.request(
                     method,

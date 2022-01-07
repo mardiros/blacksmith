@@ -21,7 +21,7 @@ from blacksmith.middleware._sync.auth import SyncHTTPAuthorization
 from blacksmith.middleware._sync.prometheus import SyncPrometheusMetrics
 from blacksmith.service._sync.base import SyncAbstractTransport
 from blacksmith.service._sync.client import SyncClient, SyncClientFactory
-from blacksmith.typing import HttpMethod
+from blacksmith.typing import HttpMethod, Proxies
 from tests.unittests.dummy_registry import (
     GetParam,
     GetResponse,
@@ -159,6 +159,15 @@ def test_client_factory_config(static_sd):
 def test_client_factory_configure_transport(static_sd):
     client_factory = SyncClientFactory(static_sd, verify_certificate=False)
     assert client_factory.transport.verify_verificate is False
+
+
+def test_client_factory_configure_proxies(static_sd):
+    proxies: Proxies = {
+        "http://": "http://localhost:8030",
+        "https://": "http://localhost:8031",
+    }
+    client_factory = SyncClientFactory(static_sd, proxies=proxies)
+    assert client_factory.transport.proxies is proxies
 
 
 @pytest.mark.asyncio
