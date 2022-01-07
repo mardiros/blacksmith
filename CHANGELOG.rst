@@ -1,3 +1,7 @@
+0.9.1 - Released at 2022-01-06
+------------------------------
+* Fix typo in documentations and internals
+
 0.9.0 - Released at 2022-01-06
 ------------------------------
 * Add parameter proxies parameter in AsyncClientFactory and SyncClientFactory
