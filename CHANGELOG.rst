@@ -1,3 +1,11 @@
+0.9.0 - Released at 2022-01-06
+------------------------------
+* Add parameter proxies parameter in AsyncClientFactory and SyncClientFactory
+   It allow to configure http proxies for http and https
+* Add parameter verify_certificate parameter in AsyncClientFactory and SyncClientFactory
+   It allow to disable the TLS Certificate check. By default, in case of invalid
+   certificate, all request are rejected.
+
 0.8.0 - Released at 2022-01-06
 ------------------------------
 * Add support of the Sync version
