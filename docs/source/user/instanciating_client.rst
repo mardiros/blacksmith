@@ -15,7 +15,7 @@ To create a client, a :class:`blacksmith.AsyncClientFactory` object must be
 configured, instanciated, then will be responsible to build client for every
 registrated resources.
 
-Synchrounous code will use the :class:`blacksmith.SyncClientFactory` instead.
+Synchronous code will use the :class:`blacksmith.SyncClientFactory` instead.
 
 .. literalinclude:: instanciating_client_01.py
 
@@ -50,8 +50,8 @@ example bellow:
    The method accept a dict version of the request schema.
 
 
-Synchrounous API
-----------------
+Synchronous API
+---------------
 
 Resource registration does not change for the sync/async version, but,
 all the runtime components differ. A prefix ``Async`` identified the
