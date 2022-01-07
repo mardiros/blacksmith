@@ -1,3 +1,16 @@
+0.8.0 - Released at 2022-01-06
+------------------------------
+* Add support of the Sync version
+
+..important:
+
+   Breaking changes:
+
+     * Rename all classes that do async with an ``Async`` prefix.
+       * Services
+       * Middlewares
+       * Service Discovery
+
 0.7.0 - Released at 2022-01-02
 ------------------------------
 * Replace circuit breaker implementation.
