@@ -1,8 +1,8 @@
-0.9.1 - Released at 2022-01-06
+0.9.1 - Released at 2022-01-07
 ------------------------------
 * Fix typo in documentations and internals
 
-0.9.0 - Released at 2022-01-06
+0.9.0 - Released at 2022-01-07
 ------------------------------
 * Add parameter proxies parameter in AsyncClientFactory and SyncClientFactory
    It allow to configure http proxies for http and https
