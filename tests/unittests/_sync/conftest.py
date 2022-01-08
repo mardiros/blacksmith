@@ -157,12 +157,13 @@ def router_sd():
 class SyncFakeHttpMiddlewareCache(SyncAbstractCache):
     """Abstract Redis Client."""
 
-    def __init__(self) -> None:
+    def __init__(self, data=None) -> None:
         super().__init__()
-        self.val: Dict[str, Tuple[int, str]] = {}
+        self.val: Dict[str, Tuple[int, str]] = data or {}
+        self.initialize_called = False
 
     def initialize(self):
-        pass
+        self.initialize_called = True
 
     def get(self, key: str) -> Optional[str]:
         """Get a value from redis"""
@@ -179,3 +180,8 @@ class SyncFakeHttpMiddlewareCache(SyncAbstractCache):
 @pytest.fixture
 def fake_http_middleware_cache():
     return SyncFakeHttpMiddlewareCache()
+
+
+@pytest.fixture
+def fake_http_middleware_cache_with_data(params):
+    return SyncFakeHttpMiddlewareCache(params["initial_cache"])

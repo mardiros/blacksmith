@@ -192,34 +192,24 @@ def test_policy_get_cache_info_for_response(params):
 @pytest.mark.parametrize(
     "params",
     [
-        (
-            "/",
-            HTTPRequest("", {}, {}),
-            HTTPResponse(200, {}, ""),
-            {},
-        ),
-        (
-            "/",
-            HTTPRequest("", {}, {}),
-            HTTPResponse(200, {"cache-control": "max-age=42, public"}, ""),
-            {
-                "dummies$/": (42, "[]"),
-                "dummies$/$": (
-                    42,
-                    '{"status_code": 200, "headers": {"cache-control": "max-age=42, '
-                    'public"}, "json": ""}',
-                ),
+        {
+            "path": "/",
+            "request": HTTPRequest("", headers={}),
+            "initial_cache": {},
+            "expected_response_from_cache": None,
+        },
+        {
+            "path": "/",
+            "request": HTTPRequest("", headers={"x-country-code": "FR"}),
+            "initial_cache": {
+                "dummies$/": (42, '["x-country-code"]'),
             },
-        ),
-        (
-            "/",
-            HTTPRequest("", headers={"x-country-code": "FR"}),
-            HTTPResponse(
-                200,
-                {"cache-control": "max-age=42, public", "vary": "X-Country-Code"},
-                "En Francais",
-            ),
-            {
+            "expected_response_from_cache": None,
+        },
+        {
+            "path": "/",
+            "request": HTTPRequest("", headers={"x-country-code": "FR"}),
+            "initial_cache": {
                 "dummies$/": (42, '["x-country-code"]'),
                 "dummies$/$x-country-code=FR": (
                     42,
@@ -228,16 +218,75 @@ def test_policy_get_cache_info_for_response(params):
                     '"X-Country-Code"}, "json": "En Francais"}',
                 ),
             },
-        ),
-        (
-            "/",
-            HTTPRequest("", headers={}),
-            HTTPResponse(
+            "expected_response_from_cache": HTTPResponse(
+                status_code=200,
+                headers={
+                    "cache-control": "max-age=42, public",
+                    "vary": "X-Country-Code",
+                },
+                json="En Francais",
+            ),
+        },
+    ],
+)
+@pytest.mark.asyncio
+async def test_get_from_cache(params, fake_http_middleware_cache_with_data):
+    middleware = AsyncHTTPCachingMiddleware(fake_http_middleware_cache_with_data)
+    resp_from_cache = await middleware.get_from_cache(
+        "dummies", params["path"], params["request"]
+    )
+    assert resp_from_cache == params["expected_response_from_cache"]
+
+
+@pytest.mark.parametrize(
+    "params",
+    [
+        {
+            "path": "/",
+            "request": HTTPRequest("", {}, {}),
+            "response": HTTPResponse(200, {}, ""),
+            "expected_cache": {},
+        },
+        {
+            "path": "/",
+            "request": HTTPRequest("", {}, {}),
+            "response": HTTPResponse(200, {"cache-control": "max-age=42, public"}, ""),
+            "expected_cache": {
+                "dummies$/": (42, "[]"),
+                "dummies$/$": (
+                    42,
+                    '{"status_code": 200, "headers": {"cache-control": "max-age=42, '
+                    'public"}, "json": ""}',
+                ),
+            },
+        },
+        {
+            "path": "/",
+            "request": HTTPRequest("", headers={"x-country-code": "FR"}),
+            "response": HTTPResponse(
+                200,
+                {"cache-control": "max-age=42, public", "vary": "X-Country-Code"},
+                "En Francais",
+            ),
+            "expected_cache": {
+                "dummies$/": (42, '["x-country-code"]'),
+                "dummies$/$x-country-code=FR": (
+                    42,
+                    '{"status_code": 200, "headers": '
+                    '{"cache-control": "max-age=42, public", "vary": '
+                    '"X-Country-Code"}, "json": "En Francais"}',
+                ),
+            },
+        },
+        {
+            "path": "/",
+            "request": HTTPRequest("", headers={}),
+            "response": HTTPResponse(
                 200,
                 {"cache-control": "max-age=42, public", "vary": "X-Country-Code"},
                 "missing_header",
             ),
-            {
+            "expected_cache": {
                 "dummies$/": (42, '["x-country-code"]'),
                 "dummies$/$x-country-code=": (
                     42,
@@ -246,16 +295,16 @@ def test_policy_get_cache_info_for_response(params):
                     '"X-Country-Code"}, "json": "missing_header"}',
                 ),
             },
-        ),
-        (
-            "/",
-            HTTPRequest("", headers={"a": "A", "B": "B", "c": "C"}),
-            HTTPResponse(
+        },
+        {
+            "path": "/",
+            "request": HTTPRequest("", headers={"a": "A", "B": "B", "c": "C"}),
+            "response": HTTPResponse(
                 200,
                 {"cache-control": "max-age=42, public", "vary": "a, b"},
                 "many_headers",
             ),
-            {
+            "expected_cache": {
                 "dummies$/": (42, '["a", "b"]'),
                 "dummies$/$a=A|b=B": (
                     42,
@@ -264,19 +313,26 @@ def test_policy_get_cache_info_for_response(params):
                     '"a, b"}, "json": "many_headers"}',
                 ),
             },
-        ),
+        },
     ],
 )
 @pytest.mark.asyncio
 async def test_http_cache_response(params, fake_http_middleware_cache):
     middleware = AsyncHTTPCachingMiddleware(fake_http_middleware_cache)
-    path, req, resp, expected = params
-    await middleware.cache_response("dummies", path, req, resp)
-    assert fake_http_middleware_cache.val == expected
 
-    resp_from_cache = await middleware.get_from_cache("dummies", path, req)
-    if expected:
-        assert resp_from_cache == resp
+    resp_from_cache = await middleware.get_from_cache(
+        "dummies", params["path"], params["request"]
+    )
+    await middleware.cache_response(
+        "dummies", params["path"], params["request"], params["response"]
+    )
+    assert fake_http_middleware_cache.val == params["expected_cache"]
+
+    resp_from_cache = await middleware.get_from_cache(
+        "dummies", params["path"], params["request"]
+    )
+    if params["expected_cache"]:
+        assert resp_from_cache == params["response"]
     else:
         assert resp_from_cache is None
 
@@ -291,6 +347,15 @@ async def test_cache_middleware(
     assert resp == HTTPResponse(
         200, {"cache-control": "max-age=42, public"}, json="Cache Me"
     )
+    assert fake_http_middleware_cache.val == {
+        "dummy$/dummies/42?foo=bar": (42, "[]"),
+        "dummy$/dummies/42?foo=bar$": (
+            42,
+            '{"status_code": 200, "headers": '
+            '{"cache-control": "max-age=42, public"}, '
+            '"json": "Cache Me"}',
+        ),
+    }
 
     # get from the cache, not from the boom which raises
     next = caching(boom_middleware)
@@ -298,3 +363,36 @@ async def test_cache_middleware(
     assert resp == HTTPResponse(
         200, {"cache-control": "max-age=42, public"}, json="Cache Me"
     )
+
+
+@pytest.mark.asyncio
+async def test_cache_middleware_policy_handle(
+    cachable_response, fake_http_middleware_cache, dummy_http_request
+):
+    class TrackHandleCacheControlPolicy(CacheControlPolicy):
+        def __init__(self):
+            super().__init__("%")
+            self.handle_request_called = False
+
+        def handle_request(self, req, method, client_name, path) -> bool:
+            self.handle_request_called = True
+            return False
+
+    tracker = TrackHandleCacheControlPolicy()
+    caching = AsyncHTTPCachingMiddleware(
+        fake_http_middleware_cache, policy=tracker
+    )
+    next = caching(cachable_response)
+    resp = await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
+    assert tracker.handle_request_called is True
+    assert fake_http_middleware_cache.val == {}
+    assert resp == HTTPResponse(
+        200, {"cache-control": "max-age=42, public"}, json="Cache Me"
+    )
+
+
+@pytest.mark.asyncio
+async def test_circuit_breaker_initialize(fake_http_middleware_cache):
+    caching = AsyncHTTPCachingMiddleware(fake_http_middleware_cache)
+    await caching.initialize()
+    assert fake_http_middleware_cache.initialize_called is True

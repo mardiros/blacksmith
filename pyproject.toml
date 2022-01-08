@@ -47,6 +47,7 @@ uvicorn = "^0.15.0"
 flake8 = "^4.0.1"
 unasync = "^0.5.0"
 starlette-zipkin = "^0.2.0"
+redis = "^4.1.0"
 
 [tool.pytest.ini_options]
 norecursedirs = "tests/unittests/scanned_resources"
