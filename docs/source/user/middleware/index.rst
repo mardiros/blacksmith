@@ -1,5 +1,5 @@
-Middleware
-==========
+Middlewares
+===========
 
 Blacksmith is extensible by adding middleware between the resource 
 contracts and the real http query.
