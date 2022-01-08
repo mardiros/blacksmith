@@ -361,9 +361,7 @@ def test_circuit_breaker_listener(echo_middleware, boom_middleware, dummy_http_r
     brk = cbreaker.circuit_breaker.get_breaker("dummy")
     assert evts == [
         ("dummy", "failed", CircuitBreakerFailed(name="dummy", failure_count=1)),
-        # FIXME
-        # ("dummy", "failed", CircuitBreakerFailed(name="dummy", failure_count=2)),
-        # ("dummy", "failed", CircuitBreakerFailed(name="dummy", failure_count=3)),
+        ("dummy", "failed", CircuitBreakerFailed(name="dummy", failure_count=2)),
         (
             "dummy",
             "state_changed",
