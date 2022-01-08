@@ -24,7 +24,11 @@ class SyncHTTPMiddleware:
 
 
 class SyncHTTPAddHeadersMiddleware(SyncHTTPMiddleware):
-    """Generic middleware that inject header."""
+    """
+    Generic middleware that inject HTTP headers.
+
+    :params: headers to inject in HTTP requests.
+    """
 
     headers: Dict[str, str]
 
