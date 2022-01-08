@@ -59,7 +59,6 @@ exclude_lines = [
   "if TYPE_CHECKING:",
   "except ImportError:",
   "except pkg_resources.DistributionNotFound:",
-  "...",
 ]
 
 [build-system]

@@ -82,12 +82,10 @@ class AbstractSerializer(Protocol):
     @staticmethod
     def loads(s: str) -> Any:
         """Load a string to an object"""
-        ...
 
     @staticmethod
     def dumps(obj: Any) -> str:
         """Get a value from redis"""
-        ...
 
 
 def int_or_0(val: str) -> int:
