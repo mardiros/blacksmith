@@ -1,3 +1,4 @@
+from purgatory.service._async.circuitbreaker import AsyncCircuitBreakerFactory
 from tests.unittests.time import AsyncSleep
 from typing import Any, Dict, Optional, cast
 
@@ -24,6 +25,13 @@ from blacksmith.middleware._async.zipkin import (
     AsyncZipkinMiddleware,
 )
 from blacksmith.typing import ClientName, HttpMethod, Path
+
+from purgatory.domain.messages.events import (
+    CircuitBreakerCreated,
+    CircuitBreakerFailed,
+    CircuitBreakerRecovered,
+    ContextChanged,
+)
 
 
 def test_authorization_header():
@@ -313,6 +321,83 @@ async def test_circuit_breaker_prometheus_metrics(
     registry.get_sample_value(
         "blacksmith_circuit_breaker_state", labels=["dummy"]
     ) == CLOSED
+
+
+@pytest.mark.asyncio
+async def test_circuit_breaker_initialize():
+    class MockPurgatory:
+        def __init__(self):
+            self.called = False
+
+        async def initialize(self):
+            self.called = True
+
+    cbreaker = AsyncCircuitBreaker()
+    purgatory_cb = MockPurgatory()
+    cbreaker.circuit_breaker = cast(AsyncCircuitBreakerFactory, purgatory_cb)
+    await cbreaker.initialize()
+    assert purgatory_cb.called is True
+
+
+@pytest.mark.asyncio
+async def test_circuit_breaker_listener(
+    echo_middleware, boom_middleware, dummy_http_request
+):
+
+    evts = []
+
+    def hook(name, evt_name, evt):
+        evts.append((name, evt_name, evt))
+
+    cbreaker = AsyncCircuitBreaker(threshold=2, ttl=0.100, listeners=[hook])
+    echo_next = cbreaker(echo_middleware)
+    await echo_next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
+    assert evts == [
+        (
+            "dummy",
+            "circuit_breaker_created",
+            CircuitBreakerCreated(name="dummy", threshold=2, ttl=0.1),
+        )
+    ]
+    evts.clear()
+    boom_next = cbreaker(boom_middleware)
+    with pytest.raises(HTTPError):
+        await boom_next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
+    with pytest.raises(HTTPError):
+        await boom_next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
+    with pytest.raises(OpenedState):
+        await boom_next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
+
+    brk = await cbreaker.circuit_breaker.get_breaker("dummy")
+    assert evts == [
+        ("dummy", "failed", CircuitBreakerFailed(name="dummy", failure_count=1)),
+        # FIXME
+        # ("dummy", "failed", CircuitBreakerFailed(name="dummy", failure_count=2)),
+        # ("dummy", "failed", CircuitBreakerFailed(name="dummy", failure_count=3)),
+        (
+            "dummy",
+            "state_changed",
+            ContextChanged(
+                name="dummy", state="opened", opened_at=brk.context._state.opened_at
+            ),
+        ),
+    ]
+    evts.clear()
+    await AsyncSleep(0.110)
+    await echo_next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
+    assert evts == [
+        (
+            "dummy",
+            "state_changed",
+            ContextChanged(name="dummy", state="half-opened", opened_at=None),
+        ),
+        ("dummy", "recovered", CircuitBreakerRecovered(name="dummy")),
+        (
+            "dummy",
+            "state_changed",
+            ContextChanged(name="dummy", state="closed", opened_at=None),
+        ),
+    ]
 
 
 @pytest.mark.asyncio
