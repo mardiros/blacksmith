@@ -430,7 +430,7 @@ async def test_zipkin_middleware(echo_middleware, dummy_http_request):
             Trace.annotations.append((value, ts))
             return self
 
-    middleware = AsyncZipkinMiddleware(cast(AbtractTraceContext, Trace))
+    middleware = AsyncZipkinMiddleware(Trace)
     next = middleware(echo_middleware)
     await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
     assert Trace.name == "GET /dummies/42"
@@ -440,4 +440,51 @@ async def test_zipkin_middleware(echo_middleware, dummy_http_request):
         "http.path": "/dummies/{name}",
         "http.querystring": "{'foo': 'bar'}",
         "http.status_code": "200",
+    }
+
+
+@pytest.mark.asyncio
+async def test_zipkin_middleware_tag_error(boom_middleware, dummy_http_request):
+    class Trace(AbtractTraceContext):
+        name = ""
+        kind = ""
+        tags = {}
+        annotations = []
+
+        def __init__(self, name: str, kind: str) -> None:
+            Trace.name = name
+            Trace.kind = kind
+            Trace.tags = {}
+            Trace.annotations = []
+
+        @classmethod
+        def make_headers(cls) -> Dict[str, str]:
+            return {}
+
+        def __enter__(self) -> "Trace":
+            return self
+
+        def __exit__(self, *exc: Any):
+            pass
+
+        def tag(self, key: str, value: str) -> "Trace":
+            Trace.tags[key] = value
+            return self
+
+        def annotate(self, value: Optional[str], ts: Optional[float]) -> "Trace":
+            Trace.annotations.append((value, ts))
+            return self
+
+    middleware = AsyncZipkinMiddleware(Trace)
+    next = middleware(boom_middleware)
+    with pytest.raises(HTTPError):
+        await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
+    assert Trace.name == "GET /dummies/42"
+    assert Trace.kind == "CLIENT"
+    assert Trace.tags == {
+        "blacksmith.client_name": "dummy",
+        "http.path": "/dummies/{name}",
+        "http.querystring": "{'foo': 'bar'}",
+        "http.status_code": "500",
+        'error': 'true',
     }

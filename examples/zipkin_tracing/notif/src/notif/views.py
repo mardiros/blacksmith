@@ -1,6 +1,7 @@
 import email as emaillib
 import smtplib
 from textwrap import dedent
+from blacksmith.domain.exceptions import HTTPError
 
 from notif.resources.user import User
 from starlette.applications import Starlette
@@ -55,10 +56,17 @@ async def post_notif(request):
     body = await request.json()
 
     api_user = await cli("api_user")
-    user: User = (await api_user.users.get({"username": body["username"]})).response
-    await send_email(user, body["message"])
+    try:
+        user: User = (await api_user.users.get({"username": body["username"]})).response
+    except HTTPError as exc:
+        status_code = exc.response.status_code
+        resp = exc.response.json,
+    else:
+        await send_email(user, body["message"])
+        status_code = 202
+        resp = {"detail": f"{user.email} accepted"},
 
     return JSONResponse(
-        {"detail": f"{user.email} accepted"},
-        status_code=202,
+        resp,
+        status_code=status_code,
     )

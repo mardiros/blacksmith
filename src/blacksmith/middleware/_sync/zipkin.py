@@ -3,6 +3,7 @@
 import abc
 from typing import Any, Dict, Optional, Type
 
+from blacksmith.domain.exceptions import HTTPError
 from blacksmith.domain.model.http import HTTPRequest, HTTPResponse
 from blacksmith.typing import ClientName, HttpMethod, Path
 
@@ -60,10 +61,7 @@ class SyncZipkinMiddleware(SyncHTTPMiddleware):
             req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
         ) -> HTTPResponse:
 
-            try:
-                name = f"{method} {path.format(**req.path)}"
-            except KeyError:
-                name = f"{method} {path}"
+            name = f"{method} {path.format(**req.path)}"
 
             with self.trace(name, "CLIENT") as child_span:
                 headers = self.trace.make_headers()
@@ -74,10 +72,14 @@ class SyncZipkinMiddleware(SyncHTTPMiddleware):
                 child_span.tag("http.path", path)
                 if req.querystring:
                     child_span.tag("http.querystring", repr(req.querystring))
-                resp = next(req, method, client_name, path)
-                child_span.tag("http.status_code", str(resp.status_code))
-                if resp.status_code >= 400:
+                try:
+                    resp = next(req, method, client_name, path)
+                except HTTPError as exc:
+                    child_span.tag("http.status_code", str(exc.response.status_code))
                     child_span.tag("error", "true")
-                return resp
+                    raise
+                else:
+                    child_span.tag("http.status_code", str(resp.status_code))
+                    return resp
 
         return handle
