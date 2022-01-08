@@ -7,16 +7,16 @@ from blacksmith.typing import ClientName, HttpMethod, Path
 
 
 class AsyncMiddleware(Protocol):
-    """Definitionan of the middleware for the async version."""
+    """Signature of the middleware for the async version."""
     def __call__(
         self, req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
     ) -> Coroutine[Any, Any, HTTPResponse]:
-        ...
+        """This is the next function of the middleware."""
 
 
 class SyncMiddleware(Protocol):
-    """Definitionan of the middleware for the sync version."""
+    """Signature of the middleware for the sync version."""
     def __call__(
         self, req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
     ) -> HTTPResponse:
-        ...
+        """This is the next function of the middleware."""
