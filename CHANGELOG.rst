@@ -1,3 +1,7 @@
+0.9.2 - Released at 2022-01-07
+------------------------------
+* Fix typo in internals
+
 0.9.1 - Released at 2022-01-07
 ------------------------------
 * Fix typo in documentations and internals
