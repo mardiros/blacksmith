@@ -1,4 +1,5 @@
 import base64
+
 from blacksmith import AsyncClientFactory, AsyncConsulDiscovery, AsyncHTTPAuthorization
 
 

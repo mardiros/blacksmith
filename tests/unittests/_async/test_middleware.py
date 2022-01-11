@@ -1,11 +1,16 @@
-from purgatory.service._async.circuitbreaker import AsyncCircuitBreakerFactory
-from tests.unittests.time import AsyncSleep
 from typing import Any, Dict, Optional, cast
 
 import prometheus_client
 import pytest
 from prometheus_client import REGISTRY, CollectorRegistry
+from purgatory.domain.messages.events import (
+    CircuitBreakerCreated,
+    CircuitBreakerFailed,
+    CircuitBreakerRecovered,
+    ContextChanged,
+)
 from purgatory.domain.model import OpenedState
+from purgatory.service._async.circuitbreaker import AsyncCircuitBreakerFactory
 
 from blacksmith import __version__
 from blacksmith.domain.exceptions import HTTPError
@@ -25,13 +30,7 @@ from blacksmith.middleware._async.zipkin import (
     AsyncZipkinMiddleware,
 )
 from blacksmith.typing import ClientName, HttpMethod, Path
-
-from purgatory.domain.messages.events import (
-    CircuitBreakerCreated,
-    CircuitBreakerFailed,
-    CircuitBreakerRecovered,
-    ContextChanged,
-)
+from tests.unittests.time import AsyncSleep
 
 
 def test_authorization_header():
@@ -486,5 +485,5 @@ async def test_zipkin_middleware_tag_error(boom_middleware, dummy_http_request):
         "http.path": "/dummies/{name}",
         "http.querystring": "{'foo': 'bar'}",
         "http.status_code": "500",
-        'error': 'true',
+        "error": "true",
     }

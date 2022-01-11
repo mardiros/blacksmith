@@ -1,8 +1,8 @@
 from typing import Dict
 
 from blacksmith.domain.model.http import HTTPRequest, HTTPResponse
-from blacksmith.typing import ClientName, HttpMethod, Path
 from blacksmith.domain.typing import AsyncMiddleware
+from blacksmith.typing import ClientName, HttpMethod, Path
 
 
 class AsyncHTTPMiddleware:

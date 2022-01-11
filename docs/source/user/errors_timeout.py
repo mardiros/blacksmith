@@ -1,4 +1,4 @@
-from blacksmith import HTTPTimeout, AsyncClientFactory, AsyncStaticDiscovery
+from blacksmith import AsyncClientFactory, AsyncStaticDiscovery, HTTPTimeout
 
 sd = AsyncStaticDiscovery({})
 

@@ -21,6 +21,20 @@ Example
 
 .. literalinclude:: authorization_bearer.py
 
+In the example above, the bearer token is share for every clients,
+of the factory, which is ok for a service like prometheus where the
+token is a configuration key, but most of the time, a token depends
+on users.
+
+So in the example below, we set the token only on a particular client.
+
+.. literalinclude:: authorization_bearer2.py
+
+In that example, we have a fake web framework that parse the authorization
+header and expose the bearer token under a variable ``request.access_token``.
+And we provide the middleware only for the execution ot that request.
+ 
+
 Create a custom authorization
 -----------------------------
 

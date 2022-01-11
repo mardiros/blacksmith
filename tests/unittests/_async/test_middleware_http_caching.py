@@ -379,9 +379,7 @@ async def test_cache_middleware_policy_handle(
             return False
 
     tracker = TrackHandleCacheControlPolicy()
-    caching = AsyncHTTPCachingMiddleware(
-        fake_http_middleware_cache, policy=tracker
-    )
+    caching = AsyncHTTPCachingMiddleware(fake_http_middleware_cache, policy=tracker)
     next = caching(cachable_response)
     resp = await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
     assert tracker.handle_request_called is True

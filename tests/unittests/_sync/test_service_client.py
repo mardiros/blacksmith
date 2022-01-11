@@ -186,7 +186,30 @@ def test_client_factory_add_middleware(static_sd, dummy_middleware):
     assert cli.middlewares == [auth, prom]
 
     client_factory.add_middleware(dummy_middleware)
-    assert cli.middlewares == [dummy_middleware, auth, prom]
+    assert client_factory.middlewares == [dummy_middleware, auth, prom]
+    assert cli.middlewares == [auth, prom]
+
+
+@pytest.mark.asyncio
+def test_client_add_middleware(static_sd, dummy_middleware):
+    tp = FakeTimeoutTransport()
+    prom = SyncPrometheusMetrics(registry=CollectorRegistry())
+    auth = SyncHTTPAuthorization("Bearer", "abc")
+    client_factory = SyncClientFactory(
+        static_sd, tp, registry=dummy_registry
+    ).add_middleware(prom)
+
+    cli = client_factory("api")
+    assert cli.middlewares == [prom]
+    cli.add_middleware(auth)
+
+    assert cli.middlewares == [auth, prom]
+    assert client_factory.middlewares == [prom]
+
+    cli2 = (client_factory("api")).add_middleware(dummy_middleware)
+    assert cli2.middlewares == [dummy_middleware, prom]
+    assert cli.middlewares == [auth, prom]
+    assert client_factory.middlewares == [prom]
 
 
 @pytest.mark.asyncio
