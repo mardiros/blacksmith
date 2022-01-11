@@ -1,10 +1,6 @@
 import aioredis
 
-from blacksmith import (
-    SyncClientFactory,
-    SyncHTTPCachingMiddleware,
-    SyncConsulDiscovery,
-)
+from blacksmith import SyncClientFactory, SyncConsulDiscovery, SyncHTTPCachingMiddleware
 
 cache = aioredis.from_url("redis://redis/0")
 sd = SyncConsulDiscovery()

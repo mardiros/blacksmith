@@ -1,7 +1,8 @@
-from typing import Optional
 from enum import Enum
+from typing import Optional
+
 import blacksmith
-from blacksmith import Request, Response, PathInfoField, PostBodyField, QueryStringField
+from blacksmith import PathInfoField, PostBodyField, QueryStringField, Request, Response
 
 
 class SizeEnum(str, Enum):
