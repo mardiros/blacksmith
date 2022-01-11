@@ -1,7 +1,6 @@
 import email as emaillib
 import smtplib
 from textwrap import dedent
-from blacksmith.domain.exceptions import HTTPError
 
 from notif.resources.user import User
 from starlette.applications import Starlette
@@ -9,6 +8,7 @@ from starlette.responses import JSONResponse
 from starlette_zipkin import trace
 
 from blacksmith import AsyncClientFactory, AsyncConsulDiscovery
+from blacksmith.domain.exceptions import HTTPError
 from blacksmith.middleware._async.zipkin import (
     AbtractTraceContext,
     AsyncZipkinMiddleware,
@@ -60,11 +60,11 @@ async def post_notif(request):
         user: User = (await api_user.users.get({"username": body["username"]})).response
     except HTTPError as exc:
         status_code = exc.response.status_code
-        resp = exc.response.json,
+        resp = exc.response.json
     else:
         await send_email(user, body["message"])
         status_code = 202
-        resp = {"detail": f"{user.email} accepted"},
+        resp = {"detail": f"{user.email} accepted"}
 
     return JSONResponse(
         resp,

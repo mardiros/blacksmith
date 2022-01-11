@@ -69,8 +69,6 @@ services:
       - "traefik.http.routers.prometheus.entrypoints=web"
       - "traefik.http.routers.prometheus.rule=Host(`prometheus.${DOMAIN_NAME}`)"
       - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
-    depends_on:
-      - consul
 
   api_user:
     build: ./user
