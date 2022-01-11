@@ -7,6 +7,12 @@ contracts and the real http query.
 For example, requests may share a security secret that make not parts
 of the contract of a route.
 
+Middleware may be shared by all clients, such as prometheus middleware
+that catch all the traffic for monitoring, or may be added on client
+to add credentials per users.
+
+
+
 .. note::
 
    Users can create their own middleware but blacksmith comes with its lists
@@ -17,9 +23,9 @@ of the contract of a route.
    :maxdepth: 1
    :caption: Contents:
 
-   authorization
    circuit_breaker_middleware
    prometheus_middleware
    zipkin_middleware
    caching_middleware
+   authorization
    generic_middleware
