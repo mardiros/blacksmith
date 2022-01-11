@@ -11,11 +11,7 @@ from blacksmith.service._async.adapters.httpx import AsyncHttpxTransport
 from blacksmith.typing import ClientName, Proxies, ResourceName, Url
 
 from .base import AsyncAbstractTransport
-from .route_proxy import (
-    AsyncRouteProxy,
-    ClientTimeout,
-    build_timeout,
-)
+from .route_proxy import AsyncRouteProxy, ClientTimeout, build_timeout
 
 
 class AsyncClient:
@@ -49,7 +45,11 @@ class AsyncClient:
         self.transport = transport
         self.timeout = timeout
         self.collection_parser = collection_parser
-        self.middlewares = middlewares
+        self.middlewares = middlewares.copy()
+
+    def add_middleware(self, middleware: AsyncHTTPMiddleware) -> "AsyncClient":
+        self.middlewares.insert(0, middleware)
+        return self
 
     def __getattr__(self, name: ResourceName) -> AsyncRouteProxy:
         """

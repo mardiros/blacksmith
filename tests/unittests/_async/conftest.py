@@ -1,4 +1,3 @@
-from tests.unittests.time import AsyncSleep
 from datetime import timedelta
 from typing import Dict, Optional, Tuple
 
@@ -15,6 +14,7 @@ from blacksmith.sd._async.adapters.static import AsyncStaticDiscovery, Endpoints
 from blacksmith.service._async.base import AsyncAbstractTransport
 from blacksmith.service._async.client import AsyncClientFactory
 from blacksmith.typing import ClientName, HttpMethod, Path
+from tests.unittests.time import AsyncSleep
 
 
 @pytest.fixture

@@ -32,11 +32,6 @@ from .middleware._async import (
     AsyncPrometheusMetrics,
     AsyncZipkinMiddleware,
 )
-from .sd._async.adapters.consul import AsyncConsulDiscovery
-from .sd._async.adapters.router import AsyncRouterDiscovery
-from .sd._async.adapters.static import AsyncStaticDiscovery
-from .service._async.client import AsyncClientFactory
-
 from .middleware._sync import (
     SyncCircuitBreaker,
     SyncHTTPAddHeadersMiddleware,
@@ -47,9 +42,13 @@ from .middleware._sync import (
     SyncMiddleware,
     SyncPrometheusMetrics,
 )
+from .sd._async.adapters.consul import AsyncConsulDiscovery
+from .sd._async.adapters.router import AsyncRouterDiscovery
+from .sd._async.adapters.static import AsyncStaticDiscovery
 from .sd._sync.adapters.consul import SyncConsulDiscovery
 from .sd._sync.adapters.router import SyncRouterDiscovery
 from .sd._sync.adapters.static import SyncStaticDiscovery
+from .service._async.client import AsyncClientFactory
 from .service._sync.client import SyncClientFactory
 
 __all__ = [

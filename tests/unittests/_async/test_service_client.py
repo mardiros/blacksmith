@@ -1,10 +1,11 @@
+from typing import cast
 import pytest
 from prometheus_client import CollectorRegistry
 
 from blacksmith.domain.exceptions import (
     HTTPError,
-    NoContractException,
     HTTPTimeoutError,
+    NoContractException,
     UnregisteredResourceException,
     UnregisteredRouteException,
     WrongRequestTypeException,
@@ -186,7 +187,39 @@ async def test_client_factory_add_middleware(static_sd, dummy_middleware):
     assert cli.middlewares == [auth, prom]
 
     client_factory.add_middleware(dummy_middleware)
-    assert cli.middlewares == [dummy_middleware, auth, prom]
+    assert client_factory.middlewares == [dummy_middleware, auth, prom]
+    assert cli.middlewares == [auth, prom]
+    assert cast(AsyncHTTPAuthorization, cli.middlewares[0]).headers == {
+        "Authorization": "Bearer abc"
+    }
+    cast(AsyncHTTPAuthorization, client_factory.middlewares[0]).headers[
+        "Authorization"
+    ] = "Bearer xyz"
+    assert cast(AsyncHTTPAuthorization, cli.middlewares[0]).headers == {
+        "Authorization": "Bearer abc"
+    }
+
+
+@pytest.mark.asyncio
+async def test_client_add_middleware(static_sd, dummy_middleware):
+    tp = FakeTimeoutTransport()
+    prom = AsyncPrometheusMetrics(registry=CollectorRegistry())
+    auth = AsyncHTTPAuthorization("Bearer", "abc")
+    client_factory = AsyncClientFactory(
+        static_sd, tp, registry=dummy_registry
+    ).add_middleware(prom)
+
+    cli = await client_factory("api")
+    assert cli.middlewares == [prom]
+    cli.add_middleware(auth)
+
+    assert cli.middlewares == [auth, prom]
+    assert client_factory.middlewares == [prom]
+
+    cli2 = (await client_factory("api")).add_middleware(dummy_middleware)
+    assert cli2.middlewares == [dummy_middleware, prom]
+    assert cli.middlewares == [auth, prom]
+    assert client_factory.middlewares == [prom]
 
 
 @pytest.mark.asyncio

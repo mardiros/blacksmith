@@ -8,6 +8,7 @@ from blacksmith.typing import ClientName, HttpMethod, Path
 
 class AsyncMiddleware(Protocol):
     """Signature of the middleware for the async version."""
+
     def __call__(
         self, req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
     ) -> Coroutine[Any, Any, HTTPResponse]:
@@ -16,6 +17,7 @@ class AsyncMiddleware(Protocol):
 
 class SyncMiddleware(Protocol):
     """Signature of the middleware for the sync version."""
+
     def __call__(
         self, req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
     ) -> HTTPResponse:

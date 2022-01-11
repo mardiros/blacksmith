@@ -45,7 +45,11 @@ class SyncClient:
         self.transport = transport
         self.timeout = timeout
         self.collection_parser = collection_parser
-        self.middlewares = middlewares
+        self.middlewares = middlewares.copy()
+
+    def add_middleware(self, middleware: SyncHTTPMiddleware) -> "SyncClient":
+        self.middlewares.insert(0, middleware)
+        return self
 
     def __getattr__(self, name: ResourceName) -> SyncRouteProxy:
         """
