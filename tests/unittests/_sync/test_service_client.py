@@ -1,3 +1,5 @@
+from typing import cast
+
 import pytest
 from prometheus_client import CollectorRegistry
 
@@ -188,6 +190,15 @@ def test_client_factory_add_middleware(static_sd, dummy_middleware):
     client_factory.add_middleware(dummy_middleware)
     assert client_factory.middlewares == [dummy_middleware, auth, prom]
     assert cli.middlewares == [auth, prom]
+    assert cast(SyncHTTPAuthorization, cli.middlewares[0]).headers == {
+        "Authorization": "Bearer abc"
+    }
+    cast(SyncHTTPAuthorization, client_factory.middlewares[0]).headers[
+        "Authorization"
+    ] = "Bearer xyz"
+    assert cast(SyncHTTPAuthorization, cli.middlewares[0]).headers == {
+        "Authorization": "Bearer abc"
+    }
 
 
 @pytest.mark.asyncio
