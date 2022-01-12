@@ -124,7 +124,7 @@ class CacheControlPolicy(AbstractCachingPolicy):
     :param sep: Separator used in cache key **MUST NOT BE USED** in client name.
     """
 
-    def __init__(self, sep: str) -> None:
+    def __init__(self, sep: str = "$") -> None:
         self.sep = sep
 
     def handle_request(
@@ -177,7 +177,7 @@ class AsyncHTTPCachingMiddleware(AsyncHTTPMiddleware):
     def __init__(
         self,
         cache: AsyncAbstractCache,
-        policy: AbstractCachingPolicy = CacheControlPolicy(sep="$"),
+        policy: AbstractCachingPolicy = CacheControlPolicy(),
         serializer: AbstractSerializer = json,
     ) -> None:
         self._cache = cache
