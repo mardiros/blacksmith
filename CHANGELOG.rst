@@ -1,3 +1,9 @@
+0.10.1 - Released on 2022-01-11
+-------------------------------
+* Add an AbstractCollectionParser to improve API signatures.
+* Cleanup code, fix few typing issue and unmanage error on collection_get
+  if the contract is not registered.
+
 0.10.0 - Released on 2022-01-11
 -------------------------------
 * Add a method to have middleware per client.
