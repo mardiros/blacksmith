@@ -614,3 +614,33 @@ async def test_route_proxy_options():
     )
     resp = (await proxy.options({})).json
     assert resp == {"detail": "accepted"}
+
+
+@pytest.mark.asyncio
+async def test_unregistered_collection(echo_transport):
+    proxy = AsyncRouteProxy(
+        "dummy",
+        "dummies",
+        "http://dummy/",
+        ApiRoutes(
+            path="/",
+            contract={"GET": (Request, None)},
+            collection_path=None,
+            collection_contract=None,
+            collection_parser=None,
+        ),
+        transport=echo_transport,
+        timeout=HTTPTimeout(),
+        collection_parser=CollectionParser,
+        middlewares=[
+            AsyncHTTPAuthorization("Bearer", "abc"),
+            AsyncHTTPAddHeadersMiddleware({"foo": "bar"}),
+            AsyncHTTPAddHeadersMiddleware({"Eggs": "egg"}),
+        ],
+    )
+    with pytest.raises(UnregisteredRouteException) as ctx:
+        await proxy.collection_get({})
+    assert (
+        str(ctx.value)
+        == "Unregistered route 'GET' in resource 'dummies' in client 'dummy'"
+    )

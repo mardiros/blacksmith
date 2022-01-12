@@ -1,7 +1,5 @@
 from typing import Any, Dict, List, Optional, Tuple, Type, Union, cast
 
-from pydantic.typing import NoneType
-
 from blacksmith.domain.exceptions import (
     NoContractException,
     UnregisteredRouteException,
@@ -15,7 +13,6 @@ from blacksmith.domain.model import (
     Request,
     Response,
     ResponseBox,
-    TResponse,
 )
 from blacksmith.domain.model.params import AbstractCollectionParser
 from blacksmith.domain.registry import ApiRoutes, HttpResource
@@ -74,7 +71,7 @@ class SyncRouteProxy:
         method: HttpMethod,
         params: Union[Optional[Request], Dict[Any, Any]],
         resource: Optional[HttpResource],
-    ) -> Tuple[HTTPRequest, Union[NoneType, Type[TResponse]]]:
+    ) -> Tuple[HTTPRequest, Optional[Type[Response]]]:
         if resource is None:
             raise UnregisteredRouteException(method, self.name, self.client_name)
         if resource.contract is None or method not in resource.contract:
@@ -193,6 +190,8 @@ class SyncRouteProxy:
         params: Union[Optional[Request], Dict[Any, Any]] = None,
         timeout: Optional[ClientTimeout] = None,
     ) -> CollectionIterator:
+        if not self.routes.collection:
+            raise UnregisteredRouteException("GET", self.name, self.client_name)
         return self._yield_collection_request(
             "GET",
             params,
