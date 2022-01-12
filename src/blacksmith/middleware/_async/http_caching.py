@@ -185,7 +185,11 @@ class AsyncHTTPCachingMiddleware(AsyncHTTPMiddleware):
         self._serializer = serializer
 
     async def initialize(self):
-        await self._cache.initialize()
+        try:
+            await self._cache.initialize()
+        except AttributeError:  # coverage-ignore
+            # the redis sync version does not implement this method
+            pass
 
     async def cache_response(
         self,

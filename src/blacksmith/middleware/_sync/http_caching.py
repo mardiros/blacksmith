@@ -185,7 +185,11 @@ class SyncHTTPCachingMiddleware(SyncHTTPMiddleware):
         self._serializer = serializer
 
     def initialize(self):
-        self._cache.initialize()
+        try:
+            self._cache.initialize()
+        except AttributeError:  # coverage-ignore
+            # the redis sync version does not implement this method
+            pass
 
     def cache_response(
         self,
