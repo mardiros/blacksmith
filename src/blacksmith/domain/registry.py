@@ -16,7 +16,7 @@ from blacksmith.typing import (
 )
 
 from .exceptions import ConfigurationError, UnregisteredClientException
-from .model import CollectionParser, Request, Response
+from .model import AbstractCollectionParser, Request, Response
 
 Schemas = Tuple[Type[Request], Optional[Type[Response]]]
 Contract = Mapping[HttpMethod, Schemas]
@@ -34,7 +34,7 @@ class HttpResource:
 
 @dataclass(frozen=True)
 class HttpCollection(HttpResource):
-    collection_parser: Optional[Type[CollectionParser]]
+    collection_parser: Optional[Type[AbstractCollectionParser]]
     """Override the default collection parlser for a given resource."""
 
 
@@ -57,7 +57,7 @@ class ApiRoutes:
         contract: Optional[Contract],
         collection_path: Optional[Path],
         collection_contract: Optional[Contract],
-        collection_parser: Optional[Type[CollectionParser]],
+        collection_parser: Optional[Type[AbstractCollectionParser]],
     ) -> None:
         self.resource = HttpResource(path, contract) if path else None
         self.collection = (
@@ -90,7 +90,7 @@ class Registry:
         contract: Optional[Contract] = None,
         collection_path: Optional[Path] = None,
         collection_contract: Optional[Contract] = None,
-        collection_parser: Optional[Type[CollectionParser]] = None,
+        collection_parser: Optional[Type[AbstractCollectionParser]] = None,
     ):
         """
         Register the resource in the registry.
@@ -149,7 +149,7 @@ def register(
     contract: Optional[Contract] = None,
     collection_path: Optional[Path] = None,
     collection_contract: Optional[Contract] = None,
-    collection_parser: Optional[Type[CollectionParser]] = None,
+    collection_parser: Optional[Type[AbstractCollectionParser]] = None,
 ):
     """
     Register a resource in a client in the default registry.

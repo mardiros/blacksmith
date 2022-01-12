@@ -2,7 +2,7 @@ from typing import List, Type
 
 from blacksmith.domain.exceptions import UnregisteredResourceException
 from blacksmith.domain.model.http import HTTPTimeout
-from blacksmith.domain.model.params import CollectionParser
+from blacksmith.domain.model.params import AbstractCollectionParser, CollectionParser
 from blacksmith.domain.registry import Registry, Resources
 from blacksmith.domain.registry import registry as default_registry
 from blacksmith.middleware._async.base import AsyncHTTPMiddleware
@@ -26,7 +26,7 @@ class AsyncClient:
     resources: Resources
     transport: AsyncAbstractTransport
     timeout: HTTPTimeout
-    collection_parser: Type[CollectionParser]
+    collection_parser: Type[AbstractCollectionParser]
     middlewares: List[AsyncHTTPMiddleware]
 
     def __init__(
@@ -36,7 +36,7 @@ class AsyncClient:
         resources: Resources,
         transport: AsyncAbstractTransport,
         timeout: HTTPTimeout,
-        collection_parser: Type[CollectionParser],
+        collection_parser: Type[AbstractCollectionParser],
         middlewares: List[AsyncHTTPMiddleware],
     ) -> None:
         self.name = name
@@ -92,7 +92,7 @@ class AsyncClientFactory:
     registry: Registry
     transport: AsyncAbstractTransport
     timeout: HTTPTimeout
-    collection_parser: Type[CollectionParser]
+    collection_parser: Type[AbstractCollectionParser]
     middlewares: List[AsyncHTTPMiddleware]
 
     def __init__(
@@ -103,7 +103,7 @@ class AsyncClientFactory:
         timeout: ClientTimeout = HTTPTimeout(),
         proxies: Proxies = None,
         verify_certificate: bool = False,
-        collection_parser: Type[CollectionParser] = CollectionParser,
+        collection_parser: Type[AbstractCollectionParser] = CollectionParser,
     ) -> None:
         self.sd = sd
         self.registry = registry

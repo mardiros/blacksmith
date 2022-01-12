@@ -9,7 +9,6 @@ from blacksmith.domain.exceptions import (
 )
 from blacksmith.domain.model import (
     CollectionIterator,
-    CollectionParser,
     HTTPRequest,
     HTTPResponse,
     HTTPTimeout,
@@ -18,6 +17,7 @@ from blacksmith.domain.model import (
     ResponseBox,
     TResponse,
 )
+from blacksmith.domain.model.params import AbstractCollectionParser
 from blacksmith.domain.registry import ApiRoutes, HttpResource
 from blacksmith.middleware._sync.base import SyncHTTPMiddleware, SyncMiddleware
 from blacksmith.typing import ClientName, HttpMethod, Path, ResourceName, Url
@@ -46,7 +46,7 @@ class SyncRouteProxy:
     routes: ApiRoutes
     transport: SyncAbstractTransport
     timeout: HTTPTimeout
-    collection_parser: Type[CollectionParser]
+    collection_parser: Type[AbstractCollectionParser]
     middlewares: List[SyncHTTPMiddleware]
 
     def __init__(
@@ -57,7 +57,7 @@ class SyncRouteProxy:
         routes: ApiRoutes,
         transport: SyncAbstractTransport,
         timeout: HTTPTimeout,
-        collection_parser: Type[CollectionParser],
+        collection_parser: Type[AbstractCollectionParser],
         middlewares: List[SyncHTTPMiddleware],
     ) -> None:
         self.client_name = client_name
@@ -112,7 +112,7 @@ class SyncRouteProxy:
         self,
         response: HTTPResponse,
         response_schema: Optional[Type[Response]],
-        collection_parser: Optional[Type[CollectionParser]],
+        collection_parser: Optional[Type[AbstractCollectionParser]],
     ) -> CollectionIterator:
 
         return CollectionIterator(

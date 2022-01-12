@@ -9,7 +9,6 @@ from blacksmith.domain.exceptions import (
 )
 from blacksmith.domain.model import (
     CollectionIterator,
-    CollectionParser,
     HTTPRequest,
     HTTPResponse,
     HTTPTimeout,
@@ -18,6 +17,7 @@ from blacksmith.domain.model import (
     ResponseBox,
     TResponse,
 )
+from blacksmith.domain.model.params import AbstractCollectionParser
 from blacksmith.domain.registry import ApiRoutes, HttpResource
 from blacksmith.middleware._async.base import AsyncHTTPMiddleware, AsyncMiddleware
 from blacksmith.typing import ClientName, HttpMethod, Path, ResourceName, Url
@@ -46,7 +46,7 @@ class AsyncRouteProxy:
     routes: ApiRoutes
     transport: AsyncAbstractTransport
     timeout: HTTPTimeout
-    collection_parser: Type[CollectionParser]
+    collection_parser: Type[AbstractCollectionParser]
     middlewares: List[AsyncHTTPMiddleware]
 
     def __init__(
@@ -57,7 +57,7 @@ class AsyncRouteProxy:
         routes: ApiRoutes,
         transport: AsyncAbstractTransport,
         timeout: HTTPTimeout,
-        collection_parser: Type[CollectionParser],
+        collection_parser: Type[AbstractCollectionParser],
         middlewares: List[AsyncHTTPMiddleware],
     ) -> None:
         self.client_name = client_name
@@ -112,7 +112,7 @@ class AsyncRouteProxy:
         self,
         response: HTTPResponse,
         response_schema: Optional[Type[Response]],
-        collection_parser: Optional[Type[CollectionParser]],
+        collection_parser: Optional[Type[AbstractCollectionParser]],
     ) -> CollectionIterator:
 
         return CollectionIterator(

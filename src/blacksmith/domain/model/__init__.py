@@ -1,5 +1,6 @@
 from .http import HTTPRequest, HTTPResponse, HTTPTimeout
 from .params import (
+    AbstractCollectionParser,
     CollectionIterator,
     CollectionParser,
     HeaderField,
@@ -15,6 +16,7 @@ from .tracing import AbtractTraceContext
 
 __all__ = [
     "AbtractTraceContext",
+    "AbstractCollectionParser",
     "CollectionIterator",
     "CollectionParser",
     "HeaderField",

@@ -8,6 +8,7 @@ except pkg_resources.DistributionNotFound:
 
 from .domain.exceptions import HTTPError, HTTPTimeoutError
 from .domain.model import (
+    AbstractCollectionParser,
     AbtractTraceContext,
     CollectionIterator,
     HeaderField,
@@ -65,6 +66,7 @@ __all__ = [
     # Request / Response Boxing
     "ResponseBox",
     "CollectionIterator",
+    "AbstractCollectionParser",
     # Exceptions
     "HTTPError",
     "HTTPTimeoutError",

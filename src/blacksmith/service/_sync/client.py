@@ -2,7 +2,7 @@ from typing import List, Type
 
 from blacksmith.domain.exceptions import UnregisteredResourceException
 from blacksmith.domain.model.http import HTTPTimeout
-from blacksmith.domain.model.params import CollectionParser
+from blacksmith.domain.model.params import AbstractCollectionParser, CollectionParser
 from blacksmith.domain.registry import Registry, Resources
 from blacksmith.domain.registry import registry as default_registry
 from blacksmith.middleware._sync.base import SyncHTTPMiddleware
@@ -26,7 +26,7 @@ class SyncClient:
     resources: Resources
     transport: SyncAbstractTransport
     timeout: HTTPTimeout
-    collection_parser: Type[CollectionParser]
+    collection_parser: Type[AbstractCollectionParser]
     middlewares: List[SyncHTTPMiddleware]
 
     def __init__(
@@ -36,7 +36,7 @@ class SyncClient:
         resources: Resources,
         transport: SyncAbstractTransport,
         timeout: HTTPTimeout,
-        collection_parser: Type[CollectionParser],
+        collection_parser: Type[AbstractCollectionParser],
         middlewares: List[SyncHTTPMiddleware],
     ) -> None:
         self.name = name
@@ -92,7 +92,7 @@ class SyncClientFactory:
     registry: Registry
     transport: SyncAbstractTransport
     timeout: HTTPTimeout
-    collection_parser: Type[CollectionParser]
+    collection_parser: Type[AbstractCollectionParser]
     middlewares: List[SyncHTTPMiddleware]
 
     def __init__(
@@ -103,7 +103,7 @@ class SyncClientFactory:
         timeout: ClientTimeout = HTTPTimeout(),
         proxies: Proxies = None,
         verify_certificate: bool = False,
-        collection_parser: Type[CollectionParser] = CollectionParser,
+        collection_parser: Type[AbstractCollectionParser] = CollectionParser,
     ) -> None:
         self.sd = sd
         self.registry = registry

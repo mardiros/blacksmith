@@ -1,3 +1,4 @@
+import abc
 from dataclasses import dataclass
 from functools import partial
 from typing import (
@@ -6,6 +7,7 @@ from typing import (
     Dict,
     Generic,
     Iterator,
+    List,
     Optional,
     Type,
     TypeVar,
@@ -102,7 +104,57 @@ class Metadata:
     links: Links
 
 
-class CollectionParser:
+class AbstractCollectionParser(abc.ABC):
+    """
+    Signature of the collection parser.
+    """
+
+    resp: HTTPResponse
+
+    def __init__(self, resp: HTTPResponse):
+        self.resp = resp
+
+    @property
+    @abc.abstractmethod
+    def meta(self) -> Metadata:
+        """
+        Return the metatadata from the response.
+
+        Usually, metadata are in a header, but if the API wrap the list,
+
+        ::
+
+            {
+                "total_items": 0,
+                "items": []
+            }
+
+
+        Then, the ``Metadata.total_count`` can be extracted from the json,
+        instead of the header.
+        """
+
+    @property
+    @abc.abstractmethod
+    def json(self) -> List[Any]:
+        """
+        Return the list part of the response the response.
+
+        For instance, if an API wrap the list in a structure like
+
+        ::
+
+            {
+                "items": [
+                    {"objkey": "objval"}
+                ]
+            }
+
+        then, the ``resp.json["items"]`` has to be returned.
+        """
+
+
+class CollectionParser(AbstractCollectionParser):
     """
     Handle the rest collection metadata parser.
 
@@ -110,9 +162,6 @@ class CollectionParser:
     """
 
     total_count_header: str = "Total-Count"
-
-    def __init__(self, resp: HTTPResponse):
-        self.resp = resp
 
     @property
     def meta(self) -> Metadata:
@@ -182,13 +231,13 @@ class CollectionIterator(Iterator[TResponse]):
     Deserialize the models in a json response list, item by item.
     """
 
-    response: CollectionParser
+    response: AbstractCollectionParser
 
     def __init__(
         self,
         response: HTTPResponse,
         response_schema: Optional[Type[Response]],
-        collection_parser: Type[CollectionParser],
+        collection_parser: Type[AbstractCollectionParser],
     ) -> None:
         self.pos = 0
         self.response_schema = response_schema
