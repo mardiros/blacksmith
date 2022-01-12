@@ -15,7 +15,7 @@ from blacksmith.domain.model import (
     ResponseBox,
 )
 from blacksmith.domain.model.params import AbstractCollectionParser
-from blacksmith.domain.registry import ApiRoutes, HttpResource
+from blacksmith.domain.registry import ApiRoutes, HttpCollection, HttpResource
 from blacksmith.middleware._async.base import AsyncHTTPMiddleware, AsyncMiddleware
 from blacksmith.typing import ClientName, HttpMethod, Path, ResourceName, Url
 
@@ -71,7 +71,7 @@ class AsyncRouteProxy:
         method: HttpMethod,
         params: Union[Optional[Request], Dict[Any, Any]],
         resource: Optional[HttpResource],
-    ) -> Tuple[HTTPRequest, Optional[Type[Response]]]:
+    ) -> Tuple[Path, HTTPRequest, Optional[Type[Response]]]:
         if resource is None:
             raise UnregisteredRouteException(method, self.name, self.client_name)
         if resource.contract is None or method not in resource.contract:
@@ -87,20 +87,20 @@ class AsyncRouteProxy:
                 params.__class__, method, self.name, self.client_name
             )
         req = params.to_http_request(self.endpoint + resource.path)
-        return (req, return_schema)
+        return (resource.path, req, return_schema)
 
     def _prepare_response(
         self,
         response: HTTPResponse,
         response_schema: Optional[Type[Response]],
         method: HttpMethod,
-        resource: Optional[HttpResource],
+        path: Path,
     ) -> ResponseBox:
         return ResponseBox(
             response,
             response_schema,
             method,
-            resource.path,
+            path,
             self.name,
             self.client_name,
         )
@@ -141,12 +141,12 @@ class AsyncRouteProxy:
         method: HttpMethod,
         params: Union[Optional[Request], Dict[Any, Any]],
         timeout: HTTPTimeout,
-        path: Path,
+        collection: HttpCollection,
     ) -> CollectionIterator:
-        req, resp_schema = self._prepare_request(method, params, self.routes.collection)
+        path, req, resp_schema = self._prepare_request(method, params, collection)
         resp = await self._handle_req_with_middlewares(method, req, timeout, path)
         return self._prepare_collection_response(
-            resp, resp_schema, self.routes.collection.collection_parser
+            resp, resp_schema, collection.collection_parser
         )
 
     async def _collection_request(
@@ -155,11 +155,11 @@ class AsyncRouteProxy:
         params: Union[Request, Dict[Any, Any]],
         timeout: HTTPTimeout,
     ) -> ResponseBox:
-        req, resp_schema = self._prepare_request(method, params, self.routes.collection)
-        resp = await self._handle_req_with_middlewares(
-            method, req, timeout, self.routes.collection.path
+        path, req, resp_schema = self._prepare_request(
+            method, params, self.routes.collection
         )
-        return self._prepare_response(resp, resp_schema, method, self.routes.collection)
+        resp = await self._handle_req_with_middlewares(method, req, timeout, path)
+        return self._prepare_response(resp, resp_schema, method, path)
 
     async def _request(
         self,
@@ -167,14 +167,11 @@ class AsyncRouteProxy:
         params: Union[Request, Dict[Any, Any]],
         timeout: HTTPTimeout,
     ) -> ResponseBox:
-        req, resp_schema = self._prepare_request(method, params, self.routes.resource)
-        resp = await self._handle_req_with_middlewares(
-            method,
-            req,
-            timeout,
-            self.routes.resource.path,
+        path, req, resp_schema = self._prepare_request(
+            method, params, self.routes.resource
         )
-        return self._prepare_response(resp, resp_schema, method, self.routes.resource)
+        resp = await self._handle_req_with_middlewares(method, req, timeout, path)
+        return self._prepare_response(resp, resp_schema, method, path)
 
     async def collection_head(
         self,
@@ -196,7 +193,7 @@ class AsyncRouteProxy:
             "GET",
             params,
             build_timeout(timeout or self.timeout),
-            self.routes.collection.path,
+            self.routes.collection,
         )
 
     async def collection_post(

@@ -638,9 +638,11 @@ async def test_unregistered_collection(echo_transport):
             AsyncHTTPAddHeadersMiddleware({"Eggs": "egg"}),
         ],
     )
-    with pytest.raises(UnregisteredRouteException) as ctx:
-        await proxy.collection_get({})
-    assert (
-        str(ctx.value)
-        == "Unregistered route 'GET' in resource 'dummies' in client 'dummy'"
-    )
+    for verb in ("get", "post", "put", "patch", "delete", "options", "head"):
+        with pytest.raises(UnregisteredRouteException) as ctx:
+            meth = getattr(proxy, f"collection_{verb}")
+            await meth({})
+        assert (
+            str(ctx.value) == f"Unregistered route '{verb.upper()}' "
+            f"in resource 'dummies' in client 'dummy'"
+        )
