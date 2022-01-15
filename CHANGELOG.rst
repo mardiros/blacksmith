@@ -1,3 +1,10 @@
+0.11.0  - Released on 2022-01-15
+--------------------------------
+* Add typing support. see PEP 561
+* Update the CI.
+* Create a wrapper around json for the AbstractSerializer
+  in the circuit breaker.
+
 0.10.1 - Released on 2022-01-11
 -------------------------------
 * Add an AbstractCollectionParser to improve API signatures.
@@ -10,11 +17,11 @@
 
 0.9.2 - Released on 2022-01-07
 ------------------------------
-* Fix typo in internals
+* Fix typo in internals.
 
 0.9.1 - Released on 2022-01-07
 ------------------------------
-* Fix typo in documentations and internals
+* Fix typo in documentations and internals.
 
 0.9.0 - Released on 2022-01-07
 ------------------------------
