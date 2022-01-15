@@ -1,4 +1,5 @@
 from typing import Optional, Tuple
+from typing_extensions import Literal
 
 from httpx import _types
 
@@ -12,11 +13,5 @@ Service = Tuple[str, Version]
 Path = str
 Proxies = _types.ProxiesTypes
 
-try:
-    from typing import Literal
-
-    HttpLocation = Literal["path", "headers", "querystring", "body"]
-    HttpMethod = Literal["HEAD", "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
-except ImportError:
-    HttpLocation = str
-    HttpMethod = str
+HttpLocation = Literal["path", "headers", "querystring", "body"]
+HttpMethod = Literal["HEAD", "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
