@@ -86,6 +86,20 @@ By the way, public API provider comes with an SDK, which is a good case,
 and blacksmith can be used to build SDK for Python / asyncio. 
 
 
+Working with or without asyncio
+-------------------------------
+
+Blacksmith is written for ``asyncio``, but works with synchronous API without overhead.
+The synchronous API is generated using `unasync`_ and tested.
+
+.. note::
+
+   All class started by `Async` are asynchronous, and all class started by `Sync` are
+   synchronous, for an explicit usage
+
+.. _`unasync`: https://unasync.readthedocs.io/en/latest/
+
+
 Read More
 ---------
 
