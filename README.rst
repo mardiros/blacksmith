@@ -92,13 +92,3 @@ Read More
 You can read the `full documentation of this library here`_.
 
 .. _`full documentation of this library here`: https://python-blacksmith.readthedocs.io/en/latest/user/introduction.html
-
-
-Contributing
-------------
-
- * Use isort and black to keep the code well formatted.
- * Write tests (Test driven development is encouraged).
- * Using just_ to run commands.
-
-.. _just: https://github.com/casey/just
