@@ -39,6 +39,9 @@ black:
 rtd:
     poetry export --dev -f requirements.txt -o docs/requirements.txt
 
+mypy:
+    poetry run mypy src/blacksmith/
+
 cov test_suite=default_test_suite:
     rm -f .coverage
     rm -rf htmlcov
