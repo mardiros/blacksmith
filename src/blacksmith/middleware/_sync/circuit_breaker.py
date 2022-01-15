@@ -2,8 +2,8 @@
 
 from typing import Any, Iterable, Optional, cast
 
-from purgatory import SyncAbstractUnitOfWork, SyncCircuitBreakerFactory  # type: ignore
-from purgatory.typing import TTL, Hook, Threshold  # type: ignore
+from purgatory import SyncAbstractUnitOfWork, SyncCircuitBreakerFactory
+from purgatory.typing import TTL, Hook, Threshold
 
 from blacksmith.domain.exceptions import HTTPError
 from blacksmith.domain.model.http import HTTPRequest, HTTPResponse
