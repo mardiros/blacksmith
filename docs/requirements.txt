@@ -470,9 +470,9 @@ pluggy==1.0.0; python_version >= "3.6" \
 prometheus-client==0.12.0; (python_version >= "2.7" and python_full_version < "3.0.0") or (python_full_version >= "3.4.0") \
     --hash=sha256:317453ebabff0a1b02df7f708efbab21e3489e7072b61cb6957230dd004a0af0 \
     --hash=sha256:1b12ba48cee33b9b0b9de64a1047cbd3c5f2d0ab6ebcead7ddda613a750ec3c5
-purgatory-circuitbreaker==0.6.1; python_version >= "3.7" and python_version < "4.0" \
-    --hash=sha256:ead61bbaa43f762978f79fc30ffb945e9b50eed8bb8b2e3b698cada588313b06 \
-    --hash=sha256:f5421e54d0401afc186288fa92aed095797cc5d255d82357fbb20f0f6c41bfe8
+purgatory-circuitbreaker==0.7.0; python_version >= "3.7" and python_version < "4.0" \
+    --hash=sha256:9925f9307b9b10c9403a9316813827a26ae635c94bcbe10444cceb66a658d9fe \
+    --hash=sha256:88b8b132f384a7bd878a85a34246b99425fa6b6c1d0f58a2cc4c36d49d452bcc
 py==1.11.0; python_version >= "3.6" and python_full_version < "3.0.0" or python_full_version >= "3.5.0" and python_version >= "3.6" \
     --hash=sha256:607c53218732647dff4acdfcd50cb62615cedf612e72d1724fb1a0cc6405b378 \
     --hash=sha256:51c75c4126074b472f746a24399ad32f6053d1b34b68d2fa41e558e6f4a98719
