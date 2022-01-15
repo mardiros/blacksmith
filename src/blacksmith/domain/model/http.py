@@ -1,6 +1,6 @@
 import re
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Mapping, Optional, Union
 
 from blacksmith.typing import Url
 
@@ -108,7 +108,7 @@ class HTTPResponse:
 
     status_code: int
     """HTTP Status code."""
-    headers: Dict[str, str]
+    headers: Mapping[str, str]
     """Header of the response."""
     json: Optional[Any]
     """Json Body of the response."""

@@ -91,8 +91,7 @@ class Response(BaseModel):
         cls: Type[TResponse], response: HTTPResponse
     ) -> Optional[TResponse]:
         """Build the response from the given HTTPResponse."""
-        if response.json:
-            return cls(**response.json)
+        return cls(**response.json) if response.json else None
 
 
 @dataclass
