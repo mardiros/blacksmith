@@ -49,6 +49,7 @@ unasync = "^0.5.0"
 starlette-zipkin = "^0.2.0"
 redis = "^4.1.0"
 esbonio = "^0.8.0"
+mypy = "^0.931"
 
 [tool.pytest.ini_options]
 norecursedirs = "tests/unittests/scanned_resources"
