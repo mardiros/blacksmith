@@ -20,17 +20,26 @@ gensync:
 
 test: unittest functest lint mypy
 
+unittest test_suite=default_test_suite:
+    poetry run pytest -sxv {{test_suite}}
+
 lf:
     poetry run pytest -sxvvv --lf
 
-unittest test_suite=default_test_suite:
-    poetry run pytest -sxv {{test_suite}}
+cov test_suite=default_test_suite:
+    rm -f .coverage
+    rm -rf htmlcov
+    poetry run pytest --cov-report=html --cov=blacksmith {{test_suite}}
+    xdg-open htmlcov/index.html
 
 functest:
     poetry run pytest -sxv tests/functionals
 
 lint:
     poetry run flake8
+
+mypy:
+    poetry run mypy src/blacksmith/
 
 black:
     poetry run isort .
@@ -72,12 +81,3 @@ publish:
     poetry publish
     git tag "$(poetry run python scripts/show_release.py)"
     git push origin "$(poetry run python scripts/show_release.py)"
-
-mypy:
-    poetry run mypy src/blacksmith/
-
-cov test_suite=default_test_suite:
-    rm -f .coverage
-    rm -rf htmlcov
-    poetry run pytest --cov-report=html --cov=blacksmith {{test_suite}}
-    xdg-open htmlcov/index.html
