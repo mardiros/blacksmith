@@ -3,7 +3,7 @@ import abc
 import json
 from dataclasses import asdict
 from datetime import timedelta
-from typing import Any, List, Optional, Tuple
+from typing import Any, List, Optional, Tuple, Type, cast
 from urllib.parse import urlencode
 
 from httpx import Headers
@@ -78,14 +78,26 @@ except ImportError:
     pass
 
 
-class AbstractSerializer(Protocol):
+class AbstractSerializer(abc.ABC):
     @staticmethod
+    @abc.abstractmethod
     def loads(s: str) -> Any:
         """Load a string to an object"""
 
     @staticmethod
+    @abc.abstractmethod
     def dumps(obj: Any) -> str:
         """Get a value from redis"""
+
+
+class JsonSerializer(AbstractSerializer):
+    @staticmethod
+    def loads(s: str) -> Any:
+        return json.loads(s)
+
+    @staticmethod
+    def dumps(obj: Any) -> str:
+        return json.dumps(obj)
 
 
 def int_or_0(val: str) -> int:
@@ -99,8 +111,8 @@ def int_or_0(val: str) -> int:
 def get_max_age(response: HTTPResponse) -> int:
     max_age = 0
     age = int_or_0(response.headers.get("age", "0"))
-    cache_control = response.headers.get("cache-control", "")
-    cache_control = [c.strip() for c in cache_control.split(",")]
+    s_cache_control = response.headers.get("cache-control", "")
+    cache_control = [c.strip() for c in s_cache_control.split(",")]
     if "public" in cache_control:
         h_max_age: List[str] = [cc for cc in cache_control if cc.startswith("max-age=")]
         if h_max_age:
@@ -178,7 +190,7 @@ class SyncHTTPCachingMiddleware(SyncHTTPMiddleware):
         self,
         cache: SyncAbstractCache,
         policy: AbstractCachingPolicy = CacheControlPolicy(),
-        serializer: AbstractSerializer = json,
+        serializer: Type[AbstractSerializer] = JsonSerializer,
     ) -> None:
         self._cache = cache
         self._policy = policy
