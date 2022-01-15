@@ -17,10 +17,10 @@ def scan(*modules: str):
     Basically, it import modules containins :func:`blacksmith.register` calls.
 
     """
-    for mod in modules:
-        mod = importlib.import_module(mod)
-        for loader, submod, _is_pkg in pkgutil.walk_packages(
+    for modname in modules:
+        mod = importlib.import_module(modname)
+        for _loader, submod, _is_pkg in pkgutil.walk_packages(
             path=mod.__path__,
             prefix=mod.__name__ + ".",
         ):
-            loader.find_module(submod).load_module(submod)
+            importlib.import_module(submod)
