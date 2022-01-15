@@ -54,8 +54,7 @@ _registry.register(
 
 def blacksmith_cli(endpoint: Url, consul_token: str) -> AsyncClientFactory:
     sd = AsyncStaticDiscovery({("consul", "v1"): endpoint})
-    kwargs = {}
-    fact = AsyncClientFactory(sd, registry=_registry, **kwargs)
+    fact = AsyncClientFactory(sd, registry=_registry)
     if consul_token:
         fact.add_middleware(AsyncHTTPBearerAuthorization(consul_token))
     return fact

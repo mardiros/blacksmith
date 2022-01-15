@@ -54,8 +54,7 @@ _registry.register(
 
 def blacksmith_cli(endpoint: Url, consul_token: str) -> SyncClientFactory:
     sd = SyncStaticDiscovery({("consul", "v1"): endpoint})
-    kwargs = {}
-    fact = SyncClientFactory(sd, registry=_registry, **kwargs)
+    fact = SyncClientFactory(sd, registry=_registry)
     if consul_token:
         fact.add_middleware(SyncHTTPBearerAuthorization(consul_token))
     return fact

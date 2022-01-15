@@ -1,4 +1,5 @@
 from typing import cast
+
 import pytest
 from prometheus_client import CollectorRegistry
 
