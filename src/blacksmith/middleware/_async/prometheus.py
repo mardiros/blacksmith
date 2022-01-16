@@ -1,6 +1,6 @@
 """Collect metrics based on prometheus."""
 import time
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any, List, Optional
 
 import pkg_resources
 
@@ -38,7 +38,9 @@ class AsyncPrometheusMetrics(AsyncHTTPMiddleware):
 
     """
 
-    def __init__(self, buckets=None, registry: Registry = None):
+    def __init__(
+        self, buckets: Optional[List[float]] = None, registry: Registry = None
+    ) -> None:
         from prometheus_client import REGISTRY, Counter, Gauge, Histogram
 
         if registry is None:

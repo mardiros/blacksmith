@@ -57,7 +57,7 @@ class SyncAbstractCache(abc.ABC):
     """Abstract Redis Client."""
 
     @abc.abstractmethod
-    def initialize(self):
+    def initialize(self) -> None:
         """Initialize the cache"""
 
     @abc.abstractmethod
@@ -65,7 +65,7 @@ class SyncAbstractCache(abc.ABC):
         """Get a value from redis"""
 
     @abc.abstractmethod
-    def set(self, key: str, val: str, ex: timedelta):
+    def set(self, key: str, val: str, ex: timedelta) -> None:
         """Get a value from redis"""
 
 
@@ -195,7 +195,7 @@ class SyncHTTPCachingMiddleware(SyncHTTPMiddleware):
         self._policy = policy
         self._serializer = serializer
 
-    def initialize(self):
+    def initialize(self) -> None:
         try:
             self._cache.initialize()
         except AttributeError:  # coverage-ignore
@@ -208,7 +208,7 @@ class SyncHTTPCachingMiddleware(SyncHTTPMiddleware):
         path: Path,
         req: HTTPRequest,
         resp: HTTPResponse,
-    ):
+    ) -> None:
         (
             ttl,
             vary_key,

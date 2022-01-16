@@ -4,12 +4,13 @@ The discovery based on :term:`Consul`.
 This driver implement a client side service discovery.
 """
 import random
-from typing import Callable, cast
+from typing import Callable, List, cast
 
 from pydantic.fields import Field
 
 from blacksmith.domain.exceptions import HTTPError, UnregisteredServiceException
 from blacksmith.domain.model import PathInfoField, Request, Response
+from blacksmith.domain.model.params import CollectionIterator
 from blacksmith.domain.registry import Registry
 from blacksmith.middleware._async.auth import AsyncHTTPBearerAuthorization
 from blacksmith.sd._async.adapters.static import AsyncStaticDiscovery
@@ -121,11 +122,13 @@ class AsyncConsulDiscovery(AsyncAbstractServiceDiscovery):
         name = self.format_service_name(service, version)
         consul = await self.blacksmith_cli("consul")
         try:
-            resp = await consul.services.collection_get(ServiceRequest(name=name))
+            iresp: CollectionIterator[Service] = await consul.services.collection_get(
+                ServiceRequest(name=name)
+            )
         except HTTPError as exc:
             raise ConsulApiError(exc)  # rewrite the class to avoid confusion
         else:
-            resp = list(resp)
+            resp: List[Service] = list(iresp)
             if not resp:
                 raise UnregisteredServiceException(service, version)
             return cast(Service, random.choice(resp))

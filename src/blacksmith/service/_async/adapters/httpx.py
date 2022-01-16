@@ -5,12 +5,12 @@ from httpx import Timeout as HttpxTimeout
 from blacksmith.domain.exceptions import HTTPError, HTTPTimeoutError
 from blacksmith.domain.model import HTTPRequest, HTTPResponse, HTTPTimeout
 from blacksmith.service.ports import AsyncClient
-from blacksmith.typing import HttpMethod
+from blacksmith.typing import HttpMethod, Json
 
 from ..base import AsyncAbstractTransport
 
 
-def safe_json(r: HttpxRepsonse):
+def safe_json(r: HttpxRepsonse) -> Json:
     try:
         return r.json()
     except Exception:

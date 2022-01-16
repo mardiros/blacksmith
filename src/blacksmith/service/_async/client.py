@@ -126,11 +126,11 @@ class AsyncClientFactory:
         self.middlewares.insert(0, middleware)
         return self
 
-    async def initialize(self):
+    async def initialize(self) -> None:
         for middleware in self.middlewares:
             await middleware.initialize()
 
-    async def __call__(self, client_name: ClientName):
+    async def __call__(self, client_name: ClientName) -> AsyncClient:
         if not self._initialized:
             self._initialized = True
             await self.initialize()

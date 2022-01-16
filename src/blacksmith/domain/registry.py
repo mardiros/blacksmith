@@ -91,7 +91,7 @@ class Registry:
         collection_path: Optional[Path] = None,
         collection_contract: Optional[Contract] = None,
         collection_parser: Optional[Type[AbstractCollectionParser]] = None,
-    ):
+    ) -> None:
         """
         Register the resource in the registry.
 
@@ -150,7 +150,7 @@ def register(
     collection_path: Optional[Path] = None,
     collection_contract: Optional[Contract] = None,
     collection_parser: Optional[Type[AbstractCollectionParser]] = None,
-):
+) -> None:
     """
     Register a resource in a client in the default registry.
 

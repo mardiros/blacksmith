@@ -2,7 +2,7 @@ import re
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Mapping, Optional, Union
 
-from blacksmith.typing import Url
+from blacksmith.typing import Json, Url
 
 simpletypes = Union[str, int, float, bool]
 Links = Dict[Optional[str], Dict[str, str]]
@@ -14,11 +14,11 @@ class HTTPTimeout:
     request: float
     connect: float
 
-    def __init__(self, timeout: float = 30.0, connect: float = 15.0):
+    def __init__(self, timeout: float = 30.0, connect: float = 15.0) -> None:
         self.request = timeout
         self.connect = connect
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         return self.request == other.request and self.connect == other.connect
 
 
@@ -44,7 +44,7 @@ class HTTPRequest:
     body: str = ""
 
     @property
-    def url(self):
+    def url(self) -> str:
         return self.url_pattern.format(**self.path)
 
 
@@ -110,7 +110,7 @@ class HTTPResponse:
     """HTTP Status code."""
     headers: Mapping[str, str]
     """Header of the response."""
-    json: Optional[Any]
+    json: Json
     """Json Body of the response."""
 
     @property

@@ -57,7 +57,7 @@ class AsyncAbstractCache(abc.ABC):
     """Abstract Redis Client."""
 
     @abc.abstractmethod
-    async def initialize(self):
+    async def initialize(self) -> None:
         """Initialize the cache"""
 
     @abc.abstractmethod
@@ -65,7 +65,7 @@ class AsyncAbstractCache(abc.ABC):
         """Get a value from redis"""
 
     @abc.abstractmethod
-    async def set(self, key: str, val: str, ex: timedelta):
+    async def set(self, key: str, val: str, ex: timedelta) -> None:
         """Get a value from redis"""
 
 
@@ -195,7 +195,7 @@ class AsyncHTTPCachingMiddleware(AsyncHTTPMiddleware):
         self._policy = policy
         self._serializer = serializer
 
-    async def initialize(self):
+    async def initialize(self) -> None:
         try:
             await self._cache.initialize()
         except AttributeError:  # coverage-ignore
@@ -208,7 +208,7 @@ class AsyncHTTPCachingMiddleware(AsyncHTTPMiddleware):
         path: Path,
         req: HTTPRequest,
         resp: HTTPResponse,
-    ):
+    ) -> None:
         (
             ttl,
             vary_key,

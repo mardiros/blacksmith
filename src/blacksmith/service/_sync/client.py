@@ -126,11 +126,11 @@ class SyncClientFactory:
         self.middlewares.insert(0, middleware)
         return self
 
-    def initialize(self):
+    def initialize(self) -> None:
         for middleware in self.middlewares:
             middleware.initialize()
 
-    def __call__(self, client_name: ClientName):
+    def __call__(self, client_name: ClientName) -> SyncClient:
         if not self._initialized:
             self._initialized = True
             self.initialize()

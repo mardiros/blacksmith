@@ -1,4 +1,4 @@
-from typing import Optional, Tuple
+from typing import Any, Optional, Tuple
 
 from httpx import _types
 from typing_extensions import Literal
@@ -15,3 +15,5 @@ Proxies = _types.ProxiesTypes
 
 HttpLocation = Literal["path", "headers", "querystring", "body"]
 HttpMethod = Literal["HEAD", "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
+
+Json = Optional[Any]

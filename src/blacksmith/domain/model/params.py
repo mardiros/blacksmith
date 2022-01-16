@@ -22,7 +22,15 @@ else:
     IntStr = str
 
 from ...domain.exceptions import NoResponseSchemaException
-from ...typing import ClientName, HttpLocation, HttpMethod, Path, ResourceName, Url
+from ...typing import (
+    ClientName,
+    HttpLocation,
+    HttpMethod,
+    Json,
+    Path,
+    ResourceName,
+    Url,
+)
 from .http import HTTPRequest, HTTPResponse, Links
 
 PATH: HttpLocation = "path"
@@ -172,7 +180,7 @@ class CollectionParser(AbstractCollectionParser):
         )
 
     @property
-    def json(self):
+    def json(self) -> List[Json]:
         return self.resp.json or []
 
 
@@ -199,10 +207,10 @@ class ResponseBox(Generic[TResponse]):
     ) -> None:
         self.http_response = response
         self.response_schema = response_schema
-        self.method = method
-        self.path = path
-        self.name = name
-        self.client_name = client_name
+        self.method: HttpMethod = method
+        self.path: Path = path
+        self.name: ResourceName = name
+        self.client_name: ClientName = client_name
 
     @property
     def json(self) -> Optional[Dict]:
@@ -263,5 +271,5 @@ class CollectionIterator(Iterator[TResponse]):
         self.pos += 1
         return cast(TResponse, resp)  # Could be a dict
 
-    def __iter__(self):
+    def __iter__(self) -> "CollectionIterator":
         return self

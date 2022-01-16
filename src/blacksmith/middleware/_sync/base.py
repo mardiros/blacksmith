@@ -11,7 +11,7 @@ class SyncHTTPMiddleware:
     def __init__(self) -> None:
         pass
 
-    def initialize(self):
+    def initialize(self) -> None:
         pass
 
     def __call__(self, next: SyncMiddleware) -> SyncMiddleware:

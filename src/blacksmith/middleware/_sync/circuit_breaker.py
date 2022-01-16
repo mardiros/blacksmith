@@ -15,7 +15,7 @@ from .prometheus import SyncPrometheusMetrics
 Listeners = Optional[Iterable[Hook]]
 
 
-def exclude_httpx_4xx(exc: HTTPError):
+def exclude_httpx_4xx(exc: HTTPError) -> bool:
     """Exclude client side http errors."""
     return exc.is_client_error
 
@@ -78,7 +78,7 @@ class SyncCircuitBreaker(SyncHTTPMiddleware):
             for listener in listeners:
                 self.circuit_breaker.add_listener(listener)
 
-    def initialize(self):
+    def initialize(self) -> None:
         self.circuit_breaker.initialize()
 
     def __call__(self, next: SyncMiddleware) -> SyncMiddleware:

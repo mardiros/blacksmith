@@ -3,6 +3,7 @@ from typing import Type
 from blacksmith.typing import (
     ClientName,
     HttpMethod,
+    Json,
     Path,
     ResourceName,
     Service,
@@ -100,19 +101,19 @@ class HTTPError(Exception):
         self.response = response
 
     @property
-    def status_code(self):
+    def status_code(self) -> int:
         return self.response.status_code
 
     @property
-    def json(self):
+    def json(self) -> Json:
         return self.response.json
 
     @property
-    def is_client_error(self):
+    def is_client_error(self) -> bool:
         return 400 <= self.status_code < 500
 
     @property
-    def is_server_error(self):
+    def is_server_error(self) -> bool:
         return 500 <= self.status_code < 600
 
 

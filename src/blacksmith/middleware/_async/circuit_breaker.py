@@ -15,7 +15,7 @@ from .prometheus import AsyncPrometheusMetrics
 Listeners = Optional[Iterable[Hook]]
 
 
-def exclude_httpx_4xx(exc: HTTPError):
+def exclude_httpx_4xx(exc: HTTPError) -> bool:
     """Exclude client side http errors."""
     return exc.is_client_error
 
@@ -78,7 +78,7 @@ class AsyncCircuitBreaker(AsyncHTTPMiddleware):
             for listener in listeners:
                 self.circuit_breaker.add_listener(listener)
 
-    async def initialize(self):
+    async def initialize(self) -> None:
         await self.circuit_breaker.initialize()
 
     def __call__(self, next: AsyncMiddleware) -> AsyncMiddleware:
