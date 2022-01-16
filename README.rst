@@ -32,7 +32,7 @@ What is Blacksmith
 Blacksmith is a declarative tool for consuming REST Api.
 
 In a REST API, resources are declared under HTTP routes, and every http verb
-as its own definition.
+has its own definition.
 
 In Blacksmith, every resources are bound to schemas that define request and response,
 in order to abstract HTTP.
