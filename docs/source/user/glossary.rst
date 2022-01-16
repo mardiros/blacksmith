@@ -70,9 +70,9 @@ Glossary
       is a critical service that must be highly available.
 
    version
-      Sometime, service are versioned, so you can declare the version as 
-      a separate parameter for readability.
-      The version may be None in case service does not expose a version number.
+      Sometime, services are versioned, the version can be declared as a separate
+      parameter for readability.
+      The version is None in case service does not expose a version number.
 
    resource
       A resource is a json document that is accessible and manipulable using
