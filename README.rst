@@ -22,7 +22,7 @@ there is a lack of clients.
 
 Consuming an API is not just about doing HTTP requests, it has to be designed
 for failure, monitoring, and service discovery with an elegant abstraction.
-blacksmith aims to provide a solution for developers to write clean client code,
+blacksmith aims to provide a solution for developers to write clean client code
 and for ops to monitor api calls also on the client side.
 
 
