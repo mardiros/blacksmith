@@ -537,7 +537,7 @@ twisted = ["twisted"]
 
 [[package]]
 name = "purgatory-circuitbreaker"
-version = "0.7.0"
+version = "0.7.1"
 description = "A circuit breaker implementation for asyncio"
 category = "main"
 optional = false
@@ -1037,7 +1037,7 @@ prometheus = ["prometheus-client"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "b6ac8bdc70827d24d0131542325ada6e1737ace838cd6fc85023b7c29f50bf66"
+content-hash = "fa5ad2c1818aa76f29e79ae4ad067df62d6feb8ebad6b11104473d8406cbf590"
 
 [metadata.files]
 aiohttp = [
@@ -1557,8 +1557,8 @@ prometheus-client = [
     {file = "prometheus_client-0.12.0.tar.gz", hash = "sha256:1b12ba48cee33b9b0b9de64a1047cbd3c5f2d0ab6ebcead7ddda613a750ec3c5"},
 ]
 purgatory-circuitbreaker = [
-    {file = "purgatory-circuitbreaker-0.7.0.tar.gz", hash = "sha256:9925f9307b9b10c9403a9316813827a26ae635c94bcbe10444cceb66a658d9fe"},
-    {file = "purgatory_circuitbreaker-0.7.0-py3-none-any.whl", hash = "sha256:88b8b132f384a7bd878a85a34246b99425fa6b6c1d0f58a2cc4c36d49d452bcc"},
+    {file = "purgatory-circuitbreaker-0.7.1.tar.gz", hash = "sha256:835072d14e09f5ad0a7e717251f6be08e68ecbe74dbe436b0c20b1c3f0dfc695"},
+    {file = "purgatory_circuitbreaker-0.7.1-py3-none-any.whl", hash = "sha256:1a65722be07d566c4c8660b0f98152af5df3ae343e6c086918e3048e17864b44"},
 ]
 py = [
     {file = "py-1.11.0-py2.py3-none-any.whl", hash = "sha256:607c53218732647dff4acdfcd50cb62615cedf612e72d1724fb1a0cc6405b378"},
