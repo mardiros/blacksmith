@@ -2,6 +2,15 @@ import pytest
 
 from blacksmith.domain.model import HTTPRequest
 
+from .scanned_resources import registry as resources_registry
+
+
+@pytest.fixture
+def registry():
+    resources_registry.clients.clear()
+    resources_registry.client_service.clear()
+    yield resources_registry
+
 
 @pytest.fixture
 def dummy_http_request():

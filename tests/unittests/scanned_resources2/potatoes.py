@@ -1,6 +1,6 @@
 from blacksmith import PathInfoField, Request, Response
 
-from .. import registry
+from ..scanned_resources import registry
 
 
 class GetParam(Request):
