@@ -13,6 +13,7 @@ class AsyncMiddleware(Protocol):
         self, req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
     ) -> Coroutine[Any, Any, HTTPResponse]:
         """This is the next function of the middleware."""
+        ...
 
 
 class SyncMiddleware(Protocol):
@@ -22,3 +23,4 @@ class SyncMiddleware(Protocol):
         self, req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
     ) -> HTTPResponse:
         """This is the next function of the middleware."""
+        ...
