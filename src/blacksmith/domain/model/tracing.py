@@ -11,7 +11,8 @@ class AbtractTraceContext(abc.ABC):
     See examples with starlette-zipking for an implementation.
     """
 
-    @abc.abstractclassmethod
+    @classmethod
+    @abc.abstractmethod
     def make_headers(cls) -> Dict[str, str]:
         """Build headers for the sub requests."""
 
