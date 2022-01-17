@@ -68,8 +68,11 @@ class Request(BaseModel):
             QUERY: {},
             BODY: {},
         }
-        for key, field in self.__fields__.items():
-            loc = cast(HttpLocation, field.field_info.extra["location"])
+        for field in self.__fields__.values():
+            loc = cast(
+                HttpLocation,
+                field.field_info.extra["location"],  # type: ignore
+            )
             fields_by_loc[loc].update({field.name: ...})
 
         headers = self.dict(
@@ -213,7 +216,7 @@ class ResponseBox(Generic[TResponse]):
         self.client_name: ClientName = client_name
 
     @property
-    def json(self) -> Optional[Dict]:
+    def json(self) -> Optional[Dict[str, Any]]:
         """Return the raw json response."""
         return self.http_response.json
 
@@ -271,5 +274,5 @@ class CollectionIterator(Iterator[TResponse]):
         self.pos += 1
         return cast(TResponse, resp)  # Could be a dict
 
-    def __iter__(self) -> "CollectionIterator":
+    def __iter__(self) -> "CollectionIterator[TResponse]":
         return self
