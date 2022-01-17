@@ -49,9 +49,9 @@ async def main():
     apikey = os.environ["GANDIV5_API_KEY"]
     sd = AsyncStaticDiscovery({("gandi", "v5"): "https://api.gandi.net/v5"})
     auth = AsyncHTTPAuthorization("Apikey", apikey)
-    cli = AsyncClientFactory(sd).add_middleware(auth)
+    cli: AsyncClientFactory[TLDResponse] = AsyncClientFactory(sd).add_middleware(auth)
     api = await cli("gandi")
-    tld: TLDResponse = (await api.tld.get(TLDInfoGetParam(name="eu"))).response
+    tld = (await api.tld.get(TLDInfoGetParam(name="eu"))).response
     print(tld)
 
 
