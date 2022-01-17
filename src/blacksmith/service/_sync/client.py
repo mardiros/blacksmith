@@ -11,7 +11,7 @@ from blacksmith.service._sync.adapters.httpx import SyncHttpxTransport
 from blacksmith.typing import ClientName, Proxies, ResourceName, Url
 
 from .base import SyncAbstractTransport
-from .route_proxy import ClientTimeout, SyncRouteProxy, build_timeout
+from .route_proxy import SyncRouteProxy, ClientTimeout, build_timeout
 
 
 class SyncClient:

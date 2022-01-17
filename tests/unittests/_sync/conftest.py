@@ -10,7 +10,7 @@ from blacksmith.middleware._sync.base import SyncHTTPAddHeadersMiddleware
 from blacksmith.middleware._sync.http_caching import SyncAbstractCache
 from blacksmith.sd._sync.adapters.consul import SyncConsulDiscovery, _registry
 from blacksmith.sd._sync.adapters.router import SyncRouterDiscovery
-from blacksmith.sd._sync.adapters.static import Endpoints, SyncStaticDiscovery
+from blacksmith.sd._sync.adapters.static import SyncStaticDiscovery, Endpoints
 from blacksmith.service._sync.base import SyncAbstractTransport
 from blacksmith.service._sync.client import SyncClientFactory
 from blacksmith.typing import ClientName, HttpMethod, Path

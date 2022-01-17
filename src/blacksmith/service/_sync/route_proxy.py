@@ -246,14 +246,18 @@ class SyncRouteProxy:
         params: Union[Request, Dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
     ) -> ResponseBox:
-        return self._request("HEAD", params, build_timeout(timeout or self.timeout))
+        return self._request(
+            "HEAD", params, build_timeout(timeout or self.timeout)
+        )
 
     def get(
         self,
         params: Union[Request, Dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
     ) -> ResponseBox:
-        resp = self._request("GET", params, build_timeout(timeout or self.timeout))
+        resp = self._request(
+            "GET", params, build_timeout(timeout or self.timeout)
+        )
         return resp
 
     def post(
@@ -261,32 +265,42 @@ class SyncRouteProxy:
         params: Union[Request, Dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
     ) -> ResponseBox:
-        return self._request("POST", params, build_timeout(timeout or self.timeout))
+        return self._request(
+            "POST", params, build_timeout(timeout or self.timeout)
+        )
 
     def put(
         self,
         params: Union[Request, Dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
     ) -> ResponseBox:
-        return self._request("PUT", params, build_timeout(timeout or self.timeout))
+        return self._request(
+            "PUT", params, build_timeout(timeout or self.timeout)
+        )
 
     def patch(
         self,
         params: Union[Request, Dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
     ) -> ResponseBox:
-        return self._request("PATCH", params, build_timeout(timeout or self.timeout))
+        return self._request(
+            "PATCH", params, build_timeout(timeout or self.timeout)
+        )
 
     def delete(
         self,
         params: Union[Request, Dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
     ) -> ResponseBox:
-        return self._request("DELETE", params, build_timeout(timeout or self.timeout))
+        return self._request(
+            "DELETE", params, build_timeout(timeout or self.timeout)
+        )
 
     def options(
         self,
         params: Union[Request, Dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
     ) -> ResponseBox:
-        return self._request("OPTIONS", params, build_timeout(timeout or self.timeout))
+        return self._request(
+            "OPTIONS", params, build_timeout(timeout or self.timeout)
+        )
