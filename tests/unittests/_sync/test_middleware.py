@@ -25,10 +25,7 @@ from blacksmith.middleware._sync.circuit_breaker import (
     exclude_httpx_4xx,
 )
 from blacksmith.middleware._sync.prometheus import SyncPrometheusMetrics
-from blacksmith.middleware._sync.zipkin import (
-    AbtractTraceContext,
-    SyncZipkinMiddleware,
-)
+from blacksmith.middleware._sync.zipkin import AbtractTraceContext, SyncZipkinMiddleware
 from blacksmith.typing import ClientName, HttpMethod, Path
 from tests.unittests.time import SyncSleep
 
@@ -222,9 +219,7 @@ def test_included_list(exc):
 
 
 @pytest.mark.asyncio
-def test_circuit_breaker_5xx(
-    echo_middleware, boom_middleware, dummy_http_request
-):
+def test_circuit_breaker_5xx(echo_middleware, boom_middleware, dummy_http_request):
     cbreaker = SyncCircuitBreaker(threshold=2)
     next = cbreaker(echo_middleware)
     resp = next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
@@ -252,9 +247,7 @@ def test_circuit_breaker_5xx(
 
 
 @pytest.mark.asyncio
-def test_circuit_breaker_4xx(
-    echo_middleware, invalid_middleware, dummy_http_request
-):
+def test_circuit_breaker_4xx(echo_middleware, invalid_middleware, dummy_http_request):
     cbreaker = SyncCircuitBreaker(threshold=2)
     next = cbreaker(invalid_middleware)
     with pytest.raises(HTTPError):
@@ -339,9 +332,7 @@ def test_circuit_breaker_initialize():
 
 
 @pytest.mark.asyncio
-def test_circuit_breaker_listener(
-    echo_middleware, boom_middleware, dummy_http_request
-):
+def test_circuit_breaker_listener(echo_middleware, boom_middleware, dummy_http_request):
 
     evts = []
 

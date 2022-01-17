@@ -4,7 +4,7 @@ The discovery based on :term:`Consul`.
 This driver implement a client side service discovery.
 """
 import random
-from typing import Callable, List, cast
+from typing import Callable, List
 
 from pydantic.fields import Field
 
@@ -53,9 +53,9 @@ _registry.register(
 )
 
 
-def blacksmith_cli(endpoint: Url, consul_token: str) -> AsyncClientFactory:
+def blacksmith_cli(endpoint: Url, consul_token: str) -> AsyncClientFactory[Service]:
     sd = AsyncStaticDiscovery({("consul", "v1"): endpoint})
-    fact = AsyncClientFactory(sd, registry=_registry)
+    fact: AsyncClientFactory[Service] = AsyncClientFactory(sd, registry=_registry)
     if consul_token:
         fact.add_middleware(AsyncHTTPBearerAuthorization(consul_token))
     return fact
@@ -85,7 +85,9 @@ class AsyncConsulDiscovery(AsyncAbstractServiceDiscovery):
         unversioned_service_name_fmt: str = "{service}",
         unversioned_service_url_fmt: str = "http://{address}:{port}",
         consul_token: str = "",
-        _client_factory: Callable[[Url, str], AsyncClientFactory] = blacksmith_cli,
+        _client_factory: Callable[
+            [Url, str], AsyncClientFactory[Service]
+        ] = blacksmith_cli,
     ) -> None:
         self.blacksmith_cli = _client_factory(addr, consul_token)
         self.service_name_fmt = service_name_fmt
@@ -131,7 +133,7 @@ class AsyncConsulDiscovery(AsyncAbstractServiceDiscovery):
             resp: List[Service] = list(iresp)
             if not resp:
                 raise UnregisteredServiceException(service, version)
-            return cast(Service, random.choice(resp))
+            return random.choice(resp)
 
     async def get_endpoint(self, service: ServiceName, version: Version) -> Url:
         """

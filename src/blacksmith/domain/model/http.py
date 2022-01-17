@@ -1,6 +1,6 @@
 import re
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Mapping, Optional, Union
+from typing import Any, Dict, List, Mapping, Optional, Union, cast
 
 from blacksmith.typing import Json, Url
 
@@ -122,4 +122,4 @@ class HTTPResponse:
             for link in links:
                 key = link.get("rel") or link.get("url")
                 ldict[key] = link
-        return ldict
+        return cast(Links, ldict)

@@ -52,6 +52,7 @@ esbonio = "^0.8.0"
 mypy = "^0.931"
 types-setuptools = "^57.4.7"
 types-redis = "^4.1.8"
+pyright = "^0.0.13"
 
 [tool.pytest.ini_options]
 norecursedirs = "tests/unittests/scanned_resources"
@@ -59,6 +60,9 @@ norecursedirs = "tests/unittests/scanned_resources"
 [tool.pyright]
 include = ["src"]
 typeCheckingMode = "strict"
+reportUnknownMemberType = false
+reportUnknownParameterType = false
+reportUnknownVariableType = false
 
 [[tool.mypy.overrides]]
 module = "blacksmith.*"

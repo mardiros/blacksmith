@@ -115,7 +115,7 @@ def get_max_age(response: HTTPResponse) -> int:
     if "public" in cache_control:
         h_max_age: List[str] = [cc for cc in cache_control if cc.startswith("max-age=")]
         if h_max_age:
-            hdr, value = h_max_age[0].split("=", 1)
+            _hdr, value = h_max_age[0].split("=", 1)
             max_age = int_or_0(value)
     return max(max_age - age, 0)
 

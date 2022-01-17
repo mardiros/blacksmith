@@ -1,4 +1,4 @@
-from typing import Type
+from typing import Any, Type
 
 from blacksmith.typing import (
     ClientName,
@@ -82,7 +82,11 @@ class NoResponseSchemaException(RuntimeError):
 
 class WrongRequestTypeException(TypeError):
     def __init__(
-        self, type: Type, route: HttpMethod, resource: ResourceName, client: ClientName
+        self,
+        type: Type[Any],
+        route: HttpMethod,
+        resource: ResourceName,
+        client: ClientName,
     ) -> None:
         super().__init__(
             f"Invalid type '{type.__module__}.{type.__name__}' for route '{route}' "

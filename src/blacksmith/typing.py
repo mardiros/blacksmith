@@ -1,6 +1,6 @@
 from typing import Any, Optional, Tuple
 
-from httpx import _types
+from httpx import _types  # type: ignore
 from typing_extensions import Literal
 
 Url = str

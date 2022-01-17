@@ -2,10 +2,10 @@ import pytest
 
 from blacksmith.domain.exceptions import UnregisteredServiceException
 from blacksmith.sd._sync.adapters.consul import (
-    SyncConsulDiscovery,
     ConsulApiError,
     Service,
     ServiceRequest,
+    SyncConsulDiscovery,
     blacksmith_cli,
 )
 from blacksmith.sd._sync.adapters.router import SyncRouterDiscovery
