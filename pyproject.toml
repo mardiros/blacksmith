@@ -56,6 +56,10 @@ types-redis = "^4.1.8"
 [tool.pytest.ini_options]
 norecursedirs = "tests/unittests/scanned_resources"
 
+[tool.pyright]
+include = ["src"]
+typeCheckingMode = "strict"
+
 [[tool.mypy.overrides]]
 module = "blacksmith.*"
 disallow_untyped_defs = true
