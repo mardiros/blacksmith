@@ -67,7 +67,11 @@ def echo_transport():
 @pytest.fixture
 def echo_middleware():
     async def next(
-        req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
+        req: HTTPRequest,
+        method: HttpMethod,
+        client_name: ClientName,
+        path: Path,
+        timeout: HTTPTimeout,
     ) -> HTTPResponse:
         return HTTPResponse(200, req.headers, json=req)
 
@@ -77,7 +81,11 @@ def echo_middleware():
 @pytest.fixture
 def cachable_response():
     async def next(
-        req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
+        req: HTTPRequest,
+        method: HttpMethod,
+        client_name: ClientName,
+        path: Path,
+        timeout: HTTPTimeout,
     ) -> HTTPResponse:
         return HTTPResponse(
             200, {"cache-control": "max-age=42, public"}, json="Cache Me"
@@ -89,7 +97,11 @@ def cachable_response():
 @pytest.fixture
 def slow_middleware():
     async def next(
-        req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
+        req: HTTPRequest,
+        method: HttpMethod,
+        client_name: ClientName,
+        path: Path,
+        timeout: HTTPTimeout,
     ) -> HTTPResponse:
         await AsyncSleep(0.06)
         return HTTPResponse(200, req.headers, json=req)
@@ -100,7 +112,11 @@ def slow_middleware():
 @pytest.fixture
 def boom_middleware():
     async def next(
-        req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
+        req: HTTPRequest,
+        method: HttpMethod,
+        client_name: ClientName,
+        path: Path,
+        timeout: HTTPTimeout,
     ) -> HTTPResponse:
         raise HTTPError(
             "Boom", req, HTTPResponse(500, {}, json={"detail": "I am bored"})
@@ -112,7 +128,11 @@ def boom_middleware():
 @pytest.fixture
 def invalid_middleware():
     async def next(
-        req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
+        req: HTTPRequest,
+        method: HttpMethod,
+        client_name: ClientName,
+        path: Path,
+        timeout: HTTPTimeout,
     ) -> HTTPResponse:
         raise HTTPError(
             "Boom",

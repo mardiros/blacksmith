@@ -124,14 +124,14 @@ class AsyncRouteProxy(Generic[TCollectionResponse, TResponse]):
         )
 
     async def _handle_req_with_middlewares(
-        self,
-        method: HttpMethod,
-        req: HTTPRequest,
-        timeout: HTTPTimeout,
-        path: Path,
+        self, method: HttpMethod, req: HTTPRequest, timeout: HTTPTimeout, path: Path
     ) -> HTTPResponse:
         async def handle_req(
-            req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
+            req: HTTPRequest,
+            method: HttpMethod,
+            client_name: ClientName,
+            path: Path,
+            timeout: HTTPTimeout,
         ) -> HTTPResponse:
             return await self.transport.request(method, req, timeout)
 
@@ -140,7 +140,7 @@ class AsyncRouteProxy(Generic[TCollectionResponse, TResponse]):
         for middleware in self.middlewares:
             next = middleware(next)
 
-        resp = await next(req, method, self.client_name, path)
+        resp = await next(req, method, self.client_name, path, timeout)
         return resp
 
     async def _yield_collection_request(

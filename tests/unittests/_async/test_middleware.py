@@ -14,7 +14,7 @@ from purgatory.service._async.circuitbreaker import AsyncCircuitBreakerFactory
 
 from blacksmith import __version__
 from blacksmith.domain.exceptions import HTTPError
-from blacksmith.domain.model.http import HTTPRequest, HTTPResponse
+from blacksmith.domain.model.http import HTTPRequest, HTTPResponse, HTTPTimeout
 from blacksmith.middleware._async.auth import AsyncHTTPAuthorization
 from blacksmith.middleware._async.base import (
     AsyncHTTPAddHeadersMiddleware,
@@ -40,16 +40,22 @@ def test_authorization_header():
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize("middleware", [AsyncHTTPMiddleware])
-async def test_empty_middleware(middleware, dummy_http_request):
+async def test_empty_middleware(middleware, dummy_http_request, dummy_timeout):
     auth = middleware()
 
     async def handle_req(
-        req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
+        req: HTTPRequest,
+        method: HttpMethod,
+        client_name: ClientName,
+        path: Path,
+        timeout: HTTPTimeout,
     ) -> HTTPResponse:
         return HTTPResponse(200, req.headers, json=req)
 
     next = auth(handle_req)
-    resp = await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
+    resp = await next(
+        dummy_http_request, "GET", "dummy", "/dummies/{name}", dummy_timeout
+    )
 
     assert resp.headers == dummy_http_request.headers
 
@@ -70,25 +76,31 @@ async def test_empty_middleware(middleware, dummy_http_request):
         ),
     ],
 )
-async def test_headers_middleware(echo_middleware, middleware, dummy_http_request):
+async def test_headers_middleware(
+    echo_middleware, middleware, dummy_http_request, dummy_timeout
+):
     middleware_cls, middleware_params, expected_headers = middleware
     auth = middleware_cls(*middleware_params)
 
     next = auth(echo_middleware)
-    resp = await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
+    resp = await next(
+        dummy_http_request, "GET", "dummy", "/dummies/{name}", dummy_timeout
+    )
 
     assert resp.headers == expected_headers
 
 
 @pytest.mark.asyncio
-async def test_prom_default_registry(echo_middleware, dummy_http_request):
+async def test_prom_default_registry(
+    echo_middleware, dummy_http_request, dummy_timeout
+):
     metrics = AsyncPrometheusMetrics()
     next = metrics(echo_middleware)
 
     val = REGISTRY.get_sample_value("blacksmith_info", labels={"version": __version__})
     assert val == 1.0
 
-    await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
+    await next(dummy_http_request, "GET", "dummy", "/dummies/{name}", dummy_timeout)
 
     val = REGISTRY.get_sample_value(
         "blacksmith_request_latency_seconds_count",
@@ -105,7 +117,7 @@ async def test_prom_default_registry(echo_middleware, dummy_http_request):
 
 
 @pytest.mark.asyncio
-async def test_prom_metrics(slow_middleware, dummy_http_request):
+async def test_prom_metrics(slow_middleware, dummy_http_request, dummy_timeout):
     registry = CollectorRegistry()
     metrics = AsyncPrometheusMetrics(registry=registry)
     next = metrics(slow_middleware)
@@ -125,7 +137,7 @@ async def test_prom_metrics(slow_middleware, dummy_http_request):
     )
     assert val is None
 
-    await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
+    await next(dummy_http_request, "GET", "dummy", "/dummies/{name}", dummy_timeout)
 
     val = registry.get_sample_value(
         "blacksmith_request_latency_seconds_count",
@@ -176,13 +188,13 @@ async def test_prom_metrics(slow_middleware, dummy_http_request):
 
 
 @pytest.mark.asyncio
-async def test_prom_metrics_error(boom_middleware, dummy_http_request):
+async def test_prom_metrics_error(boom_middleware, dummy_http_request, dummy_timeout):
     registry = CollectorRegistry()
     metrics = AsyncPrometheusMetrics(registry=registry)
     next = metrics(boom_middleware)
 
     with pytest.raises(HTTPError):
-        await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
+        await next(dummy_http_request, "GET", "dummy", "/dummies/{name}", dummy_timeout)
 
     val = registry.get_sample_value(
         "blacksmith_request_latency_seconds_bucket",
@@ -223,54 +235,64 @@ def test_included_list(exc):
 
 @pytest.mark.asyncio
 async def test_circuit_breaker_5xx(
-    echo_middleware, boom_middleware, dummy_http_request
+    echo_middleware, boom_middleware, dummy_http_request, dummy_timeout
 ):
     cbreaker = AsyncCircuitBreaker(threshold=2)
     next = cbreaker(echo_middleware)
-    resp = await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
+    resp = await next(
+        dummy_http_request, "GET", "dummy", "/dummies/{name}", dummy_timeout
+    )
     assert resp.status_code == 200
 
     next = cbreaker(boom_middleware)
 
     with pytest.raises(HTTPError) as exc:
-        await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
+        await next(dummy_http_request, "GET", "dummy", "/dummies/{name}", dummy_timeout)
     with pytest.raises(HTTPError) as exc:
-        await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
+        await next(dummy_http_request, "GET", "dummy", "/dummies/{name}", dummy_timeout)
 
     with pytest.raises(OpenedState) as exc:
-        await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
+        await next(dummy_http_request, "GET", "dummy", "/dummies/{name}", dummy_timeout)
     assert str(exc.value) == "Circuit dummy is open"
 
     # Event if it works, the circuit breaker is open
     next = cbreaker(echo_middleware)
     with pytest.raises(OpenedState) as exc:
-        await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
+        await next(dummy_http_request, "GET", "dummy", "/dummies/{name}", dummy_timeout)
 
     # Other service is still working
-    resp = await next(dummy_http_request, "GET", "foo", "/dummies/{name}")
+    resp = await next(
+        dummy_http_request, "GET", "foo", "/dummies/{name}", dummy_timeout
+    )
     assert resp.status_code == 200
 
 
 @pytest.mark.asyncio
 async def test_circuit_breaker_4xx(
-    echo_middleware, invalid_middleware, dummy_http_request
+    echo_middleware, invalid_middleware, dummy_http_request, dummy_timeout
 ):
     cbreaker = AsyncCircuitBreaker(threshold=2)
     next = cbreaker(invalid_middleware)
     with pytest.raises(HTTPError):
-        await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
+        await next(dummy_http_request, "GET", "dummy", "/dummies/{name}", dummy_timeout)
     with pytest.raises(HTTPError):
-        await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
+        await next(dummy_http_request, "GET", "dummy", "/dummies/{name}", dummy_timeout)
 
     next = cbreaker(echo_middleware)
     # Other service is still working
-    resp = await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
+    resp = await next(
+        dummy_http_request, "GET", "dummy", "/dummies/{name}", dummy_timeout
+    )
     assert resp.status_code == 200
 
 
 @pytest.mark.asyncio
 async def test_circuit_breaker_prometheus_metrics(
-    echo_middleware, invalid_middleware, boom_middleware, dummy_http_request
+    echo_middleware,
+    invalid_middleware,
+    boom_middleware,
+    dummy_http_request,
+    dummy_timeout,
 ):
     OPEN = 2.0
     HALF_OPEN = 1.0
@@ -286,11 +308,17 @@ async def test_circuit_breaker_prometheus_metrics(
     invalid_next = cbreaker(invalid_middleware)
     boom_next = cbreaker(boom_middleware)
     with pytest.raises(HTTPError):
-        await boom_next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
+        await boom_next(
+            dummy_http_request, "GET", "dummy", "/dummies/{name}", dummy_timeout
+        )
     with pytest.raises(HTTPError):
-        await boom_next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
+        await boom_next(
+            dummy_http_request, "GET", "dummy", "/dummies/{name}", dummy_timeout
+        )
     with pytest.raises(OpenedState):
-        await boom_next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
+        await boom_next(
+            dummy_http_request, "GET", "dummy", "/dummies/{name}", dummy_timeout
+        )
 
     registry.get_sample_value("blacksmith_circuit_breaker_error", labels=["dummy"]) == 1
     registry.get_sample_value(
@@ -298,17 +326,23 @@ async def test_circuit_breaker_prometheus_metrics(
     ) == OPEN
 
     with pytest.raises(OpenedState):
-        await echo_next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
+        await echo_next(
+            dummy_http_request, "GET", "dummy", "/dummies/{name}", dummy_timeout
+        )
     registry.get_sample_value("blacksmith_circuit_breaker_error", labels=["dummy"]) == 2
 
     await AsyncSleep(0.110)
-    await echo_next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
+    await echo_next(
+        dummy_http_request, "GET", "dummy", "/dummies/{name}", dummy_timeout
+    )
     registry.get_sample_value("blacksmith_circuit_breaker_error", labels=["dummy"]) == 2
     registry.get_sample_value(
         "blacksmith_circuit_breaker_state", labels=["dummy"]
     ) == HALF_OPEN
     with pytest.raises(HTTPError):
-        await invalid_next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
+        await invalid_next(
+            dummy_http_request, "GET", "dummy", "/dummies/{name}", dummy_timeout
+        )
     registry.get_sample_value("blacksmith_circuit_breaker_error", labels=["dummy"]) == 2
     registry.get_sample_value(
         "blacksmith_circuit_breaker_state", labels=["dummy"]
@@ -340,7 +374,7 @@ async def test_circuit_breaker_initialize():
 
 @pytest.mark.asyncio
 async def test_circuit_breaker_listener(
-    echo_middleware, boom_middleware, dummy_http_request
+    echo_middleware, boom_middleware, dummy_http_request, dummy_timeout
 ):
 
     evts = []
@@ -350,7 +384,9 @@ async def test_circuit_breaker_listener(
 
     cbreaker = AsyncCircuitBreaker(threshold=2, ttl=0.100, listeners=[hook])
     echo_next = cbreaker(echo_middleware)
-    await echo_next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
+    await echo_next(
+        dummy_http_request, "GET", "dummy", "/dummies/{name}", dummy_timeout
+    )
     assert evts == [
         (
             "dummy",
@@ -361,11 +397,17 @@ async def test_circuit_breaker_listener(
     evts.clear()
     boom_next = cbreaker(boom_middleware)
     with pytest.raises(HTTPError):
-        await boom_next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
+        await boom_next(
+            dummy_http_request, "GET", "dummy", "/dummies/{name}", dummy_timeout
+        )
     with pytest.raises(HTTPError):
-        await boom_next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
+        await boom_next(
+            dummy_http_request, "GET", "dummy", "/dummies/{name}", dummy_timeout
+        )
     with pytest.raises(OpenedState):
-        await boom_next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
+        await boom_next(
+            dummy_http_request, "GET", "dummy", "/dummies/{name}", dummy_timeout
+        )
 
     brk = await cbreaker.circuit_breaker.get_breaker("dummy")
     assert evts == [
@@ -381,7 +423,9 @@ async def test_circuit_breaker_listener(
     ]
     evts.clear()
     await AsyncSleep(0.110)
-    await echo_next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
+    await echo_next(
+        dummy_http_request, "GET", "dummy", "/dummies/{name}", dummy_timeout
+    )
     assert evts == [
         (
             "dummy",
@@ -398,7 +442,7 @@ async def test_circuit_breaker_listener(
 
 
 @pytest.mark.asyncio
-async def test_zipkin_middleware(echo_middleware, dummy_http_request):
+async def test_zipkin_middleware(echo_middleware, dummy_http_request, dummy_timeout):
     class Trace(AbtractTraceContext):
         name = ""
         kind = ""
@@ -431,7 +475,7 @@ async def test_zipkin_middleware(echo_middleware, dummy_http_request):
 
     middleware = AsyncZipkinMiddleware(Trace)
     next = middleware(echo_middleware)
-    await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
+    await next(dummy_http_request, "GET", "dummy", "/dummies/{name}", dummy_timeout)
     assert Trace.name == "GET /dummies/42"
     assert Trace.kind == "CLIENT"
     assert Trace.tags == {
@@ -443,7 +487,9 @@ async def test_zipkin_middleware(echo_middleware, dummy_http_request):
 
 
 @pytest.mark.asyncio
-async def test_zipkin_middleware_tag_error(boom_middleware, dummy_http_request):
+async def test_zipkin_middleware_tag_error(
+    boom_middleware, dummy_http_request, dummy_timeout
+):
     class Trace(AbtractTraceContext):
         name = ""
         kind = ""
@@ -477,7 +523,7 @@ async def test_zipkin_middleware_tag_error(boom_middleware, dummy_http_request):
     middleware = AsyncZipkinMiddleware(Trace)
     next = middleware(boom_middleware)
     with pytest.raises(HTTPError):
-        await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
+        await next(dummy_http_request, "GET", "dummy", "/dummies/{name}", dummy_timeout)
     assert Trace.name == "GET /dummies/42"
     assert Trace.kind == "CLIENT"
     assert Trace.tags == {

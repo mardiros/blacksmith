@@ -4,7 +4,7 @@ import abc
 from typing import Any, Dict, Optional, Type
 
 from blacksmith.domain.exceptions import HTTPError
-from blacksmith.domain.model.http import HTTPRequest, HTTPResponse
+from blacksmith.domain.model.http import HTTPRequest, HTTPResponse, HTTPTimeout
 from blacksmith.typing import ClientName, HttpMethod, Path
 
 from .base import SyncHTTPMiddleware, SyncMiddleware
@@ -59,7 +59,11 @@ class SyncZipkinMiddleware(SyncHTTPMiddleware):
 
     def __call__(self, next: SyncMiddleware) -> SyncMiddleware:
         def handle(
-            req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
+            req: HTTPRequest,
+            method: HttpMethod,
+            client_name: ClientName,
+            path: Path,
+            timeout: HTTPTimeout,
         ) -> HTTPResponse:
 
             name = f"{method} {path.format(**req.path)}"
@@ -74,7 +78,7 @@ class SyncZipkinMiddleware(SyncHTTPMiddleware):
                 if req.querystring:
                     child_span.tag("http.querystring", repr(req.querystring))
                 try:
-                    resp = next(req, method, client_name, path)
+                    resp = next(req, method, client_name, path, timeout)
                 except HTTPError as exc:
                     child_span.tag("http.status_code", str(exc.response.status_code))
                     child_span.tag("error", "true")

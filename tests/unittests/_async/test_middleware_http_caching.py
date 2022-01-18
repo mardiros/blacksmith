@@ -339,11 +339,17 @@ async def test_http_cache_response(params, fake_http_middleware_cache):
 
 @pytest.mark.asyncio
 async def test_cache_middleware(
-    cachable_response, boom_middleware, fake_http_middleware_cache, dummy_http_request
+    cachable_response,
+    boom_middleware,
+    fake_http_middleware_cache,
+    dummy_http_request,
+    dummy_timeout,
 ):
     caching = AsyncHTTPCachingMiddleware(fake_http_middleware_cache)
     next = caching(cachable_response)
-    resp = await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
+    resp = await next(
+        dummy_http_request, "GET", "dummy", "/dummies/{name}", dummy_timeout
+    )
     assert resp == HTTPResponse(
         200, {"cache-control": "max-age=42, public"}, json="Cache Me"
     )
@@ -359,7 +365,9 @@ async def test_cache_middleware(
 
     # get from the cache, not from the boom which raises
     next = caching(boom_middleware)
-    resp = await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
+    resp = await next(
+        dummy_http_request, "GET", "dummy", "/dummies/{name}", dummy_timeout
+    )
     assert resp == HTTPResponse(
         200, {"cache-control": "max-age=42, public"}, json="Cache Me"
     )
@@ -367,7 +375,7 @@ async def test_cache_middleware(
 
 @pytest.mark.asyncio
 async def test_cache_middleware_policy_handle(
-    cachable_response, fake_http_middleware_cache, dummy_http_request
+    cachable_response, fake_http_middleware_cache, dummy_http_request, dummy_timeout
 ):
     class TrackHandleCacheControlPolicy(CacheControlPolicy):
         def __init__(self):
@@ -381,7 +389,9 @@ async def test_cache_middleware_policy_handle(
     tracker = TrackHandleCacheControlPolicy()
     caching = AsyncHTTPCachingMiddleware(fake_http_middleware_cache, policy=tracker)
     next = caching(cachable_response)
-    resp = await next(dummy_http_request, "GET", "dummy", "/dummies/{name}")
+    resp = await next(
+        dummy_http_request, "GET", "dummy", "/dummies/{name}", dummy_timeout
+    )
     assert tracker.handle_request_called is True
     assert fake_http_middleware_cache.val == {}
     assert resp == HTTPResponse(

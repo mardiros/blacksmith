@@ -8,7 +8,7 @@ from urllib.parse import urlencode
 
 from httpx import Headers
 
-from blacksmith.domain.model.http import HTTPRequest, HTTPResponse
+from blacksmith.domain.model.http import HTTPRequest, HTTPResponse, HTTPTimeout
 from blacksmith.typing import ClientName, HttpMethod, Path
 
 from .base import SyncHTTPMiddleware, SyncMiddleware
@@ -246,16 +246,20 @@ class SyncHTTPCachingMiddleware(SyncHTTPMiddleware):
 
     def __call__(self, next: SyncMiddleware) -> SyncMiddleware:
         def handle(
-            req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
+            req: HTTPRequest,
+            method: HttpMethod,
+            client_name: ClientName,
+            path: Path,
+            timeout: HTTPTimeout,
         ) -> HTTPResponse:
 
             if not self._policy.handle_request(req, method, client_name, path):
-                return next(req, method, client_name, path)
+                return next(req, method, client_name, path, timeout)
 
             resp = self.get_from_cache(client_name, path, req)
             if resp:
                 return resp
-            resp = next(req, method, client_name, path)
+            resp = next(req, method, client_name, path, timeout)
             self.cache_response(client_name, path, req, resp)
             return resp
 
