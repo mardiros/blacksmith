@@ -4,7 +4,7 @@ The discovery based on :term:`Consul`.
 This driver implement a client side service discovery.
 """
 import random
-from typing import Callable, List
+from typing import Any, Callable, List
 
 from pydantic.fields import Field
 
@@ -53,9 +53,11 @@ _registry.register(
 )
 
 
-def blacksmith_cli(endpoint: Url, consul_token: str) -> AsyncClientFactory[Service]:
+def blacksmith_cli(
+    endpoint: Url, consul_token: str
+) -> AsyncClientFactory[Service, Any]:
     sd = AsyncStaticDiscovery({("consul", "v1"): endpoint})
-    fact: AsyncClientFactory[Service] = AsyncClientFactory(sd, registry=_registry)
+    fact: AsyncClientFactory[Service, Any] = AsyncClientFactory(sd, registry=_registry)
     if consul_token:
         fact.add_middleware(AsyncHTTPBearerAuthorization(consul_token))
     return fact
@@ -86,7 +88,7 @@ class AsyncConsulDiscovery(AsyncAbstractServiceDiscovery):
         unversioned_service_url_fmt: str = "http://{address}:{port}",
         consul_token: str = "",
         _client_factory: Callable[
-            [Url, str], AsyncClientFactory[Service]
+            [Url, str], AsyncClientFactory[Service, Any]
         ] = blacksmith_cli,
     ) -> None:
         self.blacksmith_cli = _client_factory(addr, consul_token)

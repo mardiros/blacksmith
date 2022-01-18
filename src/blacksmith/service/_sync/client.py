@@ -5,6 +5,7 @@ from blacksmith.domain.model.http import HTTPTimeout
 from blacksmith.domain.model.params import (
     AbstractCollectionParser,
     CollectionParser,
+    TCollectionResponse,
     TResponse,
 )
 from blacksmith.domain.registry import Registry, Resources
@@ -18,7 +19,7 @@ from .base import SyncAbstractTransport
 from .route_proxy import ClientTimeout, SyncRouteProxy, build_timeout
 
 
-class SyncClient(Generic[TResponse]):
+class SyncClient(Generic[TCollectionResponse, TResponse]):
     """
     Client representation for the client name.
 
@@ -51,11 +52,15 @@ class SyncClient(Generic[TResponse]):
         self.collection_parser = collection_parser
         self.middlewares = middlewares.copy()
 
-    def add_middleware(self, middleware: SyncHTTPMiddleware) -> "SyncClient[TResponse]":
+    def add_middleware(
+        self, middleware: SyncHTTPMiddleware
+    ) -> "SyncClient[TCollectionResponse, TResponse]":
         self.middlewares.insert(0, middleware)
         return self
 
-    def __getattr__(self, name: ResourceName) -> SyncRouteProxy[TResponse]:
+    def __getattr__(
+        self, name: ResourceName
+    ) -> SyncRouteProxy[TCollectionResponse, TResponse]:
         """
         The client has attributes that are the registered resource.
 
@@ -76,7 +81,7 @@ class SyncClient(Generic[TResponse]):
             raise UnregisteredResourceException(name, self.name)
 
 
-class SyncClientFactory(Generic[TResponse]):
+class SyncClientFactory(Generic[TCollectionResponse, TResponse]):
     """
     Client creator, for the given configuration.
 
@@ -122,7 +127,7 @@ class SyncClientFactory(Generic[TResponse]):
 
     def add_middleware(
         self, middleware: SyncHTTPMiddleware
-    ) -> "SyncClientFactory[TResponse]":
+    ) -> "SyncClientFactory[TCollectionResponse,TResponse]":
         """
         Add a middleware to the client factory and return the client for chaining.
 
@@ -136,7 +141,9 @@ class SyncClientFactory(Generic[TResponse]):
         for middleware in self.middlewares:
             middleware.initialize()
 
-    def __call__(self, client_name: ClientName) -> SyncClient[TResponse]:
+    def __call__(
+        self, client_name: ClientName
+    ) -> SyncClient[TCollectionResponse, TResponse]:
         if not self._initialized:
             self._initialized = True
             self.initialize()

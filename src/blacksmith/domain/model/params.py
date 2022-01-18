@@ -92,6 +92,7 @@ class Request(BaseModel):
 
 
 TResponse = TypeVar("TResponse", bound="Response")
+TCollectionResponse = TypeVar("TCollectionResponse", bound="Response")
 
 
 class Response(BaseModel):

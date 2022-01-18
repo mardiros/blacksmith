@@ -14,7 +14,11 @@ from blacksmith.domain.model import (
     Response,
     ResponseBox,
 )
-from blacksmith.domain.model.params import AbstractCollectionParser, TResponse
+from blacksmith.domain.model.params import (
+    AbstractCollectionParser,
+    TCollectionResponse,
+    TResponse,
+)
 from blacksmith.domain.registry import ApiRoutes, HttpCollection, HttpResource
 from blacksmith.middleware._async.base import AsyncHTTPMiddleware, AsyncMiddleware
 from blacksmith.typing import ClientName, HttpMethod, Path, ResourceName, Url
@@ -34,7 +38,7 @@ def build_timeout(timeout: ClientTimeout) -> HTTPTimeout:
     return timeout
 
 
-class AsyncRouteProxy(Generic[TResponse]):
+class AsyncRouteProxy(Generic[TCollectionResponse, TResponse]):
     """Proxy from resource to its associate routes."""
 
     client_name: ClientName
@@ -113,7 +117,7 @@ class AsyncRouteProxy(Generic[TResponse]):
         response: HTTPResponse,
         response_schema: Optional[Type[Response]],
         collection_parser: Optional[Type[AbstractCollectionParser]],
-    ) -> CollectionIterator[TResponse]:
+    ) -> CollectionIterator[TCollectionResponse]:
 
         return CollectionIterator(
             response, response_schema, collection_parser or self.collection_parser
@@ -145,7 +149,7 @@ class AsyncRouteProxy(Generic[TResponse]):
         params: Union[Optional[Request], Dict[Any, Any]],
         timeout: HTTPTimeout,
         collection: HttpCollection,
-    ) -> CollectionIterator[TResponse]:
+    ) -> CollectionIterator[TCollectionResponse]:
         path, req, resp_schema = self._prepare_request(method, params, collection)
         resp = await self._handle_req_with_middlewares(method, req, timeout, path)
         return self._prepare_collection_response(
@@ -189,7 +193,7 @@ class AsyncRouteProxy(Generic[TResponse]):
         self,
         params: Union[Optional[Request], Dict[Any, Any]] = None,
         timeout: Optional[ClientTimeout] = None,
-    ) -> CollectionIterator[TResponse]:
+    ) -> CollectionIterator[TCollectionResponse]:
         if not self.routes.collection:
             raise UnregisteredRouteException("GET", self.name, self.client_name)
         return await self._yield_collection_request(
