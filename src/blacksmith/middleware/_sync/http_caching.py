@@ -57,7 +57,7 @@ class SyncAbstractCache(abc.ABC):
     """Abstract Redis Client."""
 
     @abc.abstractmethod
-    def initialize(self):
+    def initialize(self) -> None:
         """Initialize the cache"""
 
     @abc.abstractmethod
@@ -65,7 +65,7 @@ class SyncAbstractCache(abc.ABC):
         """Get a value from redis"""
 
     @abc.abstractmethod
-    def set(self, key: str, val: str, ex: timedelta):
+    def set(self, key: str, val: str, ex: timedelta) -> None:
         """Get a value from redis"""
 
 
@@ -115,7 +115,7 @@ def get_max_age(response: HTTPResponse) -> int:
     if "public" in cache_control:
         h_max_age: List[str] = [cc for cc in cache_control if cc.startswith("max-age=")]
         if h_max_age:
-            hdr, value = h_max_age[0].split("=", 1)
+            _hdr, value = h_max_age[0].split("=", 1)
             max_age = int_or_0(value)
     return max(max_age - age, 0)
 
@@ -195,7 +195,7 @@ class SyncHTTPCachingMiddleware(SyncHTTPMiddleware):
         self._policy = policy
         self._serializer = serializer
 
-    def initialize(self):
+    def initialize(self) -> None:
         try:
             self._cache.initialize()
         except AttributeError:  # coverage-ignore
@@ -208,7 +208,7 @@ class SyncHTTPCachingMiddleware(SyncHTTPMiddleware):
         path: Path,
         req: HTTPRequest,
         resp: HTTPResponse,
-    ):
+    ) -> None:
         (
             ttl,
             vary_key,

@@ -11,7 +11,8 @@ class AbtractTraceContext(abc.ABC):
     See examples with starlette-zipking for an implementation.
     """
 
-    @abc.abstractclassmethod
+    @classmethod
+    @abc.abstractmethod
     def make_headers(cls) -> Dict[str, str]:
         """Build headers for the sub requests."""
 
@@ -34,7 +35,7 @@ class AbtractTraceContext(abc.ABC):
         """Make the created trace span of the current context the active span."""
 
     @abc.abstractmethod
-    def __exit__(self, *exc: Any):
+    def __exit__(self, *exc: Any) -> None:
         """
         Ends the created trace span of the context, it parents become the active span.
         """

@@ -1,8 +1,9 @@
-from typing import Type
+from typing import Any, Type
 
 from blacksmith.typing import (
     ClientName,
     HttpMethod,
+    Json,
     Path,
     ResourceName,
     Service,
@@ -81,7 +82,11 @@ class NoResponseSchemaException(RuntimeError):
 
 class WrongRequestTypeException(TypeError):
     def __init__(
-        self, type: Type, route: HttpMethod, resource: ResourceName, client: ClientName
+        self,
+        type: Type[Any],
+        route: HttpMethod,
+        resource: ResourceName,
+        client: ClientName,
     ) -> None:
         super().__init__(
             f"Invalid type '{type.__module__}.{type.__name__}' for route '{route}' "
@@ -100,19 +105,19 @@ class HTTPError(Exception):
         self.response = response
 
     @property
-    def status_code(self):
+    def status_code(self) -> int:
         return self.response.status_code
 
     @property
-    def json(self):
+    def json(self) -> Json:
         return self.response.json
 
     @property
-    def is_client_error(self):
+    def is_client_error(self) -> bool:
         return 400 <= self.status_code < 500
 
     @property
-    def is_server_error(self):
+    def is_server_error(self) -> bool:
         return 500 <= self.status_code < 600
 
 

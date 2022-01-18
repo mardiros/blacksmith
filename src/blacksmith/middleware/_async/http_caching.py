@@ -57,7 +57,7 @@ class AsyncAbstractCache(abc.ABC):
     """Abstract Redis Client."""
 
     @abc.abstractmethod
-    async def initialize(self):
+    async def initialize(self) -> None:
         """Initialize the cache"""
 
     @abc.abstractmethod
@@ -65,7 +65,7 @@ class AsyncAbstractCache(abc.ABC):
         """Get a value from redis"""
 
     @abc.abstractmethod
-    async def set(self, key: str, val: str, ex: timedelta):
+    async def set(self, key: str, val: str, ex: timedelta) -> None:
         """Get a value from redis"""
 
 
@@ -115,7 +115,7 @@ def get_max_age(response: HTTPResponse) -> int:
     if "public" in cache_control:
         h_max_age: List[str] = [cc for cc in cache_control if cc.startswith("max-age=")]
         if h_max_age:
-            hdr, value = h_max_age[0].split("=", 1)
+            _hdr, value = h_max_age[0].split("=", 1)
             max_age = int_or_0(value)
     return max(max_age - age, 0)
 
@@ -195,7 +195,7 @@ class AsyncHTTPCachingMiddleware(AsyncHTTPMiddleware):
         self._policy = policy
         self._serializer = serializer
 
-    async def initialize(self):
+    async def initialize(self) -> None:
         try:
             await self._cache.initialize()
         except AttributeError:  # coverage-ignore
@@ -208,7 +208,7 @@ class AsyncHTTPCachingMiddleware(AsyncHTTPMiddleware):
         path: Path,
         req: HTTPRequest,
         resp: HTTPResponse,
-    ):
+    ) -> None:
         (
             ttl,
             vary_key,

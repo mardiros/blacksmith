@@ -13,10 +13,10 @@ class GetResponse(Response):
 
 
 registry.register(
-    "vegetables",
-    "potatoes",
-    "vegetables",
+    "fruits",
+    "cramberries",
+    "fruits",
     "v1",
-    "/potatoes/{name}",
+    "/cramberries/{name}",
     {"GET": (GetParam, GetResponse)},
 )

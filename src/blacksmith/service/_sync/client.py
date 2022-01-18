@@ -1,8 +1,13 @@
-from typing import List, Type
+from typing import Generic, List, Optional, Type
 
 from blacksmith.domain.exceptions import UnregisteredResourceException
 from blacksmith.domain.model.http import HTTPTimeout
-from blacksmith.domain.model.params import AbstractCollectionParser, CollectionParser
+from blacksmith.domain.model.params import (
+    AbstractCollectionParser,
+    CollectionParser,
+    TCollectionResponse,
+    TResponse,
+)
 from blacksmith.domain.registry import Registry, Resources
 from blacksmith.domain.registry import registry as default_registry
 from blacksmith.middleware._sync.base import SyncHTTPMiddleware
@@ -14,7 +19,7 @@ from .base import SyncAbstractTransport
 from .route_proxy import ClientTimeout, SyncRouteProxy, build_timeout
 
 
-class SyncClient:
+class SyncClient(Generic[TCollectionResponse, TResponse]):
     """
     Client representation for the client name.
 
@@ -47,11 +52,15 @@ class SyncClient:
         self.collection_parser = collection_parser
         self.middlewares = middlewares.copy()
 
-    def add_middleware(self, middleware: SyncHTTPMiddleware) -> "SyncClient":
+    def add_middleware(
+        self, middleware: SyncHTTPMiddleware
+    ) -> "SyncClient[TCollectionResponse, TResponse]":
         self.middlewares.insert(0, middleware)
         return self
 
-    def __getattr__(self, name: ResourceName) -> SyncRouteProxy:
+    def __getattr__(
+        self, name: ResourceName
+    ) -> SyncRouteProxy[TCollectionResponse, TResponse]:
         """
         The client has attributes that are the registered resource.
 
@@ -72,7 +81,7 @@ class SyncClient:
             raise UnregisteredResourceException(name, self.name)
 
 
-class SyncClientFactory:
+class SyncClientFactory(Generic[TCollectionResponse, TResponse]):
     """
     Client creator, for the given configuration.
 
@@ -98,10 +107,10 @@ class SyncClientFactory:
     def __init__(
         self,
         sd: SyncAbstractServiceDiscovery,
-        transport: SyncAbstractTransport = None,
+        transport: Optional[SyncAbstractTransport] = None,
         registry: Registry = default_registry,
         timeout: ClientTimeout = HTTPTimeout(),
-        proxies: Proxies = None,
+        proxies: Optional[Proxies] = None,
         verify_certificate: bool = False,
         collection_parser: Type[AbstractCollectionParser] = CollectionParser,
     ) -> None:
@@ -116,7 +125,9 @@ class SyncClientFactory:
         self.middlewares = []
         self._initialized = False
 
-    def add_middleware(self, middleware: SyncHTTPMiddleware) -> "SyncClientFactory":
+    def add_middleware(
+        self, middleware: SyncHTTPMiddleware
+    ) -> "SyncClientFactory[TCollectionResponse,TResponse]":
         """
         Add a middleware to the client factory and return the client for chaining.
 
@@ -126,11 +137,13 @@ class SyncClientFactory:
         self.middlewares.insert(0, middleware)
         return self
 
-    def initialize(self):
+    def initialize(self) -> None:
         for middleware in self.middlewares:
             middleware.initialize()
 
-    def __call__(self, client_name: ClientName):
+    def __call__(
+        self, client_name: ClientName
+    ) -> SyncClient[TCollectionResponse, TResponse]:
         if not self._initialized:
             self._initialized = True
             self.initialize()

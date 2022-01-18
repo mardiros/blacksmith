@@ -1,8 +1,13 @@
-from typing import List, Type
+from typing import Generic, List, Optional, Type
 
 from blacksmith.domain.exceptions import UnregisteredResourceException
 from blacksmith.domain.model.http import HTTPTimeout
-from blacksmith.domain.model.params import AbstractCollectionParser, CollectionParser
+from blacksmith.domain.model.params import (
+    AbstractCollectionParser,
+    CollectionParser,
+    TCollectionResponse,
+    TResponse,
+)
 from blacksmith.domain.registry import Registry, Resources
 from blacksmith.domain.registry import registry as default_registry
 from blacksmith.middleware._async.base import AsyncHTTPMiddleware
@@ -14,7 +19,7 @@ from .base import AsyncAbstractTransport
 from .route_proxy import AsyncRouteProxy, ClientTimeout, build_timeout
 
 
-class AsyncClient:
+class AsyncClient(Generic[TCollectionResponse, TResponse]):
     """
     Client representation for the client name.
 
@@ -47,11 +52,15 @@ class AsyncClient:
         self.collection_parser = collection_parser
         self.middlewares = middlewares.copy()
 
-    def add_middleware(self, middleware: AsyncHTTPMiddleware) -> "AsyncClient":
+    def add_middleware(
+        self, middleware: AsyncHTTPMiddleware
+    ) -> "AsyncClient[TCollectionResponse, TResponse]":
         self.middlewares.insert(0, middleware)
         return self
 
-    def __getattr__(self, name: ResourceName) -> AsyncRouteProxy:
+    def __getattr__(
+        self, name: ResourceName
+    ) -> AsyncRouteProxy[TCollectionResponse, TResponse]:
         """
         The client has attributes that are the registered resource.
 
@@ -72,7 +81,7 @@ class AsyncClient:
             raise UnregisteredResourceException(name, self.name)
 
 
-class AsyncClientFactory:
+class AsyncClientFactory(Generic[TCollectionResponse, TResponse]):
     """
     Client creator, for the given configuration.
 
@@ -98,10 +107,10 @@ class AsyncClientFactory:
     def __init__(
         self,
         sd: AsyncAbstractServiceDiscovery,
-        transport: AsyncAbstractTransport = None,
+        transport: Optional[AsyncAbstractTransport] = None,
         registry: Registry = default_registry,
         timeout: ClientTimeout = HTTPTimeout(),
-        proxies: Proxies = None,
+        proxies: Optional[Proxies] = None,
         verify_certificate: bool = False,
         collection_parser: Type[AbstractCollectionParser] = CollectionParser,
     ) -> None:
@@ -116,7 +125,9 @@ class AsyncClientFactory:
         self.middlewares = []
         self._initialized = False
 
-    def add_middleware(self, middleware: AsyncHTTPMiddleware) -> "AsyncClientFactory":
+    def add_middleware(
+        self, middleware: AsyncHTTPMiddleware
+    ) -> "AsyncClientFactory[TCollectionResponse,TResponse]":
         """
         Add a middleware to the client factory and return the client for chaining.
 
@@ -126,11 +137,13 @@ class AsyncClientFactory:
         self.middlewares.insert(0, middleware)
         return self
 
-    async def initialize(self):
+    async def initialize(self) -> None:
         for middleware in self.middlewares:
             await middleware.initialize()
 
-    async def __call__(self, client_name: ClientName):
+    async def __call__(
+        self, client_name: ClientName
+    ) -> AsyncClient[TCollectionResponse, TResponse]:
         if not self._initialized:
             self._initialized = True
             await self.initialize()

@@ -2,6 +2,7 @@ import asyncio
 import datetime
 import os
 import sys
+from typing import Any
 
 from pydantic.fields import Field
 from pydantic.main import BaseModel
@@ -69,16 +70,16 @@ async def main():
     apikey = os.environ["GANDIV5_API_KEY"]
     sd = AsyncStaticDiscovery({("gandi", "v5"): "https://api.gandi.net/v5"})
     auth = AsyncHTTPAuthorization("Apikey", apikey)
-    cli = AsyncClientFactory(sd, timeout=(10.0)).add_middleware(auth)
+    cli: AsyncClientFactory[ListDomainResponse, Any] = AsyncClientFactory(
+        sd, timeout=(10.0)
+    ).add_middleware(auth)
     api = await cli("gandi")
     if len(sys.argv) == 2:
         domain = sys.argv[1]
         domain = await api.domain.get(DomainParam(name=domain))
         print(domain.json)
     else:
-        domains: CollectionIterator[
-            ListDomainResponse
-        ] = await api.domain.collection_get()
+        domains = await api.domain.collection_get()
 
         print(domains.meta)
         print()

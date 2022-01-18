@@ -4,12 +4,13 @@ The discovery based on :term:`Consul`.
 This driver implement a client side service discovery.
 """
 import random
-from typing import Callable, cast
+from typing import Any, Callable, List
 
 from pydantic.fields import Field
 
 from blacksmith.domain.exceptions import HTTPError, UnregisteredServiceException
 from blacksmith.domain.model import PathInfoField, Request, Response
+from blacksmith.domain.model.params import CollectionIterator
 from blacksmith.domain.registry import Registry
 from blacksmith.middleware._async.auth import AsyncHTTPBearerAuthorization
 from blacksmith.sd._async.adapters.static import AsyncStaticDiscovery
@@ -52,9 +53,11 @@ _registry.register(
 )
 
 
-def blacksmith_cli(endpoint: Url, consul_token: str) -> AsyncClientFactory:
+def blacksmith_cli(
+    endpoint: Url, consul_token: str
+) -> AsyncClientFactory[Service, Any]:
     sd = AsyncStaticDiscovery({("consul", "v1"): endpoint})
-    fact = AsyncClientFactory(sd, registry=_registry)
+    fact: AsyncClientFactory[Service, Any] = AsyncClientFactory(sd, registry=_registry)
     if consul_token:
         fact.add_middleware(AsyncHTTPBearerAuthorization(consul_token))
     return fact
@@ -84,7 +87,9 @@ class AsyncConsulDiscovery(AsyncAbstractServiceDiscovery):
         unversioned_service_name_fmt: str = "{service}",
         unversioned_service_url_fmt: str = "http://{address}:{port}",
         consul_token: str = "",
-        _client_factory: Callable[[Url, str], AsyncClientFactory] = blacksmith_cli,
+        _client_factory: Callable[
+            [Url, str], AsyncClientFactory[Service, Any]
+        ] = blacksmith_cli,
     ) -> None:
         self.blacksmith_cli = _client_factory(addr, consul_token)
         self.service_name_fmt = service_name_fmt
@@ -121,14 +126,16 @@ class AsyncConsulDiscovery(AsyncAbstractServiceDiscovery):
         name = self.format_service_name(service, version)
         consul = await self.blacksmith_cli("consul")
         try:
-            resp = await consul.services.collection_get(ServiceRequest(name=name))
+            iresp: CollectionIterator[Service] = await consul.services.collection_get(
+                ServiceRequest(name=name)
+            )
         except HTTPError as exc:
             raise ConsulApiError(exc)  # rewrite the class to avoid confusion
         else:
-            resp = list(resp)
+            resp: List[Service] = list(iresp)
             if not resp:
                 raise UnregisteredServiceException(service, version)
-            return cast(Service, random.choice(resp))
+            return random.choice(resp)
 
     async def get_endpoint(self, service: ServiceName, version: Version) -> Url:
         """

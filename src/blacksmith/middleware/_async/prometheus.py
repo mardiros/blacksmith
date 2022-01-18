@@ -1,6 +1,6 @@
 """Collect metrics based on prometheus."""
 import time
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any, List, Optional
 
 import pkg_resources
 
@@ -38,8 +38,15 @@ class AsyncPrometheusMetrics(AsyncHTTPMiddleware):
 
     """
 
-    def __init__(self, buckets=None, registry: Registry = None):
-        from prometheus_client import REGISTRY, Counter, Gauge, Histogram
+    def __init__(
+        self, buckets: Optional[List[float]] = None, registry: Registry = None
+    ) -> None:
+        from prometheus_client import (  # type: ignore
+            REGISTRY,
+            Counter,
+            Gauge,
+            Histogram,
+        )
 
         if registry is None:
             registry = REGISTRY
@@ -91,8 +98,12 @@ class AsyncPrometheusMetrics(AsyncHTTPMiddleware):
             finally:
                 if status_code > 0:
                     latency = time.perf_counter() - start
-                    self.blacksmith_request_latency_seconds.labels(
-                        client_name, method, path, status_code
+                    metric = self.blacksmith_request_latency_seconds
+                    metric.labels(
+                        client_name,
+                        method,
+                        path,
+                        status_code,
                     ).observe(latency)
             return resp
 

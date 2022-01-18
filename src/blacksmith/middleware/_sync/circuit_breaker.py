@@ -1,6 +1,6 @@
 """Cut the circuit in case a service is down."""
 
-from typing import Any, Iterable, Optional, cast
+from typing import Any, Iterable, Optional
 
 from purgatory import SyncAbstractUnitOfWork, SyncCircuitBreakerFactory
 from purgatory.typing import TTL, Hook, Threshold
@@ -15,7 +15,7 @@ from .prometheus import SyncPrometheusMetrics
 Listeners = Optional[Iterable[Hook]]
 
 
-def exclude_httpx_4xx(exc: HTTPError):
+def exclude_httpx_4xx(exc: HTTPError) -> bool:
     """Exclude client side http errors."""
     return exc.is_client_error
 
@@ -37,13 +37,11 @@ class PrometheusHook:
                 "half-opened": GaugeStateValue.HALF_OPEN,
                 "opened": GaugeStateValue.OPEN,
             }[payload.state]
-            self.prometheus_metrics.blacksmith_circuit_breaker_state.labels(
-                circuit_name
-            ).set(state)
+            metric = self.prometheus_metrics.blacksmith_circuit_breaker_state
+            metric.labels(circuit_name).set(state)
         elif evt_type == "failed":
-            self.prometheus_metrics.blacksmith_circuit_breaker_error.labels(
-                circuit_name
-            ).inc()
+            metric = self.prometheus_metrics.blacksmith_circuit_breaker_error
+            metric.labels(circuit_name).inc()
 
 
 class SyncCircuitBreaker(SyncHTTPMiddleware):
@@ -78,7 +76,7 @@ class SyncCircuitBreaker(SyncHTTPMiddleware):
             for listener in listeners:
                 self.circuit_breaker.add_listener(listener)
 
-    def initialize(self):
+    def initialize(self) -> None:
         self.circuit_breaker.initialize()
 
     def __call__(self, next: SyncMiddleware) -> SyncMiddleware:
@@ -88,6 +86,6 @@ class SyncCircuitBreaker(SyncHTTPMiddleware):
 
             with self.circuit_breaker.get_breaker(client_name):
                 resp = next(req, method, client_name, path)
-            return cast(HTTPResponse, resp)
+            return resp
 
         return handle
