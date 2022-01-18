@@ -59,6 +59,7 @@ norecursedirs = "tests/unittests/scanned_resources"
 
 [tool.pyright]
 include = ["src"]
+ignore = ["examples"]
 typeCheckingMode = "strict"
 reportUnknownMemberType = false
 reportUnknownParameterType = false
