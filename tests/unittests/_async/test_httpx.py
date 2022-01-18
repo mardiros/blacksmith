@@ -30,7 +30,7 @@ def dummy_query_timeout():
 @pytest.mark.asyncio
 async def test_query_http(patch):
     transport = AsyncHttpxTransport()
-    resp = await transport.request("GET", HTTPRequest("/"), HTTPTimeout())
+    resp = await transport(HTTPRequest("/"), "GET", "cli", "/", HTTPTimeout())
     assert resp.status_code == 200
     assert dict(resp.headers) == {
         "content-length": "17",
@@ -46,7 +46,7 @@ async def test_query_http(patch):
 @pytest.mark.asyncio
 async def test_query_http_204(patch):
     transport = AsyncHttpxTransport()
-    resp = await transport.request("GET", HTTPRequest("/"), HTTPTimeout())
+    resp = await transport(HTTPRequest("/"), "GET", "cli", "/", HTTPTimeout())
     assert resp.status_code == 204
     assert dict(resp.headers) == {}
     assert resp.json == ""
@@ -60,7 +60,7 @@ async def test_query_http_204(patch):
 async def test_query_http_422(patch):
     transport = AsyncHttpxTransport()
     with pytest.raises(HTTPError) as ctx:
-        await transport.request("POST", HTTPRequest("/", body="{}"), HTTPTimeout())
+        await transport(HTTPRequest("/", body="{}"), "POST", "cli", "/", HTTPTimeout())
 
     assert str(ctx.value) == "422 Unprocessable Entity"
     assert ctx.value.status_code == 422
@@ -75,7 +75,7 @@ async def test_query_http_422(patch):
 async def test_query_http_timeout(patch):
     transport = AsyncHttpxTransport()
     with pytest.raises(TimeoutError) as ctx:
-        await transport.request("DELETE", HTTPRequest("/slow"), HTTPTimeout())
+        await transport(HTTPRequest("/slow"), "DELETE", "cli", "/", HTTPTimeout())
     assert str(ctx.value) == "TimeoutException while calling DELETE /slow"
 
 
@@ -87,7 +87,7 @@ async def test_query_http_timeout(patch):
 async def test_query_http_no_json(patch):
     transport = AsyncHttpxTransport()
     with pytest.raises(HTTPError) as ctx:
-        await transport.request("POST", HTTPRequest("/", body="{}"), HTTPTimeout())
+        await transport(HTTPRequest("/", body="{}"), "POST", "cli", "/", HTTPTimeout())
 
     assert str(ctx.value) == "500 Internal Server Error"
     assert ctx.value.status_code == 500

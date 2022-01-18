@@ -30,7 +30,7 @@ def dummy_query_timeout():
 @pytest.mark.asyncio
 def test_query_http(patch):
     transport = SyncHttpxTransport()
-    resp = transport.request("GET", HTTPRequest("/"), HTTPTimeout())
+    resp = transport(HTTPRequest("/"), "GET", "cli", "/", HTTPTimeout())
     assert resp.status_code == 200
     assert dict(resp.headers) == {
         "content-length": "17",
@@ -46,7 +46,7 @@ def test_query_http(patch):
 @pytest.mark.asyncio
 def test_query_http_204(patch):
     transport = SyncHttpxTransport()
-    resp = transport.request("GET", HTTPRequest("/"), HTTPTimeout())
+    resp = transport(HTTPRequest("/"), "GET", "cli", "/", HTTPTimeout())
     assert resp.status_code == 204
     assert dict(resp.headers) == {}
     assert resp.json == ""
@@ -60,7 +60,7 @@ def test_query_http_204(patch):
 def test_query_http_422(patch):
     transport = SyncHttpxTransport()
     with pytest.raises(HTTPError) as ctx:
-        transport.request("POST", HTTPRequest("/", body="{}"), HTTPTimeout())
+        transport(HTTPRequest("/", body="{}"), "POST", "cli", "/", HTTPTimeout())
 
     assert str(ctx.value) == "422 Unprocessable Entity"
     assert ctx.value.status_code == 422
@@ -75,7 +75,7 @@ def test_query_http_422(patch):
 def test_query_http_timeout(patch):
     transport = SyncHttpxTransport()
     with pytest.raises(TimeoutError) as ctx:
-        transport.request("DELETE", HTTPRequest("/slow"), HTTPTimeout())
+        transport(HTTPRequest("/slow"), "DELETE", "cli", "/", HTTPTimeout())
     assert str(ctx.value) == "TimeoutException while calling DELETE /slow"
 
 
@@ -87,7 +87,7 @@ def test_query_http_timeout(patch):
 def test_query_http_no_json(patch):
     transport = SyncHttpxTransport()
     with pytest.raises(HTTPError) as ctx:
-        transport.request("POST", HTTPRequest("/", body="{}"), HTTPTimeout())
+        transport(HTTPRequest("/", body="{}"), "POST", "cli", "/", HTTPTimeout())
 
     assert str(ctx.value) == "500 Internal Server Error"
     assert ctx.value.status_code == 500

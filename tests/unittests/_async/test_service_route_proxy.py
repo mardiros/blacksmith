@@ -18,7 +18,7 @@ from blacksmith.middleware._async.auth import AsyncHTTPAuthorization
 from blacksmith.middleware._async.base import AsyncHTTPAddHeadersMiddleware
 from blacksmith.service._async.base import AsyncAbstractTransport
 from blacksmith.service._async.route_proxy import AsyncRouteProxy, build_timeout
-from blacksmith.typing import HttpMethod
+from blacksmith.typing import ClientName, HttpMethod, Path
 from tests.unittests.dummy_registry import GetParam, GetResponse, PostParam
 
 
@@ -27,11 +27,17 @@ class FakeTransport(AsyncAbstractTransport):
         super().__init__()
         self.resp = resp
 
-    async def request(
-        self, method: HttpMethod, request: HTTPRequest, timeout: HTTPTimeout
+    async def __call__(
+        self,
+        req: HTTPRequest,
+        method: HttpMethod,
+        client_name: ClientName,
+        path: Path,
+        timeout: HTTPTimeout,
     ) -> HTTPResponse:
+
         if self.resp.status_code >= 400:
-            raise HTTPError(f"{self.resp.status_code} blah", request, self.resp)
+            raise HTTPError(f"{self.resp.status_code} blah", req, self.resp)
         return self.resp
 
 

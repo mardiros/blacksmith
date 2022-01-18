@@ -23,7 +23,7 @@ from blacksmith.middleware._async.auth import AsyncHTTPAuthorization
 from blacksmith.middleware._async.prometheus import AsyncPrometheusMetrics
 from blacksmith.service._async.base import AsyncAbstractTransport
 from blacksmith.service._async.client import AsyncClient, AsyncClientFactory
-from blacksmith.typing import HttpMethod, Proxies
+from blacksmith.typing import ClientName, HttpMethod, Path, Proxies
 from tests.unittests.dummy_registry import (
     GetParam,
     GetResponse,
@@ -37,19 +37,30 @@ class FakeTransport(AsyncAbstractTransport):
         super().__init__()
         self.resp = resp
 
-    async def request(
-        self, method: HttpMethod, request: HTTPRequest, timeout: HTTPTimeout
+    async def __call__(
+        self,
+        req: HTTPRequest,
+        method: HttpMethod,
+        client_name: ClientName,
+        path: Path,
+        timeout: HTTPTimeout,
     ) -> HTTPResponse:
+
         if self.resp.status_code >= 400:
-            raise HTTPError(f"{self.resp.status_code} blah", request, self.resp)
+            raise HTTPError(f"{self.resp.status_code} blah", req, self.resp)
         return self.resp
 
 
 class FakeTimeoutTransport(AsyncAbstractTransport):
-    async def request(
-        self, method: HttpMethod, request: HTTPRequest, timeout: HTTPTimeout
+    async def __call__(
+        self,
+        req: HTTPRequest,
+        method: HttpMethod,
+        client_name: ClientName,
+        path: Path,
+        timeout: HTTPTimeout,
     ) -> HTTPResponse:
-        raise HTTPTimeoutError(f"ReadTimeout while calling {method} {request.url}")
+        raise HTTPTimeoutError(f"ReadTimeout while calling {method} {req.url}")
 
 
 @pytest.mark.asyncio
@@ -78,7 +89,6 @@ async def test_client(static_sd):
         collection_parser=CollectionParser,
         middlewares=[],
     )
-
     resp = await client.dummies.get({"name": "barbie"})
     assert isinstance(resp, ResponseBox)
     assert isinstance(resp.response, GetResponse)

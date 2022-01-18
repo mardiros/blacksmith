@@ -24,8 +24,13 @@ def static_sd():
 
 
 class FakeConsulTransport(SyncAbstractTransport):
-    def request(
-        self, method: HttpMethod, request: HTTPRequest, timeout: HTTPTimeout
+    def __call__(
+        self,
+        request: HTTPRequest,
+        method: HttpMethod,
+        client_name: ClientName,
+        path: Path,
+        timeout: HTTPTimeout,
     ) -> HTTPResponse:
         if request.path["name"] == "dummy-v2":
             return HTTPResponse(200, {}, [])
@@ -49,19 +54,18 @@ class FakeConsulTransport(SyncAbstractTransport):
         )
 
 
-class EchoTransport(SyncAbstractTransport):
-    def __init__(self) -> None:
-        super().__init__()
-
-    def request(
-        self, method: HttpMethod, request: HTTPRequest, timeout: HTTPTimeout
-    ) -> HTTPResponse:
-        return HTTPResponse(200, request.headers, request)
-
-
 @pytest.fixture
 def echo_transport():
-    return EchoTransport()
+    def next(
+        req: HTTPRequest,
+        method: HttpMethod,
+        client_name: ClientName,
+        path: Path,
+        timeout: HTTPTimeout,
+    ) -> HTTPResponse:
+        return HTTPResponse(200, req.headers, req)
+
+    return next
 
 
 @pytest.fixture

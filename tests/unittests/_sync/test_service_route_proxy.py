@@ -18,7 +18,7 @@ from blacksmith.middleware._sync.auth import SyncHTTPAuthorization
 from blacksmith.middleware._sync.base import SyncHTTPAddHeadersMiddleware
 from blacksmith.service._sync.base import SyncAbstractTransport
 from blacksmith.service._sync.route_proxy import SyncRouteProxy, build_timeout
-from blacksmith.typing import HttpMethod
+from blacksmith.typing import ClientName, HttpMethod, Path
 from tests.unittests.dummy_registry import GetParam, GetResponse, PostParam
 
 
@@ -27,11 +27,17 @@ class FakeTransport(SyncAbstractTransport):
         super().__init__()
         self.resp = resp
 
-    def request(
-        self, method: HttpMethod, request: HTTPRequest, timeout: HTTPTimeout
+    def __call__(
+        self,
+        req: HTTPRequest,
+        method: HttpMethod,
+        client_name: ClientName,
+        path: Path,
+        timeout: HTTPTimeout,
     ) -> HTTPResponse:
+
         if self.resp.status_code >= 400:
-            raise HTTPError(f"{self.resp.status_code} blah", request, self.resp)
+            raise HTTPError(f"{self.resp.status_code} blah", req, self.resp)
         return self.resp
 
 
