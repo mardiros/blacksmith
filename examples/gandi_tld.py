@@ -1,6 +1,7 @@
 import asyncio
 import os
 import sys
+from typing import Any
 
 import blacksmith
 from blacksmith import (
@@ -49,7 +50,9 @@ async def main():
     apikey = os.environ["GANDIV5_API_KEY"]
     sd = AsyncStaticDiscovery({("gandi", "v5"): "https://api.gandi.net/v5"})
     auth = AsyncHTTPAuthorization("Apikey", apikey)
-    cli: AsyncClientFactory[TLDResponse] = AsyncClientFactory(sd).add_middleware(auth)
+    cli: AsyncClientFactory[Any, TLDResponse] = AsyncClientFactory(sd).add_middleware(
+        auth
+    )
     api = await cli("gandi")
     tld = (await api.tld.get(TLDInfoGetParam(name="eu"))).response
     print(tld)
