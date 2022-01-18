@@ -63,6 +63,7 @@ typeCheckingMode = "strict"
 reportUnknownMemberType = false
 reportUnknownParameterType = false
 reportUnknownVariableType = false
+reportPrivateUsage = false
 
 [[tool.mypy.overrides]]
 module = "blacksmith.*"

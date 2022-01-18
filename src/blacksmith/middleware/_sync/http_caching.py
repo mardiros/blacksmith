@@ -61,7 +61,7 @@ class SyncAbstractCache(abc.ABC):
         """Initialize the cache"""
 
     @abc.abstractmethod
-    def get(self, key: str) -> str:
+    def get(self, key: str) -> Optional[str]:
         """Get a value from redis"""
 
     @abc.abstractmethod

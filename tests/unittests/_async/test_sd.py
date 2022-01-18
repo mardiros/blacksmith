@@ -29,6 +29,7 @@ async def test_static_discovery_raise(static_sd: AsyncStaticDiscovery):
 async def test_consul_sd_cli():
     cli = blacksmith_cli("http://consul:8888", "abc")
     assert cli.registry.client_service == {"consul": ("consul", "v1")}
+    assert cli.registry.clients["consul"]["services"].collection is not None
     assert (
         cli.registry.clients["consul"]["services"].collection.path
         == "/catalog/service/{name}"

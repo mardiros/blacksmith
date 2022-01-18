@@ -1,3 +1,5 @@
+from typing import Any
+
 import pytest
 
 from blacksmith import Request
@@ -13,6 +15,7 @@ from blacksmith.domain.model import (
     HTTPResponse,
     HTTPTimeout,
 )
+from blacksmith.domain.model.params import CollectionIterator
 from blacksmith.domain.registry import ApiRoutes
 from blacksmith.middleware._sync.auth import SyncHTTPAuthorization
 from blacksmith.middleware._sync.base import SyncHTTPAddHeadersMiddleware
@@ -51,7 +54,9 @@ def test_build_timeout():
 
 
 @pytest.mark.asyncio
-def test_route_proxy_prepare_middleware(dummy_http_request, echo_transport):
+def test_route_proxy_prepare_middleware(
+    dummy_http_request: HTTPRequest, echo_transport: SyncAbstractTransport
+):
     resp = HTTPResponse(200, {}, "")
 
     proxy = SyncRouteProxy(
@@ -262,10 +267,10 @@ def test_route_proxy_collection_head():
 
 @pytest.mark.asyncio
 def test_route_proxy_collection_get():
-    resp = HTTPResponse(
+    httpresp = HTTPResponse(
         200, {"Total-Count": "10"}, [{"name": "alice"}, {"name": "bob"}]
     )
-    tp = FakeTransport(resp)
+    tp = FakeTransport(httpresp)
 
     proxy = SyncRouteProxy(
         "dummy",
@@ -283,11 +288,11 @@ def test_route_proxy_collection_get():
         collection_parser=CollectionParser,
         middlewares=[],
     )
-    resp = proxy.collection_get()
+    resp: CollectionIterator[Any] = proxy.collection_get()
     assert resp.meta.total_count == 10
     assert resp.meta.count == 2
-    resp = list(resp)
-    assert resp == [{"name": "alice"}, {"name": "bob"}]
+    lresp = list(resp)
+    assert lresp == [{"name": "alice"}, {"name": "bob"}]
 
 
 @pytest.mark.asyncio
@@ -295,10 +300,10 @@ def test_route_proxy_collection_get_with_parser():
     class MyCollectionParser(CollectionParser):
         total_count_header: str = "X-Total-Count"
 
-    resp = HTTPResponse(
+    httpresp = HTTPResponse(
         200, {"X-Total-Count": "10"}, [{"name": "alice"}, {"name": "bob"}]
     )
-    tp = FakeTransport(resp)
+    tp = FakeTransport(httpresp)
 
     proxy = SyncRouteProxy(
         "dummy",
@@ -316,11 +321,11 @@ def test_route_proxy_collection_get_with_parser():
         collection_parser=CollectionParser,
         middlewares=[],
     )
-    resp = proxy.collection_get()
+    resp: CollectionIterator[Any] = proxy.collection_get()
     assert resp.meta.total_count == 10
     assert resp.meta.count == 2
-    resp = list(resp)
-    assert resp == [{"name": "alice"}, {"name": "bob"}]
+    lresp = list(resp)
+    assert lresp == [{"name": "alice"}, {"name": "bob"}]
 
 
 @pytest.mark.asyncio
@@ -623,8 +628,8 @@ def test_route_proxy_options():
 
 
 @pytest.mark.asyncio
-def test_unregistered_collection(echo_transport):
-    proxy = SyncRouteProxy(
+def test_unregistered_collection(echo_transport: SyncAbstractTransport):
+    proxy: SyncRouteProxy[Any, Any] = SyncRouteProxy(
         "dummy",
         "dummies",
         "http://dummy/",

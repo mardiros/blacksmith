@@ -1,5 +1,5 @@
 from datetime import timedelta
-from typing import Dict, Optional, Tuple
+from typing import Any, Dict, Mapping, Optional, Tuple
 
 import pytest
 
@@ -163,7 +163,7 @@ def dummy_middleware():
 
 @pytest.fixture
 def consul_sd():
-    def cli(url: str, tok: str) -> AsyncClientFactory:
+    def cli(url: str, tok: str) -> AsyncClientFactory[Any, Any]:
         return AsyncClientFactory(
             sd=AsyncStaticDiscovery({("consul", "v1"): url}),
             registry=_registry,
@@ -181,7 +181,7 @@ def router_sd():
 class AsyncFakeHttpMiddlewareCache(AsyncAbstractCache):
     """Abstract Redis Client."""
 
-    def __init__(self, data=None) -> None:
+    def __init__(self, data: Optional[Dict[str, Tuple[int, str]]] = None) -> None:
         super().__init__()
         self.val: Dict[str, Tuple[int, str]] = data or {}
         self.initialize_called = False
@@ -207,5 +207,5 @@ def fake_http_middleware_cache():
 
 
 @pytest.fixture
-def fake_http_middleware_cache_with_data(params):
+def fake_http_middleware_cache_with_data(params: Mapping[str, Any]):
     return AsyncFakeHttpMiddlewareCache(params["initial_cache"])
