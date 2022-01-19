@@ -55,20 +55,6 @@ class FakeConsulTransport(AsyncAbstractTransport):
 
 
 @pytest.fixture
-def echo_transport():
-    async def next(
-        req: HTTPRequest,
-        method: HttpMethod,
-        client_name: ClientName,
-        path: Path,
-        timeout: HTTPTimeout,
-    ) -> HTTPResponse:
-        return HTTPResponse(200, req.headers, req)
-
-    return next
-
-
-@pytest.fixture
 def echo_middleware():
     async def next(
         req: HTTPRequest,

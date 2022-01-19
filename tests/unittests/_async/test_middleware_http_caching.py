@@ -1,17 +1,22 @@
+from typing import Any, Dict, List, Tuple
+
 import pytest
 
-from blacksmith.domain.model.http import HTTPRequest, HTTPResponse
+from blacksmith.domain.model.http import HTTPRequest, HTTPResponse, HTTPTimeout
+from blacksmith.domain.typing import AsyncMiddleware
 from blacksmith.middleware._async.http_caching import (
+    AsyncAbstractCache,
     AsyncHTTPCachingMiddleware,
     CacheControlPolicy,
     get_max_age,
     get_vary_header_split,
     int_or_0,
 )
+from blacksmith.typing import HttpMethod
 
 
 @pytest.mark.parametrize("params", [("0", 0), ("42", 42), ("2.5", 0), ("xxx", 0)])
-def test_int_or_0(params):
+def test_int_or_0(params: Tuple[str, int]):
     assert int_or_0(params[0]) == params[1]
 
 
@@ -37,7 +42,7 @@ def test_int_or_0(params):
         ),
     ],
 )
-def test_get_max_age(params):
+def test_get_max_age(params: Tuple[HTTPResponse, int]):
     assert get_max_age(params[0]) == params[1]
 
 
@@ -52,7 +57,7 @@ def test_get_max_age(params):
         ),
     ],
 )
-def test_get_vary_header_split(params):
+def test_get_vary_header_split(params: Tuple[HTTPResponse, List[str]]):
     assert get_vary_header_split(params[0]) == params[1]
 
 
@@ -68,7 +73,7 @@ def test_get_vary_header_split(params):
         ("OPTIONS", False),
     ],
 )
-def test_policy_handle_request(params):
+def test_policy_handle_request(params: Tuple[HttpMethod, bool]):
     policy = CacheControlPolicy("$")
     req = HTTPRequest("/")
     method, expected = params
@@ -118,7 +123,7 @@ def test_policy_handle_request(params):
         ),
     ],
 )
-def test_policy_get_vary_key(params):
+def test_policy_get_vary_key(params: Tuple[str, str, HTTPRequest, str]):
     policy = CacheControlPolicy("$")
     assert policy.get_vary_key(params[0], params[1], params[2]) == params[3]
 
@@ -149,7 +154,9 @@ def test_policy_get_vary_key(params):
         ),
     ],
 )
-def test_policy_get_response_cache_key(params):
+def test_policy_get_response_cache_key(
+    params: Tuple[str, str, HTTPRequest, List[str], str]
+):
     policy = CacheControlPolicy("$")
     assert (
         policy.get_response_cache_key(params[0], params[1], params[2], params[3])
@@ -181,7 +188,9 @@ def test_policy_get_response_cache_key(params):
         ),
     ],
 )
-def test_policy_get_cache_info_for_response(params):
+def test_policy_get_cache_info_for_response(
+    params: Tuple[str, str, HTTPRequest, HTTPResponse, Tuple[int, str, List[str]]]
+):
     policy = CacheControlPolicy("$")
     assert (
         policy.get_cache_info_for_response(params[0], params[1], params[2], params[3])
@@ -230,7 +239,9 @@ def test_policy_get_cache_info_for_response(params):
     ],
 )
 @pytest.mark.asyncio
-async def test_get_from_cache(params, fake_http_middleware_cache_with_data):
+async def test_get_from_cache(
+    params: Dict[str, Any], fake_http_middleware_cache_with_data: AsyncAbstractCache
+):
     middleware = AsyncHTTPCachingMiddleware(fake_http_middleware_cache_with_data)
     resp_from_cache = await middleware.get_from_cache(
         "dummies", params["path"], params["request"]
@@ -317,7 +328,9 @@ async def test_get_from_cache(params, fake_http_middleware_cache_with_data):
     ],
 )
 @pytest.mark.asyncio
-async def test_http_cache_response(params, fake_http_middleware_cache):
+async def test_http_cache_response(
+    params: Dict[str, Any], fake_http_middleware_cache: AsyncAbstractCache
+):
     middleware = AsyncHTTPCachingMiddleware(fake_http_middleware_cache)
 
     resp_from_cache = await middleware.get_from_cache(
@@ -326,7 +339,7 @@ async def test_http_cache_response(params, fake_http_middleware_cache):
     await middleware.cache_response(
         "dummies", params["path"], params["request"], params["response"]
     )
-    assert fake_http_middleware_cache.val == params["expected_cache"]
+    assert fake_http_middleware_cache.val == params["expected_cache"]  # type: ignore
 
     resp_from_cache = await middleware.get_from_cache(
         "dummies", params["path"], params["request"]
@@ -339,11 +352,11 @@ async def test_http_cache_response(params, fake_http_middleware_cache):
 
 @pytest.mark.asyncio
 async def test_cache_middleware(
-    cachable_response,
-    boom_middleware,
-    fake_http_middleware_cache,
-    dummy_http_request,
-    dummy_timeout,
+    cachable_response: AsyncMiddleware,
+    boom_middleware: AsyncMiddleware,
+    fake_http_middleware_cache: AsyncAbstractCache,
+    dummy_http_request: HTTPRequest,
+    dummy_timeout: HTTPTimeout,
 ):
     caching = AsyncHTTPCachingMiddleware(fake_http_middleware_cache)
     next = caching(cachable_response)
@@ -353,7 +366,7 @@ async def test_cache_middleware(
     assert resp == HTTPResponse(
         200, {"cache-control": "max-age=42, public"}, json="Cache Me"
     )
-    assert fake_http_middleware_cache.val == {
+    assert fake_http_middleware_cache.val == {  # type: ignore
         "dummy$/dummies/42?foo=bar": (42, "[]"),
         "dummy$/dummies/42?foo=bar$": (
             42,
@@ -375,14 +388,17 @@ async def test_cache_middleware(
 
 @pytest.mark.asyncio
 async def test_cache_middleware_policy_handle(
-    cachable_response, fake_http_middleware_cache, dummy_http_request, dummy_timeout
+    cachable_response: AsyncMiddleware,
+    fake_http_middleware_cache: AsyncAbstractCache,
+    dummy_http_request: HTTPRequest,
+    dummy_timeout: HTTPTimeout,
 ):
     class TrackHandleCacheControlPolicy(CacheControlPolicy):
         def __init__(self):
             super().__init__("%")
             self.handle_request_called = False
 
-        def handle_request(self, req, method, client_name, path) -> bool:
+        def handle_request(self, req, method, client_name, path):  # type: ignore
             self.handle_request_called = True
             return False
 
@@ -393,14 +409,14 @@ async def test_cache_middleware_policy_handle(
         dummy_http_request, "GET", "dummy", "/dummies/{name}", dummy_timeout
     )
     assert tracker.handle_request_called is True
-    assert fake_http_middleware_cache.val == {}
+    assert fake_http_middleware_cache.val == {}  # type: ignore
     assert resp == HTTPResponse(
         200, {"cache-control": "max-age=42, public"}, json="Cache Me"
     )
 
 
 @pytest.mark.asyncio
-async def test_circuit_breaker_initialize(fake_http_middleware_cache):
+async def test_circuit_breaker_initialize(fake_http_middleware_cache: Any):
     caching = AsyncHTTPCachingMiddleware(fake_http_middleware_cache)
     await caching.initialize()
     assert fake_http_middleware_cache.initialize_called is True

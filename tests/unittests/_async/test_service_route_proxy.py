@@ -55,7 +55,7 @@ def test_build_timeout():
 
 @pytest.mark.asyncio
 async def test_route_proxy_prepare_middleware(
-    dummy_http_request: HTTPRequest, echo_transport: AsyncAbstractTransport
+    dummy_http_request: HTTPRequest, echo_middleware: AsyncAbstractTransport
 ):
     resp = HTTPResponse(200, {}, "")
 
@@ -70,7 +70,7 @@ async def test_route_proxy_prepare_middleware(
             collection_contract=None,
             collection_parser=None,
         ),
-        transport=echo_transport,
+        transport=echo_middleware,
         timeout=HTTPTimeout(),
         collection_parser=CollectionParser,
         middlewares=[
@@ -628,7 +628,7 @@ async def test_route_proxy_options():
 
 
 @pytest.mark.asyncio
-async def test_unregistered_collection(echo_transport: AsyncAbstractTransport):
+async def test_unregistered_collection(echo_middleware: AsyncAbstractTransport):
     proxy: AsyncRouteProxy[Any, Any] = AsyncRouteProxy(
         "dummy",
         "dummies",
@@ -640,7 +640,7 @@ async def test_unregistered_collection(echo_transport: AsyncAbstractTransport):
             collection_contract=None,
             collection_parser=None,
         ),
-        transport=echo_transport,
+        transport=echo_middleware,
         timeout=HTTPTimeout(),
         collection_parser=CollectionParser,
         middlewares=[

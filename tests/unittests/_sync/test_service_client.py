@@ -241,12 +241,12 @@ def test_client_add_middleware(
 
 @pytest.mark.asyncio
 def test_client_factory_initialize_middlewares(
-    echo_transport: SyncAbstractTransport,
+    echo_middleware: SyncAbstractTransport,
     static_sd: SyncAbstractServiceDiscovery,
     dummy_middleware: Any,
 ):
     client_factory = SyncClientFactory(
-        static_sd, echo_transport, registry=dummy_registry
+        static_sd, echo_middleware, registry=dummy_registry
     ).add_middleware(dummy_middleware)
     assert dummy_middleware.initialized == 0
     cli = client_factory("api")

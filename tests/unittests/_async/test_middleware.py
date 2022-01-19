@@ -1,8 +1,9 @@
 from typing import Any, Dict, Optional, cast
 
-import prometheus_client
+import prometheus_client  # type: ignore
 import pytest
-from prometheus_client import REGISTRY, CollectorRegistry
+from prometheus_client import REGISTRY, CollectorRegistry  # type: ignore
+from purgatory.domain.messages import Event
 from purgatory.domain.messages.events import (
     CircuitBreakerCreated,
     CircuitBreakerFailed,
@@ -15,6 +16,7 @@ from purgatory.service._async.circuitbreaker import AsyncCircuitBreakerFactory
 from blacksmith import __version__
 from blacksmith.domain.exceptions import HTTPError
 from blacksmith.domain.model.http import HTTPRequest, HTTPResponse, HTTPTimeout
+from blacksmith.domain.typing import AsyncMiddleware
 from blacksmith.middleware._async.auth import AsyncHTTPAuthorization
 from blacksmith.middleware._async.base import (
     AsyncHTTPAddHeadersMiddleware,
@@ -29,7 +31,6 @@ from blacksmith.middleware._async.zipkin import (
     AbtractTraceContext,
     AsyncZipkinMiddleware,
 )
-from blacksmith.typing import ClientName, HttpMethod, Path
 from tests.unittests.time import AsyncSleep
 
 
@@ -39,60 +40,57 @@ def test_authorization_header():
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("middleware", [AsyncHTTPMiddleware])
-async def test_empty_middleware(middleware, dummy_http_request, dummy_timeout):
-    auth = middleware()
+async def test_empty_middleware(
+    dummy_http_request: HTTPRequest,
+    dummy_timeout: HTTPTimeout,
+    echo_middleware: AsyncMiddleware,
+):
+    auth = AsyncHTTPMiddleware()
 
-    async def handle_req(
-        req: HTTPRequest,
-        method: HttpMethod,
-        client_name: ClientName,
-        path: Path,
-        timeout: HTTPTimeout,
-    ) -> HTTPResponse:
-        return HTTPResponse(200, req.headers, json=req)
-
-    next = auth(handle_req)
+    next = auth(echo_middleware)
     resp = await next(
         dummy_http_request, "GET", "dummy", "/dummies/{name}", dummy_timeout
     )
-
     assert resp.headers == dummy_http_request.headers
 
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
-    "middleware",
+    "params",
     [
-        (
-            AsyncHTTPAddHeadersMiddleware,
-            [{"foo": "bar"}],
-            {"X-Req-Id": "42", "foo": "bar"},
-        ),
-        (
-            AsyncHTTPAuthorization,
-            ["Bearer", "abc"],
-            {"X-Req-Id": "42", "Authorization": "Bearer abc"},
-        ),
+        {
+            "middleware_cls": AsyncHTTPAddHeadersMiddleware,
+            "middleware_params": [{"foo": "bar"}],
+            "expected_headers": {"X-Req-Id": "42", "foo": "bar"},
+        },
+        {
+            "middleware_cls": AsyncHTTPAuthorization,
+            "middleware_params": ["Bearer", "abc"],
+            "expected_headers": {"X-Req-Id": "42", "Authorization": "Bearer abc"},
+        },
     ],
 )
 async def test_headers_middleware(
-    echo_middleware, middleware, dummy_http_request, dummy_timeout
+    params: Dict[str, Any],
+    echo_middleware: AsyncMiddleware,
+    dummy_http_request: HTTPRequest,
+    dummy_timeout: HTTPTimeout,
 ):
-    middleware_cls, middleware_params, expected_headers = middleware
-    auth = middleware_cls(*middleware_params)
+    auth = params["middleware_cls"](*params["middleware_params"])
 
     next = auth(echo_middleware)
     resp = await next(
         dummy_http_request, "GET", "dummy", "/dummies/{name}", dummy_timeout
     )
 
-    assert resp.headers == expected_headers
+    assert resp.headers == params["expected_headers"]
 
 
 @pytest.mark.asyncio
 async def test_prom_default_registry(
-    echo_middleware, dummy_http_request, dummy_timeout
+    echo_middleware: AsyncMiddleware,
+    dummy_http_request: HTTPRequest,
+    dummy_timeout: HTTPTimeout,
 ):
     metrics = AsyncPrometheusMetrics()
     next = metrics(echo_middleware)
@@ -117,7 +115,11 @@ async def test_prom_default_registry(
 
 
 @pytest.mark.asyncio
-async def test_prom_metrics(slow_middleware, dummy_http_request, dummy_timeout):
+async def test_prom_metrics(
+    slow_middleware: AsyncMiddleware,
+    dummy_http_request: HTTPRequest,
+    dummy_timeout: HTTPTimeout,
+):
     registry = CollectorRegistry()
     metrics = AsyncPrometheusMetrics(registry=registry)
     next = metrics(slow_middleware)
@@ -188,7 +190,11 @@ async def test_prom_metrics(slow_middleware, dummy_http_request, dummy_timeout):
 
 
 @pytest.mark.asyncio
-async def test_prom_metrics_error(boom_middleware, dummy_http_request, dummy_timeout):
+async def test_prom_metrics_error(
+    boom_middleware: AsyncMiddleware,
+    dummy_http_request: HTTPRequest,
+    dummy_timeout: HTTPTimeout,
+):
     registry = CollectorRegistry()
     metrics = AsyncPrometheusMetrics(registry=registry)
     next = metrics(boom_middleware)
@@ -218,7 +224,7 @@ async def test_prom_metrics_error(boom_middleware, dummy_http_request, dummy_tim
         HTTPError("Mmm", HTTPRequest("/", {}, {}, {}), HTTPResponse(422, {}, {})),
     ],
 )
-def test_excluded_list(exc):
+def test_excluded_list(exc: HTTPError):
     assert exclude_httpx_4xx(exc) is True
 
 
@@ -229,13 +235,16 @@ def test_excluded_list(exc):
         HTTPError("Mmm", HTTPRequest("/", {}, {}, {}), HTTPResponse(503, {}, {})),
     ],
 )
-def test_included_list(exc):
+def test_included_list(exc: HTTPError):
     assert exclude_httpx_4xx(exc) is False
 
 
 @pytest.mark.asyncio
 async def test_circuit_breaker_5xx(
-    echo_middleware, boom_middleware, dummy_http_request, dummy_timeout
+    echo_middleware: AsyncMiddleware,
+    boom_middleware: AsyncMiddleware,
+    dummy_http_request: HTTPRequest,
+    dummy_timeout: HTTPTimeout,
 ):
     cbreaker = AsyncCircuitBreaker(threshold=2)
     next = cbreaker(echo_middleware)
@@ -269,7 +278,10 @@ async def test_circuit_breaker_5xx(
 
 @pytest.mark.asyncio
 async def test_circuit_breaker_4xx(
-    echo_middleware, invalid_middleware, dummy_http_request, dummy_timeout
+    echo_middleware: AsyncMiddleware,
+    invalid_middleware: AsyncMiddleware,
+    dummy_http_request: HTTPRequest,
+    dummy_timeout: HTTPTimeout,
 ):
     cbreaker = AsyncCircuitBreaker(threshold=2)
     next = cbreaker(invalid_middleware)
@@ -288,11 +300,11 @@ async def test_circuit_breaker_4xx(
 
 @pytest.mark.asyncio
 async def test_circuit_breaker_prometheus_metrics(
-    echo_middleware,
-    invalid_middleware,
-    boom_middleware,
-    dummy_http_request,
-    dummy_timeout,
+    echo_middleware: AsyncMiddleware,
+    invalid_middleware: AsyncMiddleware,
+    boom_middleware: AsyncMiddleware,
+    dummy_http_request: HTTPRequest,
+    dummy_timeout: HTTPTimeout,
 ):
     OPEN = 2.0
     HALF_OPEN = 1.0
@@ -374,12 +386,15 @@ async def test_circuit_breaker_initialize():
 
 @pytest.mark.asyncio
 async def test_circuit_breaker_listener(
-    echo_middleware, boom_middleware, dummy_http_request, dummy_timeout
+    echo_middleware: AsyncMiddleware,
+    boom_middleware: AsyncMiddleware,
+    dummy_http_request: HTTPRequest,
+    dummy_timeout: HTTPTimeout,
 ):
 
     evts = []
 
-    def hook(name, evt_name, evt):
+    def hook(name: str, evt_name: str, evt: Event):
         evts.append((name, evt_name, evt))
 
     cbreaker = AsyncCircuitBreaker(threshold=2, ttl=0.100, listeners=[hook])
@@ -417,7 +432,9 @@ async def test_circuit_breaker_listener(
             "dummy",
             "state_changed",
             ContextChanged(
-                name="dummy", state="opened", opened_at=brk.context._state.opened_at
+                name="dummy",
+                state="opened",
+                opened_at=brk.context._state.opened_at,  # type:ignore
             ),
         ),
     ]
@@ -442,7 +459,11 @@ async def test_circuit_breaker_listener(
 
 
 @pytest.mark.asyncio
-async def test_zipkin_middleware(echo_middleware, dummy_http_request, dummy_timeout):
+async def test_zipkin_middleware(
+    echo_middleware: AsyncMiddleware,
+    dummy_http_request: HTTPRequest,
+    dummy_timeout: HTTPTimeout,
+):
     class Trace(AbtractTraceContext):
         name = ""
         kind = ""
@@ -488,7 +509,9 @@ async def test_zipkin_middleware(echo_middleware, dummy_http_request, dummy_time
 
 @pytest.mark.asyncio
 async def test_zipkin_middleware_tag_error(
-    boom_middleware, dummy_http_request, dummy_timeout
+    boom_middleware: AsyncMiddleware,
+    dummy_http_request: HTTPRequest,
+    dummy_timeout: HTTPTimeout,
 ):
     class Trace(AbtractTraceContext):
         name = ""
