@@ -25,7 +25,7 @@ from blacksmith.middleware._sync.prometheus import SyncPrometheusMetrics
 from blacksmith.sd._sync.base import SyncAbstractServiceDiscovery
 from blacksmith.service._sync.base import SyncAbstractTransport
 from blacksmith.service._sync.client import SyncClient, SyncClientFactory
-from blacksmith.typing import ClientName, HttpMethod, Path, Proxies
+from blacksmith.typing import ClientName, Path, Proxies
 from tests.unittests.dummy_registry import (
     GetParam,
     GetResponse,
@@ -42,7 +42,6 @@ class FakeTransport(SyncAbstractTransport):
     def __call__(
         self,
         req: HTTPRequest,
-        method: HttpMethod,
         client_name: ClientName,
         path: Path,
         timeout: HTTPTimeout,
@@ -57,12 +56,11 @@ class FakeTimeoutTransport(SyncAbstractTransport):
     def __call__(
         self,
         req: HTTPRequest,
-        method: HttpMethod,
         client_name: ClientName,
         path: Path,
         timeout: HTTPTimeout,
     ) -> HTTPResponse:
-        raise HTTPTimeoutError(f"ReadTimeout while calling {method} {req.url}")
+        raise HTTPTimeoutError(f"ReadTimeout while calling {req.method} {req.url}")
 
 
 @pytest.mark.asyncio

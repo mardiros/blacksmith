@@ -7,7 +7,7 @@ from purgatory.typing import TTL, Hook, Threshold
 
 from blacksmith.domain.exceptions import HTTPError
 from blacksmith.domain.model.http import HTTPRequest, HTTPResponse, HTTPTimeout
-from blacksmith.typing import ClientName, HttpMethod, Path
+from blacksmith.typing import ClientName, Path
 
 from .base import SyncHTTPMiddleware, SyncMiddleware
 from .prometheus import SyncPrometheusMetrics
@@ -82,14 +82,13 @@ class SyncCircuitBreaker(SyncHTTPMiddleware):
     def __call__(self, next: SyncMiddleware) -> SyncMiddleware:
         def handle(
             req: HTTPRequest,
-            method: HttpMethod,
             client_name: ClientName,
             path: Path,
             timeout: HTTPTimeout,
         ) -> HTTPResponse:
 
             with self.circuit_breaker.get_breaker(client_name):
-                resp = next(req, method, client_name, path, timeout)
+                resp = next(req, client_name, path, timeout)
             return resp
 
         return handle

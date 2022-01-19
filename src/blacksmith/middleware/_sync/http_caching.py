@@ -9,7 +9,7 @@ from urllib.parse import urlencode
 from httpx import Headers
 
 from blacksmith.domain.model.http import HTTPRequest, HTTPResponse, HTTPTimeout
-from blacksmith.typing import ClientName, HttpMethod, Path
+from blacksmith.typing import ClientName, Path
 
 from .base import SyncHTTPMiddleware, SyncMiddleware
 
@@ -19,7 +19,7 @@ class AbstractCachingPolicy(abc.ABC):
 
     @abc.abstractmethod
     def handle_request(
-        self, req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
+        self, req: HTTPRequest, client_name: ClientName, path: Path
     ) -> bool:
         """A function to decide if the http request is cachable."""
 
@@ -139,9 +139,9 @@ class CacheControlPolicy(AbstractCachingPolicy):
         self.sep = sep
 
     def handle_request(
-        self, req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
+        self, req: HTTPRequest, client_name: ClientName, path: Path
     ) -> bool:
-        return method == "GET"
+        return req.method == "GET"
 
     def get_vary_key(
         self, client_name: ClientName, path: Path, request: HTTPRequest
@@ -247,19 +247,18 @@ class SyncHTTPCachingMiddleware(SyncHTTPMiddleware):
     def __call__(self, next: SyncMiddleware) -> SyncMiddleware:
         def handle(
             req: HTTPRequest,
-            method: HttpMethod,
             client_name: ClientName,
             path: Path,
             timeout: HTTPTimeout,
         ) -> HTTPResponse:
 
-            if not self._policy.handle_request(req, method, client_name, path):
-                return next(req, method, client_name, path, timeout)
+            if not self._policy.handle_request(req, client_name, path):
+                return next(req, client_name, path, timeout)
 
             resp = self.get_from_cache(client_name, path, req)
             if resp:
                 return resp
-            resp = next(req, method, client_name, path, timeout)
+            resp = next(req, client_name, path, timeout)
             self.cache_response(client_name, path, req, resp)
             return resp
 

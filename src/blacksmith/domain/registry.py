@@ -7,7 +7,7 @@ from typing import Mapping, MutableMapping, Optional, Tuple, Type
 
 from blacksmith.typing import (
     ClientName,
-    HttpMethod,
+    HTTPMethod,
     Path,
     ResourceName,
     Service,
@@ -19,7 +19,7 @@ from .exceptions import ConfigurationError, UnregisteredClientException
 from .model import AbstractCollectionParser, Request, Response
 
 Schemas = Tuple[Type[Request], Optional[Type[Response]]]
-Contract = Mapping[HttpMethod, Schemas]
+Contract = Mapping[HTTPMethod, Schemas]
 
 
 @dataclass(frozen=True)

@@ -25,7 +25,7 @@ from ...domain.exceptions import NoResponseSchemaException
 from ...typing import (
     ClientName,
     HttpLocation,
-    HttpMethod,
+    HTTPMethod,
     Json,
     Path,
     ResourceName,
@@ -57,11 +57,11 @@ class Request(BaseModel):
     :func:`.QueryStringField` or :func:`.PostBodyField` to declare each fields.
     """
 
-    def to_http_request(self, url_pattern: Url) -> HTTPRequest:
+    def to_http_request(self, method: HTTPMethod, url_pattern: Url) -> HTTPRequest:
         """Convert the request params to an http request in order to serialize
         the http request for the client.
         """
-        req = HTTPRequest(url_pattern)
+        req = HTTPRequest(method, url_pattern)
         fields_by_loc: Dict[HttpLocation, Dict[IntStr, Any]] = {
             HEADER: {},
             PATH: {},
@@ -204,14 +204,14 @@ class ResponseBox(Generic[TResponse]):
         self,
         response: HTTPResponse,
         response_schema: Optional[Type[Response]],
-        method: HttpMethod,
+        method: HTTPMethod,
         path: Path,
         name: ResourceName,
         client_name: ClientName,
     ) -> None:
         self.http_response = response
         self.response_schema = response_schema
-        self.method: HttpMethod = method
+        self.method: HTTPMethod = method
         self.path: Path = path
         self.name: ResourceName = name
         self.client_name: ClientName = client_name

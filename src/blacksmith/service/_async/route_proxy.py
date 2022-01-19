@@ -22,7 +22,7 @@ from blacksmith.domain.model.params import (
 from blacksmith.domain.registry import ApiRoutes, HttpCollection, HttpResource
 from blacksmith.domain.typing import AsyncMiddleware
 from blacksmith.middleware._async.base import AsyncHTTPMiddleware
-from blacksmith.typing import ClientName, HttpMethod, Path, ResourceName, Url
+from blacksmith.typing import ClientName, HTTPMethod, Path, ResourceName, Url
 
 from .base import AsyncAbstractTransport
 
@@ -73,7 +73,7 @@ class AsyncRouteProxy(Generic[TCollectionResponse, TResponse]):
 
     def _prepare_request(
         self,
-        method: HttpMethod,
+        method: HTTPMethod,
         params: Union[Optional[Request], Dict[Any, Any]],
         resource: Optional[HttpResource],
     ) -> Tuple[Path, HTTPRequest, Optional[Type[Response]]]:
@@ -94,14 +94,14 @@ class AsyncRouteProxy(Generic[TCollectionResponse, TResponse]):
                 self.name,
                 self.client_name,
             )
-        req = params.to_http_request(self.endpoint + resource.path)
+        req = params.to_http_request(method, self.endpoint + resource.path)
         return (resource.path, req, return_schema)
 
     def _prepare_response(
         self,
         response: HTTPResponse,
         response_schema: Optional[Type[Response]],
-        method: HttpMethod,
+        method: HTTPMethod,
         path: Path,
     ) -> ResponseBox[TResponse]:
         return ResponseBox[TResponse](
@@ -125,50 +125,50 @@ class AsyncRouteProxy(Generic[TCollectionResponse, TResponse]):
         )
 
     async def _handle_req_with_middlewares(
-        self, method: HttpMethod, req: HTTPRequest, timeout: HTTPTimeout, path: Path
+        self, req: HTTPRequest, timeout: HTTPTimeout, path: Path
     ) -> HTTPResponse:
         next: AsyncMiddleware = self.transport
         for middleware in self.middlewares:
             next = middleware(next)
 
-        resp = await next(req, method, self.client_name, path, timeout)
+        resp = await next(req, self.client_name, path, timeout)
         return resp
 
     async def _yield_collection_request(
         self,
-        method: HttpMethod,
+        method: HTTPMethod,
         params: Union[Optional[Request], Dict[Any, Any]],
         timeout: HTTPTimeout,
         collection: HttpCollection,
     ) -> CollectionIterator[TCollectionResponse]:
         path, req, resp_schema = self._prepare_request(method, params, collection)
-        resp = await self._handle_req_with_middlewares(method, req, timeout, path)
+        resp = await self._handle_req_with_middlewares(req, timeout, path)
         return self._prepare_collection_response(
             resp, resp_schema, collection.collection_parser
         )
 
     async def _collection_request(
         self,
-        method: HttpMethod,
+        method: HTTPMethod,
         params: Union[Request, Dict[Any, Any]],
         timeout: HTTPTimeout,
     ) -> ResponseBox[TResponse]:
         path, req, resp_schema = self._prepare_request(
             method, params, self.routes.collection
         )
-        resp = await self._handle_req_with_middlewares(method, req, timeout, path)
+        resp = await self._handle_req_with_middlewares(req, timeout, path)
         return self._prepare_response(resp, resp_schema, method, path)
 
     async def _request(
         self,
-        method: HttpMethod,
+        method: HTTPMethod,
         params: Union[Request, Dict[Any, Any]],
         timeout: HTTPTimeout,
     ) -> ResponseBox[TResponse]:
         path, req, resp_schema = self._prepare_request(
             method, params, self.routes.resource
         )
-        resp = await self._handle_req_with_middlewares(method, req, timeout, path)
+        resp = await self._handle_req_with_middlewares(req, timeout, path)
         return self._prepare_response(resp, resp_schema, method, path)
 
     async def collection_head(

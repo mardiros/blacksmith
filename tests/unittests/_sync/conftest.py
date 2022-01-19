@@ -13,7 +13,7 @@ from blacksmith.sd._sync.adapters.router import SyncRouterDiscovery
 from blacksmith.sd._sync.adapters.static import Endpoints, SyncStaticDiscovery
 from blacksmith.service._sync.base import SyncAbstractTransport
 from blacksmith.service._sync.client import SyncClientFactory
-from blacksmith.typing import ClientName, HttpMethod, Path
+from blacksmith.typing import ClientName, Path
 from tests.unittests.time import SyncSleep
 
 
@@ -27,7 +27,6 @@ class FakeConsulTransport(SyncAbstractTransport):
     def __call__(
         self,
         request: HTTPRequest,
-        method: HttpMethod,
         client_name: ClientName,
         path: Path,
         timeout: HTTPTimeout,
@@ -58,7 +57,6 @@ class FakeConsulTransport(SyncAbstractTransport):
 def echo_middleware():
     def next(
         req: HTTPRequest,
-        method: HttpMethod,
         client_name: ClientName,
         path: Path,
         timeout: HTTPTimeout,
@@ -72,7 +70,6 @@ def echo_middleware():
 def cachable_response():
     def next(
         req: HTTPRequest,
-        method: HttpMethod,
         client_name: ClientName,
         path: Path,
         timeout: HTTPTimeout,
@@ -88,7 +85,6 @@ def cachable_response():
 def slow_middleware():
     def next(
         req: HTTPRequest,
-        method: HttpMethod,
         client_name: ClientName,
         path: Path,
         timeout: HTTPTimeout,
@@ -103,7 +99,6 @@ def slow_middleware():
 def boom_middleware():
     def next(
         req: HTTPRequest,
-        method: HttpMethod,
         client_name: ClientName,
         path: Path,
         timeout: HTTPTimeout,
@@ -119,7 +114,6 @@ def boom_middleware():
 def invalid_middleware():
     def next(
         req: HTTPRequest,
-        method: HttpMethod,
         client_name: ClientName,
         path: Path,
         timeout: HTTPTimeout,

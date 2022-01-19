@@ -18,7 +18,7 @@ gensync:
     poetry run isort tests/unittests/_sync
     poetry run black tests/unittests/_sync
 
-test: unittest functest lint mypy
+test: mypy unittest functest lint
 
 unittest test_suite=default_test_suite:
     poetry run pytest -sxv {{test_suite}}
@@ -39,7 +39,7 @@ lint:
     poetry run flake8
 
 mypy:
-    poetry run mypy src/blacksmith/
+    poetry run mypy src/
 
 black:
     poetry run isort .

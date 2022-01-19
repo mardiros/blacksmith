@@ -14,6 +14,6 @@ Path = str
 Proxies = _types.ProxiesTypes
 
 HttpLocation = Literal["path", "headers", "querystring", "body"]
-HttpMethod = Literal["HEAD", "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
+HTTPMethod = Literal["HEAD", "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
 
 Json = Optional[Any]
