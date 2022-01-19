@@ -48,36 +48,20 @@ black:
 rtd:
     poetry export --dev -f requirements.txt -o docs/requirements.txt
 
-release major_minor_patch: gensync test rtd && changelog build
+release major_minor_patch: gensync test rtd && changelog
     poetry version {{major_minor_patch}}
     poetry install
 
-poetry_shell:
-    poetry shell
-
-changelog: poetry_shell && changelog_tail
-    #!/usr/bin/env python3
-    import datetime
-    import blacksmith
-    header = f"{blacksmith.__version__}  - Released on {datetime.datetime.now().date().isoformat()}"
-    with open("CHANGELOG.rst.new", 'w') as changelog:
-        changelog.write(header)
-        changelog.write("\n")
-        changelog.write("-" * len(header))
-        changelog.write("\n")
-        changelog.write("* please write here \n\n")
-
-changelog_tail:
+changelog:
+    poetry run python scripts/write_changelog.py
     cat CHANGELOG.rst >> CHANGELOG.rst.new
     rm CHANGELOG.rst
     mv CHANGELOG.rst.new CHANGELOG.rst
     $EDITOR CHANGELOG.rst
 
-build:
-    poetry build
-
 publish:
     git commit -am "Release $(poetry run python scripts/show_release.py)"
+    poetry build
     poetry publish
     git tag "$(poetry run python scripts/show_release.py)"
     git push origin "$(poetry run python scripts/show_release.py)"

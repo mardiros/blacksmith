@@ -1,3 +1,11 @@
+0.12.0  - Released on 2022-01-19
+--------------------------------
+* Refactor transport to have the same signature as middleware.
+* Breaking Change:
+   * The http middleware does not have an http method
+   * The type HttpMethod is not HTTPMethod
+* The HTTPRequest type now have a method attribute.
+
 0.11.0  - Released on 2022-01-15
 --------------------------------
 * Add typing support. see PEP 561
