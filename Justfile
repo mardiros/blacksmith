@@ -63,5 +63,6 @@ publish:
     git commit -am "Release $(poetry run python scripts/show_release.py)"
     poetry build
     poetry publish
+    git push
     git tag "$(poetry run python scripts/show_release.py)"
     git push origin "$(poetry run python scripts/show_release.py)"
