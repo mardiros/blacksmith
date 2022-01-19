@@ -1,3 +1,7 @@
+0.12.1  - Released on 2022-01-19
+--------------------------------
+* Expose AsyncClient and SyncClient for typing purpose. 
+
 0.12.0  - Released on 2022-01-19
 --------------------------------
 * Refactor transport to have the same signature as middleware.
