@@ -57,11 +57,11 @@ class Request(BaseModel):
     :func:`.QueryStringField` or :func:`.PostBodyField` to declare each fields.
     """
 
-    def to_http_request(self, url_pattern: Url) -> HTTPRequest:
+    def to_http_request(self, method: HttpMethod, url_pattern: Url) -> HTTPRequest:
         """Convert the request params to an http request in order to serialize
         the http request for the client.
         """
-        req = HTTPRequest(url_pattern)
+        req = HTTPRequest(method, url_pattern)
         fields_by_loc: Dict[HttpLocation, Dict[IntStr, Any]] = {
             HEADER: {},
             PATH: {},

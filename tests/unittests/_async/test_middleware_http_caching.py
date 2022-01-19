@@ -75,7 +75,7 @@ def test_get_vary_header_split(params: Tuple[HTTPResponse, List[str]]):
 )
 def test_policy_handle_request(params: Tuple[HttpMethod, bool]):
     policy = CacheControlPolicy("$")
-    req = HTTPRequest("/")
+    req = HTTPRequest("GET", "/")
     method, expected = params
     assert policy.handle_request(req, method, "", "") == expected
 
@@ -83,42 +83,42 @@ def test_policy_handle_request(params: Tuple[HttpMethod, bool]):
 @pytest.mark.parametrize(
     "params",
     [
-        ("dummies", "/", HTTPRequest("", {}, {}), "dummies$/"),
-        ("bar", "/", HTTPRequest("", {}, {}), "bar$/"),
+        ("dummies", "/", HTTPRequest("GET", "/", {}, {}), "dummies$/"),
+        ("bar", "/", HTTPRequest("GET", "/", {}, {}), "bar$/"),
         (
             "dummies",
             "/names/{name}",
-            HTTPRequest("", {"name": "dummy"}, {}),
+            HTTPRequest("GET", "/", {"name": "dummy"}, {}),
             "dummies$/names/dummy",
         ),
         (
             "dummies",
             "/names",
-            HTTPRequest("", {}, {"name": "dummy"}),
+            HTTPRequest("GET", "/", {}, {"name": "dummy"}),
             "dummies$/names?name=dummy",
         ),
         (
             "dummies",
             "/names/{name}",
-            HTTPRequest("", {"name": "dummy"}, {"foo": "bar"}),
+            HTTPRequest("GET", "/", {"name": "dummy"}, {"foo": "bar"}),
             "dummies$/names/dummy?foo=bar",
         ),
         (
             "dummies",
             "/",
-            HTTPRequest("", {}, {"foo": ["egg", "bar"]}),
+            HTTPRequest("GET", "/", {}, {"foo": ["egg", "bar"]}),
             "dummies$/?foo=egg&foo=bar",
         ),
         (
             "dummies",
             "/",
-            HTTPRequest("", {}, {"foo": ["e g", "bàr"]}),
+            HTTPRequest("GET", "/", {}, {"foo": ["e g", "bàr"]}),
             "dummies$/?foo=e+g&foo=b%C3%A0r",
         ),
         (
             "dummies",
             "/",
-            HTTPRequest("", {}, {"foo": ["our$sep"]}),
+            HTTPRequest("GET", "/", {}, {"foo": ["our$sep"]}),
             "dummies$/?foo=our%24sep",
         ),
     ],
@@ -134,21 +134,21 @@ def test_policy_get_vary_key(params: Tuple[str, str, HTTPRequest, str]):
         (
             "dummies",
             "/",
-            HTTPRequest("", headers={"Accept-Encoding": "gzip"}),
+            HTTPRequest("GET", "/", headers={"Accept-Encoding": "gzip"}),
             [],
             "dummies$/$",
         ),
         (
             "dummies",
             "/",
-            HTTPRequest("", headers={"Accept-Encoding": "gzip"}),
+            HTTPRequest("GET", "/", headers={"Accept-Encoding": "gzip"}),
             ["Accept-Encoding"],
             "dummies$/$Accept-Encoding=gzip",
         ),
         (
             "dummies",
             "/",
-            HTTPRequest("", headers={}),
+            HTTPRequest("GET", "/", headers={}),
             ["Accept-Encoding"],
             "dummies$/$Accept-Encoding=",
         ),
@@ -167,18 +167,24 @@ def test_policy_get_response_cache_key(
 @pytest.mark.parametrize(
     "params",
     [
-        ("dummies", "/", HTTPRequest(""), HTTPResponse(200, {}, ""), (0, "", [])),
         (
             "dummies",
             "/",
-            HTTPRequest("", headers={"Cache-Control": "max-age=60, public"}),
+            HTTPRequest("GET", ""),
+            HTTPResponse(200, {}, ""),
+            (0, "", []),
+        ),
+        (
+            "dummies",
+            "/",
+            HTTPRequest("GET", "/", headers={"Cache-Control": "max-age=60, public"}),
             HTTPResponse(200, {"cache-control": "max-age=60, public"}, ""),
             (60, "dummies$/", []),
         ),
         (
             "dummies",
             "/",
-            HTTPRequest("", headers={"Accept-Encoding": "gzip"}),
+            HTTPRequest("GET", "/", headers={"Accept-Encoding": "gzip"}),
             HTTPResponse(
                 200,
                 {"vary": "Accept-Encoding", "cache-control": "max-age=60, public"},
@@ -203,13 +209,13 @@ def test_policy_get_cache_info_for_response(
     [
         {
             "path": "/",
-            "request": HTTPRequest("", headers={}),
+            "request": HTTPRequest("GET", "/", headers={}),
             "initial_cache": {},
             "expected_response_from_cache": None,
         },
         {
             "path": "/",
-            "request": HTTPRequest("", headers={"x-country-code": "FR"}),
+            "request": HTTPRequest("GET", "/", headers={"x-country-code": "FR"}),
             "initial_cache": {
                 "dummies$/": (42, '["x-country-code"]'),
             },
@@ -217,7 +223,7 @@ def test_policy_get_cache_info_for_response(
         },
         {
             "path": "/",
-            "request": HTTPRequest("", headers={"x-country-code": "FR"}),
+            "request": HTTPRequest("GET", "/", headers={"x-country-code": "FR"}),
             "initial_cache": {
                 "dummies$/": (42, '["x-country-code"]'),
                 "dummies$/$x-country-code=FR": (
@@ -254,13 +260,13 @@ async def test_get_from_cache(
     [
         {
             "path": "/",
-            "request": HTTPRequest("", {}, {}),
+            "request": HTTPRequest("GET", "/", {}, {}),
             "response": HTTPResponse(200, {}, ""),
             "expected_cache": {},
         },
         {
             "path": "/",
-            "request": HTTPRequest("", {}, {}),
+            "request": HTTPRequest("GET", "/", {}, {}),
             "response": HTTPResponse(200, {"cache-control": "max-age=42, public"}, ""),
             "expected_cache": {
                 "dummies$/": (42, "[]"),
@@ -273,7 +279,7 @@ async def test_get_from_cache(
         },
         {
             "path": "/",
-            "request": HTTPRequest("", headers={"x-country-code": "FR"}),
+            "request": HTTPRequest("GET", "/", headers={"x-country-code": "FR"}),
             "response": HTTPResponse(
                 200,
                 {"cache-control": "max-age=42, public", "vary": "X-Country-Code"},
@@ -291,7 +297,7 @@ async def test_get_from_cache(
         },
         {
             "path": "/",
-            "request": HTTPRequest("", headers={}),
+            "request": HTTPRequest("GET", "/", headers={}),
             "response": HTTPResponse(
                 200,
                 {"cache-control": "max-age=42, public", "vary": "X-Country-Code"},
@@ -309,7 +315,7 @@ async def test_get_from_cache(
         },
         {
             "path": "/",
-            "request": HTTPRequest("", headers={"a": "A", "B": "B", "c": "C"}),
+            "request": HTTPRequest("GET", "/", headers={"a": "A", "B": "B", "c": "C"}),
             "response": HTTPResponse(
                 200,
                 {"cache-control": "max-age=42, public", "vary": "a, b"},

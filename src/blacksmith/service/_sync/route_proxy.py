@@ -94,7 +94,7 @@ class SyncRouteProxy(Generic[TCollectionResponse, TResponse]):
                 self.name,
                 self.client_name,
             )
-        req = params.to_http_request(self.endpoint + resource.path)
+        req = params.to_http_request(method, self.endpoint + resource.path)
         return (resource.path, req, return_schema)
 
     def _prepare_response(

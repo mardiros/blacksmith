@@ -211,10 +211,18 @@ def test_prom_metrics_error(
 @pytest.mark.parametrize(
     "exc",
     [
-        HTTPError("Mmm", HTTPRequest("/", {}, {}, {}), HTTPResponse(400, {}, {})),
-        HTTPError("Mmm", HTTPRequest("/", {}, {}, {}), HTTPResponse(401, {}, {})),
-        HTTPError("Mmm", HTTPRequest("/", {}, {}, {}), HTTPResponse(403, {}, {})),
-        HTTPError("Mmm", HTTPRequest("/", {}, {}, {}), HTTPResponse(422, {}, {})),
+        HTTPError(
+            "Mmm", HTTPRequest("GET", "/", {}, {}, {}), HTTPResponse(400, {}, {})
+        ),
+        HTTPError(
+            "Mmm", HTTPRequest("GET", "/", {}, {}, {}), HTTPResponse(401, {}, {})
+        ),
+        HTTPError(
+            "Mmm", HTTPRequest("GET", "/", {}, {}, {}), HTTPResponse(403, {}, {})
+        ),
+        HTTPError(
+            "Mmm", HTTPRequest("GET", "/", {}, {}, {}), HTTPResponse(422, {}, {})
+        ),
     ],
 )
 def test_excluded_list(exc: HTTPError):
@@ -224,8 +232,12 @@ def test_excluded_list(exc: HTTPError):
 @pytest.mark.parametrize(
     "exc",
     [
-        HTTPError("Mmm", HTTPRequest("/", {}, {}, {}), HTTPResponse(500, {}, {})),
-        HTTPError("Mmm", HTTPRequest("/", {}, {}, {}), HTTPResponse(503, {}, {})),
+        HTTPError(
+            "Mmm", HTTPRequest("GET", "/", {}, {}, {}), HTTPResponse(500, {}, {})
+        ),
+        HTTPError(
+            "Mmm", HTTPRequest("GET", "/", {}, {}, {}), HTTPResponse(503, {}, {})
+        ),
     ],
 )
 def test_included_list(exc: HTTPError):

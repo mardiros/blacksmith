@@ -15,6 +15,7 @@ def registry():
 @pytest.fixture
 def dummy_http_request():
     return HTTPRequest(
+        "GET",
         "/dummy/{name}",
         {"name": 42},
         {"foo": "bar"},

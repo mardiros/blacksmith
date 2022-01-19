@@ -40,6 +40,7 @@ def test_timeout_neq():
 
 def test_request_url():
     req = HTTPRequest(
+        "GET",
         "/foo/{name}/bar/{id}",
         path={"id": 42, "name": "John"},
         querystring={},
@@ -61,7 +62,7 @@ def test_param_to_req():
         birthdate: datetime = PostBodyField()
 
     dummy = Dummy(name="Jane", country="FR", age=23, birthdate=datetime(1956, 12, 13))
-    req = dummy.to_http_request("/dummies/{name}")
+    req = dummy.to_http_request("GET", "/dummies/{name}")
     assert req.url == "/dummies/Jane"
     assert req.headers == {"X-Message-Id": "123"}
     assert req.querystring == {"country": "FR"}
