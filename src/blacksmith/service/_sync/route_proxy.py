@@ -125,13 +125,13 @@ class SyncRouteProxy(Generic[TCollectionResponse, TResponse]):
         )
 
     def _handle_req_with_middlewares(
-        self, method: HttpMethod, req: HTTPRequest, timeout: HTTPTimeout, path: Path
+        self, req: HTTPRequest, timeout: HTTPTimeout, path: Path
     ) -> HTTPResponse:
         next: SyncMiddleware = self.transport
         for middleware in self.middlewares:
             next = middleware(next)
 
-        resp = next(req, method, self.client_name, path, timeout)
+        resp = next(req, self.client_name, path, timeout)
         return resp
 
     def _yield_collection_request(
@@ -142,7 +142,7 @@ class SyncRouteProxy(Generic[TCollectionResponse, TResponse]):
         collection: HttpCollection,
     ) -> CollectionIterator[TCollectionResponse]:
         path, req, resp_schema = self._prepare_request(method, params, collection)
-        resp = self._handle_req_with_middlewares(method, req, timeout, path)
+        resp = self._handle_req_with_middlewares(req, timeout, path)
         return self._prepare_collection_response(
             resp, resp_schema, collection.collection_parser
         )
@@ -156,7 +156,7 @@ class SyncRouteProxy(Generic[TCollectionResponse, TResponse]):
         path, req, resp_schema = self._prepare_request(
             method, params, self.routes.collection
         )
-        resp = self._handle_req_with_middlewares(method, req, timeout, path)
+        resp = self._handle_req_with_middlewares(req, timeout, path)
         return self._prepare_response(resp, resp_schema, method, path)
 
     def _request(
@@ -168,7 +168,7 @@ class SyncRouteProxy(Generic[TCollectionResponse, TResponse]):
         path, req, resp_schema = self._prepare_request(
             method, params, self.routes.resource
         )
-        resp = self._handle_req_with_middlewares(method, req, timeout, path)
+        resp = self._handle_req_with_middlewares(req, timeout, path)
         return self._prepare_response(resp, resp_schema, method, path)
 
     def collection_head(

@@ -7,7 +7,7 @@ from httpx import Timeout as HttpxTimeout
 from blacksmith.domain.exceptions import HTTPError, HTTPTimeoutError
 from blacksmith.domain.model import HTTPRequest, HTTPResponse, HTTPTimeout
 from blacksmith.service.ports import AsyncClient
-from blacksmith.typing import ClientName, HttpMethod, Json, Path
+from blacksmith.typing import ClientName, Json, Path
 
 from ..base import AsyncAbstractTransport
 
@@ -30,7 +30,6 @@ class AsyncHttpxTransport(AsyncAbstractTransport):
     async def __call__(
         self,
         req: HTTPRequest,
-        method: HttpMethod,
         client_name: ClientName,
         path: Path,
         timeout: HTTPTimeout,
@@ -44,7 +43,7 @@ class AsyncHttpxTransport(AsyncAbstractTransport):
         ) as client:
             try:
                 r = await client.request(  # type: ignore
-                    method,
+                    req.method,
                     req.url,
                     params=req.querystring,
                     headers=headers,
@@ -53,7 +52,8 @@ class AsyncHttpxTransport(AsyncAbstractTransport):
                 )
             except httpx.TimeoutException as exc:
                 raise HTTPTimeoutError(
-                    f"{exc.__class__.__name__} while calling {method} {req.url}"
+                    f"{client_name} - {req.method} {path} - "
+                    f"{exc.__class__.__name__} while calling {req.method} {req.url}"
                 )
 
         status_code: int = r.status_code  # type: ignore
@@ -61,5 +61,10 @@ class AsyncHttpxTransport(AsyncAbstractTransport):
         json = "" if status_code == 204 else safe_json(r)
         resp = HTTPResponse(status_code, headers, json=json)
         if not r.is_success:
-            raise HTTPError(f"{r.status_code} {r.reason_phrase}", req, resp)
+            raise HTTPError(
+                f"{client_name} - {req.method} {path} - "
+                f"{r.status_code} {r.reason_phrase}",
+                req,
+                resp,
+            )
         return resp

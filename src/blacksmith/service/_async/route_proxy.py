@@ -125,13 +125,13 @@ class AsyncRouteProxy(Generic[TCollectionResponse, TResponse]):
         )
 
     async def _handle_req_with_middlewares(
-        self, method: HttpMethod, req: HTTPRequest, timeout: HTTPTimeout, path: Path
+        self, req: HTTPRequest, timeout: HTTPTimeout, path: Path
     ) -> HTTPResponse:
         next: AsyncMiddleware = self.transport
         for middleware in self.middlewares:
             next = middleware(next)
 
-        resp = await next(req, method, self.client_name, path, timeout)
+        resp = await next(req, self.client_name, path, timeout)
         return resp
 
     async def _yield_collection_request(
@@ -142,7 +142,7 @@ class AsyncRouteProxy(Generic[TCollectionResponse, TResponse]):
         collection: HttpCollection,
     ) -> CollectionIterator[TCollectionResponse]:
         path, req, resp_schema = self._prepare_request(method, params, collection)
-        resp = await self._handle_req_with_middlewares(method, req, timeout, path)
+        resp = await self._handle_req_with_middlewares(req, timeout, path)
         return self._prepare_collection_response(
             resp, resp_schema, collection.collection_parser
         )
@@ -156,7 +156,7 @@ class AsyncRouteProxy(Generic[TCollectionResponse, TResponse]):
         path, req, resp_schema = self._prepare_request(
             method, params, self.routes.collection
         )
-        resp = await self._handle_req_with_middlewares(method, req, timeout, path)
+        resp = await self._handle_req_with_middlewares(req, timeout, path)
         return self._prepare_response(resp, resp_schema, method, path)
 
     async def _request(
@@ -168,7 +168,7 @@ class AsyncRouteProxy(Generic[TCollectionResponse, TResponse]):
         path, req, resp_schema = self._prepare_request(
             method, params, self.routes.resource
         )
-        resp = await self._handle_req_with_middlewares(method, req, timeout, path)
+        resp = await self._handle_req_with_middlewares(req, timeout, path)
         return self._prepare_response(resp, resp_schema, method, path)
 
     async def collection_head(

@@ -74,10 +74,10 @@ def test_get_vary_header_split(params: Tuple[HTTPResponse, List[str]]):
     ],
 )
 def test_policy_handle_request(params: Tuple[HttpMethod, bool]):
-    policy = CacheControlPolicy("$")
-    req = HTTPRequest("GET", "/")
     method, expected = params
-    assert policy.handle_request(req, method, "", "") == expected
+    policy = CacheControlPolicy("$")
+    req = HTTPRequest(method, "/")
+    assert policy.handle_request(req, "", "") == expected
 
 
 @pytest.mark.parametrize(
@@ -366,7 +366,7 @@ def test_cache_middleware(
 ):
     caching = SyncHTTPCachingMiddleware(fake_http_middleware_cache)
     next = caching(cachable_response)
-    resp = next(dummy_http_request, "GET", "dummy", "/dummies/{name}", dummy_timeout)
+    resp = next(dummy_http_request, "dummy", "/dummies/{name}", dummy_timeout)
     assert resp == HTTPResponse(
         200, {"cache-control": "max-age=42, public"}, json="Cache Me"
     )
@@ -382,7 +382,7 @@ def test_cache_middleware(
 
     # get from the cache, not from the boom which raises
     next = caching(boom_middleware)
-    resp = next(dummy_http_request, "GET", "dummy", "/dummies/{name}", dummy_timeout)
+    resp = next(dummy_http_request, "dummy", "/dummies/{name}", dummy_timeout)
     assert resp == HTTPResponse(
         200, {"cache-control": "max-age=42, public"}, json="Cache Me"
     )
@@ -400,14 +400,14 @@ def test_cache_middleware_policy_handle(
             super().__init__("%")
             self.handle_request_called = False
 
-        def handle_request(self, req, method, client_name, path):  # type: ignore
+        def handle_request(self, req, client_name, path):  # type: ignore
             self.handle_request_called = True
             return False
 
     tracker = TrackHandleCacheControlPolicy()
     caching = SyncHTTPCachingMiddleware(fake_http_middleware_cache, policy=tracker)
     next = caching(cachable_response)
-    resp = next(dummy_http_request, "GET", "dummy", "/dummies/{name}", dummy_timeout)
+    resp = next(dummy_http_request, "dummy", "/dummies/{name}", dummy_timeout)
     assert tracker.handle_request_called is True
     assert fake_http_middleware_cache.val == {}  # type: ignore
     assert resp == HTTPResponse(

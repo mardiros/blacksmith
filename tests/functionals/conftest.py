@@ -1,9 +1,9 @@
 from enum import Enum
 from multiprocessing import Process
-from typing import Dict, List, Optional, cast
+from typing import Dict, Iterable, List, Optional, Type, cast
 
 import pytest
-import uvicorn
+import uvicorn  # type: ignore
 from asgiref.typing import ASGI3Application
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
@@ -49,7 +49,7 @@ def create_item(item: Item):
 
 
 @app.get("/items/{item_name}")
-def read_item(item_name: str, response_model=Item):
+def read_item(item_name: str, response_model: Type[BaseModel] = Item):
     try:
         return items_db[item_name]
     except KeyError:
@@ -79,12 +79,12 @@ def delete_item(item_name: str, item: PatchItem):
         raise not_found
 
 
-def run_server(port):
+def run_server(port: int):
     uvicorn.run(cast(ASGI3Application, app), port=port)
 
 
 @pytest.fixture
-def dummy_api_endpoint():
+def dummy_api_endpoint() -> Iterable[str]:
     port = 6556
     proc = Process(target=run_server, args=(port,), daemon=True)
     proc.start()

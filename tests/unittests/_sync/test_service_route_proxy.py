@@ -21,7 +21,7 @@ from blacksmith.middleware._sync.auth import SyncHTTPAuthorization
 from blacksmith.middleware._sync.base import SyncHTTPAddHeadersMiddleware
 from blacksmith.service._sync.base import SyncAbstractTransport
 from blacksmith.service._sync.route_proxy import SyncRouteProxy, build_timeout
-from blacksmith.typing import ClientName, HttpMethod, Path
+from blacksmith.typing import ClientName, Path
 from tests.unittests.dummy_registry import GetParam, GetResponse, PostParam
 
 
@@ -33,7 +33,6 @@ class FakeTransport(SyncAbstractTransport):
     def __call__(
         self,
         req: HTTPRequest,
-        method: HttpMethod,
         client_name: ClientName,
         path: Path,
         timeout: HTTPTimeout,
@@ -80,7 +79,6 @@ def test_route_proxy_prepare_middleware(
         ],
     )
     resp = proxy._handle_req_with_middlewares(
-        "GET",
         dummy_http_request,
         HTTPTimeout(4.2),
         "/",

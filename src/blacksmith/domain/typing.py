@@ -3,7 +3,7 @@ from typing import Any, Coroutine
 from typing_extensions import Protocol
 
 from blacksmith.domain.model.http import HTTPRequest, HTTPResponse, HTTPTimeout
-from blacksmith.typing import ClientName, HttpMethod, Path
+from blacksmith.typing import ClientName, Path
 
 
 class AsyncMiddleware(Protocol):
@@ -12,7 +12,6 @@ class AsyncMiddleware(Protocol):
     def __call__(
         self,
         req: HTTPRequest,
-        method: HttpMethod,
         client_name: ClientName,
         path: Path,
         timeout: HTTPTimeout,
@@ -27,7 +26,6 @@ class SyncMiddleware(Protocol):
     def __call__(
         self,
         req: HTTPRequest,
-        method: HttpMethod,
         client_name: ClientName,
         path: Path,
         timeout: HTTPTimeout,
