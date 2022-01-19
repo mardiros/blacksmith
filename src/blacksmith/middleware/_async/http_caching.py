@@ -8,7 +8,7 @@ from urllib.parse import urlencode
 
 from httpx import Headers
 
-from blacksmith.domain.model.http import HTTPRequest, HTTPResponse
+from blacksmith.domain.model.http import HTTPRequest, HTTPResponse, HTTPTimeout
 from blacksmith.typing import ClientName, HttpMethod, Path
 
 from .base import AsyncHTTPMiddleware, AsyncMiddleware
@@ -61,7 +61,7 @@ class AsyncAbstractCache(abc.ABC):
         """Initialize the cache"""
 
     @abc.abstractmethod
-    async def get(self, key: str) -> str:
+    async def get(self, key: str) -> Optional[str]:
         """Get a value from redis"""
 
     @abc.abstractmethod
@@ -246,16 +246,20 @@ class AsyncHTTPCachingMiddleware(AsyncHTTPMiddleware):
 
     def __call__(self, next: AsyncMiddleware) -> AsyncMiddleware:
         async def handle(
-            req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
+            req: HTTPRequest,
+            method: HttpMethod,
+            client_name: ClientName,
+            path: Path,
+            timeout: HTTPTimeout,
         ) -> HTTPResponse:
 
             if not self._policy.handle_request(req, method, client_name, path):
-                return await next(req, method, client_name, path)
+                return await next(req, method, client_name, path, timeout)
 
             resp = await self.get_from_cache(client_name, path, req)
             if resp:
                 return resp
-            resp = await next(req, method, client_name, path)
+            resp = await next(req, method, client_name, path, timeout)
             await self.cache_response(client_name, path, req, resp)
             return resp
 

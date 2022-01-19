@@ -1,5 +1,5 @@
 from datetime import timedelta
-from typing import Dict, Optional, Tuple
+from typing import Any, Dict, Mapping, Optional, Tuple
 
 import pytest
 
@@ -24,8 +24,13 @@ def static_sd():
 
 
 class FakeConsulTransport(SyncAbstractTransport):
-    def request(
-        self, method: HttpMethod, request: HTTPRequest, timeout: HTTPTimeout
+    def __call__(
+        self,
+        request: HTTPRequest,
+        method: HttpMethod,
+        client_name: ClientName,
+        path: Path,
+        timeout: HTTPTimeout,
     ) -> HTTPResponse:
         if request.path["name"] == "dummy-v2":
             return HTTPResponse(200, {}, [])
@@ -49,25 +54,14 @@ class FakeConsulTransport(SyncAbstractTransport):
         )
 
 
-class EchoTransport(SyncAbstractTransport):
-    def __init__(self) -> None:
-        super().__init__()
-
-    def request(
-        self, method: HttpMethod, request: HTTPRequest, timeout: HTTPTimeout
-    ) -> HTTPResponse:
-        return HTTPResponse(200, request.headers, request)
-
-
-@pytest.fixture
-def echo_transport():
-    return EchoTransport()
-
-
 @pytest.fixture
 def echo_middleware():
     def next(
-        req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
+        req: HTTPRequest,
+        method: HttpMethod,
+        client_name: ClientName,
+        path: Path,
+        timeout: HTTPTimeout,
     ) -> HTTPResponse:
         return HTTPResponse(200, req.headers, json=req)
 
@@ -77,7 +71,11 @@ def echo_middleware():
 @pytest.fixture
 def cachable_response():
     def next(
-        req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
+        req: HTTPRequest,
+        method: HttpMethod,
+        client_name: ClientName,
+        path: Path,
+        timeout: HTTPTimeout,
     ) -> HTTPResponse:
         return HTTPResponse(
             200, {"cache-control": "max-age=42, public"}, json="Cache Me"
@@ -89,7 +87,11 @@ def cachable_response():
 @pytest.fixture
 def slow_middleware():
     def next(
-        req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
+        req: HTTPRequest,
+        method: HttpMethod,
+        client_name: ClientName,
+        path: Path,
+        timeout: HTTPTimeout,
     ) -> HTTPResponse:
         SyncSleep(0.06)
         return HTTPResponse(200, req.headers, json=req)
@@ -100,7 +102,11 @@ def slow_middleware():
 @pytest.fixture
 def boom_middleware():
     def next(
-        req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
+        req: HTTPRequest,
+        method: HttpMethod,
+        client_name: ClientName,
+        path: Path,
+        timeout: HTTPTimeout,
     ) -> HTTPResponse:
         raise HTTPError(
             "Boom", req, HTTPResponse(500, {}, json={"detail": "I am bored"})
@@ -112,7 +118,11 @@ def boom_middleware():
 @pytest.fixture
 def invalid_middleware():
     def next(
-        req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
+        req: HTTPRequest,
+        method: HttpMethod,
+        client_name: ClientName,
+        path: Path,
+        timeout: HTTPTimeout,
     ) -> HTTPResponse:
         raise HTTPError(
             "Boom",
@@ -139,7 +149,7 @@ def dummy_middleware():
 
 @pytest.fixture
 def consul_sd():
-    def cli(url: str, tok: str) -> SyncClientFactory:
+    def cli(url: str, tok: str) -> SyncClientFactory[Any, Any]:
         return SyncClientFactory(
             sd=SyncStaticDiscovery({("consul", "v1"): url}),
             registry=_registry,
@@ -157,7 +167,7 @@ def router_sd():
 class SyncFakeHttpMiddlewareCache(SyncAbstractCache):
     """Abstract Redis Client."""
 
-    def __init__(self, data=None) -> None:
+    def __init__(self, data: Optional[Dict[str, Tuple[int, str]]] = None) -> None:
         super().__init__()
         self.val: Dict[str, Tuple[int, str]] = data or {}
         self.initialize_called = False
@@ -183,5 +193,5 @@ def fake_http_middleware_cache():
 
 
 @pytest.fixture
-def fake_http_middleware_cache_with_data(params):
+def fake_http_middleware_cache_with_data(params: Mapping[str, Any]):
     return SyncFakeHttpMiddlewareCache(params["initial_cache"])

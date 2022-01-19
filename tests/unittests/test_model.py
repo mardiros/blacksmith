@@ -1,6 +1,6 @@
 import json
 from datetime import datetime
-from typing import Optional
+from typing import Any, Optional
 
 import pytest
 
@@ -124,7 +124,7 @@ def test_response_box():
             },
         ),
         GetResponse,
-        "",
+        "GET",
         "",
         "",
         "",
@@ -160,7 +160,7 @@ def test_response_box_no_schema():
 
 
 def test_collection_iterator():
-    collec = CollectionIterator(
+    collec: CollectionIterator[Any] = CollectionIterator(
         HTTPResponse(
             200,
             {"Total-Count": "5"},

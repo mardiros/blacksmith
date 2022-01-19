@@ -1,6 +1,6 @@
 from typing import Dict
 
-from blacksmith.domain.model.http import HTTPRequest, HTTPResponse
+from blacksmith.domain.model.http import HTTPRequest, HTTPResponse, HTTPTimeout
 from blacksmith.domain.typing import SyncMiddleware
 from blacksmith.typing import ClientName, HttpMethod, Path
 
@@ -16,9 +16,13 @@ class SyncHTTPMiddleware:
 
     def __call__(self, next: SyncMiddleware) -> SyncMiddleware:
         def handle(
-            req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
+            req: HTTPRequest,
+            method: HttpMethod,
+            client_name: ClientName,
+            path: Path,
+            timeout: HTTPTimeout,
         ) -> HTTPResponse:
-            return next(req, method, client_name, path)
+            return next(req, method, client_name, path, timeout)
 
         return handle
 
@@ -37,9 +41,13 @@ class SyncHTTPAddHeadersMiddleware(SyncHTTPMiddleware):
 
     def __call__(self, next: SyncMiddleware) -> SyncMiddleware:
         def handle(
-            req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
+            req: HTTPRequest,
+            method: HttpMethod,
+            client_name: ClientName,
+            path: Path,
+            timeout: HTTPTimeout,
         ) -> HTTPResponse:
             req.headers.update(self.headers)
-            return next(req, method, client_name, path)
+            return next(req, method, client_name, path, timeout)
 
         return handle

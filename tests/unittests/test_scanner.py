@@ -1,6 +1,9 @@
+from typing import Any, Dict
+
 import pytest
 
 import blacksmith
+from blacksmith.domain.registry import Registry
 
 
 @pytest.mark.parametrize(
@@ -19,7 +22,7 @@ import blacksmith
         },
     ],
 )
-def test_scan(params, registry):
+def test_scan(params: Dict[str, Any], registry: Registry):
     blacksmith.scan(params["mod"])
     assert registry.client_service == params["expected"]
 
@@ -39,7 +42,7 @@ def test_scan(params, registry):
         },
     ],
 )
-def test_scan_errors(params, registry):
+def test_scan_errors(params: Dict[str, Any], registry: Registry):
     with pytest.raises(params["expected_exception"]) as ctx:
         blacksmith.scan(params["mod"])
     assert str(ctx.value) == params["expected_message"]

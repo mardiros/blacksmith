@@ -12,7 +12,6 @@ from blacksmith import (
     AsyncClientFactory,
     AsyncHTTPAuthorization,
     AsyncStaticDiscovery,
-    CollectionIterator,
     PathInfoField,
     QueryStringField,
     Request,

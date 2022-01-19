@@ -7,7 +7,7 @@ from httpx import Timeout as HttpxTimeout
 from blacksmith.domain.exceptions import HTTPError, HTTPTimeoutError
 from blacksmith.domain.model import HTTPRequest, HTTPResponse, HTTPTimeout
 from blacksmith.service.ports import SyncClient
-from blacksmith.typing import HttpMethod, Json
+from blacksmith.typing import ClientName, HttpMethod, Json, Path
 
 from ..base import SyncAbstractTransport
 
@@ -27,11 +27,16 @@ class SyncHttpxTransport(SyncAbstractTransport):
 
     """
 
-    def request(
-        self, method: HttpMethod, request: HTTPRequest, timeout: HTTPTimeout
+    def __call__(
+        self,
+        req: HTTPRequest,
+        method: HttpMethod,
+        client_name: ClientName,
+        path: Path,
+        timeout: HTTPTimeout,
     ) -> HTTPResponse:
-        headers = request.headers.copy()
-        if request.body:
+        headers = req.headers.copy()
+        if req.body:
             headers["Content-Type"] = "application/json"
         with SyncClient(
             verify=self.verify_certificate,
@@ -40,15 +45,15 @@ class SyncHttpxTransport(SyncAbstractTransport):
             try:
                 r = client.request(  # type: ignore
                     method,
-                    request.url,
-                    params=request.querystring,
+                    req.url,
+                    params=req.querystring,
                     headers=headers,
-                    content=request.body,
+                    content=req.body,
                     timeout=HttpxTimeout(timeout.request, connect=timeout.connect),
                 )
             except httpx.TimeoutException as exc:
                 raise HTTPTimeoutError(
-                    f"{exc.__class__.__name__} while calling {method} {request.url}"
+                    f"{exc.__class__.__name__} while calling {method} {req.url}"
                 )
 
         status_code: int = r.status_code  # type: ignore
@@ -56,5 +61,5 @@ class SyncHttpxTransport(SyncAbstractTransport):
         json = "" if status_code == 204 else safe_json(r)
         resp = HTTPResponse(status_code, headers, json=json)
         if not r.is_success:
-            raise HTTPError(f"{status_code} {r.reason_phrase}", request, resp)
+            raise HTTPError(f"{r.status_code} {r.reason_phrase}", req, resp)
         return resp

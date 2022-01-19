@@ -1,4 +1,4 @@
-from typing import Any, Dict, Generic, List, Optional, Tuple, Type, Union, cast
+from typing import Any, Dict, Generic, List, Optional, Tuple, Type, Union
 
 from blacksmith.domain.exceptions import (
     NoContractException,
@@ -20,7 +20,8 @@ from blacksmith.domain.model.params import (
     TResponse,
 )
 from blacksmith.domain.registry import ApiRoutes, HttpCollection, HttpResource
-from blacksmith.middleware._sync.base import SyncHTTPMiddleware, SyncMiddleware
+from blacksmith.domain.typing import SyncMiddleware
+from blacksmith.middleware._sync.base import SyncHTTPMiddleware
 from blacksmith.typing import ClientName, HttpMethod, Path, ResourceName, Url
 
 from .base import SyncAbstractTransport
@@ -124,23 +125,13 @@ class SyncRouteProxy(Generic[TCollectionResponse, TResponse]):
         )
 
     def _handle_req_with_middlewares(
-        self,
-        method: HttpMethod,
-        req: HTTPRequest,
-        timeout: HTTPTimeout,
-        path: Path,
+        self, method: HttpMethod, req: HTTPRequest, timeout: HTTPTimeout, path: Path
     ) -> HTTPResponse:
-        def handle_req(
-            req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
-        ) -> HTTPResponse:
-            return self.transport.request(method, req, timeout)
-
-        next = cast(SyncMiddleware, handle_req)
-
+        next: SyncMiddleware = self.transport
         for middleware in self.middlewares:
             next = middleware(next)
 
-        resp = next(req, method, self.client_name, path)
+        resp = next(req, method, self.client_name, path, timeout)
         return resp
 
     def _yield_collection_request(

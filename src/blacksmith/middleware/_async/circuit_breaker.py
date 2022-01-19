@@ -6,7 +6,7 @@ from purgatory import AsyncAbstractUnitOfWork, AsyncCircuitBreakerFactory
 from purgatory.typing import TTL, Hook, Threshold
 
 from blacksmith.domain.exceptions import HTTPError
-from blacksmith.domain.model.http import HTTPRequest, HTTPResponse
+from blacksmith.domain.model.http import HTTPRequest, HTTPResponse, HTTPTimeout
 from blacksmith.typing import ClientName, HttpMethod, Path
 
 from .base import AsyncHTTPMiddleware, AsyncMiddleware
@@ -81,11 +81,15 @@ class AsyncCircuitBreaker(AsyncHTTPMiddleware):
 
     def __call__(self, next: AsyncMiddleware) -> AsyncMiddleware:
         async def handle(
-            req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
+            req: HTTPRequest,
+            method: HttpMethod,
+            client_name: ClientName,
+            path: Path,
+            timeout: HTTPTimeout,
         ) -> HTTPResponse:
 
             async with await self.circuit_breaker.get_breaker(client_name):
-                resp = await next(req, method, client_name, path)
+                resp = await next(req, method, client_name, path, timeout)
             return resp
 
         return handle

@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any, List, Optional
 import pkg_resources
 
 from blacksmith.domain.exceptions import HTTPError
-from blacksmith.domain.model.http import HTTPRequest, HTTPResponse
+from blacksmith.domain.model.http import HTTPRequest, HTTPResponse, HTTPTimeout
 from blacksmith.typing import ClientName, HttpMethod, Path
 
 from .base import SyncHTTPMiddleware, SyncMiddleware
@@ -85,12 +85,16 @@ class SyncPrometheusMetrics(SyncHTTPMiddleware):
 
     def __call__(self, next: SyncMiddleware) -> SyncMiddleware:
         def handle(
-            req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
+            req: HTTPRequest,
+            method: HttpMethod,
+            client_name: ClientName,
+            path: Path,
+            timeout: HTTPTimeout,
         ) -> HTTPResponse:
             status_code = 0
             start = time.perf_counter()
             try:
-                resp = next(req, method, client_name, path)
+                resp = next(req, method, client_name, path, timeout)
                 status_code = resp.status_code
             except HTTPError as exc:
                 status_code = exc.response.status_code

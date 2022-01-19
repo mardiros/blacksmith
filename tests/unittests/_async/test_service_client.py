@@ -1,7 +1,7 @@
-from typing import cast
+from typing import Any, cast
 
 import pytest
-from prometheus_client import CollectorRegistry
+from prometheus_client import CollectorRegistry  # type: ignore
 
 from blacksmith.domain.exceptions import (
     HTTPError,
@@ -20,10 +20,12 @@ from blacksmith.domain.model import (
 )
 from blacksmith.domain.registry import ApiRoutes
 from blacksmith.middleware._async.auth import AsyncHTTPAuthorization
+from blacksmith.middleware._async.base import AsyncHTTPMiddleware
 from blacksmith.middleware._async.prometheus import AsyncPrometheusMetrics
+from blacksmith.sd._async.base import AsyncAbstractServiceDiscovery
 from blacksmith.service._async.base import AsyncAbstractTransport
 from blacksmith.service._async.client import AsyncClient, AsyncClientFactory
-from blacksmith.typing import HttpMethod, Proxies
+from blacksmith.typing import ClientName, HttpMethod, Path, Proxies
 from tests.unittests.dummy_registry import (
     GetParam,
     GetResponse,
@@ -37,23 +39,34 @@ class FakeTransport(AsyncAbstractTransport):
         super().__init__()
         self.resp = resp
 
-    async def request(
-        self, method: HttpMethod, request: HTTPRequest, timeout: HTTPTimeout
+    async def __call__(
+        self,
+        req: HTTPRequest,
+        method: HttpMethod,
+        client_name: ClientName,
+        path: Path,
+        timeout: HTTPTimeout,
     ) -> HTTPResponse:
+
         if self.resp.status_code >= 400:
-            raise HTTPError(f"{self.resp.status_code} blah", request, self.resp)
+            raise HTTPError(f"{self.resp.status_code} blah", req, self.resp)
         return self.resp
 
 
 class FakeTimeoutTransport(AsyncAbstractTransport):
-    async def request(
-        self, method: HttpMethod, request: HTTPRequest, timeout: HTTPTimeout
+    async def __call__(
+        self,
+        req: HTTPRequest,
+        method: HttpMethod,
+        client_name: ClientName,
+        path: Path,
+        timeout: HTTPTimeout,
     ) -> HTTPResponse:
-        raise HTTPTimeoutError(f"ReadTimeout while calling {method} {request.url}")
+        raise HTTPTimeoutError(f"ReadTimeout while calling {method} {req.url}")
 
 
 @pytest.mark.asyncio
-async def test_client(static_sd):
+async def test_client(static_sd: AsyncAbstractServiceDiscovery):
 
     resp = HTTPResponse(
         200,
@@ -78,7 +91,6 @@ async def test_client(static_sd):
         collection_parser=CollectionParser,
         middlewares=[],
     )
-
     resp = await client.dummies.get({"name": "barbie"})
     assert isinstance(resp, ResponseBox)
     assert isinstance(resp.response, GetResponse)
@@ -122,7 +134,7 @@ async def test_client(static_sd):
 
 
 @pytest.mark.asyncio
-async def test_client_timeout(static_sd):
+async def test_client_timeout(static_sd: AsyncAbstractServiceDiscovery):
 
     routes = ApiRoutes(
         "/dummies/{name}", {"GET": (GetParam, GetResponse)}, None, None, None
@@ -146,7 +158,7 @@ async def test_client_timeout(static_sd):
 
 
 @pytest.mark.asyncio
-async def test_client_factory_config(static_sd):
+async def test_client_factory_config(static_sd: AsyncAbstractServiceDiscovery):
     tp = FakeTimeoutTransport()
     client_factory = AsyncClientFactory(static_sd, tp, registry=dummy_registry)
 
@@ -158,12 +170,12 @@ async def test_client_factory_config(static_sd):
     assert cli.transport == tp
 
 
-def test_client_factory_configure_transport(static_sd):
+def test_client_factory_configure_transport(static_sd: AsyncAbstractServiceDiscovery):
     client_factory = AsyncClientFactory(static_sd, verify_certificate=False)
     assert client_factory.transport.verify_certificate is False
 
 
-def test_client_factory_configure_proxies(static_sd):
+def test_client_factory_configure_proxies(static_sd: AsyncAbstractServiceDiscovery):
     proxies: Proxies = {
         "http://": "http://localhost:8030",
         "https://": "http://localhost:8031",
@@ -173,7 +185,9 @@ def test_client_factory_configure_proxies(static_sd):
 
 
 @pytest.mark.asyncio
-async def test_client_factory_add_middleware(static_sd, dummy_middleware):
+async def test_client_factory_add_middleware(
+    static_sd: AsyncAbstractServiceDiscovery, dummy_middleware: AsyncHTTPMiddleware
+):
     tp = FakeTimeoutTransport()
     auth = AsyncHTTPAuthorization("Bearer", "abc")
     prom = AsyncPrometheusMetrics(registry=CollectorRegistry())
@@ -202,7 +216,9 @@ async def test_client_factory_add_middleware(static_sd, dummy_middleware):
 
 
 @pytest.mark.asyncio
-async def test_client_add_middleware(static_sd, dummy_middleware):
+async def test_client_add_middleware(
+    static_sd: AsyncAbstractServiceDiscovery, dummy_middleware: AsyncHTTPMiddleware
+):
     tp = FakeTimeoutTransport()
     prom = AsyncPrometheusMetrics(registry=CollectorRegistry())
     auth = AsyncHTTPAuthorization("Bearer", "abc")
@@ -225,10 +241,12 @@ async def test_client_add_middleware(static_sd, dummy_middleware):
 
 @pytest.mark.asyncio
 async def test_client_factory_initialize_middlewares(
-    echo_transport, static_sd, dummy_middleware
+    echo_middleware: AsyncAbstractTransport,
+    static_sd: AsyncAbstractServiceDiscovery,
+    dummy_middleware: Any,
 ):
     client_factory = AsyncClientFactory(
-        static_sd, echo_transport, registry=dummy_registry
+        static_sd, echo_middleware, registry=dummy_registry
     ).add_middleware(dummy_middleware)
     assert dummy_middleware.initialized == 0
     cli = await client_factory("api")

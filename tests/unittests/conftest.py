@@ -1,6 +1,6 @@
 import pytest
 
-from blacksmith.domain.model import HTTPRequest
+from blacksmith.domain.model import HTTPRequest, HTTPTimeout
 
 from .scanned_resources import registry as resources_registry
 
@@ -21,3 +21,8 @@ def dummy_http_request():
         {"X-Req-Id": "42"},
         '{"bandi_manchot": "777"}',
     )
+
+
+@pytest.fixture
+def dummy_timeout():
+    return HTTPTimeout()

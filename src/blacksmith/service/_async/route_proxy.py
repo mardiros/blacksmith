@@ -1,4 +1,4 @@
-from typing import Any, Dict, Generic, List, Optional, Tuple, Type, Union, cast
+from typing import Any, Dict, Generic, List, Optional, Tuple, Type, Union
 
 from blacksmith.domain.exceptions import (
     NoContractException,
@@ -20,7 +20,8 @@ from blacksmith.domain.model.params import (
     TResponse,
 )
 from blacksmith.domain.registry import ApiRoutes, HttpCollection, HttpResource
-from blacksmith.middleware._async.base import AsyncHTTPMiddleware, AsyncMiddleware
+from blacksmith.domain.typing import AsyncMiddleware
+from blacksmith.middleware._async.base import AsyncHTTPMiddleware
 from blacksmith.typing import ClientName, HttpMethod, Path, ResourceName, Url
 
 from .base import AsyncAbstractTransport
@@ -124,23 +125,13 @@ class AsyncRouteProxy(Generic[TCollectionResponse, TResponse]):
         )
 
     async def _handle_req_with_middlewares(
-        self,
-        method: HttpMethod,
-        req: HTTPRequest,
-        timeout: HTTPTimeout,
-        path: Path,
+        self, method: HttpMethod, req: HTTPRequest, timeout: HTTPTimeout, path: Path
     ) -> HTTPResponse:
-        async def handle_req(
-            req: HTTPRequest, method: HttpMethod, client_name: ClientName, path: Path
-        ) -> HTTPResponse:
-            return await self.transport.request(method, req, timeout)
-
-        next = cast(AsyncMiddleware, handle_req)
-
+        next: AsyncMiddleware = self.transport
         for middleware in self.middlewares:
             next = middleware(next)
 
-        resp = await next(req, method, self.client_name, path)
+        resp = await next(req, method, self.client_name, path, timeout)
         return resp
 
     async def _yield_collection_request(

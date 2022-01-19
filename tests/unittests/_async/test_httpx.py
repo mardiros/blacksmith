@@ -1,3 +1,4 @@
+from typing import Any
 from unittest import mock
 
 import pytest
@@ -20,7 +21,7 @@ dummy_error_500_response = Response(500, headers={}, text="internal server error
 
 
 def dummy_query_timeout():
-    raise HttpxTimeoutException("ReadTimeout", request=None)
+    raise HttpxTimeoutException("ReadTimeout", request=None)  # type: ignore
 
 
 @mock.patch(
@@ -28,9 +29,9 @@ def dummy_query_timeout():
     return_value=dummy_response,
 )
 @pytest.mark.asyncio
-async def test_query_http(patch):
+async def test_query_http(patch: Any):
     transport = AsyncHttpxTransport()
-    resp = await transport.request("GET", HTTPRequest("/"), HTTPTimeout())
+    resp = await transport(HTTPRequest("/"), "GET", "cli", "/", HTTPTimeout())
     assert resp.status_code == 200
     assert dict(resp.headers) == {
         "content-length": "17",
@@ -44,9 +45,9 @@ async def test_query_http(patch):
     return_value=dummy_empty_response,
 )
 @pytest.mark.asyncio
-async def test_query_http_204(patch):
+async def test_query_http_204(patch: Any):
     transport = AsyncHttpxTransport()
-    resp = await transport.request("GET", HTTPRequest("/"), HTTPTimeout())
+    resp = await transport(HTTPRequest("/"), "GET", "cli", "/", HTTPTimeout())
     assert resp.status_code == 204
     assert dict(resp.headers) == {}
     assert resp.json == ""
@@ -57,10 +58,10 @@ async def test_query_http_204(patch):
     return_value=dummy_error_response,
 )
 @pytest.mark.asyncio
-async def test_query_http_422(patch):
+async def test_query_http_422(patch: Any):
     transport = AsyncHttpxTransport()
     with pytest.raises(HTTPError) as ctx:
-        await transport.request("POST", HTTPRequest("/", body="{}"), HTTPTimeout())
+        await transport(HTTPRequest("/", body="{}"), "POST", "cli", "/", HTTPTimeout())
 
     assert str(ctx.value) == "422 Unprocessable Entity"
     assert ctx.value.status_code == 422
@@ -69,13 +70,13 @@ async def test_query_http_422(patch):
 
 @mock.patch(
     "httpx._client.AsyncClient.request",
-    side_effect=lambda *args, **kwargs: dummy_query_timeout(),
+    side_effect=lambda *args, **kwargs: dummy_query_timeout(),  # type: ignore
 )
 @pytest.mark.asyncio
-async def test_query_http_timeout(patch):
+async def test_query_http_timeout(patch: Any):
     transport = AsyncHttpxTransport()
     with pytest.raises(TimeoutError) as ctx:
-        await transport.request("DELETE", HTTPRequest("/slow"), HTTPTimeout())
+        await transport(HTTPRequest("/slow"), "DELETE", "cli", "/", HTTPTimeout())
     assert str(ctx.value) == "TimeoutException while calling DELETE /slow"
 
 
@@ -84,10 +85,10 @@ async def test_query_http_timeout(patch):
     return_value=dummy_error_500_response,
 )
 @pytest.mark.asyncio
-async def test_query_http_no_json(patch):
+async def test_query_http_no_json(patch: Any):
     transport = AsyncHttpxTransport()
     with pytest.raises(HTTPError) as ctx:
-        await transport.request("POST", HTTPRequest("/", body="{}"), HTTPTimeout())
+        await transport(HTTPRequest("/", body="{}"), "POST", "cli", "/", HTTPTimeout())
 
     assert str(ctx.value) == "500 Internal Server Error"
     assert ctx.value.status_code == 500

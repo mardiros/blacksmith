@@ -1,19 +1,12 @@
-import abc
 from typing import Optional
 
-from blacksmith.domain.model import HTTPRequest, HTTPResponse, HTTPTimeout
-from blacksmith.typing import HttpMethod, Proxies
+from blacksmith.domain.typing import SyncMiddleware
+from blacksmith.typing import Proxies
 
 
-class SyncAbstractTransport(abc.ABC):
+class SyncAbstractTransport(SyncMiddleware):
     def __init__(
         self, verify_certificate: bool = True, proxies: Optional[Proxies] = None
     ):
         self.verify_certificate = verify_certificate
         self.proxies = proxies
-
-    @abc.abstractmethod
-    def request(
-        self, method: HttpMethod, request: HTTPRequest, timeout: HTTPTimeout
-    ) -> HTTPResponse:
-        """Process the HTTP Get request."""
