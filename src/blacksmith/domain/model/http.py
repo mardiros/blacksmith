@@ -2,7 +2,7 @@ import re
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Mapping, Optional, Union, cast
 
-from blacksmith.typing import HttpMethod, Json, Url
+from blacksmith.typing import HTTPMethod, Json, Url
 
 simpletypes = Union[str, int, float, bool]
 Links = Dict[Optional[str], Dict[str, str]]
@@ -34,7 +34,7 @@ class HTTPRequest:
     :class:`blacksmith.domain.model.params.Request` schema.
     """
 
-    method: HttpMethod
+    method: HTTPMethod
     url_pattern: Url
     # the property match with the "location" of feaut
     path: Dict[str, simpletypes] = field(default_factory=dict)

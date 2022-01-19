@@ -2,7 +2,7 @@ from typing import Any, Type
 
 from blacksmith.typing import (
     ClientName,
-    HttpMethod,
+    HTTPMethod,
     Json,
     Path,
     ResourceName,
@@ -48,7 +48,7 @@ class UnregisteredRouteException(RuntimeError):
     """Raised when an unregistered service is beeing requested."""
 
     def __init__(
-        self, route: HttpMethod, resource: ResourceName, client: ClientName
+        self, route: HTTPMethod, resource: ResourceName, client: ClientName
     ) -> None:
         super().__init__(
             f"Unregistered route '{route}' in resource '{resource}' in "
@@ -60,7 +60,7 @@ class NoContractException(RuntimeError):
     """Raised when an unregistered service is beeing requested."""
 
     def __init__(
-        self, method: HttpMethod, resource: ResourceName, client: ClientName
+        self, method: HTTPMethod, resource: ResourceName, client: ClientName
     ) -> None:
         super().__init__(
             f"Unregistered route '{method}' in resource '{resource}' in "
@@ -72,7 +72,7 @@ class NoResponseSchemaException(RuntimeError):
     """Raised when an unregistered service is beeing requested."""
 
     def __init__(
-        self, method: HttpMethod, path: Path, resource: ResourceName, client: ClientName
+        self, method: HTTPMethod, path: Path, resource: ResourceName, client: ClientName
     ) -> None:
         super().__init__(
             f"No response schema in route '{method} {path}' in resource'{resource}' "
@@ -84,7 +84,7 @@ class WrongRequestTypeException(TypeError):
     def __init__(
         self,
         type: Type[Any],
-        route: HttpMethod,
+        route: HTTPMethod,
         resource: ResourceName,
         client: ClientName,
     ) -> None:

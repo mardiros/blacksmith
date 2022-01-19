@@ -22,7 +22,7 @@ from blacksmith.domain.model.params import (
 from blacksmith.domain.registry import ApiRoutes, HttpCollection, HttpResource
 from blacksmith.domain.typing import AsyncMiddleware
 from blacksmith.middleware._async.base import AsyncHTTPMiddleware
-from blacksmith.typing import ClientName, HttpMethod, Path, ResourceName, Url
+from blacksmith.typing import ClientName, HTTPMethod, Path, ResourceName, Url
 
 from .base import AsyncAbstractTransport
 
@@ -73,7 +73,7 @@ class AsyncRouteProxy(Generic[TCollectionResponse, TResponse]):
 
     def _prepare_request(
         self,
-        method: HttpMethod,
+        method: HTTPMethod,
         params: Union[Optional[Request], Dict[Any, Any]],
         resource: Optional[HttpResource],
     ) -> Tuple[Path, HTTPRequest, Optional[Type[Response]]]:
@@ -101,7 +101,7 @@ class AsyncRouteProxy(Generic[TCollectionResponse, TResponse]):
         self,
         response: HTTPResponse,
         response_schema: Optional[Type[Response]],
-        method: HttpMethod,
+        method: HTTPMethod,
         path: Path,
     ) -> ResponseBox[TResponse]:
         return ResponseBox[TResponse](
@@ -136,7 +136,7 @@ class AsyncRouteProxy(Generic[TCollectionResponse, TResponse]):
 
     async def _yield_collection_request(
         self,
-        method: HttpMethod,
+        method: HTTPMethod,
         params: Union[Optional[Request], Dict[Any, Any]],
         timeout: HTTPTimeout,
         collection: HttpCollection,
@@ -149,7 +149,7 @@ class AsyncRouteProxy(Generic[TCollectionResponse, TResponse]):
 
     async def _collection_request(
         self,
-        method: HttpMethod,
+        method: HTTPMethod,
         params: Union[Request, Dict[Any, Any]],
         timeout: HTTPTimeout,
     ) -> ResponseBox[TResponse]:
@@ -161,7 +161,7 @@ class AsyncRouteProxy(Generic[TCollectionResponse, TResponse]):
 
     async def _request(
         self,
-        method: HttpMethod,
+        method: HTTPMethod,
         params: Union[Request, Dict[Any, Any]],
         timeout: HTTPTimeout,
     ) -> ResponseBox[TResponse]:

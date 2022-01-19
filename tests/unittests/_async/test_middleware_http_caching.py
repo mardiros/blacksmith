@@ -12,7 +12,7 @@ from blacksmith.middleware._async.http_caching import (
     get_vary_header_split,
     int_or_0,
 )
-from blacksmith.typing import HttpMethod
+from blacksmith.typing import HTTPMethod
 
 
 @pytest.mark.parametrize("params", [("0", 0), ("42", 42), ("2.5", 0), ("xxx", 0)])
@@ -73,7 +73,7 @@ def test_get_vary_header_split(params: Tuple[HTTPResponse, List[str]]):
         ("OPTIONS", False),
     ],
 )
-def test_policy_handle_request(params: Tuple[HttpMethod, bool]):
+def test_policy_handle_request(params: Tuple[HTTPMethod, bool]):
     method, expected = params
     policy = CacheControlPolicy("$")
     req = HTTPRequest(method, "/")
