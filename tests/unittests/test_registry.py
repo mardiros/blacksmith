@@ -33,6 +33,8 @@ def test_default_registry():
         assert set(default_registry.clients["dummies_api"].keys()) == {"dummies"}
 
         api = default_registry.clients["dummies_api"]
+        assert api["dummies"].resource is not None
+        assert api["dummies"].resource.contract is not None
         assert api["dummies"].resource.path == "/dummies/{name}"
         assert set(api["dummies"].resource.contract.keys()) == {"GET"}
         assert api["dummies"].resource.contract["GET"][0] == DummyRequest
@@ -70,6 +72,8 @@ def test_registry_without_collection():
     assert set(registry.clients["dummies_api"].keys()) == {"dummies"}
 
     api = registry.clients["dummies_api"]
+    assert api["dummies"].resource is not None
+    assert api["dummies"].resource.contract is not None
     assert api["dummies"].resource.path == "/dummies/{name}"
     assert set(api["dummies"].resource.contract.keys()) == {"GET"}
     assert api["dummies"].resource.contract["GET"][0] == DummyRequest
@@ -99,6 +103,8 @@ def test_registry_without_response():
     assert set(registry.clients["dummies_api"].keys()) == {"dummies"}
 
     api = registry.clients["dummies_api"]
+    assert api["dummies"].resource is not None
+    assert api["dummies"].resource.contract is not None
     assert api["dummies"].resource.path == "/dummies/{name}"
     assert set(api["dummies"].resource.contract.keys()) == {"GET"}
     assert api["dummies"].resource.contract["GET"][0] == DummyRequest
@@ -130,6 +136,8 @@ def test_registry_only_collection():
     assert set(registry.clients["dummies_api"].keys()) == {"dummies"}
 
     api = registry.clients["dummies_api"]
+    assert api["dummies"].collection is not None
+    assert api["dummies"].collection.contract is not None
     assert api["dummies"].collection.path == "/dummies"
     assert set(api["dummies"].collection.contract.keys()) == {"GET"}
     assert api["dummies"].collection.contract["GET"][0] == DummyRequest
@@ -171,6 +179,8 @@ def test_registry_complete():
     assert set(registry.clients["dummies_api"].keys()) == {"dummies"}
 
     api = registry.clients["dummies_api"]
+    assert api["dummies"].collection is not None
+    assert api["dummies"].collection.contract is not None
     assert api["dummies"].collection.path == "/dummies"
     assert set(api["dummies"].collection.contract.keys()) == {"GET", "POST"}
     assert api["dummies"].collection.contract["GET"][0] == Request
@@ -178,6 +188,8 @@ def test_registry_complete():
     assert api["dummies"].collection.contract["POST"][0] == CreateDummyRequest
     assert api["dummies"].collection.contract["POST"][1] is None
 
+    assert api["dummies"].resource is not None
+    assert api["dummies"].resource.contract is not None
     assert api["dummies"].resource.path == "/dummies/{name}"
     assert set(api["dummies"].resource.contract.keys()) == {"GET", "DELETE"}
     assert api["dummies"].resource.contract["GET"][0] == DummyRequest
