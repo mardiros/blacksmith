@@ -49,8 +49,8 @@ from .sd._async.adapters.static import AsyncStaticDiscovery
 from .sd._sync.adapters.consul import SyncConsulDiscovery
 from .sd._sync.adapters.router import SyncRouterDiscovery
 from .sd._sync.adapters.static import SyncStaticDiscovery
-from .service._async.client import AsyncClientFactory
-from .service._sync.client import SyncClientFactory
+from .service._async.client import AsyncClient, AsyncClientFactory
+from .service._sync.client import SyncClient, SyncClientFactory
 
 __all__ = [
     # Ordered for the doc
@@ -75,6 +75,8 @@ __all__ = [
     # Factories
     "AsyncClientFactory",
     "SyncClientFactory",
+    "AsyncClient",
+    "SyncClient",
     # Service Discovery
     "AsyncConsulDiscovery",
     "SyncConsulDiscovery",
