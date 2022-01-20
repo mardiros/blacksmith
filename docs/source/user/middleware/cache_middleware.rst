@@ -28,13 +28,13 @@ Or using poetry
 Usage using the async api
 -------------------------
 
-.. literalinclude:: caching_middleware.py
+.. literalinclude:: cache_middleware.py
 
 
 Usage using the sync api
 ------------------------
 
-.. literalinclude:: caching_middleware_sync.py
+.. literalinclude:: cache_middleware_sync.py
 
 
 

@@ -1,7 +1,7 @@
 from .auth import AsyncHTTPAuthorization, AsyncHTTPBearerAuthorization
 from .base import AsyncHTTPAddHeadersMiddleware, AsyncHTTPMiddleware, AsyncMiddleware
 from .circuit_breaker import AsyncCircuitBreaker
-from .http_caching import AsyncHTTPCachingMiddleware
+from .http_cache import AsyncHTTPCacheMiddleware
 from .prometheus import AsyncPrometheusMetrics
 from .zipkin import AsyncZipkinMiddleware
 
@@ -10,7 +10,7 @@ __all__ = [
     "AsyncHTTPAddHeadersMiddleware",
     "AsyncHTTPAuthorization",
     "AsyncHTTPBearerAuthorization",
-    "AsyncHTTPCachingMiddleware",
+    "AsyncHTTPCacheMiddleware",
     "AsyncHTTPMiddleware",
     "AsyncMiddleware",
     "AsyncPrometheusMetrics",

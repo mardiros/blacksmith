@@ -4,10 +4,10 @@ import pytest
 
 from blacksmith.domain.model.http import HTTPRequest, HTTPResponse, HTTPTimeout
 from blacksmith.domain.model.middleware.http_cache import CacheControlPolicy
-from blacksmith.domain.typing import AsyncMiddleware
-from blacksmith.middleware._async.http_caching import (
-    AsyncAbstractCache,
-    AsyncHTTPCachingMiddleware,
+from blacksmith.domain.typing import SyncMiddleware
+from blacksmith.middleware._sync.http_cache import (
+    SyncAbstractCache,
+    SyncHTTPCacheMiddleware,
 )
 
 
@@ -52,11 +52,11 @@ from blacksmith.middleware._async.http_caching import (
     ],
 )
 @pytest.mark.asyncio
-async def test_get_from_cache(
-    params: Dict[str, Any], fake_http_middleware_cache_with_data: AsyncAbstractCache
+def test_get_from_cache(
+    params: Dict[str, Any], fake_http_middleware_cache_with_data: SyncAbstractCache
 ):
-    middleware = AsyncHTTPCachingMiddleware(fake_http_middleware_cache_with_data)
-    resp_from_cache = await middleware.get_from_cache(
+    middleware = SyncHTTPCacheMiddleware(fake_http_middleware_cache_with_data)
+    resp_from_cache = middleware.get_from_cache(
         "dummies", params["path"], params["request"]
     )
     assert resp_from_cache == params["expected_response_from_cache"]
@@ -141,20 +141,20 @@ async def test_get_from_cache(
     ],
 )
 @pytest.mark.asyncio
-async def test_http_cache_response(
-    params: Dict[str, Any], fake_http_middleware_cache: AsyncAbstractCache
+def test_http_cache_response(
+    params: Dict[str, Any], fake_http_middleware_cache: SyncAbstractCache
 ):
-    middleware = AsyncHTTPCachingMiddleware(fake_http_middleware_cache)
+    middleware = SyncHTTPCacheMiddleware(fake_http_middleware_cache)
 
-    resp_from_cache = await middleware.get_from_cache(
+    resp_from_cache = middleware.get_from_cache(
         "dummies", params["path"], params["request"]
     )
-    await middleware.cache_response(
+    middleware.cache_response(
         "dummies", params["path"], params["request"], params["response"]
     )
     assert fake_http_middleware_cache.val == params["expected_cache"]  # type: ignore
 
-    resp_from_cache = await middleware.get_from_cache(
+    resp_from_cache = middleware.get_from_cache(
         "dummies", params["path"], params["request"]
     )
     if params["expected_cache"]:
@@ -164,16 +164,16 @@ async def test_http_cache_response(
 
 
 @pytest.mark.asyncio
-async def test_cache_middleware(
-    cachable_response: AsyncMiddleware,
-    boom_middleware: AsyncMiddleware,
-    fake_http_middleware_cache: AsyncAbstractCache,
+def test_cache_middleware(
+    cachable_response: SyncMiddleware,
+    boom_middleware: SyncMiddleware,
+    fake_http_middleware_cache: SyncAbstractCache,
     dummy_http_request: HTTPRequest,
     dummy_timeout: HTTPTimeout,
 ):
-    caching = AsyncHTTPCachingMiddleware(fake_http_middleware_cache)
+    caching = SyncHTTPCacheMiddleware(fake_http_middleware_cache)
     next = caching(cachable_response)
-    resp = await next(dummy_http_request, "dummy", "/dummies/{name}", dummy_timeout)
+    resp = next(dummy_http_request, "dummy", "/dummies/{name}", dummy_timeout)
     assert resp == HTTPResponse(
         200, {"cache-control": "max-age=42, public"}, json="Cache Me"
     )
@@ -189,16 +189,16 @@ async def test_cache_middleware(
 
     # get from the cache, not from the boom which raises
     next = caching(boom_middleware)
-    resp = await next(dummy_http_request, "dummy", "/dummies/{name}", dummy_timeout)
+    resp = next(dummy_http_request, "dummy", "/dummies/{name}", dummy_timeout)
     assert resp == HTTPResponse(
         200, {"cache-control": "max-age=42, public"}, json="Cache Me"
     )
 
 
 @pytest.mark.asyncio
-async def test_cache_middleware_policy_handle(
-    cachable_response: AsyncMiddleware,
-    fake_http_middleware_cache: AsyncAbstractCache,
+def test_cache_middleware_policy_handle(
+    cachable_response: SyncMiddleware,
+    fake_http_middleware_cache: SyncAbstractCache,
     dummy_http_request: HTTPRequest,
     dummy_timeout: HTTPTimeout,
 ):
@@ -212,9 +212,9 @@ async def test_cache_middleware_policy_handle(
             return False
 
     tracker = TrackHandleCacheControlPolicy()
-    caching = AsyncHTTPCachingMiddleware(fake_http_middleware_cache, policy=tracker)
+    caching = SyncHTTPCacheMiddleware(fake_http_middleware_cache, policy=tracker)
     next = caching(cachable_response)
-    resp = await next(dummy_http_request, "dummy", "/dummies/{name}", dummy_timeout)
+    resp = next(dummy_http_request, "dummy", "/dummies/{name}", dummy_timeout)
     assert tracker.handle_request_called is True
     assert fake_http_middleware_cache.val == {}  # type: ignore
     assert resp == HTTPResponse(
@@ -223,7 +223,7 @@ async def test_cache_middleware_policy_handle(
 
 
 @pytest.mark.asyncio
-async def test_circuit_breaker_initialize(fake_http_middleware_cache: Any):
-    caching = AsyncHTTPCachingMiddleware(fake_http_middleware_cache)
-    await caching.initialize()
+def test_circuit_breaker_initialize(fake_http_middleware_cache: Any):
+    caching = SyncHTTPCacheMiddleware(fake_http_middleware_cache)
+    caching.initialize()
     assert fake_http_middleware_cache.initialize_called is True

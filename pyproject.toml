@@ -27,7 +27,7 @@ typing-extensions = "^4.0.1"
 purgatory-circuitbreaker = "^0.7.2"
 
 [tool.poetry.extras]
-caching = ["aioredis"]
+http_cache = ["aioredis"]
 prometheus = ["prometheus-client"]
 
 [tool.poetry.dev-dependencies]

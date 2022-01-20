@@ -7,7 +7,7 @@ from blacksmith.domain.exceptions import HTTPError
 from blacksmith.domain.model import HTTPRequest, HTTPResponse, HTTPTimeout
 from blacksmith.middleware._async.auth import AsyncHTTPAuthorization
 from blacksmith.middleware._async.base import AsyncHTTPAddHeadersMiddleware
-from blacksmith.middleware._async.http_caching import AsyncAbstractCache
+from blacksmith.middleware._async.http_cache import AsyncAbstractCache
 from blacksmith.sd._async.adapters.consul import AsyncConsulDiscovery, _registry
 from blacksmith.sd._async.adapters.router import AsyncRouterDiscovery
 from blacksmith.sd._async.adapters.static import AsyncStaticDiscovery, Endpoints

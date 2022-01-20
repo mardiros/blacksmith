@@ -14,7 +14,7 @@ import blacksmith
 from blacksmith import (
     AsyncClientFactory,
     AsyncConsulDiscovery,
-    AsyncHTTPCachingMiddleware,
+    AsyncHTTPCacheMiddleware,
 )
 
 app = Starlette(debug=True)
@@ -22,7 +22,7 @@ app = Starlette(debug=True)
 cache = aioredis.from_url("redis://redis/0")
 blacksmith.scan("notif.resources")
 sd = AsyncConsulDiscovery()
-cli = AsyncClientFactory(sd).add_middleware(AsyncHTTPCachingMiddleware(cache))
+cli = AsyncClientFactory(sd).add_middleware(AsyncHTTPCacheMiddleware(cache))
 
 
 smtp_sd = AsyncConsulDiscovery(unversioned_service_url_fmt="{address} {port}")
