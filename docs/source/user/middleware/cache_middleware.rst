@@ -1,5 +1,5 @@
-Caching Middleware
-==================
+HTTP Cache Middleware
+=====================
 
 Sometime, for performance reason, caching avoid lots of compute made in
 services. Blacksmith comes with a middleware based on redis and that cache

@@ -19,8 +19,8 @@ Synchronous code will use the :class:`blacksmith.SyncClientFactory` instead.
 
 .. literalinclude:: instanciating_client_01.py
 
-In the example above, we consume the previously registered resource `item`,
-from the service "api" at version `None`.
+In the example above, we consume the previously registered resource ``item``,
+from the service ``api`` at version ``None``.
 
 The ``api.item`` property has methods **collection_get**, **collection_post**,
 **collection_put**, **collection_patch**, **collection_delete**,

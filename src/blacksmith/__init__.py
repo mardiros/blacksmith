@@ -27,6 +27,7 @@ from .domain.model import (
 from .domain.registry import register
 from .domain.scanner import scan
 from .middleware._async import (
+    AsyncAbstractCache,
     AsyncCircuitBreaker,
     AsyncHTTPAddHeadersMiddleware,
     AsyncHTTPAuthorization,
@@ -109,6 +110,7 @@ __all__ = [
     "AbstractSerializer",
     "CacheControlPolicy",
     "JsonSerializer",
+    "AsyncAbstractCache",
     "AsyncHTTPCacheMiddleware",
     "SyncHTTPCacheMiddleware",
     "AbtractTraceContext",

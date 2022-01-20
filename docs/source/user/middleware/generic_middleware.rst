@@ -3,19 +3,23 @@
 Generic Middleware
 ==================
 
-`PrometheusMetrics`, `CircuitBreaker`, `HTTPAddHeadersMiddleware` are 
-implementation of the `HTTPMiddleware` that can be used to create own
-middleware.
+:class:`blacksmith.PrometheusMetrics`, :class:`blacksmith.CircuitBreaker`,
+:class:`blacksmith.HTTPAddHeadersMiddleware` are 
+implementation of the :class:`blacksmith.HTTPMiddleware` that can be used to
+create new middlewares.
 
-The middleware pattern is very common on http framework, in blacksmith, this
-is the same concept, the middleware is injected after the serialization
-of the request, before sending the http query, to intercept request
-and response.
+.. note::
+
+   The middleware pattern is very common on http framework, in blacksmith,
+   this is the same concept.
+   
+   The middleware is injected after the serialization of the request, before
+   sending the http query, to intercept request and response.
 
 Example of middleware:
 ----------------------
 
-.. literalinclude:: generic_middleware.py
+.. literalinclude:: generic_middleware_async.py
 
 
 .. note::

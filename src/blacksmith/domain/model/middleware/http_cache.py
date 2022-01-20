@@ -11,7 +11,7 @@ from blacksmith.typing import ClientName, Path
 
 
 class AbstractCachePolicy(abc.ABC):
-    """Caching Policy"""
+    """Define the Cache Policy"""
 
     @abc.abstractmethod
     def handle_request(

@@ -20,8 +20,11 @@ Request parameters
 The first things to do is to create models that represent every routes.
 
 To represent a request parameter, the base class :class:`blacksmith.Request`
-has to be overridden, with special fields :class:`blacksmith.HeaderField',
-:class:`PathInfoField', :class:`PostBodyField` or :class:`QueryStringField`.
+has to be overridden, with special fields 
+:class:`blacksmith.HeaderField`,
+:class:`blacksmith.PathInfoField`,
+:class:`blacksmith.PostBodyField` or 
+:class:`blacksmith.QueryStringField`.
 
 For instance:
 
