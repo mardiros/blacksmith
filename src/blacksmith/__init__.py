@@ -8,11 +8,15 @@ except pkg_resources.DistributionNotFound:
 
 from .domain.exceptions import HTTPError, HTTPTimeoutError
 from .domain.model import (
+    AbstractCachePolicy,
     AbstractCollectionParser,
+    AbstractSerializer,
     AbtractTraceContext,
+    CacheControlPolicy,
     CollectionIterator,
     HeaderField,
     HTTPTimeout,
+    JsonSerializer,
     PathInfoField,
     PostBodyField,
     QueryStringField,
@@ -101,6 +105,10 @@ __all__ = [
     "SyncCircuitBreaker",
     "AsyncPrometheusMetrics",
     "SyncPrometheusMetrics",
+    "AbstractCachePolicy",
+    "AbstractSerializer",
+    "CacheControlPolicy",
+    "JsonSerializer",
     "AsyncHTTPCacheMiddleware",
     "SyncHTTPCacheMiddleware",
     "AbtractTraceContext",
