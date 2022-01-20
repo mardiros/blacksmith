@@ -26,6 +26,6 @@ to add credentials per users.
    circuit_breaker_middleware
    prometheus_middleware
    zipkin_middleware
-   caching_middleware
+   cache_middleware
    authorization
    generic_middleware

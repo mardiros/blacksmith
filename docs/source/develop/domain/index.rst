@@ -9,3 +9,4 @@ Domain
    registry
    exceptions
    scanner
+   middleware/index

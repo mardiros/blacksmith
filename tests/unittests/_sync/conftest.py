@@ -7,7 +7,7 @@ from blacksmith.domain.exceptions import HTTPError
 from blacksmith.domain.model import HTTPRequest, HTTPResponse, HTTPTimeout
 from blacksmith.middleware._sync.auth import SyncHTTPAuthorization
 from blacksmith.middleware._sync.base import SyncHTTPAddHeadersMiddleware
-from blacksmith.middleware._sync.http_caching import SyncAbstractCache
+from blacksmith.middleware._sync.http_cache import SyncAbstractCache
 from blacksmith.sd._sync.adapters.consul import SyncConsulDiscovery, _registry
 from blacksmith.sd._sync.adapters.router import SyncRouterDiscovery
 from blacksmith.sd._sync.adapters.static import Endpoints, SyncStaticDiscovery

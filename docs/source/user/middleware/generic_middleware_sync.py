@@ -1,6 +1,6 @@
 from blacksmith import SyncHTTPMiddleware, SyncMiddleware
-from blacksmith.domain.model import HTTPRequest, HTTPResponse
-from blacksmith.typing import ClientName, HTTPMethod, Path
+from blacksmith.domain.model import HTTPRequest, HTTPResponse, HTTPTimeout
+from blacksmith.typing import ClientName, Path
 
 
 class SyncHTTPPrintMiddleware(SyncHTTPMiddleware):
@@ -8,10 +8,10 @@ class SyncHTTPPrintMiddleware(SyncHTTPMiddleware):
 
     def __call__(self, next: SyncMiddleware) -> SyncMiddleware:
         def handle(
-            req: HTTPRequest, method: HTTPMethod, client_name: ClientName, path: Path
+            req: HTTPRequest, client_name: ClientName, path: Path, timeout: HTTPTimeout
         ) -> HTTPResponse:
             print(f">>> {req}")
-            resp = next(req, method, client_name, path)
+            resp = next(req, client_name, path, timeout)
             print(f"<<< {resp}")
             return resp
 

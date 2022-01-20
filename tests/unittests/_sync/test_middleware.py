@@ -16,6 +16,7 @@ from purgatory.service._sync.circuitbreaker import SyncCircuitBreakerFactory
 from blacksmith import __version__
 from blacksmith.domain.exceptions import HTTPError
 from blacksmith.domain.model.http import HTTPRequest, HTTPResponse, HTTPTimeout
+from blacksmith.domain.model.middleware.prometheus import PrometheusMetrics
 from blacksmith.domain.typing import SyncMiddleware
 from blacksmith.middleware._sync.auth import SyncHTTPAuthorization
 from blacksmith.middleware._sync.base import (
@@ -114,8 +115,9 @@ def test_prom_metrics(
     dummy_timeout: HTTPTimeout,
 ):
     registry = CollectorRegistry()
-    metrics = SyncPrometheusMetrics(registry=registry)
-    next = metrics(slow_middleware)
+    metrics = PrometheusMetrics(registry=registry)
+    metrics_middleware = SyncPrometheusMetrics(metrics=metrics)
+    next = metrics_middleware(slow_middleware)
 
     val = registry.get_sample_value("blacksmith_info", labels={"version": __version__})
     assert val == 1.0
@@ -189,8 +191,9 @@ def test_prom_metrics_error(
     dummy_timeout: HTTPTimeout,
 ):
     registry = CollectorRegistry()
-    metrics = SyncPrometheusMetrics(registry=registry)
-    next = metrics(boom_middleware)
+    metrics = PrometheusMetrics(registry=registry)
+    metrics_middleware = SyncPrometheusMetrics(metrics=metrics)
+    next = metrics_middleware(boom_middleware)
 
     with pytest.raises(HTTPError):
         next(dummy_http_request, "dummy", "/dummies/{name}", dummy_timeout)
@@ -309,11 +312,11 @@ def test_circuit_breaker_prometheus_metrics(
     HALF_OPEN = 1.0
     CLOSED = 0.0
     registry = CollectorRegistry()
-    prom = SyncPrometheusMetrics(registry=registry)
+    metrics = PrometheusMetrics(registry=registry)
     cbreaker = SyncCircuitBreaker(
         threshold=2,
         ttl=0.100,
-        prometheus_metrics=prom,
+        prometheus_metrics=metrics,
     )
     echo_next = cbreaker(echo_middleware)
     invalid_next = cbreaker(invalid_middleware)

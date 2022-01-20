@@ -3,9 +3,9 @@ import aioredis
 from blacksmith import (
     AsyncClientFactory,
     AsyncConsulDiscovery,
-    AsyncHTTPCachingMiddleware,
+    AsyncHTTPCacheMiddleware,
 )
 
 cache = aioredis.from_url("redis://redis/0")
 sd = AsyncConsulDiscovery()
-cli = AsyncClientFactory(sd).add_middleware(AsyncHTTPCachingMiddleware(cache))
+cli = AsyncClientFactory(sd).add_middleware(AsyncHTTPCacheMiddleware(cache))

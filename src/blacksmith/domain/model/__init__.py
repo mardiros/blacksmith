@@ -1,4 +1,10 @@
 from .http import HTTPRequest, HTTPResponse, HTTPTimeout
+from .middleware.http_cache import (
+    AbstractCachePolicy,
+    AbstractSerializer,
+    CacheControlPolicy,
+    JsonSerializer,
+)
 from .params import (
     AbstractCollectionParser,
     CollectionIterator,
@@ -15,10 +21,6 @@ from .params import (
 from .tracing import AbtractTraceContext
 
 __all__ = [
-    "AbtractTraceContext",
-    "AbstractCollectionParser",
-    "CollectionIterator",
-    "CollectionParser",
     "HeaderField",
     "HTTPRequest",
     "HTTPResponse",
@@ -30,4 +32,12 @@ __all__ = [
     "Response",
     "ResponseBox",
     "TResponse",
+    "AbstractCollectionParser",
+    "CollectionParser",
+    "CollectionIterator",
+    "AbstractSerializer",
+    "JsonSerializer",
+    "AbstractCachePolicy",
+    "CacheControlPolicy",
+    "AbtractTraceContext",
 ]

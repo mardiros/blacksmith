@@ -8,11 +8,15 @@ except pkg_resources.DistributionNotFound:
 
 from .domain.exceptions import HTTPError, HTTPTimeoutError
 from .domain.model import (
+    AbstractCachePolicy,
     AbstractCollectionParser,
+    AbstractSerializer,
     AbtractTraceContext,
+    CacheControlPolicy,
     CollectionIterator,
     HeaderField,
     HTTPTimeout,
+    JsonSerializer,
     PathInfoField,
     PostBodyField,
     QueryStringField,
@@ -23,11 +27,12 @@ from .domain.model import (
 from .domain.registry import register
 from .domain.scanner import scan
 from .middleware._async import (
+    AsyncAbstractCache,
     AsyncCircuitBreaker,
     AsyncHTTPAddHeadersMiddleware,
     AsyncHTTPAuthorization,
     AsyncHTTPBearerAuthorization,
-    AsyncHTTPCachingMiddleware,
+    AsyncHTTPCacheMiddleware,
     AsyncHTTPMiddleware,
     AsyncMiddleware,
     AsyncPrometheusMetrics,
@@ -38,7 +43,7 @@ from .middleware._sync import (
     SyncHTTPAddHeadersMiddleware,
     SyncHTTPAuthorization,
     SyncHTTPBearerAuthorization,
-    SyncHTTPCachingMiddleware,
+    SyncHTTPCacheMiddleware,
     SyncHTTPMiddleware,
     SyncMiddleware,
     SyncPrometheusMetrics,
@@ -101,8 +106,13 @@ __all__ = [
     "SyncCircuitBreaker",
     "AsyncPrometheusMetrics",
     "SyncPrometheusMetrics",
-    "AsyncHTTPCachingMiddleware",
-    "SyncHTTPCachingMiddleware",
+    "AbstractCachePolicy",
+    "AbstractSerializer",
+    "CacheControlPolicy",
+    "JsonSerializer",
+    "AsyncAbstractCache",
+    "AsyncHTTPCacheMiddleware",
+    "SyncHTTPCacheMiddleware",
     "AbtractTraceContext",
     "AsyncZipkinMiddleware",
 ]
