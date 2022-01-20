@@ -6,7 +6,7 @@ from typing import Optional, Type
 
 from blacksmith.domain.model.http import HTTPRequest, HTTPResponse, HTTPTimeout
 from blacksmith.domain.model.middleware.http_cache import (
-    AbstractCachingPolicy,
+    AbstractCachePolicy,
     AbstractSerializer,
     CacheControlPolicy,
     JsonSerializer,
@@ -48,7 +48,7 @@ class SyncHTTPCacheMiddleware(SyncHTTPMiddleware):
     def __init__(
         self,
         cache: SyncAbstractCache,
-        policy: AbstractCachingPolicy = CacheControlPolicy(),
+        policy: AbstractCachePolicy = CacheControlPolicy(),
         serializer: Type[AbstractSerializer] = JsonSerializer,
     ) -> None:
         self._cache = cache

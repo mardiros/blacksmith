@@ -10,7 +10,7 @@ from blacksmith.domain.model.http import HTTPRequest, HTTPResponse
 from blacksmith.typing import ClientName, Path
 
 
-class AbstractCachingPolicy(abc.ABC):
+class AbstractCachePolicy(abc.ABC):
     """Caching Policy"""
 
     @abc.abstractmethod
@@ -98,7 +98,7 @@ def get_vary_header_split(response: HTTPResponse) -> List[str]:
     return fields
 
 
-class CacheControlPolicy(AbstractCachingPolicy):
+class CacheControlPolicy(AbstractCachePolicy):
     """
     Initialize the caching using `Cache-Control` http headers.
     Also consume the `Vary` response header to cache response per
