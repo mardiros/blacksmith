@@ -8,7 +8,6 @@ from purgatory import AsyncRedisUnitOfWork
 from starlette.applications import Starlette
 from starlette.responses import JSONResponse, Response
 
-import blacksmith
 from blacksmith import (
     AsyncCircuitBreaker,
     AsyncClientFactory,
@@ -18,7 +17,6 @@ from blacksmith import (
 
 app = Starlette(debug=True)
 
-blacksmith.scan("notif.resources")
 sd = AsyncConsulDiscovery()
 prom = AsyncPrometheusMetrics()
 cli = (

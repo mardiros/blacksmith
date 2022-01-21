@@ -40,6 +40,9 @@ Call the service
       -X POST http://notif.localhost/v1/notification
 
 
+After doing many 500 errors, the circuit will be open, then sending message
+to naruto will also raise 500 because of the circuit.
+
 Check result
 ------------
 
@@ -49,3 +52,6 @@ to view the email has been properly received.
 The api calls count are stored in the prometheus after scrapping:
 
 http://prometheus.localhost/graph?g0.expr=blacksmith_request_latency_seconds_count
+
+
+.. image:: ./screenshot.png

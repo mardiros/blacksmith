@@ -5,12 +5,11 @@ name = "notif"
 version = "0.1.0"
 
 [tool.poetry.dependencies]
-blacksmith = {version = "^0.5.0", extras = ["prometheus"]}
+blacksmith = {version = "^0.12.1", extras = ["prometheus"]}
 python = "^3.9"
 starlette = "^0.17.0"
 aioredis = "^2.0.1"
 hypercorn = "^0.13.2"
-purgatory-circuitbreaker = "^0.5.0"
 
 [build-system]
 build-backend = "poetry.core.masonry.api"

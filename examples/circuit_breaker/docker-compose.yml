@@ -83,9 +83,9 @@ services:
       - "SERVICE_NAME=user-v1"
     networks:
       - "internal"
-    volumes:
-      - "./user:/srv/user"
-      - "../../src/blacksmith:/home/notif/.cache/pypoetry/virtualenvs/notif-E5XGZiq1-py3.10/lib/python3.10/site-packages/blacksmith"
+    # volumes:
+    #   - "./user:/srv/user"
+    #   - "../../src/blacksmith:/home/notif/.cache/pypoetry/virtualenvs/notif-E5XGZiq1-py3.10/lib/python3.10/site-packages/blacksmith"
 
   redis:
     image: "redis"
@@ -103,9 +103,9 @@ services:
       - "SERVICE_NAME=notif-v1"
     networks:
       - "internal"
-    volumes:
-      - "./notif:/srv/notif"
-      - "../../src/blacksmith:/home/notif/.cache/pypoetry/virtualenvs/notif-E5XGZiq1-py3.10/lib/python3.10/site-packages/blacksmith"
+    # volumes:
+    #   - "./notif:/srv/notif"
+    #   - "../../src/blacksmith:/home/notif/.cache/pypoetry/virtualenvs/notif-E5XGZiq1-py3.10/lib/python3.10/site-packages/blacksmith"
 
   mailhog:
     image: mailhog/mailhog
