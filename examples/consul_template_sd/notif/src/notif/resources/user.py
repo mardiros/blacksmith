@@ -1,4 +1,4 @@
-from blacksmith import PathInfoField, register, Request, Response
+from blacksmith import PathInfoField, Request, Response, register
 
 
 class UserRequest(Request):

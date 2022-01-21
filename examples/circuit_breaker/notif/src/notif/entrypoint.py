@@ -1,10 +1,10 @@
 import asyncio
 
-import blacksmith
 from hypercorn.asyncio import serve
 from hypercorn.config import Config
-
 from notif.views import app, cli
+
+import blacksmith
 
 
 async def main():

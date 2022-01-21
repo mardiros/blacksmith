@@ -1,5 +1,4 @@
-import blacksmith
-from blacksmith import PathInfoField, Request, Response
+from blacksmith import PathInfoField, Request, Response, register
 
 
 class UserRequest(Request):
@@ -12,7 +11,7 @@ class User(Response):
     lastname: str
 
 
-blacksmith.register(
+register(
     client_name="api_user",
     resource="users",
     service="user",

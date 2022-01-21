@@ -1,8 +1,7 @@
 import uvicorn
-import blacksmith
-
 from notif.views import app
 
+import blacksmith
 
 if __name__ == "__main__":
     blacksmith.scan("notif.resources")
