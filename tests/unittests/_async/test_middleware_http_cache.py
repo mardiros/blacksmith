@@ -71,12 +71,14 @@ async def test_get_from_cache(
             "path": "/",
             "request": HTTPRequest("GET", "/", {}, {}),
             "response": HTTPResponse(200, {}, ""),
+            "expected_cachable": False,
             "expected_cache": {},
         },
         {
             "path": "/",
             "request": HTTPRequest("GET", "/", {}, {}),
             "response": HTTPResponse(200, {"cache-control": "max-age=42, public"}, ""),
+            "expected_cachable": True,
             "expected_cache": {
                 "dummies$/": (42, "[]"),
                 "dummies$/$": (
@@ -94,6 +96,7 @@ async def test_get_from_cache(
                 {"cache-control": "max-age=42, public", "vary": "X-Country-Code"},
                 "En Francais",
             ),
+            "expected_cachable": True,
             "expected_cache": {
                 "dummies$/": (42, '["x-country-code"]'),
                 "dummies$/$x-country-code=FR": (
@@ -112,6 +115,7 @@ async def test_get_from_cache(
                 {"cache-control": "max-age=42, public", "vary": "X-Country-Code"},
                 "missing_header",
             ),
+            "expected_cachable": True,
             "expected_cache": {
                 "dummies$/": (42, '["x-country-code"]'),
                 "dummies$/$x-country-code=": (
@@ -130,6 +134,7 @@ async def test_get_from_cache(
                 {"cache-control": "max-age=42, public", "vary": "a, b"},
                 "many_headers",
             ),
+            "expected_cachable": True,
             "expected_cache": {
                 "dummies$/": (42, '["a", "b"]'),
                 "dummies$/$a=A|b=B": (
@@ -151,9 +156,10 @@ async def test_http_cache_response(
     resp_from_cache = await middleware.get_from_cache(
         "dummies", params["path"], params["request"]
     )
-    await middleware.cache_response(
+    resp = await middleware.cache_response(
         "dummies", params["path"], params["request"], params["response"]
     )
+    assert resp is params["expected_cachable"]
     assert fake_http_middleware_cache.val == params["expected_cache"]  # type: ignore
 
     resp_from_cache = await middleware.get_from_cache(
@@ -281,6 +287,50 @@ async def test_cache_middleware_metrics_helpers(
                 "path": "/",
                 "status_code": "200",
                 "le": "0.08",
+            },
+        )
+        == 1
+    )
+
+
+@pytest.mark.asyncio
+async def test_cache_middleware_metrics(
+    cachable_response: AsyncMiddleware,
+    uncachable_response: AsyncMiddleware,
+    fake_http_middleware_cache: AsyncAbstractCache,
+    dummy_http_request: HTTPRequest,
+    dummy_timeout: HTTPTimeout,
+    prometheus_registry: CollectorRegistry,
+    metrics: PrometheusMetrics,
+):
+    caching = AsyncHTTPCacheMiddleware(fake_http_middleware_cache, metrics)
+    next = caching(uncachable_response)
+    await next(dummy_http_request, "dummy", "/dummies/{name}", dummy_timeout)
+    assert (
+        prometheus_registry.get_sample_value(
+            "blacksmith_cache_miss_total",
+            labels={
+                "client_name": "dummy",
+                "cachable_state": "uncachable_response",
+                "method": "GET",
+                "path": "/dummies/{name}",
+                "status_code": "200",
+            },
+        )
+        == 1
+    )
+
+    next = caching(cachable_response)
+    await next(dummy_http_request, "dummy", "/dummies/{name}", dummy_timeout)
+    assert (
+        prometheus_registry.get_sample_value(
+            "blacksmith_cache_miss_total",
+            labels={
+                "client_name": "dummy",
+                "cachable_state": "cached",
+                "method": "GET",
+                "path": "/dummies/{name}",
+                "status_code": "200",
             },
         )
         == 1

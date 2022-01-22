@@ -120,15 +120,32 @@ class AsyncHTTPCacheMiddleware(AsyncHTTPMiddleware):
             path: Path,
             timeout: HTTPTimeout,
         ) -> HTTPResponse:
-
+            start = time.perf_counter()
             if not self._policy.handle_request(req, client_name, path):
-                return await next(req, client_name, path, timeout)
-
-            resp = await self.get_from_cache(client_name, path, req)
-            if resp:
+                resp = await next(req, client_name, path, timeout)
+                self.inc_blacksmith_cache_miss(
+                    client_name,
+                    "uncachable_request",
+                    req.method,
+                    path,
+                    resp.status_code,
+                )
                 return resp
+
+            resp_from_cache = await self.get_from_cache(client_name, path, req)
+            if resp_from_cache:
+                latency = time.perf_counter() - start
+                self.observe_blacksmith_cache_hit(
+                    client_name, req.method, path, resp_from_cache.status_code, latency
+                )
+                return resp_from_cache
+
             resp = await next(req, client_name, path, timeout)
-            await self.cache_response(client_name, path, req, resp)
+            is_cached = await self.cache_response(client_name, path, req, resp)
+            state: CachableState = "cached" if is_cached else "uncachable_response"
+            self.inc_blacksmith_cache_miss(
+                client_name, state, req.method, path, resp.status_code
+            )
             return resp
 
         return handle
