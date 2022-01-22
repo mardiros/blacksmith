@@ -47,3 +47,5 @@ Check result
 
 The mailbox is available in a web application http://mailhog.localhost/
 to view the email has been properly received.
+
+.. image:: ./screenshot.png

@@ -19,7 +19,7 @@ from blacksmith.domain.model.middleware.prometheus import PrometheusMetrics
 app = Starlette(debug=True)
 
 cache = aioredis.from_url("redis://redis/0")
-metrics = PrometheusMetrics()
+metrics = PrometheusMetrics(hit_cache_buckets=[0.0005 * 2 ** x for x in range(10)])
 sd = AsyncConsulDiscovery()
 cli = (
     AsyncClientFactory(sd)

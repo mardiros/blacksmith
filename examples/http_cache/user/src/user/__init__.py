@@ -32,7 +32,7 @@ async def show_user(request):
     await asyncio.sleep(1.0)
     try:
         return JSONResponse(
-            USERS[username], headers={"Cache-Control": "max-age=10, public"}
+            USERS[username], headers={"Cache-Control": "max-age=2, public"}
         )
     except KeyError:
         return JSONResponse({"detail": "user not found"}, status_code=404)
