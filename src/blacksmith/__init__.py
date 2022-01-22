@@ -32,7 +32,7 @@ from .middleware._async import (
     AsyncCircuitBreakerMiddleware,
     AsyncHTTPAddHeadersMiddleware,
     AsyncHTTPAuthorizationMiddleware,
-    AsyncHTTPBearerAuthorization,
+    AsyncHTTPBearerMiddleware,
     AsyncHTTPCacheMiddleware,
     AsyncHTTPMiddleware,
     AsyncMiddleware,
@@ -100,7 +100,7 @@ __all__ = [
     "SyncHTTPAddHeadersMiddleware",
     "AsyncHTTPAuthorizationMiddleware",
     "SyncHTTPAuthorization",
-    "AsyncHTTPBearerAuthorization",
+    "AsyncHTTPBearerMiddleware",
     "SyncHTTPBearerAuthorization",
     # Advanced Middlewares
     "AsyncCircuitBreakerMiddleware",
