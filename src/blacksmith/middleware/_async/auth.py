@@ -3,7 +3,7 @@
 from .base import AsyncHTTPAddHeadersMiddleware
 
 
-class AsyncHTTPAuthorization(AsyncHTTPAddHeadersMiddleware):
+class AsyncHTTPAuthorizationMiddleware(AsyncHTTPAddHeadersMiddleware):
     """
     Authentication Mechanism based on the header `Authorization`.
 
@@ -15,7 +15,7 @@ class AsyncHTTPAuthorization(AsyncHTTPAddHeadersMiddleware):
         return super().__init__({"Authorization": f"{scheme} {value}"})
 
 
-class AsyncHTTPBearerAuthorization(AsyncHTTPAuthorization):
+class AsyncHTTPBearerAuthorization(AsyncHTTPAuthorizationMiddleware):
     """
     Authentication Mechanism based on the header `Authorization` with the Bearer scheme.
 

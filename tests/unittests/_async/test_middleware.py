@@ -18,7 +18,7 @@ from blacksmith.domain.exceptions import HTTPError
 from blacksmith.domain.model.http import HTTPRequest, HTTPResponse, HTTPTimeout
 from blacksmith.domain.model.middleware.prometheus import PrometheusMetrics
 from blacksmith.domain.typing import AsyncMiddleware
-from blacksmith.middleware._async.auth import AsyncHTTPAuthorization
+from blacksmith.middleware._async.auth import AsyncHTTPAuthorizationMiddleware
 from blacksmith.middleware._async.base import (
     AsyncHTTPAddHeadersMiddleware,
     AsyncHTTPMiddleware,
@@ -36,7 +36,7 @@ from tests.unittests.time import AsyncSleep
 
 
 def test_authorization_header():
-    auth = AsyncHTTPAuthorization("Bearer", "abc")
+    auth = AsyncHTTPAuthorizationMiddleware("Bearer", "abc")
     assert auth.headers == {"Authorization": "Bearer abc"}
 
 
@@ -63,7 +63,7 @@ async def test_empty_middleware(
             "expected_headers": {"X-Req-Id": "42", "foo": "bar"},
         },
         {
-            "middleware_cls": AsyncHTTPAuthorization,
+            "middleware_cls": AsyncHTTPAuthorizationMiddleware,
             "middleware_params": ["Bearer", "abc"],
             "expected_headers": {"X-Req-Id": "42", "Authorization": "Bearer abc"},
         },

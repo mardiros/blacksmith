@@ -10,7 +10,7 @@ from pydantic.main import BaseModel
 import blacksmith
 from blacksmith import (
     AsyncClientFactory,
-    AsyncHTTPAuthorization,
+    AsyncHTTPAuthorizationMiddleware,
     AsyncStaticDiscovery,
     PathInfoField,
     QueryStringField,
@@ -68,7 +68,7 @@ async def main():
         sys.exit(-1)
     apikey = os.environ["GANDIV5_API_KEY"]
     sd = AsyncStaticDiscovery({("gandi", "v5"): "https://api.gandi.net/v5"})
-    auth = AsyncHTTPAuthorization("Apikey", apikey)
+    auth = AsyncHTTPAuthorizationMiddleware("Apikey", apikey)
     cli: AsyncClientFactory[ListDomainResponse, Any] = AsyncClientFactory(
         sd, timeout=(10.0)
     ).add_middleware(auth)

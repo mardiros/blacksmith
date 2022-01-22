@@ -1,4 +1,4 @@
-from .auth import AsyncHTTPAuthorization, AsyncHTTPBearerAuthorization
+from .auth import AsyncHTTPAuthorizationMiddleware, AsyncHTTPBearerAuthorization
 from .base import AsyncHTTPAddHeadersMiddleware, AsyncHTTPMiddleware, AsyncMiddleware
 from .circuit_breaker import AsyncCircuitBreakerMiddleware
 from .http_cache import AsyncAbstractCache, AsyncHTTPCacheMiddleware
@@ -9,7 +9,7 @@ __all__ = [
     "AsyncAbstractCache",
     "AsyncCircuitBreakerMiddleware",
     "AsyncHTTPAddHeadersMiddleware",
-    "AsyncHTTPAuthorization",
+    "AsyncHTTPAuthorizationMiddleware",
     "AsyncHTTPBearerAuthorization",
     "AsyncHTTPCacheMiddleware",
     "AsyncHTTPMiddleware",
