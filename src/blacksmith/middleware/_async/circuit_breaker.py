@@ -19,7 +19,7 @@ from .base import AsyncHTTPMiddleware, AsyncMiddleware
 Listeners = Optional[Iterable[Hook]]
 
 
-class AsyncCircuitBreaker(AsyncHTTPMiddleware):
+class AsyncCircuitBreakerMiddleware(AsyncHTTPMiddleware):
     """
     Prevent cascading failure.
 

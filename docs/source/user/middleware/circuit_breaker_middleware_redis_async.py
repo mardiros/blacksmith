@@ -1,5 +1,7 @@
 from purgatory import AsyncRedisUnitOfWork
 
-from blacksmith import AsyncCircuitBreaker
+from blacksmith import AsyncCircuitBreakerMiddleware
 
-breaker = AsyncCircuitBreaker(5, 30, uow=AsyncRedisUnitOfWork("redis://redis/0"))
+breaker = AsyncCircuitBreakerMiddleware(
+    5, 30, uow=AsyncRedisUnitOfWork("redis://redis/0")
+)

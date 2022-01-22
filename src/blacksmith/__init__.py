@@ -29,7 +29,7 @@ from .domain.registry import register
 from .domain.scanner import scan
 from .middleware._async import (
     AsyncAbstractCache,
-    AsyncCircuitBreaker,
+    AsyncCircuitBreakerMiddleware,
     AsyncHTTPAddHeadersMiddleware,
     AsyncHTTPAuthorization,
     AsyncHTTPBearerAuthorization,
@@ -103,7 +103,7 @@ __all__ = [
     "AsyncHTTPBearerAuthorization",
     "SyncHTTPBearerAuthorization",
     # Advanced Middlewares
-    "AsyncCircuitBreaker",
+    "AsyncCircuitBreakerMiddleware",
     "SyncCircuitBreaker",
     "PrometheusMetrics",
     "AsyncPrometheusMiddleware",

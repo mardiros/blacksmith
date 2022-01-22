@@ -24,7 +24,7 @@ from blacksmith.middleware._async.base import (
     AsyncHTTPMiddleware,
 )
 from blacksmith.middleware._async.circuit_breaker import (
-    AsyncCircuitBreaker,
+    AsyncCircuitBreakerMiddleware,
     exclude_httpx_4xx,
 )
 from blacksmith.middleware._async.prometheus import AsyncPrometheusMiddleware
@@ -257,7 +257,7 @@ async def test_circuit_breaker_5xx(
     dummy_http_request: HTTPRequest,
     dummy_timeout: HTTPTimeout,
 ):
-    cbreaker = AsyncCircuitBreaker(threshold=2)
+    cbreaker = AsyncCircuitBreakerMiddleware(threshold=2)
     next = cbreaker(echo_middleware)
     resp = await next(dummy_http_request, "dummy", "/dummies/{name}", dummy_timeout)
     assert resp.status_code == 200
@@ -290,7 +290,7 @@ async def test_circuit_breaker_4xx(
     dummy_http_request: HTTPRequest,
     dummy_timeout: HTTPTimeout,
 ):
-    cbreaker = AsyncCircuitBreaker(threshold=2)
+    cbreaker = AsyncCircuitBreakerMiddleware(threshold=2)
     next = cbreaker(invalid_middleware)
     with pytest.raises(HTTPError):
         await next(dummy_http_request, "dummy", "/dummies/{name}", dummy_timeout)
@@ -315,7 +315,7 @@ async def test_circuit_breaker_prometheus_metrics(
 ):
     OPEN = 2.0
     CLOSED = 0.0
-    cbreaker = AsyncCircuitBreaker(
+    cbreaker = AsyncCircuitBreakerMiddleware(
         threshold=2,
         ttl=0.100,
         metrics=metrics,
@@ -393,7 +393,7 @@ async def test_circuit_breaker_initialize():
         async def initialize(self):
             self.called = True
 
-    cbreaker = AsyncCircuitBreaker()
+    cbreaker = AsyncCircuitBreakerMiddleware()
     purgatory_cb = MockPurgatory()
     cbreaker.circuit_breaker = cast(AsyncCircuitBreakerFactory, purgatory_cb)
     await cbreaker.initialize()
@@ -413,7 +413,7 @@ async def test_circuit_breaker_listener(
     def hook(name: str, evt_name: str, evt: Event):
         evts.append((name, evt_name, evt))
 
-    cbreaker = AsyncCircuitBreaker(threshold=2, ttl=0.100, listeners=[hook])
+    cbreaker = AsyncCircuitBreakerMiddleware(threshold=2, ttl=0.100, listeners=[hook])
     echo_next = cbreaker(echo_middleware)
     await echo_next(dummy_http_request, "dummy", "/dummies/{name}", dummy_timeout)
     assert evts == [
