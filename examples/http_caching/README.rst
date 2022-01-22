@@ -35,7 +35,7 @@ Call the service
 
    while true; do; curl -H "Content-Type: application/json" \
          -v --data '{"username": "naruto", "message": "Datte Bayo"}' \
-         -X POST http://notif.localhost/v1/notification; done
+         http://notif.localhost/v1/notification; done
 
 
 

@@ -3,27 +3,28 @@ import smtplib
 from textwrap import dedent
 
 import aioredis
+from notif.resources.user import User
 from prometheus_client import CONTENT_TYPE_LATEST, REGISTRY, generate_latest
 from starlette.applications import Starlette
 from starlette.responses import JSONResponse, Response
+
 from blacksmith import (
     AsyncClientFactory,
     AsyncConsulDiscovery,
-    AsyncPrometheusMetrics,
     AsyncHTTPCacheMiddleware,
+    AsyncPrometheusMetrics,
 )
-
-from notif.resources.user import User
-
+from blacksmith.domain.model.middleware.prometheus import PrometheusMetrics
 
 app = Starlette(debug=True)
 
 cache = aioredis.from_url("redis://redis/0")
+metrics = PrometheusMetrics()
 sd = AsyncConsulDiscovery()
 cli = (
     AsyncClientFactory(sd)
-    .add_middleware(AsyncHTTPCacheMiddleware(cache))
-    .add_middleware(AsyncPrometheusMetrics())
+    .add_middleware(AsyncHTTPCacheMiddleware(cache, metrics=metrics))
+    .add_middleware(AsyncPrometheusMetrics(metrics))
 )
 
 
