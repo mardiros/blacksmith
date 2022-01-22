@@ -52,9 +52,9 @@ You may configure the buckets using the parameter buckets
 
 ::
 
-   from blacksmith import AsyncPrometheusMetrics
+   from blacksmith import AsyncPrometheusMiddleware
    BUCKETS = [0.05, 0.1, 0.2, 0.4, 0.8, 1.6, 3.2, 6.4, 12.8, 25.6]
-   metric = AsyncPrometheusMetrics(buckets=BUCKETS)
+   metric = AsyncPrometheusMiddleware(buckets=BUCKETS)
 
 
 `blacksmith_request_latency_seconds` labels are  `client_name`, `method`,
@@ -142,8 +142,8 @@ Example using starlette
 
    ::
 
-      from blacksmith import AsyncPrometheusMetrics
-      prom_middleware = AsyncPrometheusMetrics(registry=my_registry)
+      from blacksmith import AsyncPrometheusMiddleware
+      prom_middleware = AsyncPrometheusMiddleware(registry=my_registry)
 
 
 Full examples of prometheus metrics

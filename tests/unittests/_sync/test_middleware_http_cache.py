@@ -1,9 +1,11 @@
 from typing import Any, Dict
 
 import pytest
+from prometheus_client import CollectorRegistry  # type: ignore
 
 from blacksmith.domain.model.http import HTTPRequest, HTTPResponse, HTTPTimeout
 from blacksmith.domain.model.middleware.http_cache import CacheControlPolicy
+from blacksmith.domain.model.middleware.prometheus import PrometheusMetrics
 from blacksmith.domain.typing import SyncMiddleware
 from blacksmith.middleware._sync.http_cache import (
     SyncAbstractCache,
@@ -69,12 +71,14 @@ def test_get_from_cache(
             "path": "/",
             "request": HTTPRequest("GET", "/", {}, {}),
             "response": HTTPResponse(200, {}, ""),
+            "expected_cachable": False,
             "expected_cache": {},
         },
         {
             "path": "/",
             "request": HTTPRequest("GET", "/", {}, {}),
             "response": HTTPResponse(200, {"cache-control": "max-age=42, public"}, ""),
+            "expected_cachable": True,
             "expected_cache": {
                 "dummies$/": (42, "[]"),
                 "dummies$/$": (
@@ -92,6 +96,7 @@ def test_get_from_cache(
                 {"cache-control": "max-age=42, public", "vary": "X-Country-Code"},
                 "En Francais",
             ),
+            "expected_cachable": True,
             "expected_cache": {
                 "dummies$/": (42, '["x-country-code"]'),
                 "dummies$/$x-country-code=FR": (
@@ -110,6 +115,7 @@ def test_get_from_cache(
                 {"cache-control": "max-age=42, public", "vary": "X-Country-Code"},
                 "missing_header",
             ),
+            "expected_cachable": True,
             "expected_cache": {
                 "dummies$/": (42, '["x-country-code"]'),
                 "dummies$/$x-country-code=": (
@@ -128,6 +134,7 @@ def test_get_from_cache(
                 {"cache-control": "max-age=42, public", "vary": "a, b"},
                 "many_headers",
             ),
+            "expected_cachable": True,
             "expected_cache": {
                 "dummies$/": (42, '["a", "b"]'),
                 "dummies$/$a=A|b=B": (
@@ -149,9 +156,10 @@ def test_http_cache_response(
     resp_from_cache = middleware.get_from_cache(
         "dummies", params["path"], params["request"]
     )
-    middleware.cache_response(
+    resp = middleware.cache_response(
         "dummies", params["path"], params["request"], params["response"]
     )
+    assert resp is params["expected_cachable"]
     assert fake_http_middleware_cache.val == params["expected_cache"]  # type: ignore
 
     resp_from_cache = middleware.get_from_cache(
@@ -223,7 +231,114 @@ def test_cache_middleware_policy_handle(
 
 
 @pytest.mark.asyncio
-def test_circuit_breaker_initialize(fake_http_middleware_cache: Any):
+def test_cache_middleware_metrics_helpers(
+    fake_http_middleware_cache: SyncAbstractCache,
+    prometheus_registry: CollectorRegistry,
+    metrics: PrometheusMetrics,
+):
+    caching = SyncHTTPCacheMiddleware(fake_http_middleware_cache, metrics)
+    caching.inc_blacksmith_cache_miss("dummy", "cached", "GET", "/", 200)
+    assert (
+        prometheus_registry.get_sample_value(
+            "blacksmith_cache_miss_total",
+            labels={
+                "client_name": "dummy",
+                "cachable_state": "cached",
+                "method": "GET",
+                "path": "/",
+                "status_code": "200",
+            },
+        )
+        == 1
+    )
+
+    caching.observe_blacksmith_cache_hit("dummy", "GET", "/", 200, 0.07)
+    assert (
+        prometheus_registry.get_sample_value(
+            "blacksmith_cache_hit_total",
+            labels={
+                "client_name": "dummy",
+                "method": "GET",
+                "path": "/",
+                "status_code": "200",
+            },
+        )
+        == 1
+    )
+    assert (
+        prometheus_registry.get_sample_value(
+            "blacksmith_cache_latency_seconds_bucket",
+            labels={
+                "client_name": "dummy",
+                "method": "GET",
+                "path": "/",
+                "status_code": "200",
+                "le": "0.04",
+            },
+        )
+        == 0
+    )
+    assert (
+        prometheus_registry.get_sample_value(
+            "blacksmith_cache_latency_seconds_bucket",
+            labels={
+                "client_name": "dummy",
+                "method": "GET",
+                "path": "/",
+                "status_code": "200",
+                "le": "0.08",
+            },
+        )
+        == 1
+    )
+
+
+@pytest.mark.asyncio
+def test_cache_middleware_metrics(
+    cachable_response: SyncMiddleware,
+    uncachable_response: SyncMiddleware,
+    fake_http_middleware_cache: SyncAbstractCache,
+    dummy_http_request: HTTPRequest,
+    dummy_timeout: HTTPTimeout,
+    prometheus_registry: CollectorRegistry,
+    metrics: PrometheusMetrics,
+):
+    caching = SyncHTTPCacheMiddleware(fake_http_middleware_cache, metrics)
+    next = caching(uncachable_response)
+    next(dummy_http_request, "dummy", "/dummies/{name}", dummy_timeout)
+    assert (
+        prometheus_registry.get_sample_value(
+            "blacksmith_cache_miss_total",
+            labels={
+                "client_name": "dummy",
+                "cachable_state": "uncachable_response",
+                "method": "GET",
+                "path": "/dummies/{name}",
+                "status_code": "200",
+            },
+        )
+        == 1
+    )
+
+    next = caching(cachable_response)
+    next(dummy_http_request, "dummy", "/dummies/{name}", dummy_timeout)
+    assert (
+        prometheus_registry.get_sample_value(
+            "blacksmith_cache_miss_total",
+            labels={
+                "client_name": "dummy",
+                "cachable_state": "cached",
+                "method": "GET",
+                "path": "/dummies/{name}",
+                "status_code": "200",
+            },
+        )
+        == 1
+    )
+
+
+@pytest.mark.asyncio
+def test_http_cache_initialize(fake_http_middleware_cache: Any):
     caching = SyncHTTPCacheMiddleware(fake_http_middleware_cache)
     caching.initialize()
     assert fake_http_middleware_cache.initialize_called is True

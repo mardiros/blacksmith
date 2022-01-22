@@ -19,7 +19,7 @@ else:
     Registry = Any
 
 
-class SyncPrometheusMetrics(SyncHTTPMiddleware):
+class SyncPrometheusMiddleware(SyncHTTPMiddleware):
     """
     Collect the api calls made in a prometheus registry.
 

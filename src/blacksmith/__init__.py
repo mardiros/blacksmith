@@ -19,6 +19,7 @@ from .domain.model import (
     JsonSerializer,
     PathInfoField,
     PostBodyField,
+    PrometheusMetrics,
     QueryStringField,
     Request,
     Response,
@@ -35,7 +36,7 @@ from .middleware._async import (
     AsyncHTTPCacheMiddleware,
     AsyncHTTPMiddleware,
     AsyncMiddleware,
-    AsyncPrometheusMetrics,
+    AsyncPrometheusMiddleware,
     AsyncZipkinMiddleware,
 )
 from .middleware._sync import (
@@ -46,7 +47,7 @@ from .middleware._sync import (
     SyncHTTPCacheMiddleware,
     SyncHTTPMiddleware,
     SyncMiddleware,
-    SyncPrometheusMetrics,
+    SyncPrometheusMiddleware,
 )
 from .sd._async.adapters.consul import AsyncConsulDiscovery
 from .sd._async.adapters.router import AsyncRouterDiscovery
@@ -104,8 +105,9 @@ __all__ = [
     # Advanced Middlewares
     "AsyncCircuitBreaker",
     "SyncCircuitBreaker",
-    "AsyncPrometheusMetrics",
-    "SyncPrometheusMetrics",
+    "PrometheusMetrics",
+    "AsyncPrometheusMiddleware",
+    "SyncPrometheusMiddleware",
     "AbstractCachePolicy",
     "AbstractSerializer",
     "CacheControlPolicy",

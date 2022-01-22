@@ -55,10 +55,11 @@ In the example above, prometheus **will not count** cached request:
 
    cache = aioredis.from_url("redis://redis/0")
    sd = AsyncConsulDiscovery()
+   metrics = PrometheusMetrics()
    cli = (
       AsyncClientFactory(sd)
-      .add_middleware(AsyncHTTPCacheMiddleware(cache))
-      .add_middleware(AsyncPrometheusMetrics())
+      .add_middleware(AsyncHTTPCacheMiddleware(cache, metrics=metrics))
+      .add_middleware(AsyncPrometheusMiddleware(metrics))
    )
 
 
@@ -73,7 +74,7 @@ In the example above, prometheus **will count** cached request:
    sd = AsyncConsulDiscovery()
    cli = (
       AsyncClientFactory(sd)
-      .add_middleware(AsyncPrometheusMetrics())
+      .add_middleware(AsyncPrometheusMiddleware())
       .add_middleware(AsyncHTTPCacheMiddleware(cache))
    )
 
@@ -84,9 +85,14 @@ In the example above, prometheus **will count** cached request:
    from the cache and from APIs.
 
 
-Full example of the redis_caching
----------------------------------
+Full example of the http_cache
+------------------------------
 
 You will find an example using prometheus and the circuit breaker in the examples directory:
 
-   https://github.com/mardiros/blacksmith/tree/master/examples/redis_caching
+   https://github.com/mardiros/blacksmith/tree/master/examples/http_cache
+
+
+.. figure:: ../../../../examples/http_cache/screenshot.png
+
+   Example with metrics on http://prometheus.localhost/

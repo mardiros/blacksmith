@@ -27,7 +27,7 @@ from blacksmith.middleware._async.circuit_breaker import (
     AsyncCircuitBreaker,
     exclude_httpx_4xx,
 )
-from blacksmith.middleware._async.prometheus import AsyncPrometheusMetrics
+from blacksmith.middleware._async.prometheus import AsyncPrometheusMiddleware
 from blacksmith.middleware._async.zipkin import (
     AbtractTraceContext,
     AsyncZipkinMiddleware,
@@ -89,7 +89,7 @@ async def test_prom_default_registry(
     dummy_http_request: HTTPRequest,
     dummy_timeout: HTTPTimeout,
 ):
-    metrics = AsyncPrometheusMetrics()
+    metrics = AsyncPrometheusMiddleware()
     next = metrics(echo_middleware)
 
     val = REGISTRY.get_sample_value("blacksmith_info", labels={"version": __version__})
@@ -119,7 +119,7 @@ async def test_prom_metrics(
 ):
     registry = CollectorRegistry()
     metrics = PrometheusMetrics(registry=registry)
-    metrics_middleware = AsyncPrometheusMetrics(metrics=metrics)
+    metrics_middleware = AsyncPrometheusMiddleware(metrics=metrics)
     next = metrics_middleware(slow_middleware)
 
     val = registry.get_sample_value("blacksmith_info", labels={"version": __version__})
@@ -195,7 +195,7 @@ async def test_prom_metrics_error(
 ):
     registry = CollectorRegistry()
     metrics = PrometheusMetrics(registry=registry)
-    metrics_middleware = AsyncPrometheusMetrics(metrics=metrics)
+    metrics_middleware = AsyncPrometheusMiddleware(metrics=metrics)
     next = metrics_middleware(boom_middleware)
 
     with pytest.raises(HTTPError):
@@ -310,57 +310,78 @@ async def test_circuit_breaker_prometheus_metrics(
     boom_middleware: AsyncMiddleware,
     dummy_http_request: HTTPRequest,
     dummy_timeout: HTTPTimeout,
+    prometheus_registry: CollectorRegistry,
+    metrics: PrometheusMetrics,
 ):
     OPEN = 2.0
-    HALF_OPEN = 1.0
     CLOSED = 0.0
-    registry = CollectorRegistry()
-    metrics = PrometheusMetrics(registry=registry)
     cbreaker = AsyncCircuitBreaker(
         threshold=2,
         ttl=0.100,
-        prometheus_metrics=metrics,
+        metrics=metrics,
     )
     echo_next = cbreaker(echo_middleware)
     invalid_next = cbreaker(invalid_middleware)
     boom_next = cbreaker(boom_middleware)
+
     with pytest.raises(HTTPError):
         await boom_next(dummy_http_request, "dummy", "/dummies/{name}", dummy_timeout)
-    with pytest.raises(HTTPError):
-        await boom_next(dummy_http_request, "dummy", "/dummies/{name}", dummy_timeout)
-    with pytest.raises(OpenedState):
-        await boom_next(dummy_http_request, "dummy", "/dummies/{name}", dummy_timeout)
-
-    registry.get_sample_value("blacksmith_circuit_breaker_error", labels=["dummy"]) == 1
-    registry.get_sample_value(
-        "blacksmith_circuit_breaker_state", labels=["dummy"]
-    ) == OPEN
-
-    with pytest.raises(OpenedState):
-        await echo_next(dummy_http_request, "dummy", "/dummies/{name}", dummy_timeout)
-    registry.get_sample_value("blacksmith_circuit_breaker_error", labels=["dummy"]) == 2
-
-    await AsyncSleep(0.110)
-    await echo_next(dummy_http_request, "dummy", "/dummies/{name}", dummy_timeout)
-    registry.get_sample_value("blacksmith_circuit_breaker_error", labels=["dummy"]) == 2
-    registry.get_sample_value(
-        "blacksmith_circuit_breaker_state", labels=["dummy"]
-    ) == HALF_OPEN
     with pytest.raises(HTTPError):
         await invalid_next(
             dummy_http_request, "dummy", "/dummies/{name}", dummy_timeout
         )
-    registry.get_sample_value("blacksmith_circuit_breaker_error", labels=["dummy"]) == 2
-    registry.get_sample_value(
-        "blacksmith_circuit_breaker_state", labels=["dummy"]
-    ) == HALF_OPEN
+
+    assert (
+        prometheus_registry.get_sample_value(
+            "blacksmith_circuit_breaker_error_total", labels={"client_name": "dummy"}
+        )
+        == 1
+    )
+
+    with pytest.raises(HTTPError):
+        await boom_next(dummy_http_request, "dummy", "/dummies/{name}", dummy_timeout)
+    with pytest.raises(HTTPError):
+        await boom_next(dummy_http_request, "dummy", "/dummies/{name}", dummy_timeout)
+    with pytest.raises(OpenedState):
+        await boom_next(dummy_http_request, "dummy", "/dummies/{name}", dummy_timeout)
+
+    assert (
+        prometheus_registry.get_sample_value(
+            "blacksmith_circuit_breaker_error_total", labels={"client_name": "dummy"}
+        )
+        == 3
+    )
+    assert (
+        prometheus_registry.get_sample_value(
+            "blacksmith_circuit_breaker_state", labels={"client_name": "dummy"}
+        )
+        == OPEN
+    )
+
+    with pytest.raises(OpenedState):
+        await echo_next(dummy_http_request, "dummy", "/dummies/{name}", dummy_timeout)
+
+    assert (
+        prometheus_registry.get_sample_value(
+            "blacksmith_circuit_breaker_error_total", labels={"client_name": "dummy"}
+        )
+        == 3
+    )
 
     await AsyncSleep(0.110)
-    cbreaker(echo_middleware)
-    registry.get_sample_value("blacksmith_circuit_breaker_error", labels=["dummy"]) == 2
-    registry.get_sample_value(
-        "blacksmith_circuit_breaker_state", labels=["dummy"]
-    ) == CLOSED
+    await echo_next(dummy_http_request, "dummy", "/dummies/{name}", dummy_timeout)
+    assert (
+        prometheus_registry.get_sample_value(
+            "blacksmith_circuit_breaker_error_total", labels={"client_name": "dummy"}
+        )
+        == 3
+    )
+    assert (
+        prometheus_registry.get_sample_value(
+            "blacksmith_circuit_breaker_state", labels={"client_name": "dummy"}
+        )
+        == CLOSED
+    )
 
 
 @pytest.mark.asyncio
