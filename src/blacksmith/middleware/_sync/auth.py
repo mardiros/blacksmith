@@ -3,7 +3,7 @@
 from .base import SyncHTTPAddHeadersMiddleware
 
 
-class SyncHTTPAuthorization(SyncHTTPAddHeadersMiddleware):
+class SyncHTTPAuthorizationMiddleware(SyncHTTPAddHeadersMiddleware):
     """
     Authentication Mechanism based on the header `Authorization`.
 
@@ -15,7 +15,7 @@ class SyncHTTPAuthorization(SyncHTTPAddHeadersMiddleware):
         return super().__init__({"Authorization": f"{scheme} {value}"})
 
 
-class SyncHTTPBearerAuthorization(SyncHTTPAuthorization):
+class SyncHTTPBearerMiddleware(SyncHTTPAuthorizationMiddleware):
     """
     Authentication Mechanism based on the header `Authorization` with the Bearer scheme.
 
