@@ -1,9 +1,13 @@
 import base64
 
-from blacksmith import AsyncClientFactory, AsyncConsulDiscovery, AsyncHTTPAuthorization
+from blacksmith import (
+    AsyncClientFactory,
+    AsyncConsulDiscovery,
+    AsyncHTTPAuthorizationMiddleware,
+)
 
 
-class AsyncBasicAuthorization(AsyncHTTPAuthorization):
+class AsyncBasicAuthorization(AsyncHTTPAuthorizationMiddleware):
     def __init__(self, username, password):
         userpass = f"{username}:{password}".encode("utf-8")
         b64head = base64.b64encode(userpass).decode("ascii")

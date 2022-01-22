@@ -17,7 +17,7 @@ from blacksmith.domain.model import (
 )
 from blacksmith.domain.model.params import CollectionIterator
 from blacksmith.domain.registry import ApiRoutes
-from blacksmith.middleware._async.auth import AsyncHTTPAuthorization
+from blacksmith.middleware._async.auth import AsyncHTTPAuthorizationMiddleware
 from blacksmith.middleware._async.base import AsyncHTTPAddHeadersMiddleware
 from blacksmith.service._async.base import AsyncAbstractTransport
 from blacksmith.service._async.route_proxy import AsyncRouteProxy, build_timeout
@@ -73,7 +73,7 @@ async def test_route_proxy_prepare_middleware(
         timeout=HTTPTimeout(),
         collection_parser=CollectionParser,
         middlewares=[
-            AsyncHTTPAuthorization("Bearer", "abc"),
+            AsyncHTTPAuthorizationMiddleware("Bearer", "abc"),
             AsyncHTTPAddHeadersMiddleware({"foo": "bar"}),
             AsyncHTTPAddHeadersMiddleware({"Eggs": "egg"}),
         ],
@@ -642,7 +642,7 @@ async def test_unregistered_collection(echo_middleware: AsyncAbstractTransport):
         timeout=HTTPTimeout(),
         collection_parser=CollectionParser,
         middlewares=[
-            AsyncHTTPAuthorization("Bearer", "abc"),
+            AsyncHTTPAuthorizationMiddleware("Bearer", "abc"),
             AsyncHTTPAddHeadersMiddleware({"foo": "bar"}),
             AsyncHTTPAddHeadersMiddleware({"Eggs": "egg"}),
         ],

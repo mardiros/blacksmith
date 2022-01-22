@@ -20,7 +20,7 @@ from blacksmith.domain.model import (
 )
 from blacksmith.domain.model.middleware.prometheus import PrometheusMetrics
 from blacksmith.domain.registry import ApiRoutes
-from blacksmith.middleware._sync.auth import SyncHTTPAuthorization
+from blacksmith.middleware._sync.auth import SyncHTTPAuthorizationMiddleware
 from blacksmith.middleware._sync.base import SyncHTTPMiddleware
 from blacksmith.middleware._sync.prometheus import SyncPrometheusMiddleware
 from blacksmith.sd._sync.base import SyncAbstractServiceDiscovery
@@ -188,7 +188,7 @@ def test_client_factory_add_middleware(
     static_sd: SyncAbstractServiceDiscovery, dummy_middleware: SyncHTTPMiddleware
 ):
     tp = FakeTimeoutTransport()
-    auth = SyncHTTPAuthorization("Bearer", "abc")
+    auth = SyncHTTPAuthorizationMiddleware("Bearer", "abc")
     metrics = PrometheusMetrics(registry=CollectorRegistry())
     prom = SyncPrometheusMiddleware(metrics=metrics)
     client_factory = (
@@ -204,13 +204,13 @@ def test_client_factory_add_middleware(
     client_factory.add_middleware(dummy_middleware)
     assert client_factory.middlewares == [dummy_middleware, auth, prom]
     assert cli.middlewares == [auth, prom]
-    assert cast(SyncHTTPAuthorization, cli.middlewares[0]).headers == {
+    assert cast(SyncHTTPAuthorizationMiddleware, cli.middlewares[0]).headers == {
         "Authorization": "Bearer abc"
     }
-    cast(SyncHTTPAuthorization, client_factory.middlewares[0]).headers[
+    cast(SyncHTTPAuthorizationMiddleware, client_factory.middlewares[0]).headers[
         "Authorization"
     ] = "Bearer xyz"
-    assert cast(SyncHTTPAuthorization, cli.middlewares[0]).headers == {
+    assert cast(SyncHTTPAuthorizationMiddleware, cli.middlewares[0]).headers == {
         "Authorization": "Bearer abc"
     }
 
@@ -222,7 +222,7 @@ def test_client_add_middleware(
     tp = FakeTimeoutTransport()
     metrics = PrometheusMetrics(registry=CollectorRegistry())
     prom = SyncPrometheusMiddleware(metrics)
-    auth = SyncHTTPAuthorization("Bearer", "abc")
+    auth = SyncHTTPAuthorizationMiddleware("Bearer", "abc")
     client_factory = SyncClientFactory(
         static_sd, tp, registry=dummy_registry
     ).add_middleware(prom)

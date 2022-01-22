@@ -12,7 +12,7 @@ from blacksmith.domain.exceptions import HTTPError, UnregisteredServiceException
 from blacksmith.domain.model import PathInfoField, Request, Response
 from blacksmith.domain.model.params import CollectionIterator
 from blacksmith.domain.registry import Registry
-from blacksmith.middleware._sync.auth import SyncHTTPBearerAuthorization
+from blacksmith.middleware._sync.auth import SyncHTTPBearerMiddleware
 from blacksmith.sd._sync.adapters.static import SyncStaticDiscovery
 from blacksmith.sd._sync.base import SyncAbstractServiceDiscovery, Url
 from blacksmith.service._sync.client import SyncClientFactory
@@ -57,7 +57,7 @@ def blacksmith_cli(endpoint: Url, consul_token: str) -> SyncClientFactory[Servic
     sd = SyncStaticDiscovery({("consul", "v1"): endpoint})
     fact: SyncClientFactory[Service, Any] = SyncClientFactory(sd, registry=_registry)
     if consul_token:
-        fact.add_middleware(SyncHTTPBearerAuthorization(consul_token))
+        fact.add_middleware(SyncHTTPBearerMiddleware(consul_token))
     return fact
 
 

@@ -5,7 +5,7 @@ import pytest
 
 from blacksmith.domain.exceptions import HTTPError
 from blacksmith.domain.model import HTTPRequest, HTTPResponse, HTTPTimeout
-from blacksmith.middleware._sync.auth import SyncHTTPAuthorization
+from blacksmith.middleware._sync.auth import SyncHTTPAuthorizationMiddleware
 from blacksmith.middleware._sync.base import SyncHTTPAddHeadersMiddleware
 from blacksmith.middleware._sync.http_cache import SyncAbstractCache
 from blacksmith.sd._sync.adapters.consul import SyncConsulDiscovery, _registry
@@ -151,7 +151,7 @@ def consul_sd():
             sd=SyncStaticDiscovery({("consul", "v1"): url}),
             registry=_registry,
             transport=FakeConsulTransport(),
-        ).add_middleware(SyncHTTPAuthorization("Bearer", tok))
+        ).add_middleware(SyncHTTPAuthorizationMiddleware("Bearer", tok))
 
     return SyncConsulDiscovery(_client_factory=cli)
 

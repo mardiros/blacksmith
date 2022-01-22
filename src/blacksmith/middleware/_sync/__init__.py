@@ -1,16 +1,16 @@
-from .auth import SyncHTTPAuthorization, SyncHTTPBearerAuthorization
+from .auth import SyncHTTPAuthorizationMiddleware, SyncHTTPBearerMiddleware
 from .base import SyncHTTPAddHeadersMiddleware, SyncHTTPMiddleware, SyncMiddleware
-from .circuit_breaker import SyncCircuitBreaker
+from .circuit_breaker import SyncCircuitBreakerMiddleware
 from .http_cache import SyncAbstractCache, SyncHTTPCacheMiddleware
 from .prometheus import SyncPrometheusMiddleware
 from .zipkin import SyncZipkinMiddleware
 
 __all__ = [
     "SyncAbstractCache",
-    "SyncCircuitBreaker",
+    "SyncCircuitBreakerMiddleware",
     "SyncHTTPAddHeadersMiddleware",
-    "SyncHTTPAuthorization",
-    "SyncHTTPBearerAuthorization",
+    "SyncHTTPAuthorizationMiddleware",
+    "SyncHTTPBearerMiddleware",
     "SyncHTTPCacheMiddleware",
     "SyncHTTPMiddleware",
     "SyncMiddleware",

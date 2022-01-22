@@ -18,13 +18,13 @@ from blacksmith.domain.exceptions import HTTPError
 from blacksmith.domain.model.http import HTTPRequest, HTTPResponse, HTTPTimeout
 from blacksmith.domain.model.middleware.prometheus import PrometheusMetrics
 from blacksmith.domain.typing import SyncMiddleware
-from blacksmith.middleware._sync.auth import SyncHTTPAuthorization
+from blacksmith.middleware._sync.auth import SyncHTTPAuthorizationMiddleware
 from blacksmith.middleware._sync.base import (
     SyncHTTPAddHeadersMiddleware,
     SyncHTTPMiddleware,
 )
 from blacksmith.middleware._sync.circuit_breaker import (
-    SyncCircuitBreaker,
+    SyncCircuitBreakerMiddleware,
     exclude_httpx_4xx,
 )
 from blacksmith.middleware._sync.prometheus import SyncPrometheusMiddleware
@@ -33,7 +33,7 @@ from tests.unittests.time import SyncSleep
 
 
 def test_authorization_header():
-    auth = SyncHTTPAuthorization("Bearer", "abc")
+    auth = SyncHTTPAuthorizationMiddleware("Bearer", "abc")
     assert auth.headers == {"Authorization": "Bearer abc"}
 
 
@@ -60,7 +60,7 @@ def test_empty_middleware(
             "expected_headers": {"X-Req-Id": "42", "foo": "bar"},
         },
         {
-            "middleware_cls": SyncHTTPAuthorization,
+            "middleware_cls": SyncHTTPAuthorizationMiddleware,
             "middleware_params": ["Bearer", "abc"],
             "expected_headers": {"X-Req-Id": "42", "Authorization": "Bearer abc"},
         },
@@ -254,7 +254,7 @@ def test_circuit_breaker_5xx(
     dummy_http_request: HTTPRequest,
     dummy_timeout: HTTPTimeout,
 ):
-    cbreaker = SyncCircuitBreaker(threshold=2)
+    cbreaker = SyncCircuitBreakerMiddleware(threshold=2)
     next = cbreaker(echo_middleware)
     resp = next(dummy_http_request, "dummy", "/dummies/{name}", dummy_timeout)
     assert resp.status_code == 200
@@ -287,7 +287,7 @@ def test_circuit_breaker_4xx(
     dummy_http_request: HTTPRequest,
     dummy_timeout: HTTPTimeout,
 ):
-    cbreaker = SyncCircuitBreaker(threshold=2)
+    cbreaker = SyncCircuitBreakerMiddleware(threshold=2)
     next = cbreaker(invalid_middleware)
     with pytest.raises(HTTPError):
         next(dummy_http_request, "dummy", "/dummies/{name}", dummy_timeout)
@@ -312,7 +312,7 @@ def test_circuit_breaker_prometheus_metrics(
 ):
     OPEN = 2.0
     CLOSED = 0.0
-    cbreaker = SyncCircuitBreaker(
+    cbreaker = SyncCircuitBreakerMiddleware(
         threshold=2,
         ttl=0.100,
         metrics=metrics,
@@ -388,7 +388,7 @@ def test_circuit_breaker_initialize():
         def initialize(self):
             self.called = True
 
-    cbreaker = SyncCircuitBreaker()
+    cbreaker = SyncCircuitBreakerMiddleware()
     purgatory_cb = MockPurgatory()
     cbreaker.circuit_breaker = cast(SyncCircuitBreakerFactory, purgatory_cb)
     cbreaker.initialize()
@@ -408,7 +408,7 @@ def test_circuit_breaker_listener(
     def hook(name: str, evt_name: str, evt: Event):
         evts.append((name, evt_name, evt))
 
-    cbreaker = SyncCircuitBreaker(threshold=2, ttl=0.100, listeners=[hook])
+    cbreaker = SyncCircuitBreakerMiddleware(threshold=2, ttl=0.100, listeners=[hook])
     echo_next = cbreaker(echo_middleware)
     echo_next(dummy_http_request, "dummy", "/dummies/{name}", dummy_timeout)
     assert evts == [

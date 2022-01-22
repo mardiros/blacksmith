@@ -19,7 +19,7 @@ from .base import SyncHTTPMiddleware, SyncMiddleware
 Listeners = Optional[Iterable[Hook]]
 
 
-class SyncCircuitBreaker(SyncHTTPMiddleware):
+class SyncCircuitBreakerMiddleware(SyncHTTPMiddleware):
     """
     Prevent cascading failure.
 

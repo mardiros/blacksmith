@@ -9,7 +9,7 @@ from starlette.applications import Starlette
 from starlette.responses import JSONResponse, Response
 
 from blacksmith import (
-    AsyncCircuitBreaker,
+    AsyncCircuitBreakerMiddleware,
     AsyncClientFactory,
     AsyncConsulDiscovery,
     AsyncPrometheusMiddleware,
@@ -23,7 +23,7 @@ metrics = PrometheusMetrics()
 cli = (
     AsyncClientFactory(sd)
     .add_middleware(
-        AsyncCircuitBreaker(
+        AsyncCircuitBreakerMiddleware(
             3,
             30,
             metrics=metrics,

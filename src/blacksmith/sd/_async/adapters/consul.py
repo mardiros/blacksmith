@@ -12,7 +12,7 @@ from blacksmith.domain.exceptions import HTTPError, UnregisteredServiceException
 from blacksmith.domain.model import PathInfoField, Request, Response
 from blacksmith.domain.model.params import CollectionIterator
 from blacksmith.domain.registry import Registry
-from blacksmith.middleware._async.auth import AsyncHTTPBearerAuthorization
+from blacksmith.middleware._async.auth import AsyncHTTPBearerMiddleware
 from blacksmith.sd._async.adapters.static import AsyncStaticDiscovery
 from blacksmith.sd._async.base import AsyncAbstractServiceDiscovery, Url
 from blacksmith.service._async.client import AsyncClientFactory
@@ -59,7 +59,7 @@ def blacksmith_cli(
     sd = AsyncStaticDiscovery({("consul", "v1"): endpoint})
     fact: AsyncClientFactory[Service, Any] = AsyncClientFactory(sd, registry=_registry)
     if consul_token:
-        fact.add_middleware(AsyncHTTPBearerAuthorization(consul_token))
+        fact.add_middleware(AsyncHTTPBearerMiddleware(consul_token))
     return fact
 
 

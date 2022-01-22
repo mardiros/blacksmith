@@ -20,7 +20,7 @@ from blacksmith.domain.model import (
 )
 from blacksmith.domain.model.middleware.prometheus import PrometheusMetrics
 from blacksmith.domain.registry import ApiRoutes
-from blacksmith.middleware._async.auth import AsyncHTTPAuthorization
+from blacksmith.middleware._async.auth import AsyncHTTPAuthorizationMiddleware
 from blacksmith.middleware._async.base import AsyncHTTPMiddleware
 from blacksmith.middleware._async.prometheus import AsyncPrometheusMiddleware
 from blacksmith.sd._async.base import AsyncAbstractServiceDiscovery
@@ -188,7 +188,7 @@ async def test_client_factory_add_middleware(
     static_sd: AsyncAbstractServiceDiscovery, dummy_middleware: AsyncHTTPMiddleware
 ):
     tp = FakeTimeoutTransport()
-    auth = AsyncHTTPAuthorization("Bearer", "abc")
+    auth = AsyncHTTPAuthorizationMiddleware("Bearer", "abc")
     metrics = PrometheusMetrics(registry=CollectorRegistry())
     prom = AsyncPrometheusMiddleware(metrics=metrics)
     client_factory = (
@@ -204,13 +204,13 @@ async def test_client_factory_add_middleware(
     client_factory.add_middleware(dummy_middleware)
     assert client_factory.middlewares == [dummy_middleware, auth, prom]
     assert cli.middlewares == [auth, prom]
-    assert cast(AsyncHTTPAuthorization, cli.middlewares[0]).headers == {
+    assert cast(AsyncHTTPAuthorizationMiddleware, cli.middlewares[0]).headers == {
         "Authorization": "Bearer abc"
     }
-    cast(AsyncHTTPAuthorization, client_factory.middlewares[0]).headers[
+    cast(AsyncHTTPAuthorizationMiddleware, client_factory.middlewares[0]).headers[
         "Authorization"
     ] = "Bearer xyz"
-    assert cast(AsyncHTTPAuthorization, cli.middlewares[0]).headers == {
+    assert cast(AsyncHTTPAuthorizationMiddleware, cli.middlewares[0]).headers == {
         "Authorization": "Bearer abc"
     }
 
@@ -222,7 +222,7 @@ async def test_client_add_middleware(
     tp = FakeTimeoutTransport()
     metrics = PrometheusMetrics(registry=CollectorRegistry())
     prom = AsyncPrometheusMiddleware(metrics)
-    auth = AsyncHTTPAuthorization("Bearer", "abc")
+    auth = AsyncHTTPAuthorizationMiddleware("Bearer", "abc")
     client_factory = AsyncClientFactory(
         static_sd, tp, registry=dummy_registry
     ).add_middleware(prom)

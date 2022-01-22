@@ -1,4 +1,10 @@
-from blacksmith import AsyncCircuitBreaker, AsyncClientFactory, AsyncConsulDiscovery
+from blacksmith import (
+    AsyncCircuitBreakerMiddleware,
+    AsyncClientFactory,
+    AsyncConsulDiscovery,
+)
 
 sd = AsyncConsulDiscovery()
-cli = AsyncClientFactory(sd).add_middleware(AsyncCircuitBreaker(threshold=5, ttl=30))
+cli = AsyncClientFactory(sd).add_middleware(
+    AsyncCircuitBreakerMiddleware(threshold=5, ttl=30)
+)

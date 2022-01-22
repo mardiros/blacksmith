@@ -6,7 +6,7 @@ from typing import Any
 import blacksmith
 from blacksmith import (
     AsyncClientFactory,
-    AsyncHTTPAuthorization,
+    AsyncHTTPAuthorizationMiddleware,
     AsyncStaticDiscovery,
     PathInfoField,
     Request,
@@ -49,7 +49,7 @@ async def main():
         sys.exit(-1)
     apikey = os.environ["GANDIV5_API_KEY"]
     sd = AsyncStaticDiscovery({("gandi", "v5"): "https://api.gandi.net/v5"})
-    auth = AsyncHTTPAuthorization("Apikey", apikey)
+    auth = AsyncHTTPAuthorizationMiddleware("Apikey", apikey)
     cli: AsyncClientFactory[Any, TLDResponse] = AsyncClientFactory(sd).add_middleware(
         auth
     )
