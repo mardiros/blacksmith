@@ -66,6 +66,9 @@ def echo_middleware():
     return next
 
 
+uncachable_response = echo_middleware
+
+
 @pytest.fixture
 def cachable_response():
     def next(
