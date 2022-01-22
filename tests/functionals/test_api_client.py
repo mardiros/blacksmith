@@ -3,18 +3,19 @@ from typing import Any, Optional
 
 import pytest
 
-import blacksmith
 from blacksmith import (
     AsyncClientFactory,
     AsyncStaticDiscovery,
+    CollectionIterator,
+    HTTPError,
     PathInfoField,
     PostBodyField,
     QueryStringField,
     Request,
     Response,
+    register,
 )
-from blacksmith.domain.exceptions import HTTPError, NoContractException
-from blacksmith.domain.model.params import CollectionIterator
+from blacksmith.domain.exceptions import NoContractException
 
 
 class SizeEnum(str, Enum):
@@ -49,7 +50,7 @@ class UpdateItem(GetItem):
 DeleteItem = GetItem
 
 
-blacksmith.register(
+register(
     "api",
     "item",
     "api",

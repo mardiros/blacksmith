@@ -7,7 +7,6 @@ from prometheus_client import CONTENT_TYPE_LATEST, REGISTRY, generate_latest
 from starlette.applications import Starlette
 from starlette.responses import JSONResponse, Response
 
-import blacksmith
 from blacksmith import (
     AsyncClientFactory,
     AsyncConsulDiscovery,
@@ -16,7 +15,6 @@ from blacksmith import (
 
 app = Starlette(debug=True)
 
-blacksmith.scan("notif.resources")
 sd = AsyncConsulDiscovery()
 cli = AsyncClientFactory(sd).add_middleware(AsyncPrometheusMiddleware())
 

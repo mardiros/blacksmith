@@ -1,8 +1,14 @@
 from enum import Enum
 from typing import Optional
 
-import blacksmith
-from blacksmith import PathInfoField, PostBodyField, QueryStringField, Request, Response
+from blacksmith import (
+    PathInfoField,
+    PostBodyField,
+    QueryStringField,
+    Request,
+    Response,
+    register,
+)
 
 
 class SizeEnum(str, Enum):
@@ -40,7 +46,7 @@ class UpdateItem(GetItem):
 
 DeleteItem = GetItem
 
-blacksmith.register(
+register(
     "api",
     "item",
     "api",
