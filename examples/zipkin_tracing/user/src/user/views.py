@@ -6,7 +6,7 @@ from starlette_zipkin import B3Headers, ZipkinConfig, ZipkinMiddleware
 
 app = Starlette(debug=True)
 config = ZipkinConfig(
-    host="zipkin",
+    host="jaeger",
     port=9411,
     service_name="user-v1",
     sample_rate=1.0,

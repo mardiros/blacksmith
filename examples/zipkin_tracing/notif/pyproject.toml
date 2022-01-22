@@ -8,7 +8,7 @@ authors = ["Guillaume Gauvrit <guillaume@gauvr.it>"]
 python = "^3.9"
 starlette = "^0.17.0"
 uvicorn = "^0.15.0"
-blacksmith = "0.9.2"
+blacksmith = "0.12.1"
 "starlette-zipkin" = "^0.2.0"
 
 

@@ -137,7 +137,7 @@ Example using starlette
 
 .. note::
 
-   REGISTRY is the default registry, `PrometheusMetrics` can be 
+   REGISTRY is the default registry, `PrometheusMetrics` can be
    build by specifying another registry if necessary:
 
    ::

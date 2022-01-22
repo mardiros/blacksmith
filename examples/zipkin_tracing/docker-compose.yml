@@ -100,14 +100,32 @@ services:
       - "SERVICE_1025_NAME=smtp"
       - "SERVICE_8025_IGNORE=true"
 
-  zipkin:
-    image: openzipkin/zipkin-slim
+  # You may use zipkin insead,
+  # /!\ the name of the container has been hardcoded,
+  # replace jaeger by zipkin in the code get it working
+  # zipkin:
+  #   image: openzipkin/zipkin-slim
+  #   labels:
+  #     - "traefik.enable=true"
+  #     - "traefik.http.routers.zipkin.entrypoints=web"
+  #     - "traefik.http.routers.zipkin.rule=Host(`zipkin.${DOMAIN_NAME}`)"
+  #     - "traefik.http.services.zipkin.loadbalancer.server.port=9411"
+  #   networks:
+  #     - "internal"
+  #   environment:
+  #     - "SERVICE_NAME=zipkin"
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    environment:
+      - "COLLECTOR_ZIPKIN_HOST_PORT=:9411"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.zipkin.entrypoints=web"
-      - "traefik.http.routers.zipkin.rule=Host(`zipkin.${DOMAIN_NAME}`)"
-      - "traefik.http.services.zipkin.loadbalancer.server.port=9411"
+      - "traefik.http.routers.jaeger.entrypoints=web"
+      - "traefik.http.routers.jaeger.rule=Host(`jaeger.${DOMAIN_NAME}`)"
+      - "traefik.http.services.jaeger.loadbalancer.server.port=16686"
     networks:
       - "internal"
-    environment:
-      - "SERVICE_NAME=zipkin"
+    ports:
+      - "9411:9411"
+      - "16686:16686"
