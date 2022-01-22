@@ -1,10 +1,7 @@
 import email as emaillib
 import smtplib
 from textwrap import dedent
-from typing import cast
 
-import uvicorn
-from asgiref.typing import ASGI3Application
 from notif.resources.user import User
 from starlette.applications import Starlette
 from starlette.responses import JSONResponse

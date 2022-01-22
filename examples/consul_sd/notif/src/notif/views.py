@@ -1,9 +1,7 @@
 import email as emaillib
 import smtplib
 from textwrap import dedent
-from typing import cast
 
-import uvicorn
 from notif.resources.user import User
 from starlette.applications import Starlette
 from starlette.responses import JSONResponse
