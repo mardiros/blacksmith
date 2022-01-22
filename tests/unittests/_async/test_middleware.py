@@ -318,7 +318,7 @@ async def test_circuit_breaker_prometheus_metrics(
     cbreaker = AsyncCircuitBreaker(
         threshold=2,
         ttl=0.100,
-        prometheus_metrics=metrics,
+        metrics=metrics,
     )
     echo_next = cbreaker(echo_middleware)
     invalid_next = cbreaker(invalid_middleware)

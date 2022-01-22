@@ -19,7 +19,7 @@ gensync:
     poetry run black tests/unittests/_sync
 
 lint:
-    poetry run flake8 && echo "$(tput setaf 10)Success: no lint issue"
+    poetry run flake8 && echo "$(tput setaf 10)Success: no lint issue$(tput setaf 7)"
 
 test: lint mypy unittest functest
 

@@ -13,8 +13,8 @@ from blacksmith import (
     AsyncConsulDiscovery,
     AsyncHTTPCacheMiddleware,
     AsyncPrometheusMetrics,
+    PrometheusMetrics,
 )
-from blacksmith.domain.model.middleware.prometheus import PrometheusMetrics
 
 app = Starlette(debug=True)
 

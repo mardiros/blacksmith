@@ -37,7 +37,7 @@ class SyncCircuitBreaker(SyncHTTPMiddleware):
         ttl: TTL = 30,
         listeners: Listeners = None,
         uow: Optional[SyncAbstractUnitOfWork] = None,
-        prometheus_metrics: Optional[PrometheusMetrics] = None,
+        metrics: Optional[PrometheusMetrics] = None,
     ):
         self.circuit_breaker = SyncCircuitBreakerFactory(
             default_threshold=threshold,
@@ -45,8 +45,8 @@ class SyncCircuitBreaker(SyncHTTPMiddleware):
             exclude=[(HTTPError, exclude_httpx_4xx)],
             uow=uow,
         )
-        if prometheus_metrics:
-            self.circuit_breaker.add_listener(PrometheusHook(prometheus_metrics))
+        if metrics:
+            self.circuit_breaker.add_listener(PrometheusHook(metrics))
         if listeners:
             for listener in listeners:
                 self.circuit_breaker.add_listener(listener)

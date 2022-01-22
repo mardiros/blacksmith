@@ -1,5 +1,4 @@
 import pytest
-
 from prometheus_client import CollectorRegistry  # type: ignore
 
 from blacksmith.domain.model import HTTPRequest, HTTPTimeout

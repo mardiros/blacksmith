@@ -13,20 +13,24 @@ from blacksmith import (
     AsyncClientFactory,
     AsyncConsulDiscovery,
     AsyncPrometheusMetrics,
+    PrometheusMetrics,
 )
 
 app = Starlette(debug=True)
 
 sd = AsyncConsulDiscovery()
-prom = AsyncPrometheusMetrics()
+metrics = PrometheusMetrics()
 cli = (
     AsyncClientFactory(sd)
     .add_middleware(
         AsyncCircuitBreaker(
-            3, 30, prometheus_metrics=prom, uow=AsyncRedisUnitOfWork("redis://redis/0")
+            3,
+            30,
+            metrics=metrics,
+            uow=AsyncRedisUnitOfWork("redis://redis/0"),
         ),
     )
-    .add_middleware(prom)
+    .add_middleware(AsyncPrometheusMetrics(metrics))
 )
 
 

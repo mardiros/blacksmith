@@ -5,6 +5,7 @@ from .middleware.http_cache import (
     CacheControlPolicy,
     JsonSerializer,
 )
+from .middleware.prometheus import PrometheusMetrics
 from .params import (
     AbstractCollectionParser,
     CollectionIterator,
@@ -39,5 +40,6 @@ __all__ = [
     "JsonSerializer",
     "AbstractCachePolicy",
     "CacheControlPolicy",
+    "PrometheusMetrics",
     "AbtractTraceContext",
 ]

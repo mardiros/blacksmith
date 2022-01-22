@@ -19,6 +19,7 @@ from .domain.model import (
     JsonSerializer,
     PathInfoField,
     PostBodyField,
+    PrometheusMetrics,
     QueryStringField,
     Request,
     Response,
@@ -104,6 +105,7 @@ __all__ = [
     # Advanced Middlewares
     "AsyncCircuitBreaker",
     "SyncCircuitBreaker",
+    "PrometheusMetrics",
     "AsyncPrometheusMetrics",
     "SyncPrometheusMetrics",
     "AbstractCachePolicy",
