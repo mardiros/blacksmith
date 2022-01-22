@@ -61,6 +61,20 @@ services:
     depends_on:
       - consul
 
+  prometheus:
+    image: prom/prometheus
+    environment:
+      - SERVICE_NAME=prometheus
+    networks:
+      - "internal"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.prometheus.entrypoints=web"
+      - "traefik.http.routers.prometheus.rule=Host(`prometheus.${DOMAIN_NAME}`)"
+      - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
+
   api_user:
     build: ./user
     labels:

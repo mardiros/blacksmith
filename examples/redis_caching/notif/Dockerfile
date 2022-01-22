@@ -18,4 +18,4 @@ RUN poetry install
 COPY . /srv/notif/
 RUN poetry install
 
-CMD ["poetry", "run", "python", "src/notif/__init__.py"]
+CMD ["poetry", "run", "python", "src/notif/entrypoint.py"]

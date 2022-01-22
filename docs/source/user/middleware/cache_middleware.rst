@@ -28,13 +28,49 @@ Or using poetry
 Usage using the async api
 -------------------------
 
-.. literalinclude:: cache_middleware.py
+.. literalinclude:: cache_middleware_async.py
 
 
 Usage using the sync api
 ------------------------
 
 .. literalinclude:: cache_middleware_sync.py
+
+
+
+
+Combining caching and prometheus
+--------------------------------
+
+.. important::
+
+   The order of the middleware is important.
+
+
+In the example above, prometheus **will not count** cached request:
+
+::
+
+   cache = aioredis.from_url("redis://redis/0")
+   sd = AsyncConsulDiscovery()
+   cli = (
+      AsyncClientFactory(sd)
+      .add_middleware(AsyncHTTPCacheMiddleware(cache))
+      .add_middleware(AsyncPrometheusMetrics())
+   )
+
+
+In the example above, prometheus **will count** cached request:
+
+::
+
+   cache = aioredis.from_url("redis://redis/0")
+   sd = AsyncConsulDiscovery()
+   cli = (
+      AsyncClientFactory(sd)
+      .add_middleware(AsyncPrometheusMetrics())
+      .add_middleware(AsyncHTTPCacheMiddleware(cache))
+   )
 
 
 

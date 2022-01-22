@@ -33,9 +33,13 @@ Call the service
 
 ::
 
-   curl -H "Content-Type: application/json" \
-      --data '{"username": "naruto", "message": "Datte Bayo"}' \
-      -X POST http://notif.localhost/v1/notification
+   while true; do; curl -H "Content-Type: application/json" \
+         -v --data '{"username": "naruto", "message": "Datte Bayo"}' \
+         -X POST http://notif.localhost/v1/notification; done
+
+
+
+http://prometheus.localhost/graph?g0.expr=blacksmith_request_latency_seconds_count&g0.tab=0&g0.stacked=1&g0.show_exemplars=0&g0.range_input=1h
 
 
 Check result
