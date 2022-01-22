@@ -7,6 +7,7 @@ from blacksmith import (
     AsyncHTTPCacheMiddleware,
 )
 
+
 async def main():
     cache = aioredis.from_url("redis://redis/0")
     sd = AsyncConsulDiscovery()

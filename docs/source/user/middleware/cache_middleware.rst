@@ -46,6 +46,8 @@ Combining caching and prometheus
 
    The order of the middleware is important.
 
+GOOD
+~~~~
 
 In the example above, prometheus **will not count** cached request:
 
@@ -60,6 +62,9 @@ In the example above, prometheus **will not count** cached request:
    )
 
 
+BAD
+~~~
+
 In the example above, prometheus **will count** cached request:
 
 ::
@@ -72,6 +77,11 @@ In the example above, prometheus **will count** cached request:
       .add_middleware(AsyncHTTPCacheMiddleware(cache))
    )
 
+.. warning::
+
+   By adding the cache after the prometheus middleware, the metrics
+   ``blacksmith_request_latency_seconds`` will mix the API response
+   from the cache and from APIs.
 
 
 Full example of the redis_caching
