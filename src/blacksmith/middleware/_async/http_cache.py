@@ -1,8 +1,11 @@
 """Collect metrics based on prometheus."""
 import abc
+import time
 from dataclasses import asdict
 from datetime import timedelta
 from typing import Optional, Type
+
+from typing_extensions import Literal
 
 from blacksmith.domain.model.http import HTTPRequest, HTTPResponse, HTTPTimeout
 from blacksmith.domain.model.middleware.http_cache import (
@@ -11,9 +14,12 @@ from blacksmith.domain.model.middleware.http_cache import (
     CacheControlPolicy,
     JsonSerializer,
 )
-from blacksmith.typing import ClientName, Path
+from blacksmith.domain.model.middleware.prometheus import PrometheusMetrics
+from blacksmith.typing import ClientName, HTTPMethod, Path
 
 from .base import AsyncHTTPMiddleware, AsyncMiddleware
+
+CachableState = Literal["uncachable_request", "uncachable_response", "cached"]
 
 
 class AsyncAbstractCache(abc.ABC):
@@ -48,12 +54,14 @@ class AsyncHTTPCacheMiddleware(AsyncHTTPMiddleware):
     def __init__(
         self,
         cache: AsyncAbstractCache,
+        metrics: Optional[PrometheusMetrics] = None,
         policy: AbstractCachePolicy = CacheControlPolicy(),
         serializer: Type[AbstractSerializer] = JsonSerializer,
     ) -> None:
         self._cache = cache
         self._policy = policy
         self._serializer = serializer
+        self._metrics = metrics
 
     async def initialize(self) -> None:
         try:
@@ -68,14 +76,14 @@ class AsyncHTTPCacheMiddleware(AsyncHTTPMiddleware):
         path: Path,
         req: HTTPRequest,
         resp: HTTPResponse,
-    ) -> None:
+    ) -> bool:
         (
             ttl,
             vary_key,
             vary,
         ) = self._policy.get_cache_info_for_response(client_name, path, req, resp)
         if ttl <= 0:
-            return
+            return False
         ttld = timedelta(seconds=ttl)
         vary_val = self._serializer.dumps(vary)
         await self._cache.set(vary_key, vary_val, ttld)
@@ -86,6 +94,7 @@ class AsyncHTTPCacheMiddleware(AsyncHTTPMiddleware):
         resp.headers = dict(resp.headers)
         response_cache = self._serializer.dumps(asdict(resp))
         await self._cache.set(response_cache_key, response_cache, ttld)
+        return True
 
     async def get_from_cache(
         self, client_name: ClientName, path: Path, req: HTTPRequest
@@ -123,3 +132,37 @@ class AsyncHTTPCacheMiddleware(AsyncHTTPMiddleware):
             return resp
 
         return handle
+
+    def observe_blacksmith_cache_hit(
+        self, client_name: str, method: str, path: str, status_code: int, latency: float
+    ) -> None:
+        if self._metrics:
+            self._metrics.blacksmith_cache_hit.labels(
+                client_name=client_name,
+                method=method,
+                path=path,
+                status_code=status_code,
+            ).inc()
+            self._metrics.blacksmith_cache_latency_seconds.labels(
+                client_name=client_name,
+                method=method,
+                path=path,
+                status_code=status_code,
+            ).observe(latency)
+
+    def inc_blacksmith_cache_miss(
+        self,
+        client_name: str,
+        cachable_state: CachableState,
+        method: HTTPMethod,
+        path: str,
+        status_code: int,
+    ) -> None:
+        if self._metrics:
+            self._metrics.blacksmith_cache_miss.labels(
+                client_name=client_name,
+                cachable_state=cachable_state,
+                method=method,
+                path=path,
+                status_code=status_code,
+            ).inc()

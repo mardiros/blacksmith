@@ -15,7 +15,10 @@ else:
 
 class PrometheusMetrics:
     def __init__(
-        self, buckets: Optional[List[float]] = None, registry: Registry = None
+        self,
+        buckets: Optional[List[float]] = None,
+        hit_cache_buckets: Optional[List[float]] = None,
+        registry: Registry = None,
     ) -> None:
         from prometheus_client import (  # type: ignore
             REGISTRY,
@@ -28,6 +31,8 @@ class PrometheusMetrics:
             registry = REGISTRY
         if buckets is None:
             buckets = [0.05 * 2 ** x for x in range(10)]
+        if hit_cache_buckets is None:
+            hit_cache_buckets = [0.005 * 2 ** x for x in range(10)]
         version_info = {"version": pkg_resources.get_distribution("blacksmith").version}
         self.blacksmith_info = Gauge(
             "blacksmith_info",
@@ -57,4 +62,32 @@ class PrometheusMetrics:
             "State of the circuit breaker. 0 is closed, 1 is half-opened, 2 is opened.",
             registry=registry,
             labelnames=["client_name"],
+        )
+
+        self.blacksmith_cache_hit = Counter(
+            "blacksmith_cache_hit",
+            "Request where the response has been retrieved from the cache.",
+            registry=registry,
+            labelnames=["client_name", "method", "path", "status_code"],
+        )
+
+        self.blacksmith_cache_miss = Counter(
+            "blacksmith_cache_miss",
+            "Request where the response has been retrieved from the cache.",
+            registry=registry,
+            labelnames=[
+                "client_name",
+                "cachable_state",
+                "method",
+                "path",
+                "status_code",
+            ],
+        )
+
+        self.blacksmith_cache_latency_seconds = Histogram(
+            "blacksmith_cache_latency_seconds",
+            "Latency of http cache middleware in seconds",
+            buckets=hit_cache_buckets,
+            registry=registry,
+            labelnames=["client_name", "method", "path", "status_code"],
         )

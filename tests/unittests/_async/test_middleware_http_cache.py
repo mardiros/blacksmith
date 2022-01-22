@@ -1,9 +1,11 @@
 from typing import Any, Dict
 
 import pytest
+from prometheus_client import CollectorRegistry  # type: ignore
 
 from blacksmith.domain.model.http import HTTPRequest, HTTPResponse, HTTPTimeout
 from blacksmith.domain.model.middleware.http_cache import CacheControlPolicy
+from blacksmith.domain.model.middleware.prometheus import PrometheusMetrics
 from blacksmith.domain.typing import AsyncMiddleware
 from blacksmith.middleware._async.http_cache import (
     AsyncAbstractCache,
@@ -223,7 +225,70 @@ async def test_cache_middleware_policy_handle(
 
 
 @pytest.mark.asyncio
-async def test_circuit_breaker_initialize(fake_http_middleware_cache: Any):
+async def test_cache_middleware_metrics_helpers(
+    fake_http_middleware_cache: AsyncAbstractCache,
+    prometheus_registry: CollectorRegistry,
+    metrics: PrometheusMetrics,
+):
+    caching = AsyncHTTPCacheMiddleware(fake_http_middleware_cache, metrics)
+    caching.inc_blacksmith_cache_miss("dummy", "cached", "GET", "/", 200)
+    assert (
+        prometheus_registry.get_sample_value(
+            "blacksmith_cache_miss_total",
+            labels={
+                "client_name": "dummy",
+                "cachable_state": "cached",
+                "method": "GET",
+                "path": "/",
+                "status_code": "200",
+            },
+        )
+        == 1
+    )
+
+    caching.observe_blacksmith_cache_hit("dummy", "GET", "/", 200, 0.07)
+    assert (
+        prometheus_registry.get_sample_value(
+            "blacksmith_cache_hit_total",
+            labels={
+                "client_name": "dummy",
+                "method": "GET",
+                "path": "/",
+                "status_code": "200",
+            },
+        )
+        == 1
+    )
+    assert (
+        prometheus_registry.get_sample_value(
+            "blacksmith_cache_latency_seconds_bucket",
+            labels={
+                "client_name": "dummy",
+                "method": "GET",
+                "path": "/",
+                "status_code": "200",
+                "le": "0.04",
+            },
+        )
+        == 0
+    )
+    assert (
+        prometheus_registry.get_sample_value(
+            "blacksmith_cache_latency_seconds_bucket",
+            labels={
+                "client_name": "dummy",
+                "method": "GET",
+                "path": "/",
+                "status_code": "200",
+                "le": "0.08",
+            },
+        )
+        == 1
+    )
+
+
+@pytest.mark.asyncio
+async def test_http_cache_initialize(fake_http_middleware_cache: Any):
     caching = AsyncHTTPCacheMiddleware(fake_http_middleware_cache)
     await caching.initialize()
     assert fake_http_middleware_cache.initialize_called is True
