@@ -29,10 +29,10 @@ USERS = {
 @app.route("/v1/users/{username}", methods=["GET"])
 async def show_user(request):
     username = request.path_params["username"]
-    await asyncio.sleep(1.5)
+    await asyncio.sleep(1.)
     try:
         return JSONResponse(
-            USERS[username], headers={"Cache-Control": "max-age=60, public"}
+            USERS[username], headers={"Cache-Control": "max-age=10, public"}
         )
     except KeyError:
         return JSONResponse({"detail": "user not found"}, status_code=404)

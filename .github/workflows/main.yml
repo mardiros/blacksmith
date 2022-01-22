@@ -34,11 +34,6 @@ jobs:
       - name: Install blacksmith
         run: poetry install
 
-      - name: Run tests
-        run: |
-          poetry run pytest tests/unittests  --junitxml=junit/test-results-${{ matrix.python-version }}.xml --cov=blacksmith --cov-report=xml --cov-report=html
-          poetry run pytest tests/functionals
-
       - name: Check lint
         run: |
           poetry run flake8 .
@@ -46,6 +41,11 @@ jobs:
       - name: Check types
         run: |
           poetry run mypy src/blacksmith/
+
+      - name: Run tests
+        run: |
+          poetry run pytest tests/unittests  --junitxml=junit/test-results-${{ matrix.python-version }}.xml --cov=blacksmith --cov-report=xml --cov-report=html
+          poetry run pytest tests/functionals
 
       - name: Upload pytest test results
         uses: actions/upload-artifact@v2

@@ -18,7 +18,7 @@ You will find an example using prometheus in the examples directory:
    https://github.com/mardiros/blacksmith/tree/master/examples/zipkin_tracing
 
 
-.. figure:: ../../screenshots/zipkin.png
+.. figure:: ../../../../examples/zipkin_tracing/screenshot.png
 
-   Example of querying the zipkin instance on http://zipkin.localhost/
+   Example with Jaeger on http://jaegier.localhost/
 

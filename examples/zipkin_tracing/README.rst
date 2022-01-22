@@ -41,7 +41,7 @@ Check result
 
 The curl response contains a header `X-B3-Traceid` that can be searched
 
-on http://zipkin.localhost/
+on http://jaeger.localhost/
 
 
-.. image:: ../../docs/screenshots/zipkin.png
+.. image:: ./screenshots.png

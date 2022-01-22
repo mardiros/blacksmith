@@ -73,7 +73,7 @@ You may configure the buckets using the parameter buckets
 
 
 
-.. figure:: ../../screenshots/prometheus_request_latency_seconds.png
+.. figure:: ../../../../examples/prometheus_metrics/screenshot.png
 
    Example of `blacksmith_request_latency_seconds` Histogram
 
@@ -89,9 +89,6 @@ states of circuit breakers per :term:`client_name`.
  * `1` - the circuit breaker is `half-open`.
  * `2` - the circuit breaker is `open`.
 
-.. figure:: ../../screenshots/prometheus_circuit_breaker_gauge.png
-
-   Example of `blacksmith_circuit_breaker_state` Gauge
 
 blacksmith_circuit_breaker_error Counter
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -99,9 +96,6 @@ blacksmith_circuit_breaker_error Counter
 While combining with the :ref:`Circuit Breaker Middleware`,
 a metrics `blacksmith_circuit_breaker_error_total`
 
-.. figure:: ../../screenshots/prometheus_circuit_breaker_counter.png
-
-   Example of `blacksmith_circuit_breaker_error` Counter
 
 blacksmith_info Gauge
 ~~~~~~~~~~~~~~~~~~~~~
@@ -143,7 +137,7 @@ Example using starlette
 
 .. note::
 
-   REGISTRY is the default registry, `PrometheusMetrics` can be 
+   REGISTRY is the default registry, `PrometheusMetrics` can be
    build by specifying another registry if necessary:
 
    ::

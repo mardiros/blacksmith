@@ -8,8 +8,8 @@ from purgatory.typing import TTL, Hook, Threshold
 from blacksmith.domain.exceptions import HTTPError
 from blacksmith.domain.model.http import HTTPRequest, HTTPResponse, HTTPTimeout
 from blacksmith.domain.model.middleware.circuit_breaker import (
-    exclude_httpx_4xx,
     PrometheusHook,
+    exclude_httpx_4xx,
 )
 from blacksmith.domain.model.middleware.prometheus import PrometheusMetrics
 from blacksmith.typing import ClientName, Path

@@ -18,7 +18,10 @@ gensync:
     poetry run isort tests/unittests/_sync
     poetry run black tests/unittests/_sync
 
-test: mypy unittest functest lint
+lint:
+    poetry run flake8 && echo "$(tput setaf 10)Success: no lint issue"
+
+test: lint mypy unittest functest
 
 unittest test_suite=default_test_suite:
     poetry run pytest -sxv {{test_suite}}
@@ -34,9 +37,6 @@ cov test_suite=default_test_suite:
 
 functest:
     poetry run pytest -sxv tests/functionals
-
-lint:
-    poetry run flake8
 
 mypy:
     poetry run mypy src/

@@ -23,8 +23,8 @@ to add credentials per users.
    :maxdepth: 1
    :caption: Contents:
 
-   circuit_breaker_middleware
    prometheus_middleware
+   circuit_breaker_middleware
    zipkin_middleware
    cache_middleware
    authorization

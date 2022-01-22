@@ -3,31 +3,18 @@ import smtplib
 from textwrap import dedent
 
 from notif.resources.user import User
-from prometheus_client import CONTENT_TYPE_LATEST, REGISTRY, generate_latest
-from purgatory import AsyncRedisUnitOfWork
 from starlette.applications import Starlette
-from starlette.responses import JSONResponse, Response
+from starlette.responses import JSONResponse
 
-from blacksmith import (
-    AsyncCircuitBreaker,
-    AsyncClientFactory,
-    AsyncConsulDiscovery,
-    AsyncPrometheusMetrics,
-)
+from blacksmith import AsyncClientFactory, AsyncConsulDiscovery, AsyncRouterDiscovery
 
 app = Starlette(debug=True)
 
-sd = AsyncConsulDiscovery()
-prom = AsyncPrometheusMetrics()
-cli = (
-    AsyncClientFactory(sd)
-    .add_middleware(
-        AsyncCircuitBreaker(
-            3, 30, prometheus_metrics=prom, uow=AsyncRedisUnitOfWork("redis://redis/0")
-        ),
-    )
-    .add_middleware(prom)
-)
+sd = AsyncRouterDiscovery()
+cli = AsyncClientFactory(sd)
+
+
+smtp_sd = AsyncConsulDiscovery()
 
 
 async def send_email(user: User, message: str):
@@ -42,7 +29,7 @@ async def send_email(user: User, message: str):
     )
     msg = emaillib.message_from_string(email_content)
 
-    srv = await sd.resolve("smtp", None)
+    srv = await smtp_sd.resolve("smtp", None)
     # XXX Synchronous socket here, OK for the example
     # real code should use aiosmtplib
     s = smtplib.SMTP(srv.address, int(srv.port))
@@ -62,12 +49,3 @@ async def post_notif(request):
     user: User = (await api_user.users.get({"username": body["username"]})).response
     await send_email(user, body["message"])
     return JSONResponse({"detail": f"{user.email} accepted"}, status_code=202)
-
-
-@app.route("/metrics", methods=["GET"])
-async def get_metrics(request):
-    resp = Response(
-        generate_latest(REGISTRY),
-        media_type=CONTENT_TYPE_LATEST,
-    )
-    return resp

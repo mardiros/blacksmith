@@ -1,8 +1,19 @@
-from typing import cast
+import asyncio
 
-import uvicorn
-from asgiref.typing import ASGI3Application
-from notif.views import app
+from hypercorn.asyncio import serve
+from hypercorn.config import Config
+from notif.views import app, cli
+
+import blacksmith
+
+
+async def main():
+    blacksmith.scan("notif.resources")
+    config = Config()
+    config.bind = ["0.0.0.0:8000"]
+    await cli.initialize()
+    await serve(app, config)
+
 
 if __name__ == "__main__":
-    uvicorn.run(cast(ASGI3Application, app), host="0.0.0.0", port=8000)
+    asyncio.run(main())

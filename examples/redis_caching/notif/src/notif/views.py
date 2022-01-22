@@ -2,31 +2,28 @@ import email as emaillib
 import smtplib
 from textwrap import dedent
 
-from notif.resources.user import User
+import aioredis
 from prometheus_client import CONTENT_TYPE_LATEST, REGISTRY, generate_latest
-from purgatory import AsyncRedisUnitOfWork
 from starlette.applications import Starlette
 from starlette.responses import JSONResponse, Response
-
 from blacksmith import (
-    AsyncCircuitBreaker,
     AsyncClientFactory,
     AsyncConsulDiscovery,
     AsyncPrometheusMetrics,
+    AsyncHTTPCacheMiddleware,
 )
+
+from notif.resources.user import User
+
 
 app = Starlette(debug=True)
 
+cache = aioredis.from_url("redis://redis/0")
 sd = AsyncConsulDiscovery()
-prom = AsyncPrometheusMetrics()
 cli = (
     AsyncClientFactory(sd)
-    .add_middleware(
-        AsyncCircuitBreaker(
-            3, 30, prometheus_metrics=prom, uow=AsyncRedisUnitOfWork("redis://redis/0")
-        ),
-    )
-    .add_middleware(prom)
+    .add_middleware(AsyncHTTPCacheMiddleware(cache))
+    .add_middleware(AsyncPrometheusMetrics())
 )
 
 

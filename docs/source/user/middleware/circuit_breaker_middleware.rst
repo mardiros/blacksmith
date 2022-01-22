@@ -70,3 +70,7 @@ Full example of the circuit_breaker
 You will find an example using prometheus and the circuit breaker in the examples directory:
 
    https://github.com/mardiros/blacksmith/tree/master/examples/circuit_breaker
+
+
+
+.. image:: ../../../../examples/circuit_breaker/screenshot.png

@@ -28,7 +28,7 @@ Or using poetry
 Usage using the async api
 -------------------------
 
-.. literalinclude:: cache_middleware.py
+.. literalinclude:: cache_middleware_async.py
 
 
 Usage using the sync api
@@ -36,6 +36,52 @@ Usage using the sync api
 
 .. literalinclude:: cache_middleware_sync.py
 
+
+
+
+Combining caching and prometheus
+--------------------------------
+
+.. important::
+
+   The order of the middleware is important.
+
+GOOD
+~~~~
+
+In the example above, prometheus **will not count** cached request:
+
+::
+
+   cache = aioredis.from_url("redis://redis/0")
+   sd = AsyncConsulDiscovery()
+   cli = (
+      AsyncClientFactory(sd)
+      .add_middleware(AsyncHTTPCacheMiddleware(cache))
+      .add_middleware(AsyncPrometheusMetrics())
+   )
+
+
+BAD
+~~~
+
+In the example above, prometheus **will count** cached request:
+
+::
+
+   cache = aioredis.from_url("redis://redis/0")
+   sd = AsyncConsulDiscovery()
+   cli = (
+      AsyncClientFactory(sd)
+      .add_middleware(AsyncPrometheusMetrics())
+      .add_middleware(AsyncHTTPCacheMiddleware(cache))
+   )
+
+.. warning::
+
+   By adding the cache after the prometheus middleware, the metrics
+   ``blacksmith_request_latency_seconds`` will mix the API response
+   from the cache and from APIs.
 
 
 Full example of the redis_caching
