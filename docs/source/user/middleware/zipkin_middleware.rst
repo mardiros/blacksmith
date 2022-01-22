@@ -20,5 +20,5 @@ You will find an example using prometheus in the examples directory:
 
 .. figure:: ../../../../examples/zipkin_tracing/screenshot.png
 
-   Example with Jaeger on http://jaegier.localhost/
+   Example with Jaeger on http://jaeger.localhost/
 
