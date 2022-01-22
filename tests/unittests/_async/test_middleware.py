@@ -27,7 +27,7 @@ from blacksmith.middleware._async.circuit_breaker import (
     AsyncCircuitBreaker,
     exclude_httpx_4xx,
 )
-from blacksmith.middleware._async.prometheus import AsyncPrometheusMetrics
+from blacksmith.middleware._async.prometheus import AsyncPrometheusMiddleware
 from blacksmith.middleware._async.zipkin import (
     AbtractTraceContext,
     AsyncZipkinMiddleware,
@@ -89,7 +89,7 @@ async def test_prom_default_registry(
     dummy_http_request: HTTPRequest,
     dummy_timeout: HTTPTimeout,
 ):
-    metrics = AsyncPrometheusMetrics()
+    metrics = AsyncPrometheusMiddleware()
     next = metrics(echo_middleware)
 
     val = REGISTRY.get_sample_value("blacksmith_info", labels={"version": __version__})
@@ -119,7 +119,7 @@ async def test_prom_metrics(
 ):
     registry = CollectorRegistry()
     metrics = PrometheusMetrics(registry=registry)
-    metrics_middleware = AsyncPrometheusMetrics(metrics=metrics)
+    metrics_middleware = AsyncPrometheusMiddleware(metrics=metrics)
     next = metrics_middleware(slow_middleware)
 
     val = registry.get_sample_value("blacksmith_info", labels={"version": __version__})
@@ -195,7 +195,7 @@ async def test_prom_metrics_error(
 ):
     registry = CollectorRegistry()
     metrics = PrometheusMetrics(registry=registry)
-    metrics_middleware = AsyncPrometheusMetrics(metrics=metrics)
+    metrics_middleware = AsyncPrometheusMiddleware(metrics=metrics)
     next = metrics_middleware(boom_middleware)
 
     with pytest.raises(HTTPError):

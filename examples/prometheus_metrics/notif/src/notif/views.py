@@ -8,13 +8,17 @@ from starlette.applications import Starlette
 from starlette.responses import JSONResponse, Response
 
 import blacksmith
-from blacksmith import AsyncClientFactory, AsyncConsulDiscovery, AsyncPrometheusMetrics
+from blacksmith import (
+    AsyncClientFactory,
+    AsyncConsulDiscovery,
+    AsyncPrometheusMiddleware,
+)
 
 app = Starlette(debug=True)
 
 blacksmith.scan("notif.resources")
 sd = AsyncConsulDiscovery()
-cli = AsyncClientFactory(sd).add_middleware(AsyncPrometheusMetrics())
+cli = AsyncClientFactory(sd).add_middleware(AsyncPrometheusMiddleware())
 
 
 async def send_email(user: User, message: str):

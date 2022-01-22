@@ -22,7 +22,7 @@ from blacksmith.domain.model.middleware.prometheus import PrometheusMetrics
 from blacksmith.domain.registry import ApiRoutes
 from blacksmith.middleware._sync.auth import SyncHTTPAuthorization
 from blacksmith.middleware._sync.base import SyncHTTPMiddleware
-from blacksmith.middleware._sync.prometheus import SyncPrometheusMetrics
+from blacksmith.middleware._sync.prometheus import SyncPrometheusMiddleware
 from blacksmith.sd._sync.base import SyncAbstractServiceDiscovery
 from blacksmith.service._sync.base import SyncAbstractTransport
 from blacksmith.service._sync.client import SyncClient, SyncClientFactory
@@ -190,7 +190,7 @@ def test_client_factory_add_middleware(
     tp = FakeTimeoutTransport()
     auth = SyncHTTPAuthorization("Bearer", "abc")
     metrics = PrometheusMetrics(registry=CollectorRegistry())
-    prom = SyncPrometheusMetrics(metrics=metrics)
+    prom = SyncPrometheusMiddleware(metrics=metrics)
     client_factory = (
         SyncClientFactory(static_sd, tp, registry=dummy_registry)
         .add_middleware(prom)
@@ -221,7 +221,7 @@ def test_client_add_middleware(
 ):
     tp = FakeTimeoutTransport()
     metrics = PrometheusMetrics(registry=CollectorRegistry())
-    prom = SyncPrometheusMetrics(metrics)
+    prom = SyncPrometheusMiddleware(metrics)
     auth = SyncHTTPAuthorization("Bearer", "abc")
     client_factory = SyncClientFactory(
         static_sd, tp, registry=dummy_registry

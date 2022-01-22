@@ -12,7 +12,7 @@ from blacksmith import (
     AsyncCircuitBreaker,
     AsyncClientFactory,
     AsyncConsulDiscovery,
-    AsyncPrometheusMetrics,
+    AsyncPrometheusMiddleware,
     PrometheusMetrics,
 )
 
@@ -30,7 +30,7 @@ cli = (
             uow=AsyncRedisUnitOfWork("redis://redis/0"),
         ),
     )
-    .add_middleware(AsyncPrometheusMetrics(metrics))
+    .add_middleware(AsyncPrometheusMiddleware(metrics))
 )
 
 

@@ -2,7 +2,7 @@ from .auth import SyncHTTPAuthorization, SyncHTTPBearerAuthorization
 from .base import SyncHTTPAddHeadersMiddleware, SyncHTTPMiddleware, SyncMiddleware
 from .circuit_breaker import SyncCircuitBreaker
 from .http_cache import SyncAbstractCache, SyncHTTPCacheMiddleware
-from .prometheus import SyncPrometheusMetrics
+from .prometheus import SyncPrometheusMiddleware
 from .zipkin import SyncZipkinMiddleware
 
 __all__ = [
@@ -14,6 +14,6 @@ __all__ = [
     "SyncHTTPCacheMiddleware",
     "SyncHTTPMiddleware",
     "SyncMiddleware",
-    "SyncPrometheusMetrics",
+    "SyncPrometheusMiddleware",
     "SyncZipkinMiddleware",
 ]

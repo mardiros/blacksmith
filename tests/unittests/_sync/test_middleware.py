@@ -27,7 +27,7 @@ from blacksmith.middleware._sync.circuit_breaker import (
     SyncCircuitBreaker,
     exclude_httpx_4xx,
 )
-from blacksmith.middleware._sync.prometheus import SyncPrometheusMetrics
+from blacksmith.middleware._sync.prometheus import SyncPrometheusMiddleware
 from blacksmith.middleware._sync.zipkin import AbtractTraceContext, SyncZipkinMiddleware
 from tests.unittests.time import SyncSleep
 
@@ -86,7 +86,7 @@ def test_prom_default_registry(
     dummy_http_request: HTTPRequest,
     dummy_timeout: HTTPTimeout,
 ):
-    metrics = SyncPrometheusMetrics()
+    metrics = SyncPrometheusMiddleware()
     next = metrics(echo_middleware)
 
     val = REGISTRY.get_sample_value("blacksmith_info", labels={"version": __version__})
@@ -116,7 +116,7 @@ def test_prom_metrics(
 ):
     registry = CollectorRegistry()
     metrics = PrometheusMetrics(registry=registry)
-    metrics_middleware = SyncPrometheusMetrics(metrics=metrics)
+    metrics_middleware = SyncPrometheusMiddleware(metrics=metrics)
     next = metrics_middleware(slow_middleware)
 
     val = registry.get_sample_value("blacksmith_info", labels={"version": __version__})
@@ -192,7 +192,7 @@ def test_prom_metrics_error(
 ):
     registry = CollectorRegistry()
     metrics = PrometheusMetrics(registry=registry)
-    metrics_middleware = SyncPrometheusMetrics(metrics=metrics)
+    metrics_middleware = SyncPrometheusMiddleware(metrics=metrics)
     next = metrics_middleware(boom_middleware)
 
     with pytest.raises(HTTPError):

@@ -59,7 +59,7 @@ In the example above, prometheus **will not count** cached request:
    cli = (
       AsyncClientFactory(sd)
       .add_middleware(AsyncHTTPCacheMiddleware(cache, metrics=metrics))
-      .add_middleware(AsyncPrometheusMetrics(metrics))
+      .add_middleware(AsyncPrometheusMiddleware(metrics))
    )
 
 
@@ -74,7 +74,7 @@ In the example above, prometheus **will count** cached request:
    sd = AsyncConsulDiscovery()
    cli = (
       AsyncClientFactory(sd)
-      .add_middleware(AsyncPrometheusMetrics())
+      .add_middleware(AsyncPrometheusMiddleware())
       .add_middleware(AsyncHTTPCacheMiddleware(cache))
    )
 

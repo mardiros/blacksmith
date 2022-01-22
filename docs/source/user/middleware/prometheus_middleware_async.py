@@ -1,4 +1,8 @@
-from blacksmith import AsyncClientFactory, AsyncConsulDiscovery, AsyncPrometheusMetrics
+from blacksmith import (
+    AsyncClientFactory,
+    AsyncConsulDiscovery,
+    AsyncPrometheusMiddleware,
+)
 
 sd = AsyncConsulDiscovery()
-cli = AsyncClientFactory(sd).add_middleware(AsyncPrometheusMetrics())
+cli = AsyncClientFactory(sd).add_middleware(AsyncPrometheusMiddleware())

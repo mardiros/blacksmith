@@ -12,7 +12,7 @@ from blacksmith import (
     AsyncClientFactory,
     AsyncConsulDiscovery,
     AsyncHTTPCacheMiddleware,
-    AsyncPrometheusMetrics,
+    AsyncPrometheusMiddleware,
     PrometheusMetrics,
 )
 
@@ -24,7 +24,7 @@ sd = AsyncConsulDiscovery()
 cli = (
     AsyncClientFactory(sd)
     .add_middleware(AsyncHTTPCacheMiddleware(cache, metrics=metrics))
-    .add_middleware(AsyncPrometheusMetrics(metrics))
+    .add_middleware(AsyncPrometheusMiddleware(metrics))
 )
 
 

@@ -22,7 +22,7 @@ from blacksmith.domain.model.middleware.prometheus import PrometheusMetrics
 from blacksmith.domain.registry import ApiRoutes
 from blacksmith.middleware._async.auth import AsyncHTTPAuthorization
 from blacksmith.middleware._async.base import AsyncHTTPMiddleware
-from blacksmith.middleware._async.prometheus import AsyncPrometheusMetrics
+from blacksmith.middleware._async.prometheus import AsyncPrometheusMiddleware
 from blacksmith.sd._async.base import AsyncAbstractServiceDiscovery
 from blacksmith.service._async.base import AsyncAbstractTransport
 from blacksmith.service._async.client import AsyncClient, AsyncClientFactory
@@ -190,7 +190,7 @@ async def test_client_factory_add_middleware(
     tp = FakeTimeoutTransport()
     auth = AsyncHTTPAuthorization("Bearer", "abc")
     metrics = PrometheusMetrics(registry=CollectorRegistry())
-    prom = AsyncPrometheusMetrics(metrics=metrics)
+    prom = AsyncPrometheusMiddleware(metrics=metrics)
     client_factory = (
         AsyncClientFactory(static_sd, tp, registry=dummy_registry)
         .add_middleware(prom)
@@ -221,7 +221,7 @@ async def test_client_add_middleware(
 ):
     tp = FakeTimeoutTransport()
     metrics = PrometheusMetrics(registry=CollectorRegistry())
-    prom = AsyncPrometheusMetrics(metrics)
+    prom = AsyncPrometheusMiddleware(metrics)
     auth = AsyncHTTPAuthorization("Bearer", "abc")
     client_factory = AsyncClientFactory(
         static_sd, tp, registry=dummy_registry
