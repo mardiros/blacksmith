@@ -123,7 +123,6 @@ class AsyncClientFactory(Generic[TCollectionResponse, TResponse]):
         self.timeout = build_timeout(timeout)
         self.collection_parser = collection_parser
         self.middlewares = []
-        self._initialized = False
 
     def add_middleware(
         self, middleware: AsyncHTTPMiddleware
@@ -144,9 +143,6 @@ class AsyncClientFactory(Generic[TCollectionResponse, TResponse]):
     async def __call__(
         self, client_name: ClientName
     ) -> AsyncClient[TCollectionResponse, TResponse]:
-        if not self._initialized:
-            self._initialized = True
-            await self.initialize()
         srv, resources = self.registry.get_service(client_name)
         endpoint = await self.sd.get_endpoint(srv[0], srv[1])
         return AsyncClient(
