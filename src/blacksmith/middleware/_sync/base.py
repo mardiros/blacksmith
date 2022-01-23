@@ -8,11 +8,12 @@ from blacksmith.typing import ClientName, Path
 class SyncHTTPMiddleware:
     """Inject data in http query on every requests."""
 
-    def __init__(self) -> None:
-        pass
-
     def initialize(self) -> None:
-        pass
+        """
+        Asynchronous initialization of a middleware.
+
+        For instance, used to initialize connection to storage backend.
+        """
 
     def __call__(self, next: SyncMiddleware) -> SyncMiddleware:
         def handle(

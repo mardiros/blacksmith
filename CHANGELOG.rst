@@ -1,6 +1,47 @@
+0.13.0  - Released on 2022-01-23
+--------------------------------
+
+.. important::
+
+   This is the release candidate.
+   Last releases where a lot about refactoring and fixing naming concistency.
+
+   * No new feature will be added.
+   * No breaking change are going to be introduced.
+
+
+* New feature
+
+   * HTTP Cache Middleware now expose metrics using the its `metrics` argument.
+
+* Breaking Changes
+
+   * The :meth:`blacksmith.AsyncClientFactory.initialize` must be called to initialize
+     middleware that requires it. (e.g. the ones that use a ``aioredis`` connections).
+     See the documentation of :ref:`HTTP Cache Middleware` and
+     :ref:`Circuit Breaker Middleware` for the detail.
+
+   * All middleware classes ends with a ``Middleware`` suffix.
+      * ``AsyncHTTPAuthorization`` => :class:`blacksmith.AsyncHTTPAuthorizationMiddleware`
+      * ``AsyncHTTPBearerAuthorization`` => :class:`blacksmith.AsyncHTTPBearerMiddleware`
+      * ``AsyncCircuitBreaker`` => :class:`blacksmith.AsyncCircuitBreakerMiddleware`
+      * ``AsyncPrometheusMetrics`` => :class:`blacksmith.AsyncPrometheusMiddleware`
+      * ``AsyncHTTPCachingMiddleware`` => :class:`blacksmith.AsyncHTTPCacheMiddleware`
+      * ``SyncHTTPAuthorization`` => :class:`blacksmith.SyncHTTPAuthorizationMiddleware`
+      * ``SyncHTTPBearerAuthorization`` => :class:`blacksmith.SyncHTTPBearerMiddleware`
+      * ``SyncCircuitBreaker`` => :class:`blacksmith.SyncCircuitBreakerMiddleware`
+      * ``SyncPrometheusMetrics`` => :class:`blacksmith.SyncPrometheusMiddleware`
+      * ``SyncHTTPCachingMiddleware`` => :class:`blacksmith.SyncHTTPCacheMiddleware`
+
+   * :class:`blacksmith.AsyncCircuitBreakerMiddleware` and
+     :class:`blacksmith.SyncCircuitBreakerMiddleware` now have a
+     :class:`blacksmith.PrometheusMetrics` instead of the prometheus middleware
+     :class:`blacksmith.AsyncPrometheusMiddleware`
+     or :class:`blacksmith.SyncPrometheusMiddleware`.
+
 0.12.1  - Released on 2022-01-19
 --------------------------------
-* Expose AsyncClient and SyncClient for typing purpose. 
+* Expose AsyncClient and SyncClient for typing purpose.
 
 0.12.0  - Released on 2022-01-19
 --------------------------------
@@ -63,7 +104,7 @@
 ..important:
 
    Breaking change in the middleware.
-  
+
    Parameter fail_max is now named threshold
    Parameter timeout_duration is now named ttl and is a float (number of second).
 

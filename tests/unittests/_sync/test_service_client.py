@@ -250,8 +250,5 @@ def test_client_factory_initialize_middlewares(
         static_sd, echo_middleware, registry=dummy_registry
     ).add_middleware(dummy_middleware)
     assert dummy_middleware.initialized == 0
-    cli = client_factory("api")
-    cli.dummies.get({"name": "foo"})
-    assert dummy_middleware.initialized == 1
-    cli = client_factory("api")
+    client_factory.initialize()
     assert dummy_middleware.initialized == 1
