@@ -82,8 +82,7 @@ contracts to get a better view of which service use what.
 Building SDK
 ------------
 
-By the way, public API provider comes with an SDK, which is a good case,
-and blacksmith can be used to build SDK for Python / asyncio.
+By the way, blacksmith can be use to build a SDK for public API.
 
 
 Working with or without asyncio
