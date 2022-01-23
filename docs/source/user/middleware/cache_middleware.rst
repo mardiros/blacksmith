@@ -1,3 +1,5 @@
+.. _`HTTP Cache Middleware`:
+
 HTTP Cache Middleware
 =====================
 
@@ -61,7 +63,9 @@ GOOD
 
 In the example above, prometheus **will not count** cached request:
 
-::
+.. code-block:: python
+   :emphasize-lines: 6,7
+   :linenos:
 
    cache = aioredis.from_url("redis://redis/0")
    sd = AsyncConsulDiscovery()
@@ -78,14 +82,17 @@ BAD
 
 In the example above, prometheus **will count** cached request:
 
-::
+.. code-block:: python
+   :emphasize-lines: 6,7
+   :linenos:
 
    cache = aioredis.from_url("redis://redis/0")
    sd = AsyncConsulDiscovery()
+   metrics = PrometheusMetrics()
    cli = (
       AsyncClientFactory(sd)
-      .add_middleware(AsyncPrometheusMiddleware())
-      .add_middleware(AsyncHTTPCacheMiddleware(cache))
+      .add_middleware(AsyncPrometheusMiddleware(metrics))
+      .add_middleware(AsyncHTTPCacheMiddleware(cache, metrics=metrics))
    )
 
 .. warning::
