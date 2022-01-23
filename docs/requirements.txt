@@ -498,9 +498,9 @@ pygls==0.11.3 \
 pygments==2.11.2; python_version >= "3.6" and python_full_version < "3.0.0" or python_full_version >= "3.4.0" and python_version >= "3.6" \
     --hash=sha256:44238f1b60a76d78fc8ca0528ee429702aae011c265fe6a8dd8b63049ae41c65 \
     --hash=sha256:4e426f72023d88d03b2fa258de560726ce890ff3b630f88c21cbb8b2503b8c6a
-pyparsing==3.0.6; python_version >= "3.6" \
-    --hash=sha256:04ff808a5b90911829c55c4e26f75fa5ca8a2f5f36aa3a51f68e27033341d3e4 \
-    --hash=sha256:d9bdec0013ef1eb5a84ab39a3b3868911598afa494f5faa038647101504e2b81
+pyparsing==3.0.7; python_version >= "3.6" \
+    --hash=sha256:a6c06a88f252e6c322f65faf8f418b16213b51bdfaece0524c1c1bc30c63c484 \
+    --hash=sha256:18ee9022775d270c55187733956460083db60b37d0d0fb357445f3094eed3eea
 pytest-asyncio==0.16.0; python_version >= "3.6" \
     --hash=sha256:7496c5977ce88c34379df64a66459fe395cd05543f0a2f837016e7144391fcfb \
     --hash=sha256:5f2a21273c47b331ae6aa5b36087047b4899e40f03f18397c0e65fa5cca54e9b
@@ -590,9 +590,9 @@ typed-ast==1.5.1; python_version < "3.8" and implementation_name == "cpython" an
 typeguard==2.13.3; python_full_version >= "3.5.3" \
     --hash=sha256:5e3e3be01e887e7eafae5af63d1f36c849aaa94e3a0112097312aabfa16284f1 \
     --hash=sha256:00edaa8da3a133674796cf5ea87d9f4b4c367d77476e185e80251cc13dfbb8c4
-types-redis==4.1.9 \
-    --hash=sha256:d46f4a5a81238816136a5729b44276a506f3c5eb8a3bf165b79e01eced19e544 \
-    --hash=sha256:47952c7d50ea5bdee4683c98f9cb2ab9554e5161437dfccdf8d1cd4a1ce481b3
+types-redis==4.1.10 \
+    --hash=sha256:cd9fe6689442315a453028b38ff2ba11eff7a46f22320335766508e956164dc6 \
+    --hash=sha256:7b6b5ce5837cdebb9b36efd37a8587204f544956367a51a6cd29b8e62def756e
 types-setuptools==57.4.7 \
     --hash=sha256:9677d969b00ec1c14552f5be2b2b47a6fbea4d0ed4de0fdcee18abdaa0cc9267 \
     --hash=sha256:ffda504687ea02d4b7751c0d1df517fbbcdc276836d90849e4f1a5f1ccd79f01
