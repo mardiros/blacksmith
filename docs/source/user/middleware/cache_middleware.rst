@@ -31,12 +31,22 @@ Usage using the async api
 .. literalinclude:: cache_middleware_async.py
 
 
+.. important::
+
+   Using redis, the middleware **MUST BE** initialized.
+
+   To initialize middlewares, the method :meth:`blacksmith.ClientFactory.initialize`
+   has to be called after instantiation.
+
+   Example using initializing in an ASGI service running with hypercorn.
+
+   .. literalinclude:: ../../../../examples/http_cache/notif/src/notif/entrypoint.py
+
+
 Usage using the sync api
 ------------------------
 
 .. literalinclude:: cache_middleware_sync.py
-
-
 
 
 Combining caching and prometheus

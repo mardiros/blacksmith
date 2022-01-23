@@ -53,6 +53,19 @@ Async
 
 .. literalinclude:: circuit_breaker_middleware_redis_async.py
 
+
+.. important::
+
+   Using redis, the middleware **MUST BE** initialized.
+
+   To initialize middlewares, the method :meth:`blacksmith.ClientFactory.initialize`
+   has to be called after instantiation.
+
+   Example using initializing in an ASGI service running with hypercorn.
+
+   .. literalinclude:: ../../../../examples/circuit_breaker/notif/src/notif/entrypoint.py
+
+
 Sync
 ~~~~
 
