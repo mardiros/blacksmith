@@ -11,6 +11,7 @@ from blacksmith import (
     PathInfoField,
     Request,
     Response,
+    register,
 )
 
 
@@ -31,7 +32,7 @@ class TLDResponse(Response):
     # 'href': 'https://api.gandi.net/v5/domain/tlds/eu'
 
 
-blacksmith.register(
+register(
     "gandi",
     "tld",
     "gandi",

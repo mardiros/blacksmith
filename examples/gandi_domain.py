@@ -7,7 +7,6 @@ from typing import Any
 from pydantic.fields import Field
 from pydantic.main import BaseModel
 
-import blacksmith
 from blacksmith import (
     AsyncClientFactory,
     AsyncHTTPAuthorizationMiddleware,
@@ -16,6 +15,7 @@ from blacksmith import (
     QueryStringField,
     Request,
     Response,
+    register,
 )
 
 
@@ -44,7 +44,7 @@ class CollectionDomainParam(Request):
     per_page: int = QueryStringField(2)
 
 
-blacksmith.register(
+register(
     "gandi",
     "domain",
     "gandi",
