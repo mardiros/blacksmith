@@ -38,7 +38,7 @@ In Blacksmith, every resources are bound to schemas that define request and resp
 in order to abstract HTTP.
 
 This is a common concept for SQL table with ORM, where tables are bound to models,
-and then, operations are available on models. This is a usefull abstraction to 
+and then, operations are available on models. This is a usefull abstraction to
 write maintainable code and to dive into a project easilly.
 
 Handling API resources using an http client, such as `requests`_ does not handle
@@ -83,7 +83,7 @@ Building SDK
 ------------
 
 By the way, public API provider comes with an SDK, which is a good case,
-and blacksmith can be used to build SDK for Python / asyncio. 
+and blacksmith can be used to build SDK for Python / asyncio.
 
 
 Working with or without asyncio
