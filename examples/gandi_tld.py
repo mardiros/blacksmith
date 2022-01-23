@@ -3,7 +3,6 @@ import os
 import sys
 from typing import Any
 
-import blacksmith
 from blacksmith import (
     AsyncClientFactory,
     AsyncHTTPAuthorizationMiddleware,
