@@ -237,7 +237,7 @@ def test_cache_middleware_metrics_helpers(
     metrics: PrometheusMetrics,
 ):
     caching = SyncHTTPCacheMiddleware(fake_http_middleware_cache, metrics)
-    caching.inc_blacksmith_cache_miss("dummy", "cached", "GET", "/", 200)
+    caching.inc_cache_miss("dummy", "cached", "GET", "/", 200)
     assert (
         prometheus_registry.get_sample_value(
             "blacksmith_cache_miss_total",
@@ -252,7 +252,7 @@ def test_cache_middleware_metrics_helpers(
         == 1
     )
 
-    caching.observe_blacksmith_cache_hit("dummy", "GET", "/", 200, 0.07)
+    caching.observe_cache_hit("dummy", "GET", "/", 200, 0.07)
     assert (
         prometheus_registry.get_sample_value(
             "blacksmith_cache_hit_total",

@@ -123,7 +123,7 @@ class SyncHTTPCacheMiddleware(SyncHTTPMiddleware):
             start = time.perf_counter()
             if not self._policy.handle_request(req, client_name, path):
                 resp = next(req, client_name, path, timeout)
-                self.inc_blacksmith_cache_miss(
+                self.inc_cache_miss(
                     client_name,
                     "uncachable_request",
                     req.method,
@@ -135,7 +135,7 @@ class SyncHTTPCacheMiddleware(SyncHTTPMiddleware):
             resp_from_cache = self.get_from_cache(client_name, path, req)
             if resp_from_cache:
                 latency = time.perf_counter() - start
-                self.observe_blacksmith_cache_hit(
+                self.observe_cache_hit(
                     client_name, req.method, path, resp_from_cache.status_code, latency
                 )
                 return resp_from_cache
@@ -143,14 +143,12 @@ class SyncHTTPCacheMiddleware(SyncHTTPMiddleware):
             resp = next(req, client_name, path, timeout)
             is_cached = self.cache_response(client_name, path, req, resp)
             state: CachableState = "cached" if is_cached else "uncachable_response"
-            self.inc_blacksmith_cache_miss(
-                client_name, state, req.method, path, resp.status_code
-            )
+            self.inc_cache_miss(client_name, state, req.method, path, resp.status_code)
             return resp
 
         return handle
 
-    def observe_blacksmith_cache_hit(
+    def observe_cache_hit(
         self, client_name: str, method: str, path: str, status_code: int, latency: float
     ) -> None:
         if self._metrics:
@@ -167,7 +165,7 @@ class SyncHTTPCacheMiddleware(SyncHTTPMiddleware):
                 status_code=status_code,
             ).observe(latency)
 
-    def inc_blacksmith_cache_miss(
+    def inc_cache_miss(
         self,
         client_name: str,
         cachable_state: CachableState,
