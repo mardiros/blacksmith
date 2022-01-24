@@ -1,15 +1,15 @@
 from starlette_zipkin import trace
 
 from blacksmith import (
-    AbtractTraceContext,
+    AbstractTraceContext,
     AsyncClientFactory,
     AsyncConsulDiscovery,
     AsyncZipkinMiddleware,
 )
 
-# AbtractTraceContext is an abtract base classe,
+# AbstractTraceContext is an abtract base classe,
 # register the class that already implement it.
-AbtractTraceContext.register(trace)
+AbstractTraceContext.register(trace)
 
 sd = AsyncConsulDiscovery()
 cli = AsyncClientFactory(sd)

@@ -11,7 +11,7 @@ from .domain.model import (
     AbstractCachePolicy,
     AbstractCollectionParser,
     AbstractSerializer,
-    AbtractTraceContext,
+    AbstractTraceContext,
     CacheControlPolicy,
     CollectionIterator,
     HeaderField,
@@ -115,6 +115,6 @@ __all__ = [
     "AsyncAbstractCache",
     "AsyncHTTPCacheMiddleware",
     "SyncHTTPCacheMiddleware",
-    "AbtractTraceContext",
+    "AbstractTraceContext",
     "AsyncZipkinMiddleware",
 ]

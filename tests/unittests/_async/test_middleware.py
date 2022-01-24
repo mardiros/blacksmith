@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional, cast
+from typing import Any, Dict, cast
 
 import prometheus_client  # type: ignore
 import pytest
@@ -16,6 +16,7 @@ from purgatory.service._async.circuitbreaker import AsyncCircuitBreakerFactory
 from blacksmith import __version__
 from blacksmith.domain.exceptions import HTTPError
 from blacksmith.domain.model.http import HTTPRequest, HTTPResponse, HTTPTimeout
+from blacksmith.domain.model.middleware.circuit_breaker import exclude_httpx_4xx
 from blacksmith.domain.model.middleware.prometheus import PrometheusMetrics
 from blacksmith.domain.typing import AsyncMiddleware
 from blacksmith.middleware._async.auth import AsyncHTTPAuthorizationMiddleware
@@ -23,15 +24,9 @@ from blacksmith.middleware._async.base import (
     AsyncHTTPAddHeadersMiddleware,
     AsyncHTTPMiddleware,
 )
-from blacksmith.middleware._async.circuit_breaker import (
-    AsyncCircuitBreakerMiddleware,
-    exclude_httpx_4xx,
-)
+from blacksmith.middleware._async.circuit_breaker import AsyncCircuitBreakerMiddleware
 from blacksmith.middleware._async.prometheus import AsyncPrometheusMiddleware
-from blacksmith.middleware._async.zipkin import (
-    AbtractTraceContext,
-    AsyncZipkinMiddleware,
-)
+from blacksmith.middleware._async.zipkin import AsyncZipkinMiddleware
 from tests.unittests.time import AsyncSleep
 
 
@@ -264,9 +259,9 @@ async def test_circuit_breaker_5xx(
 
     next = cbreaker(boom_middleware)
 
-    with pytest.raises(HTTPError) as exc:
+    with pytest.raises(HTTPError):
         await next(dummy_http_request, "dummy", "/dummies/{name}", dummy_timeout)
-    with pytest.raises(HTTPError) as exc:
+    with pytest.raises(HTTPError):
         await next(dummy_http_request, "dummy", "/dummies/{name}", dummy_timeout)
 
     with pytest.raises(OpenedState) as exc:
@@ -275,7 +270,7 @@ async def test_circuit_breaker_5xx(
 
     # Event if it works, the circuit breaker is open
     next = cbreaker(echo_middleware)
-    with pytest.raises(OpenedState) as exc:
+    with pytest.raises(OpenedState):
         await next(dummy_http_request, "dummy", "/dummies/{name}", dummy_timeout)
 
     # Other service is still working
@@ -469,43 +464,15 @@ async def test_zipkin_middleware(
     echo_middleware: AsyncMiddleware,
     dummy_http_request: HTTPRequest,
     dummy_timeout: HTTPTimeout,
+    trace: Any,
 ):
-    class Trace(AbtractTraceContext):
-        name = ""
-        kind = ""
-        tags = {}
-        annotations = []
 
-        def __init__(self, name: str, kind: str) -> None:
-            Trace.name = name
-            Trace.kind = kind
-            Trace.tags = {}
-            Trace.annotations = []
-
-        @classmethod
-        def make_headers(cls) -> Dict[str, str]:
-            return {}
-
-        def __enter__(self) -> "Trace":
-            return self
-
-        def __exit__(self, *exc: Any):
-            pass
-
-        def tag(self, key: str, value: str) -> "Trace":
-            Trace.tags[key] = value
-            return self
-
-        def annotate(self, value: Optional[str], ts: Optional[float]) -> "Trace":
-            Trace.annotations.append((value, ts))
-            return self
-
-    middleware = AsyncZipkinMiddleware(Trace)
+    middleware = AsyncZipkinMiddleware(trace)
     next = middleware(echo_middleware)
     await next(dummy_http_request, "dummy", "/dummies/{name}", dummy_timeout)
-    assert Trace.name == "GET /dummies/42"
-    assert Trace.kind == "CLIENT"
-    assert Trace.tags == {
+    assert trace.name == "GET /dummies/42"
+    assert trace.kind == "CLIENT"
+    assert trace.tags == {
         "blacksmith.client_name": "dummy",
         "http.path": "/dummies/{name}",
         "http.querystring": "{'foo': 'bar'}",
@@ -518,44 +485,16 @@ async def test_zipkin_middleware_tag_error(
     boom_middleware: AsyncMiddleware,
     dummy_http_request: HTTPRequest,
     dummy_timeout: HTTPTimeout,
+    trace: Any,
 ):
-    class Trace(AbtractTraceContext):
-        name = ""
-        kind = ""
-        tags = {}
-        annotations = []
 
-        def __init__(self, name: str, kind: str) -> None:
-            Trace.name = name
-            Trace.kind = kind
-            Trace.tags = {}
-            Trace.annotations = []
-
-        @classmethod
-        def make_headers(cls) -> Dict[str, str]:
-            return {}
-
-        def __enter__(self) -> "Trace":
-            return self
-
-        def __exit__(self, *exc: Any):
-            pass
-
-        def tag(self, key: str, value: str) -> "Trace":
-            Trace.tags[key] = value
-            return self
-
-        def annotate(self, value: Optional[str], ts: Optional[float]) -> "Trace":
-            Trace.annotations.append((value, ts))
-            return self
-
-    middleware = AsyncZipkinMiddleware(Trace)
+    middleware = AsyncZipkinMiddleware(trace)
     next = middleware(boom_middleware)
     with pytest.raises(HTTPError):
         await next(dummy_http_request, "dummy", "/dummies/{name}", dummy_timeout)
-    assert Trace.name == "GET /dummies/42"
-    assert Trace.kind == "CLIENT"
-    assert Trace.tags == {
+    assert trace.name == "GET /dummies/42"
+    assert trace.kind == "CLIENT"
+    assert trace.tags == {
         "blacksmith.client_name": "dummy",
         "http.path": "/dummies/{name}",
         "http.querystring": "{'foo': 'bar'}",

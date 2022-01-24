@@ -39,7 +39,7 @@ functest:
     poetry run pytest -sxv tests/functionals
 
 mypy:
-    poetry run mypy src/
+    poetry run mypy src/ tests/
 
 black:
     poetry run isort .

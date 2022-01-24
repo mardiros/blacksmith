@@ -6,6 +6,7 @@ from .middleware.http_cache import (
     JsonSerializer,
 )
 from .middleware.prometheus import PrometheusMetrics
+from .middleware.zipkin import AbstractTraceContext
 from .params import (
     AbstractCollectionParser,
     CollectionIterator,
@@ -19,7 +20,6 @@ from .params import (
     ResponseBox,
     TResponse,
 )
-from .tracing import AbtractTraceContext
 
 __all__ = [
     "HeaderField",
@@ -41,5 +41,5 @@ __all__ = [
     "AbstractCachePolicy",
     "CacheControlPolicy",
     "PrometheusMetrics",
-    "AbtractTraceContext",
+    "AbstractTraceContext",
 ]
