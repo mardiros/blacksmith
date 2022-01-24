@@ -57,7 +57,7 @@ types-redis = "^4.1.8"
 norecursedirs = "tests/unittests/scanned_resources"
 
 [tool.pyright]
-include = ["src"]
+include = ["src", "tests"]
 ignore = ["examples"]
 typeCheckingMode = "strict"
 reportUnknownMemberType = false
@@ -68,6 +68,7 @@ reportPrivateUsage = false
 [[tool.mypy.overrides]]
 module = "blacksmith.*"
 disallow_untyped_defs = true
+disallow_any_generics = true
 
 [tool.isort]
 profile = "black"

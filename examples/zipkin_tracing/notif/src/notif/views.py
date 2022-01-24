@@ -10,11 +10,11 @@ from starlette_zipkin import trace
 from blacksmith import AsyncClientFactory, AsyncConsulDiscovery
 from blacksmith.domain.exceptions import HTTPError
 from blacksmith.middleware._async.zipkin import (
-    AbtractTraceContext,
+    AbstractTraceContext,
     AsyncZipkinMiddleware,
 )
 
-AbtractTraceContext.register(trace)
+AbstractTraceContext.register(trace)
 
 
 app = Starlette(debug=True)

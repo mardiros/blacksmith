@@ -58,7 +58,7 @@ def test_route_proxy_prepare_middleware(
 ):
     resp = HTTPResponse(200, {}, "")
 
-    proxy = SyncRouteProxy(
+    proxy: SyncRouteProxy[Any, Any] = SyncRouteProxy(
         "dummy",
         "dummies",
         "http://dummy/",

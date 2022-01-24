@@ -1,10 +1,11 @@
 from datetime import timedelta
-from typing import Any, Dict, Mapping, Optional, Tuple
+from typing import Any, Dict, List, Mapping, Optional, Tuple, Type
 
 import pytest
 
 from blacksmith.domain.exceptions import HTTPError
 from blacksmith.domain.model import HTTPRequest, HTTPResponse, HTTPTimeout
+from blacksmith.domain.model.middleware.zipkin import AbstractTraceContext
 from blacksmith.middleware._sync.auth import SyncHTTPAuthorizationMiddleware
 from blacksmith.middleware._sync.base import SyncHTTPAddHeadersMiddleware
 from blacksmith.middleware._sync.http_cache import SyncAbstractCache
@@ -192,3 +193,39 @@ def fake_http_middleware_cache():
 @pytest.fixture
 def fake_http_middleware_cache_with_data(params: Mapping[str, Any]):
     return SyncFakeHttpMiddlewareCache(params["initial_cache"])
+
+
+class Trace(AbstractTraceContext):
+    name = ""
+    kind = ""
+    tags: Dict[str, str] = {}
+    annotations: List[Tuple[Optional[str], Optional[float]]] = []
+
+    def __init__(self, name: str, kind: str) -> None:
+        Trace.name = name
+        Trace.kind = kind
+        Trace.tags = {}
+        Trace.annotations = []
+
+    @classmethod
+    def make_headers(cls) -> Dict[str, str]:
+        return {}
+
+    def __enter__(self) -> "Trace":
+        return self
+
+    def __exit__(self, *exc: Any):
+        pass
+
+    def tag(self, key: str, value: str) -> "Trace":
+        Trace.tags[key] = value
+        return self
+
+    def annotate(self, value: Optional[str], ts: Optional[float] = None) -> "Trace":
+        Trace.annotations.append((value, ts))
+        return self
+
+
+@pytest.fixture
+def trace() -> Type[AbstractTraceContext]:
+    return Trace

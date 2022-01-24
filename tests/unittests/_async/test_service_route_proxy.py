@@ -58,7 +58,7 @@ async def test_route_proxy_prepare_middleware(
 ):
     resp = HTTPResponse(200, {}, "")
 
-    proxy = AsyncRouteProxy(
+    proxy: AsyncRouteProxy[Any, Any] = AsyncRouteProxy(
         "dummy",
         "dummies",
         "http://dummy/",

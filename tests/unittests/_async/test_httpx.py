@@ -15,9 +15,9 @@ headers["Content-Type"] = "application/json"
 dummy_json = {"name": "Alice"}
 dummy_error = {"detail": "error"}
 dummy_response = Response(200, headers=headers, json=dummy_json)
-dummy_empty_response = Response(204, headers={}, json=None)
-dummy_error_response = Response(422, headers={}, json=dummy_error)
-dummy_error_500_response = Response(500, headers={}, text="internal server error")
+dummy_empty_response = Response(204, headers=Headers(), json=None)
+dummy_error_response = Response(422, headers=headers, json=dummy_error)
+dummy_error_500_response = Response(500, headers=headers, text="internal server error")
 
 
 def dummy_query_timeout():

@@ -10,7 +10,7 @@ from blacksmith.typing import ClientName, Path
 from .base import AsyncHTTPMiddleware, AsyncMiddleware
 
 
-class AbtractTraceContext(abc.ABC):
+class AbstractTraceContext(abc.ABC):
     """
     Interface of the trace context for the middleware.
 
@@ -27,17 +27,17 @@ class AbtractTraceContext(abc.ABC):
         """Create a trace span for the current context."""
 
     @abc.abstractmethod
-    def tag(self, key: str, value: str) -> "AbtractTraceContext":
+    def tag(self, key: str, value: str) -> "AbstractTraceContext":
         """Tag the span"""
 
     @abc.abstractmethod
     def annotate(
         self, value: Optional[str], ts: Optional[float] = None
-    ) -> "AbtractTraceContext":
+    ) -> "AbstractTraceContext":
         """Annotate the span"""
 
     @abc.abstractmethod
-    def __enter__(self) -> "AbtractTraceContext":
+    def __enter__(self) -> "AbstractTraceContext":
         """Make the created trace span of the current context the active span."""
 
     @abc.abstractmethod
@@ -54,7 +54,7 @@ class AsyncZipkinMiddleware(AsyncHTTPMiddleware):
     :param trace: A deferred context manager that manage the trace span stack.
     """
 
-    def __init__(self, trace: Type[AbtractTraceContext]) -> None:
+    def __init__(self, trace: Type[AbstractTraceContext]) -> None:
         self.trace = trace
 
     def __call__(self, next: AsyncMiddleware) -> AsyncMiddleware:

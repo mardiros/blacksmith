@@ -1,6 +1,7 @@
 from typing import Any, cast
 
 import pytest
+from _pytest._code.code import ExceptionInfo  # type: ignore
 from prometheus_client import CollectorRegistry  # type: ignore
 
 from blacksmith.domain.exceptions import (
@@ -81,7 +82,7 @@ def test_client(static_sd: SyncAbstractServiceDiscovery):
         "/dummies/{name}", {"GET": (GetParam, GetResponse)}, None, None, None
     )
 
-    client = SyncClient(
+    client: SyncClient[Any, GetResponse] = SyncClient(
         "api",
         "https://dummies.v1",
         {"dummies": routes},
@@ -90,21 +91,18 @@ def test_client(static_sd: SyncAbstractServiceDiscovery):
         collection_parser=CollectionParser,
         middlewares=[],
     )
-    resp = client.dummies.get({"name": "barbie"})
-    assert isinstance(resp, ResponseBox)
-    assert isinstance(resp.response, GetResponse)
-    assert resp.response.dict() == {"name": "Barbie", "age": 42}
-    assert resp.json == {
+    api_resp = client.dummies.get({"name": "barbie"})
+    assert isinstance(api_resp, ResponseBox)
+    assert isinstance(api_resp.response, GetResponse)
+    assert api_resp.response.dict() == {"name": "Barbie", "age": 42}
+    assert api_resp.json == {
         "name": "Barbie",
         "age": 42,
         "hair_color": "blond",
     }
+    assert api_resp.response.dict() == {"name": "Barbie", "age": 42}
 
-    resp = client.dummies.get(GetParam(name="barbie"))
-    assert isinstance(resp, ResponseBox)
-    assert isinstance(resp.response, GetResponse)
-    assert resp.response.dict() == {"name": "Barbie", "age": 42}
-
+    ctx: ExceptionInfo[Any]
     with pytest.raises(UnregisteredResourceException) as ctx:
         client.daemon
     assert str(ctx.value) == "Unregistered resource 'daemon' in client 'api'"
@@ -139,7 +137,7 @@ def test_client_timeout(static_sd: SyncAbstractServiceDiscovery):
         "/dummies/{name}", {"GET": (GetParam, GetResponse)}, None, None, None
     )
 
-    client = SyncClient(
+    client: SyncClient[Any, GetResponse] = SyncClient(
         "api",
         "http://dummies.v1",
         {"dummies": routes},
@@ -159,7 +157,9 @@ def test_client_timeout(static_sd: SyncAbstractServiceDiscovery):
 @pytest.mark.asyncio
 def test_client_factory_config(static_sd: SyncAbstractServiceDiscovery):
     tp = FakeTimeoutTransport()
-    client_factory = SyncClientFactory(static_sd, tp, registry=dummy_registry)
+    client_factory: SyncClientFactory[Any, Any] = SyncClientFactory(
+        static_sd, tp, registry=dummy_registry
+    )
 
     cli = client_factory("api")
 
@@ -170,7 +170,9 @@ def test_client_factory_config(static_sd: SyncAbstractServiceDiscovery):
 
 
 def test_client_factory_configure_transport(static_sd: SyncAbstractServiceDiscovery):
-    client_factory = SyncClientFactory(static_sd, verify_certificate=False)
+    client_factory: SyncClientFactory[Any, Any] = SyncClientFactory(
+        static_sd, verify_certificate=False
+    )
     assert client_factory.transport.verify_certificate is False
 
 
@@ -179,7 +181,9 @@ def test_client_factory_configure_proxies(static_sd: SyncAbstractServiceDiscover
         "http://": "http://localhost:8030",
         "https://": "http://localhost:8031",
     }
-    client_factory = SyncClientFactory(static_sd, proxies=proxies)
+    client_factory: SyncClientFactory[Any, Any] = SyncClientFactory(
+        static_sd, proxies=proxies
+    )
     assert client_factory.transport.proxies is proxies
 
 
@@ -191,7 +195,7 @@ def test_client_factory_add_middleware(
     auth = SyncHTTPAuthorizationMiddleware("Bearer", "abc")
     metrics = PrometheusMetrics(registry=CollectorRegistry())
     prom = SyncPrometheusMiddleware(metrics=metrics)
-    client_factory = (
+    client_factory: SyncClientFactory[Any, Any] = (
         SyncClientFactory(static_sd, tp, registry=dummy_registry)
         .add_middleware(prom)
         .add_middleware(auth)
@@ -223,7 +227,7 @@ def test_client_add_middleware(
     metrics = PrometheusMetrics(registry=CollectorRegistry())
     prom = SyncPrometheusMiddleware(metrics)
     auth = SyncHTTPAuthorizationMiddleware("Bearer", "abc")
-    client_factory = SyncClientFactory(
+    client_factory: SyncClientFactory[Any, Any] = SyncClientFactory(
         static_sd, tp, registry=dummy_registry
     ).add_middleware(prom)
 
@@ -246,7 +250,7 @@ def test_client_factory_initialize_middlewares(
     static_sd: SyncAbstractServiceDiscovery,
     dummy_middleware: Any,
 ):
-    client_factory = SyncClientFactory(
+    client_factory: SyncClientFactory[Any, Any] = SyncClientFactory(
         static_sd, echo_middleware, registry=dummy_registry
     ).add_middleware(dummy_middleware)
     assert dummy_middleware.initialized == 0
