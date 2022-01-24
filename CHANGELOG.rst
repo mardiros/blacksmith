@@ -1,3 +1,7 @@
+0.13.1  - Released on 2022-01-24
+--------------------------------
+* Fix typo, rename AbtractTraceContext to :class:`blacksmith.AbstractTraceContext`
+
 0.13.0  - Released on 2022-01-23
 --------------------------------
 
