@@ -14,6 +14,7 @@ from .domain.model import (
     AbstractTraceContext,
     CacheControlPolicy,
     CollectionIterator,
+    CollectionParser,
     HeaderField,
     HTTPTimeout,
     JsonSerializer,
@@ -49,13 +50,21 @@ from .middleware._sync import (
     SyncMiddleware,
     SyncPrometheusMiddleware,
 )
-from .sd._async.adapters.consul import AsyncConsulDiscovery
-from .sd._async.adapters.router import AsyncRouterDiscovery
-from .sd._async.adapters.static import AsyncStaticDiscovery
-from .sd._sync.adapters.consul import SyncConsulDiscovery
-from .sd._sync.adapters.router import SyncRouterDiscovery
-from .sd._sync.adapters.static import SyncStaticDiscovery
+from .sd._async import (
+    AsyncAbstractServiceDiscovery,
+    AsyncConsulDiscovery,
+    AsyncRouterDiscovery,
+    AsyncStaticDiscovery,
+)
+from .sd._sync import (
+    SyncAbstractServiceDiscovery,
+    SyncConsulDiscovery,
+    SyncRouterDiscovery,
+    SyncStaticDiscovery,
+)
+from .service._async.base import AsyncAbstractTransport
 from .service._async.client import AsyncClient, AsyncClientFactory
+from .service._sync.base import SyncAbstractTransport
 from .service._sync.client import SyncClient, SyncClientFactory
 
 __all__ = [
@@ -73,6 +82,7 @@ __all__ = [
     "ResponseBox",
     "CollectionIterator",
     "AbstractCollectionParser",
+    "CollectionParser",
     # Exceptions
     "HTTPError",
     "HTTPTimeoutError",
@@ -84,6 +94,8 @@ __all__ = [
     "AsyncClient",
     "SyncClient",
     # Service Discovery
+    "AsyncAbstractServiceDiscovery",
+    "SyncAbstractServiceDiscovery",
     "AsyncConsulDiscovery",
     "SyncConsulDiscovery",
     "AsyncRouterDiscovery",
@@ -117,4 +129,7 @@ __all__ = [
     "SyncHTTPCacheMiddleware",
     "AbstractTraceContext",
     "AsyncZipkinMiddleware",
+    # Transport
+    "AsyncAbstractTransport",
+    "SyncAbstractTransport",
 ]

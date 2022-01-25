@@ -143,9 +143,7 @@ class AsyncHTTPCacheMiddleware(AsyncHTTPMiddleware):
             resp = await next(req, client_name, path, timeout)
             is_cached = await self.cache_response(client_name, path, req, resp)
             state: CachableState = "cached" if is_cached else "uncachable_response"
-            self.inc_cache_miss(
-                client_name, state, req.method, path, resp.status_code
-            )
+            self.inc_cache_miss(client_name, state, req.method, path, resp.status_code)
             return resp
 
         return handle
