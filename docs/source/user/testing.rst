@@ -81,3 +81,9 @@ Now to finalize our ``conftest.py``, some fixture must be written to.
    but it was a simple method before, to simplify the example.
 
    .. literalinclude:: ../../../examples/unittesting/notif/src/notif/entrypoint.py
+
+
+The full example can be found in the examples directory on github:
+
+https://github.com/mardiros/blacksmith/tree/main/examples/unittesting/notif
+
