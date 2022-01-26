@@ -15,6 +15,7 @@
    user/sd/service_discovery
    user/middleware/index
    user/errors
+   user/testing
    user/api
    user/changelog
    user/glossary

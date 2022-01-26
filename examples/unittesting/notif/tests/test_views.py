@@ -1,5 +1,6 @@
 import json
 from textwrap import dedent
+from typing import Any, Dict, List
 
 import pytest
 from fastapi.testclient import TestClient
@@ -38,8 +39,7 @@ from blacksmith.domain.model.http import HTTPResponse
         }
     ],
 )
-@pytest.mark.asyncio
-def test_notif(params, client: TestClient, mboxes):
+def test_notif(params: Dict[str, Any], client: TestClient, mboxes: List[str]):
     resp = client.post("/v1/notification", json=params["request"])
     assert json.loads(resp.content) == params["expected_response"]
     assert mboxes == params["expected_messages"]

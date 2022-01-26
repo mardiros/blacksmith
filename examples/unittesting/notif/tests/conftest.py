@@ -1,5 +1,5 @@
 from email.message import Message
-from typing import Tuple
+from typing import Dict, Tuple
 
 import pytest
 from fastapi.testclient import TestClient
@@ -12,7 +12,7 @@ from blacksmith.service._async.base import AsyncAbstractTransport
 
 
 class FakeTransport(AsyncAbstractTransport):
-    def __init__(self, responses):
+    def __init__(self, responses: Dict[str, HTTPResponse]):
         super().__init__()
         self.responses = responses
 
@@ -49,12 +49,9 @@ def settings():
 
 
 @pytest.fixture
-@pytest.mark.asyncio
 async def configure_dependency_injection(params, settings):
     settings["transport"] = FakeTransport(params["blacksmith_responses"])
-
     await FastConfig.configure(settings)
-    yield
 
 
 @pytest.fixture

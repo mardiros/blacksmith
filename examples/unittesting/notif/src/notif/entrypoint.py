@@ -18,7 +18,7 @@ async def main(settings=None):
     config = Config()
     config.bind = ["0.0.0.0:8000"]
     config.reload = True
-    await FastConfig.configure(settings or DEFAULT_SETTINGS)
+    await FastConfig.configure(DEFAULT_SETTINGS)
     await serve(fastapi, config)
 
 
