@@ -1,9 +1,9 @@
-from typing import Mapping, TypeVar, Union
+from typing import Mapping
 
-from fastapi import Depends, FastAPI
+from fastapi import Depends
+from notif.emailing import EmailSender
 
 from blacksmith import AsyncClientFactory, AsyncConsulDiscovery, AsyncRouterDiscovery
-
 
 
 class AppConfig:
@@ -15,13 +15,14 @@ class AppConfig:
             self.settings["unversioned_service_url_fmt"],
         )
         self.get_client = AsyncClientFactory(sd=sd, transport=transport)
+        self.transport = self.settings.get("transport")
+
+        self.send_email = settings.get("email_sender") or EmailSender(
+            AsyncConsulDiscovery()
+        )
 
     async def initialize(self):
         await self.get_client.initialize()
-
-    # async def get_smtp_endpoint(self):
-    #     srv = await self.smtp_sd.resolve("smtp", None)
-    #     return srv
 
 
 class FastConfig:

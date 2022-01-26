@@ -1,28 +1,45 @@
-import pytest
 import json
+from textwrap import dedent
 
+import pytest
 from fastapi.testclient import TestClient
+
 from blacksmith.domain.model.http import HTTPResponse
 
-from notif.views import fastapi
-from notif.config import AppConfig
 
+@pytest.mark.parametrize(
+    "params",
+    [
+        {
+            "request": {"username": "naruto", "message": "Datte Bayo"},
+            "blacksmith_responses": {
+                "GET http://user.v1/users/naruto": HTTPResponse(
+                    200,
+                    {},
+                    {
+                        "email": "naruto@konoha.city",
+                        "firstname": "Naruto",
+                        "lastname": "Uzumaki",
+                    },
+                )
+            },
+            "expected_response": {"detail": "naruto@konoha.city accepted"},
+            "expected_messages": [
+                dedent(
+                    """
+                    Subject: notification
+                    From: notification@localhost
+                    To: "Naruto Uzumaki" <naruto@konoha.city>
 
-@pytest.mark.parametrize("params", [
-    {
-        "request": {"username": "naruto", "message": "Datte Bayo"},
-        "blacksmith_responses": {
-            "GET http://user.v1/users/naruto": HTTPResponse(200, {}, {
-                "email": "naruto@konoha.city",
-                "firstname": "Naruto",
-                "lastname": "Uzumaki",
-            })
-        },
-        "expected": {'detail': 'naruto@konoha.city accepted'},
-    }
-])
+                    Datte Bayo
+                    """
+                ).lstrip()
+            ],
+        }
+    ],
+)
 @pytest.mark.asyncio
-def test_notif(params, client: TestClient):
+def test_notif(params, client: TestClient, mboxes):
     resp = client.post("/v1/notification", json=params["request"])
-    assert json.loads(resp.content) == params["expected"]
-
+    assert json.loads(resp.content) == params["expected_response"]
+    assert mboxes == params["expected_messages"]
