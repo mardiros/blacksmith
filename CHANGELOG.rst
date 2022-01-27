@@ -1,3 +1,17 @@
+0.13.2  - Released on 2022-01-27
+--------------------------------
+* Exposing more classes in the main module:
+
+  * CollectionParser
+  * AsyncAbstractServiceDiscovery
+  * SyncAbstractServiceDiscovery
+  * AsyncAbstractTransport
+  * SyncAbstractTransport
+  * HTTPRequest
+  * HTTPResponse
+
+* Add an example on how to unit test.
+
 0.13.1  - Released on 2022-01-24
 --------------------------------
 * Fix typo, rename AbtractTraceContext to :class:`blacksmith.AbstractTraceContext`
