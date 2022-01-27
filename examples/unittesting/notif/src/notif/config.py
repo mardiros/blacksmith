@@ -3,20 +3,15 @@ from typing import Any, Mapping
 from fastapi import Depends
 from notif.emailing import EmailSender
 
-from blacksmith import AsyncClientFactory, AsyncConsulDiscovery, AsyncRouterDiscovery
+from blacksmith import AsyncClientFactory, AsyncConsulDiscovery
 
 
 class AppConfig:
     def __init__(self, settings: Mapping[str, Any]):
         transport = settings.get("transport")
-        sd = AsyncRouterDiscovery(
-            settings["service_url_fmt"],
-            settings["unversioned_service_url_fmt"],
-        )
+        sd = AsyncConsulDiscovery()
         self.get_client = AsyncClientFactory(sd=sd, transport=transport)
-        self.send_email = settings.get("email_sender") or EmailSender(
-            AsyncConsulDiscovery()
-        )
+        self.send_email = settings.get("email_sender") or EmailSender(sd)
 
     async def initialize(self):
         await self.get_client.initialize()

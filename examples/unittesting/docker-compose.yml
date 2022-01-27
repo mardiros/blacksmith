@@ -1,0 +1,97 @@
+version: "3"
+
+networks:
+  proxy:
+    external: true
+  internal:
+    external: false
+
+services:
+
+  traefik:
+    image: "traefik:latest"
+    command:
+      - "--log.level=INFO"
+      - "--api=true"
+      - "--api.insecure=true"
+      - "--api.dashboard=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=internal"
+      - "traefik.http.routers.traefik.entrypoints=web"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.${DOMAIN_NAME}`)"
+      - "traefik.http.services.traefik.loadbalancer.server.port=8080"
+    restart: always
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - "proxy"
+      - "internal"
+    ports:
+      - "80:80"
+
+  consul:
+    image: "consul:latest"
+    command: "agent -server -ui -node=server-1 -bootstrap-expect=1 -client=0.0.0.0"
+    environment:
+      - "SERVICE_IGNORE=true"
+    networks:
+      - "internal"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.consul.entrypoints=web"
+      - "traefik.http.routers.consul.rule=Host(`consul.${DOMAIN_NAME}`)"
+      - "traefik.http.services.consul.loadbalancer.server.port=8500"
+
+  registrator:
+    image: "gliderlabs/registrator"
+    command: -internal consul://consul:8500
+    networks:
+      - "internal"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock
+    depends_on:
+      - consul
+
+  api_user:
+    build: ./user
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api_user.entrypoints=web"
+      - "traefik.http.routers.api_user.rule=Host(`user.${DOMAIN_NAME}`)"
+      - "traefik.http.services.api_user.loadbalancer.server.port=8000"
+    environment:
+      - "SERVICE_NAME=user-v1"
+    networks:
+      - "internal"
+
+  api_notif:
+    build: ./notif
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api_notif.entrypoints=web"
+      - "traefik.http.routers.api_notif.rule=Host(`notif.${DOMAIN_NAME}`)"
+      - "traefik.http.services.api_notif.loadbalancer.server.port=8000"
+    environment:
+      - "SERVICE_NAME=notif-v1"
+    networks:
+      - "internal"
+    # volumes:
+    #   - "./notif:/srv/notif"
+    #   - "../../src/blacksmith:/home/notif/.cache/pypoetry/virtualenvs/notif-E5XGZiq1-py3.10/lib/python3.10/site-packages/blacksmith"
+
+  mailhog:
+    image: mailhog/mailhog
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.mailhog.entrypoints=web"
+      - "traefik.http.routers.mailhog.rule=Host(`mailhog.${DOMAIN_NAME}`)"
+      - "traefik.http.services.mailhog.loadbalancer.server.port=8025"
+    networks:
+      - internal
+    environment:
+      - "SERVICE_1025_NAME=smtp"
+      - "SERVICE_8025_IGNORE=true"
