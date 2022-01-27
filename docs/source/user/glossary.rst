@@ -19,7 +19,7 @@ Glossary
       Design pattern used in software development.
       It is used to detect failures and encapsulates the logic of preventing
       a failure from constantly recurring, during maintenance, temporary
-      external system failure or unexpected system difficulties. 
+      external system failure or unexpected system difficulties.
 
       Source: https://en.wikipedia.org/wiki/Circuit_breaker_design_pattern
 
@@ -44,7 +44,7 @@ Glossary
    Prometheus
       | A software used for event monitoring and alerting.
       | Website: https://prometheus.io/
-   
+
    Pydantic
       | Data validation using python type annotations.
       | Type hints provides user friendly errors when data is invalid.
@@ -60,7 +60,7 @@ Glossary
 
    service discovery
       A service discovery is a mechanism to determin the endpoint of a service,
-      in a rest api, it is basically a function that build an url prefix 
+      in a rest api, it is basically a function that build an url prefix
       from a :term:`service` and a :term:`version`.
 
    service registry

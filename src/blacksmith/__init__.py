@@ -26,6 +26,7 @@ from .domain.model import (
     Response,
     ResponseBox,
 )
+from .domain.model.http import HTTPRequest, HTTPResponse
 from .domain.registry import register
 from .domain.scanner import scan
 from .middleware._async import (
@@ -132,4 +133,6 @@ __all__ = [
     # Transport
     "AsyncAbstractTransport",
     "SyncAbstractTransport",
+    "HTTPRequest",
+    "HTTPResponse",
 ]
