@@ -1,3 +1,12 @@
+0.13.3  - Released on 2022-01-29
+--------------------------------
+* Rename internal attribute request to read on :class:`blacksmith.HTTPTimeout`
+* Declare missing type on :class:`blacksmith.AsyncAbstractTransport`
+
+.. important::
+
+   Breaking change
+
 0.13.2  - Released on 2022-01-27
 --------------------------------
 * Exposing more classes in the main module:
@@ -16,6 +25,10 @@
 --------------------------------
 * Fix typo, rename AbtractTraceContext to :class:`blacksmith.AbstractTraceContext`
 
+.. important::
+
+   Breaking change
+
 0.13.0  - Released on 2022-01-23
 --------------------------------
 
@@ -25,7 +38,7 @@
    Last releases where a lot about refactoring and fixing naming concistency.
 
    * No new feature will be added.
-   * No breaking change are going to be introduced.
+   * No major breaking change are going to be introduced.
 
 
 * New feature
