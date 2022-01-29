@@ -48,7 +48,7 @@ class AsyncHttpxTransport(AsyncAbstractTransport):
                     params=req.querystring,
                     headers=headers,
                     content=req.body,
-                    timeout=HttpxTimeout(timeout.request, connect=timeout.connect),
+                    timeout=HttpxTimeout(timeout.read, connect=timeout.connect),
                 )
             except httpx.TimeoutException as exc:
                 raise HTTPTimeoutError(

@@ -11,15 +11,15 @@ Links = Dict[Optional[str], Dict[str, str]]
 class HTTPTimeout:
     """Request timeout."""
 
-    request: float
+    read: float
     connect: float
 
-    def __init__(self, timeout: float = 30.0, connect: float = 15.0) -> None:
-        self.request = timeout
+    def __init__(self, read: float = 30.0, connect: float = 15.0) -> None:
+        self.read = read
         self.connect = connect
 
     def __eq__(self, other: Any) -> bool:
-        return self.request == other.request and self.connect == other.connect
+        return self.read == other.read and self.connect == other.connect
 
 
 @dataclass
