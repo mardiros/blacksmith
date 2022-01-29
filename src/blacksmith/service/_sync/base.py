@@ -5,6 +5,9 @@ from blacksmith.typing import Proxies
 
 
 class SyncAbstractTransport(SyncMiddleware):
+    verify_certificate: bool
+    proxies: Optional[Proxies]
+
     def __init__(
         self, verify_certificate: bool = True, proxies: Optional[Proxies] = None
     ):
