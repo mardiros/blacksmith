@@ -1,5 +1,5 @@
-Writing testing with blacksmith
-===============================
+Writing tests with blacksmith
+=============================
 
 In software development, the testability of the code is the key of software
 quality.
