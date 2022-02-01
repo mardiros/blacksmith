@@ -27,13 +27,14 @@ typing-extensions = "^4.0.1"
 purgatory-circuitbreaker = "^0.7.2"
 
 [tool.poetry.extras]
-http_cache = ["aioredis"]
+http_cache_async = ["aioredis"]
+http_cache_sync = ["redis"]
 prometheus = ["prometheus-client"]
 
 [tool.poetry.dev-dependencies]
 Sphinx = "^4.2.0"
 aioredis = {version = "^2.0.0"}
-black = "^21.9b0"
+black = "^22.1.0"
 coverage = {version = "^6.2", extras = ["toml"]}
 fastapi = "^0.73.0"
 isort = "^5.9.3"

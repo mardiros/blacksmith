@@ -1,6 +1,5 @@
 from typing import Dict
 
-
 from blacksmith import AsyncAbstractTransport, HTTPRequest, HTTPResponse, HTTPTimeout
 
 

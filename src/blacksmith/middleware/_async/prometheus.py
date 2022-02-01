@@ -36,6 +36,7 @@ class AsyncPrometheusMiddleware(AsyncHTTPMiddleware):
         client_name for 1 service name/version.
 
     """
+
     metrics: PrometheusMetrics
 
     def __init__(self, metrics: Optional[PrometheusMetrics] = None) -> None:
