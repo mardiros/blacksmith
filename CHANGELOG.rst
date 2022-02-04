@@ -1,3 +1,8 @@
+0.13.4 - Released on 2022-02-04
+-------------------------------
+* Update depencies
+* Add type support for prometheus
+
 0.13.3 - Released on 2022-01-29
 -------------------------------
 * Rename internal attribute request to read on :class:`blacksmith.HTTPTimeout`
