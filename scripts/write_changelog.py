@@ -4,7 +4,7 @@ import datetime
 import blacksmith
 
 header = (
-    f"{blacksmith.__version__}  - "
+    f"{blacksmith.__version__} - "
     f"Released on {datetime.datetime.now().date().isoformat()}"
 )
 with open("CHANGELOG.rst.new", "w") as changelog:

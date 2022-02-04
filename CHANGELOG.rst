@@ -1,5 +1,5 @@
-0.13.3  - Released on 2022-01-29
---------------------------------
+0.13.3 - Released on 2022-01-29
+-------------------------------
 * Rename internal attribute request to read on :class:`blacksmith.HTTPTimeout`
 * Declare missing type on :class:`blacksmith.AsyncAbstractTransport`
 
@@ -7,8 +7,8 @@
 
    Breaking change
 
-0.13.2  - Released on 2022-01-27
---------------------------------
+0.13.2 - Released on 2022-01-27
+-------------------------------
 * Exposing more classes in the main module:
 
   * CollectionParser
@@ -21,16 +21,16 @@
 
 * Add an example on how to unit test.
 
-0.13.1  - Released on 2022-01-24
---------------------------------
+0.13.1 - Released on 2022-01-24
+-------------------------------
 * Fix typo, rename AbtractTraceContext to :class:`blacksmith.AbstractTraceContext`
 
 .. important::
 
    Breaking change
 
-0.13.0  - Released on 2022-01-23
---------------------------------
+0.13.0 - Released on 2022-01-23
+-------------------------------
 
 .. important::
 
@@ -70,20 +70,20 @@
      :class:`blacksmith.AsyncPrometheusMiddleware`
      or :class:`blacksmith.SyncPrometheusMiddleware`.
 
-0.12.1  - Released on 2022-01-19
---------------------------------
+0.12.1 - Released on 2022-01-19
+-------------------------------
 * Expose AsyncClient and SyncClient for typing purpose.
 
-0.12.0  - Released on 2022-01-19
---------------------------------
+0.12.0 - Released on 2022-01-19
+-------------------------------
 * Refactor transport to have the same signature as middleware.
 * Breaking Change:
    * The http middleware does not have an http method
    * The type HttpMethod is not HTTPMethod
 * The HTTPRequest type now have a method attribute.
 
-0.11.0  - Released on 2022-01-15
---------------------------------
+0.11.0 - Released on 2022-01-15
+-------------------------------
 * Add typing support. see PEP 561
 * Update the CI.
 * Create a wrapper around json for the AbstractSerializer
