@@ -11,7 +11,7 @@ from .base import AsyncHTTPMiddleware, AsyncMiddleware
 
 if TYPE_CHECKING:
     try:
-        import prometheus_client  # type: ignore
+        import prometheus_client
     except ImportError:
         pass
     Registry = Optional["prometheus_client.CollectorRegistry"]

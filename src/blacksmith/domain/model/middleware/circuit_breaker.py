@@ -35,5 +35,5 @@ class PrometheusHook:
             metric = self.metrics.blacksmith_circuit_breaker_state
             metric.labels(circuit_name).set(state)
         elif evt_type == "failed":
-            metric = self.metrics.blacksmith_circuit_breaker_error
-            metric.labels(circuit_name).inc()
+            error_metric = self.metrics.blacksmith_circuit_breaker_error
+            error_metric.labels(circuit_name).inc()

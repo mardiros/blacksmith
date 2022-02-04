@@ -5,7 +5,7 @@ import pkg_resources
 
 if TYPE_CHECKING:
     try:
-        import prometheus_client  # type: ignore
+        import prometheus_client
     except ImportError:
         pass
     Registry = Optional["prometheus_client.CollectorRegistry"]
@@ -20,7 +20,7 @@ class PrometheusMetrics:
         hit_cache_buckets: Optional[List[float]] = None,
         registry: Registry = None,
     ) -> None:
-        from prometheus_client import (  # type: ignore
+        from prometheus_client import (
             REGISTRY,
             Counter,
             Gauge,

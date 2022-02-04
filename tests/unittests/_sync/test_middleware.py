@@ -1,8 +1,8 @@
 from typing import Any, Dict, cast
 
-import prometheus_client  # type: ignore
+import prometheus_client
 import pytest
-from prometheus_client import REGISTRY, CollectorRegistry  # type: ignore
+from prometheus_client import REGISTRY, CollectorRegistry
 from purgatory.domain.messages import Event
 from purgatory.domain.messages.events import (
     CircuitBreakerCreated,
