@@ -1,8 +1,8 @@
 from typing import Mapping
 
-import httpx
-from httpx import Response as HttpxRepsonse
+from httpx import Response as HttpxResponse
 from httpx import Timeout as HttpxTimeout
+from httpx import TimeoutException
 
 from blacksmith.domain.exceptions import HTTPError, HTTPTimeoutError
 from blacksmith.domain.model import HTTPRequest, HTTPResponse, HTTPTimeout
@@ -12,7 +12,7 @@ from blacksmith.typing import ClientName, Json, Path
 from ..base import SyncAbstractTransport
 
 
-def safe_json(r: HttpxRepsonse) -> Json:
+def safe_json(r: HttpxResponse) -> Json:
     try:
         return r.json()
     except Exception:
@@ -50,7 +50,7 @@ class SyncHttpxTransport(SyncAbstractTransport):
                     content=req.body,
                     timeout=HttpxTimeout(timeout.read, connect=timeout.connect),
                 )
-            except httpx.TimeoutException as exc:
+            except TimeoutException as exc:
                 raise HTTPTimeoutError(
                     f"{client_name} - {req.method} {path} - "
                     f"{exc.__class__.__name__} while calling {req.method} {req.url}"

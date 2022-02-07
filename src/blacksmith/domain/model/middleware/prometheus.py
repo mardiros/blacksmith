@@ -20,12 +20,7 @@ class PrometheusMetrics:
         hit_cache_buckets: Optional[List[float]] = None,
         registry: Registry = None,
     ) -> None:
-        from prometheus_client import (
-            REGISTRY,
-            Counter,
-            Gauge,
-            Histogram,
-        )
+        from prometheus_client import REGISTRY, Counter, Gauge, Histogram
 
         if registry is None:
             registry = REGISTRY
