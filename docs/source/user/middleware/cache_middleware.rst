@@ -14,18 +14,25 @@ It also interpret the ``Vary`` response header to create distinct response
 depending on the request headers.
 
 
-It requires an extra dependency `aioredis` installed using the
+It requires an extra dependency `redis` or `aioredis` installed using the
 following command.
 
 ::
 
-   pip install blacksmith[caching]
+   # For async client
+   pip install blacksmith[http_cache_async]
+   # For sync client
+   pip install blacksmith[http_cache_sync]
 
 Or using poetry
 
 ::
 
-   poetry add blacksmith -E caching
+   # For async client
+   poetry add blacksmith -E http_cache_async
+   # For sync client
+   poetry add blacksmith -E http_cache_sync
+
 
 Usage using the async api
 -------------------------
