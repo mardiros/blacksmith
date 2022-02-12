@@ -1,5 +1,5 @@
-Instanciating Client
-====================
+Instanciating Clients
+=====================
 
 After registrating resources in blacksmith, to consume API, a client must be
 instanciated.

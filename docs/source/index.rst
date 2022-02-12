@@ -11,12 +11,12 @@
 
    user/introduction
    user/register_routes
-   user/instanciating_client
+   user/instanciating_clients
    user/sd/service_discovery
    user/middleware/index
    user/errors
    user/testing
-   user/using_frameworks
+   user/using_web_frameworks
    user/api
    user/changelog
    user/glossary
