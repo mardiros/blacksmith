@@ -16,6 +16,7 @@
    user/middleware/index
    user/errors
    user/testing
+   user/using_frameworks
    user/api
    user/changelog
    user/glossary
