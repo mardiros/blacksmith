@@ -1,7 +1,13 @@
+1.0.0 - Released on 2022-02-12
+------------------------------
+* Add new page in the doc for the web framework integration
+* Update dependencies
+
 0.13.4 - Released on 2022-02-04
 -------------------------------
-* Update depencies
+* Update dependencies
 * Add type support for prometheus
+* Remove extra dependency `caching`, add `http_cache_async` and `http_cache_sync`.
 
 0.13.3 - Released on 2022-01-29
 -------------------------------
