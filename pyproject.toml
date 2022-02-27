@@ -24,7 +24,7 @@ prometheus-client = {version = "^0.13.0", optional = true}
 pydantic = "^1.8.2"
 python = "^3.7"
 typing-extensions = "^4.0.1"
-purgatory-circuitbreaker = "^0.7.2"
+purgatory = "^1.0.0"
 
 [tool.poetry.extras]
 http_cache_async = ["aioredis"]
