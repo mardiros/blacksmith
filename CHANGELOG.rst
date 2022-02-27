@@ -1,3 +1,7 @@
+1.0.1 - Released on 2022-02-27
+------------------------------
+* Update depenencies
+
 1.0.0 - Released on 2022-02-12
 ------------------------------
 * Add new page in the doc for the web framework integration
