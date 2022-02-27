@@ -28,7 +28,6 @@ def dummy_query_timeout():
     "httpx._client.Client.request",
     return_value=dummy_response,
 )
-@pytest.mark.asyncio
 def test_query_http(patch: Any):
     transport = SyncHttpxTransport()
     resp = transport(HTTPRequest("GET", "/"), "cli", "/", HTTPTimeout())
@@ -44,7 +43,6 @@ def test_query_http(patch: Any):
     "httpx._client.Client.request",
     return_value=dummy_empty_response,
 )
-@pytest.mark.asyncio
 def test_query_http_204(patch: Any):
     transport = SyncHttpxTransport()
     resp = transport(HTTPRequest("GET", "/"), "cli", "/", HTTPTimeout())
@@ -57,7 +55,6 @@ def test_query_http_204(patch: Any):
     "httpx._client.Client.request",
     return_value=dummy_error_response,
 )
-@pytest.mark.asyncio
 def test_query_http_422(patch: Any):
     transport = SyncHttpxTransport()
     with pytest.raises(HTTPError) as ctx:
@@ -72,7 +69,6 @@ def test_query_http_422(patch: Any):
     "httpx._client.Client.request",
     side_effect=lambda *args, **kwargs: dummy_query_timeout(),  # type: ignore
 )
-@pytest.mark.asyncio
 def test_query_http_timeout(patch: Any):
     transport = SyncHttpxTransport()
     with pytest.raises(TimeoutError) as ctx:
@@ -87,7 +83,6 @@ def test_query_http_timeout(patch: Any):
     "httpx._client.Client.request",
     return_value=dummy_error_500_response,
 )
-@pytest.mark.asyncio
 def test_query_http_no_json(patch: Any):
     transport = SyncHttpxTransport()
     with pytest.raises(HTTPError) as ctx:

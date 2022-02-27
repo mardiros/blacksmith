@@ -35,7 +35,6 @@ def test_authorization_header():
     assert auth.headers == {"Authorization": "Bearer abc"}
 
 
-@pytest.mark.asyncio
 def test_empty_middleware(
     dummy_http_request: HTTPRequest,
     dummy_timeout: HTTPTimeout,
@@ -48,7 +47,6 @@ def test_empty_middleware(
     assert resp.headers == dummy_http_request.headers
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize(
     "params",
     [
@@ -78,7 +76,6 @@ def test_headers_middleware(
     assert resp.headers == params["expected_headers"]
 
 
-@pytest.mark.asyncio
 def test_prom_default_registry(
     echo_middleware: SyncMiddleware,
     dummy_http_request: HTTPRequest,
@@ -106,7 +103,6 @@ def test_prom_default_registry(
     prometheus_client.REGISTRY = CollectorRegistry()
 
 
-@pytest.mark.asyncio
 def test_prom_metrics(
     slow_middleware: SyncMiddleware,
     dummy_http_request: HTTPRequest,
@@ -182,7 +178,6 @@ def test_prom_metrics(
     assert val == 1.0
 
 
-@pytest.mark.asyncio
 def test_prom_metrics_error(
     boom_middleware: SyncMiddleware,
     dummy_http_request: HTTPRequest,
@@ -245,7 +240,6 @@ def test_included_list(exc: HTTPError):
     assert exclude_httpx_4xx(exc) is False
 
 
-@pytest.mark.asyncio
 def test_circuit_breaker_5xx(
     echo_middleware: SyncMiddleware,
     boom_middleware: SyncMiddleware,
@@ -278,7 +272,6 @@ def test_circuit_breaker_5xx(
     assert resp.status_code == 200
 
 
-@pytest.mark.asyncio
 def test_circuit_breaker_4xx(
     echo_middleware: SyncMiddleware,
     invalid_middleware: SyncMiddleware,
@@ -298,7 +291,6 @@ def test_circuit_breaker_4xx(
     assert resp.status_code == 200
 
 
-@pytest.mark.asyncio
 def test_circuit_breaker_prometheus_metrics(
     echo_middleware: SyncMiddleware,
     invalid_middleware: SyncMiddleware,
@@ -377,7 +369,6 @@ def test_circuit_breaker_prometheus_metrics(
     )
 
 
-@pytest.mark.asyncio
 def test_circuit_breaker_initialize():
     class MockPurgatory:
         def __init__(self):
@@ -393,7 +384,6 @@ def test_circuit_breaker_initialize():
     assert purgatory_cb.called is True
 
 
-@pytest.mark.asyncio
 def test_circuit_breaker_listener(
     echo_middleware: SyncMiddleware,
     boom_middleware: SyncMiddleware,
@@ -457,7 +447,6 @@ def test_circuit_breaker_listener(
     ]
 
 
-@pytest.mark.asyncio
 def test_zipkin_middleware(
     echo_middleware: SyncMiddleware,
     dummy_http_request: HTTPRequest,
@@ -478,7 +467,6 @@ def test_zipkin_middleware(
     }
 
 
-@pytest.mark.asyncio
 def test_zipkin_middleware_tag_error(
     boom_middleware: SyncMiddleware,
     dummy_http_request: HTTPRequest,

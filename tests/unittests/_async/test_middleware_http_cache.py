@@ -53,7 +53,6 @@ from blacksmith.middleware._async.http_cache import (
         },
     ],
 )
-@pytest.mark.asyncio
 async def test_get_from_cache(
     params: Dict[str, Any], fake_http_middleware_cache_with_data: AsyncAbstractCache
 ):
@@ -147,7 +146,6 @@ async def test_get_from_cache(
         },
     ],
 )
-@pytest.mark.asyncio
 async def test_http_cache_response(
     params: Dict[str, Any], fake_http_middleware_cache: AsyncAbstractCache
 ):
@@ -171,7 +169,6 @@ async def test_http_cache_response(
         assert resp_from_cache is None
 
 
-@pytest.mark.asyncio
 async def test_cache_middleware(
     cachable_response: AsyncMiddleware,
     boom_middleware: AsyncMiddleware,
@@ -203,7 +200,6 @@ async def test_cache_middleware(
     )
 
 
-@pytest.mark.asyncio
 async def test_cache_middleware_policy_handle(
     cachable_response: AsyncMiddleware,
     fake_http_middleware_cache: AsyncAbstractCache,
@@ -230,7 +226,6 @@ async def test_cache_middleware_policy_handle(
     )
 
 
-@pytest.mark.asyncio
 async def test_cache_middleware_metrics_helpers(
     fake_http_middleware_cache: AsyncAbstractCache,
     prometheus_registry: CollectorRegistry,
@@ -293,7 +288,6 @@ async def test_cache_middleware_metrics_helpers(
     )
 
 
-@pytest.mark.asyncio
 async def test_cache_middleware_metrics(
     cachable_response: AsyncMiddleware,
     uncachable_response: AsyncMiddleware,
@@ -337,7 +331,6 @@ async def test_cache_middleware_metrics(
     )
 
 
-@pytest.mark.asyncio
 async def test_http_cache_initialize(fake_http_middleware_cache: Any):
     caching = AsyncHTTPCacheMiddleware(fake_http_middleware_cache)
     await caching.initialize()

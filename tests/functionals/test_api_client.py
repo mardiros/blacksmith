@@ -69,7 +69,6 @@ register(
 )
 
 
-@pytest.mark.asyncio
 async def test_crud(dummy_api_endpoint: str):
     sd = AsyncStaticDiscovery({("api", None): dummy_api_endpoint})
     cli: AsyncClientFactory[Any, Any] = AsyncClientFactory(sd)

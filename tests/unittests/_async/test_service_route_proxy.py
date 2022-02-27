@@ -52,7 +52,6 @@ def test_build_timeout():
     assert timeout == HTTPTimeout(5.0, 2.0)
 
 
-@pytest.mark.asyncio
 async def test_route_proxy_prepare_middleware(
     dummy_http_request: HTTPRequest, echo_middleware: AsyncAbstractTransport
 ):
@@ -91,7 +90,6 @@ async def test_route_proxy_prepare_middleware(
     }
 
 
-@pytest.mark.asyncio
 async def test_route_proxy_prepare_unregistered_method_resource():
     resp = HTTPResponse(200, {}, "")
     tp = FakeTransport(resp)
@@ -120,7 +118,6 @@ async def test_route_proxy_prepare_unregistered_method_resource():
     )
 
 
-@pytest.mark.asyncio
 async def test_route_proxy_prepare_unregistered_method_collection():
     resp = HTTPResponse(200, {}, "")
     tp = FakeTransport(resp)
@@ -149,7 +146,6 @@ async def test_route_proxy_prepare_unregistered_method_collection():
     )
 
 
-@pytest.mark.asyncio
 async def test_route_proxy_prepare_unregistered_resource():
     resp = HTTPResponse(200, {}, "")
     tp = FakeTransport(resp)
@@ -178,7 +174,6 @@ async def test_route_proxy_prepare_unregistered_resource():
     )
 
 
-@pytest.mark.asyncio
 async def test_route_proxy_prepare_unregistered_collection():
     resp = HTTPResponse(200, {}, "")
     tp = FakeTransport(resp)
@@ -207,7 +202,6 @@ async def test_route_proxy_prepare_unregistered_collection():
     )
 
 
-@pytest.mark.asyncio
 async def test_route_proxy_prepare_wrong_type():
     resp = HTTPResponse(200, {}, "")
     tp = FakeTransport(resp)
@@ -239,7 +233,6 @@ async def test_route_proxy_prepare_wrong_type():
     )
 
 
-@pytest.mark.asyncio
 async def test_route_proxy_collection_head():
     resp = HTTPResponse(200, {}, "")
     tp = FakeTransport(resp)
@@ -263,7 +256,6 @@ async def test_route_proxy_collection_head():
     assert resp == ""
 
 
-@pytest.mark.asyncio
 async def test_route_proxy_collection_get():
     httpresp = HTTPResponse(
         200, {"Total-Count": "10"}, [{"name": "alice"}, {"name": "bob"}]
@@ -293,7 +285,6 @@ async def test_route_proxy_collection_get():
     assert lresp == [{"name": "alice"}, {"name": "bob"}]
 
 
-@pytest.mark.asyncio
 async def test_route_proxy_collection_get_with_parser():
     class MyCollectionParser(CollectionParser):
         total_count_header: str = "X-Total-Count"
@@ -326,7 +317,6 @@ async def test_route_proxy_collection_get_with_parser():
     assert lresp == [{"name": "alice"}, {"name": "bob"}]
 
 
-@pytest.mark.asyncio
 async def test_route_proxy_collection_post():
     resp = HTTPResponse(202, {}, {"detail": "accepted"})
     tp = FakeTransport(resp)
@@ -351,7 +341,6 @@ async def test_route_proxy_collection_post():
     assert resp == {"detail": "accepted"}
 
 
-@pytest.mark.asyncio
 async def test_route_proxy_collection_put():
     resp = HTTPResponse(202, {}, {"detail": "accepted"})
     tp = FakeTransport(resp)
@@ -376,7 +365,6 @@ async def test_route_proxy_collection_put():
     assert resp == {"detail": "accepted"}
 
 
-@pytest.mark.asyncio
 async def test_route_proxy_collection_patch():
     resp = HTTPResponse(202, {}, {"detail": "accepted"})
     tp = FakeTransport(resp)
@@ -401,7 +389,6 @@ async def test_route_proxy_collection_patch():
     assert resp == {"detail": "accepted"}
 
 
-@pytest.mark.asyncio
 async def test_route_proxy_collection_delete():
     resp = HTTPResponse(202, {}, {"detail": "accepted"})
     tp = FakeTransport(resp)
@@ -426,7 +413,6 @@ async def test_route_proxy_collection_delete():
     assert resp == {"detail": "accepted"}
 
 
-@pytest.mark.asyncio
 async def test_route_proxy_collection_options():
     resp = HTTPResponse(202, {}, {"detail": "accepted"})
     tp = FakeTransport(resp)
@@ -451,7 +437,6 @@ async def test_route_proxy_collection_options():
     assert resp == {"detail": "accepted"}
 
 
-@pytest.mark.asyncio
 async def test_route_proxy_head():
     resp = HTTPResponse(200, {}, "")
     tp = FakeTransport(resp)
@@ -475,7 +460,6 @@ async def test_route_proxy_head():
     assert resp == ""
 
 
-@pytest.mark.asyncio
 async def test_route_proxy_get():
     resp = HTTPResponse(200, {}, [{"name": "alice"}, {"name": "bob"}])
     tp = FakeTransport(resp)
@@ -500,7 +484,6 @@ async def test_route_proxy_get():
     assert resp == [{"name": "alice"}, {"name": "bob"}]
 
 
-@pytest.mark.asyncio
 async def test_route_proxy_post():
     resp = HTTPResponse(202, {}, {"detail": "accepted"})
     tp = FakeTransport(resp)
@@ -525,7 +508,6 @@ async def test_route_proxy_post():
     assert resp == {"detail": "accepted"}
 
 
-@pytest.mark.asyncio
 async def test_route_proxy_put():
     resp = HTTPResponse(202, {}, {"detail": "accepted"})
     tp = FakeTransport(resp)
@@ -550,7 +532,6 @@ async def test_route_proxy_put():
     assert resp == {"detail": "accepted"}
 
 
-@pytest.mark.asyncio
 async def test_route_proxy_patch():
     resp = HTTPResponse(202, {}, {"detail": "accepted"})
     tp = FakeTransport(resp)
@@ -575,7 +556,6 @@ async def test_route_proxy_patch():
     assert resp == {"detail": "accepted"}
 
 
-@pytest.mark.asyncio
 async def test_route_proxy_delete():
     resp = HTTPResponse(202, {}, {"detail": "accepted"})
     tp = FakeTransport(resp)
@@ -600,7 +580,6 @@ async def test_route_proxy_delete():
     assert resp == {"detail": "accepted"}
 
 
-@pytest.mark.asyncio
 async def test_route_proxy_options():
     resp = HTTPResponse(202, {}, {"detail": "accepted"})
     tp = FakeTransport(resp)
@@ -625,7 +604,6 @@ async def test_route_proxy_options():
     assert resp == {"detail": "accepted"}
 
 
-@pytest.mark.asyncio
 async def test_unregistered_collection(echo_middleware: AsyncAbstractTransport):
     proxy: AsyncRouteProxy[Any, Any] = AsyncRouteProxy(
         "dummy",

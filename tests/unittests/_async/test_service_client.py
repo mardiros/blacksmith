@@ -65,7 +65,6 @@ class FakeTimeoutTransport(AsyncAbstractTransport):
         raise HTTPTimeoutError(f"ReadTimeout while calling {req.method} {req.url}")
 
 
-@pytest.mark.asyncio
 async def test_client(static_sd: AsyncAbstractServiceDiscovery):
 
     resp = HTTPResponse(
@@ -130,7 +129,6 @@ async def test_client(static_sd: AsyncAbstractServiceDiscovery):
     )
 
 
-@pytest.mark.asyncio
 async def test_client_timeout(static_sd: AsyncAbstractServiceDiscovery):
 
     routes = ApiRoutes(
@@ -154,7 +152,6 @@ async def test_client_timeout(static_sd: AsyncAbstractServiceDiscovery):
     )
 
 
-@pytest.mark.asyncio
 async def test_client_factory_config(static_sd: AsyncAbstractServiceDiscovery):
     tp = FakeTimeoutTransport()
     client_factory: AsyncClientFactory[Any, Any] = AsyncClientFactory(
@@ -187,7 +184,6 @@ def test_client_factory_configure_proxies(static_sd: AsyncAbstractServiceDiscove
     assert client_factory.transport.proxies is proxies
 
 
-@pytest.mark.asyncio
 async def test_client_factory_add_middleware(
     static_sd: AsyncAbstractServiceDiscovery, dummy_middleware: AsyncHTTPMiddleware
 ):
@@ -219,7 +215,6 @@ async def test_client_factory_add_middleware(
     }
 
 
-@pytest.mark.asyncio
 async def test_client_add_middleware(
     static_sd: AsyncAbstractServiceDiscovery, dummy_middleware: AsyncHTTPMiddleware
 ):
@@ -244,7 +239,6 @@ async def test_client_add_middleware(
     assert client_factory.middlewares == [prom]
 
 
-@pytest.mark.asyncio
 async def test_client_factory_initialize_middlewares(
     echo_middleware: AsyncAbstractTransport,
     static_sd: AsyncAbstractServiceDiscovery,
