@@ -19,8 +19,8 @@ version = "1.0.1"
 
 [tool.poetry.dependencies]
 aioredis = {version = "^2.0.0", optional = true}
-httpx = "^0.21.1"
-prometheus-client = {version = "^0.13.0", optional = true}
+httpx = "^0.23.0"
+prometheus-client = {version = "^0.14.1", optional = true}
 purgatory = "^1.0.0"
 pydantic = "^1.8.2"
 python = "^3.7"
@@ -36,23 +36,24 @@ Sphinx = "^4.2.0"
 aioredis = {version = "^2.0.0"}
 black = "^22.1.0"
 coverage = {version = "^6.2", extras = ["toml"]}
-esbonio = "^0.8.0"
-fastapi = "^0.74.1"
+esbonio = "^0.13.0"
+fastapi = "^0.78.0"
 flake8 = "^4.0.1"
 isort = "^5.9.3"
-mypy = "^0.931"
-prometheus-client = "^0.13.0"
-pytest = "^7.0.1"
-pytest-asyncio = "^0.18.1"
+mypy = "^0.960"
+prometheus-client = "^0.14.1"
+pytest = "^7.1.2"
+pytest-asyncio = "^0.18.3"
 pytest-cov = "^3.0.0"
 redis = "^4.1.0"
 sphinx-rtd-theme = "^1.0.0"
-starlette-zipkin = "^0.2.0"
-tomlkit = "^0.7.2"
+starlette-zipkin = "^0.2.3"
+tomlkit = "^0.11.0"
 types-redis = "^4.1.8"
 types-setuptools = "^57.4.7"
 unasync = "^0.5.0"
-uvicorn = "^0.17.5"
+uvicorn = "^0.17.6"
+
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
