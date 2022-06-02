@@ -1,6 +1,10 @@
+1.0.2 - Released on 2022-06-02
+------------------------------
+* Update dependencies
+
 1.0.1 - Released on 2022-02-27
 ------------------------------
-* Update depenencies
+* Update dependencies
 
 1.0.0 - Released on 2022-02-12
 ------------------------------
