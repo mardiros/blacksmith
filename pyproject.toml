@@ -25,6 +25,7 @@ purgatory = "^1.0.1"
 pydantic = "^1.8.2"
 python = "^3.7"
 typing-extensions = "^4.0.1"
+result = "^0.8.0"
 
 [tool.poetry.extras]
 http_cache_async = ["aioredis"]

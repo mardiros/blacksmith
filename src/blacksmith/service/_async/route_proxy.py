@@ -1,6 +1,9 @@
 from typing import Any, Dict, Generic, List, Optional, Tuple, Type, Union
 
+from result import Err, Ok, Result
+
 from blacksmith.domain.exceptions import (
+    HTTPError,
     NoContractException,
     UnregisteredRouteException,
     WrongRequestTypeException,
@@ -99,13 +102,13 @@ class AsyncRouteProxy(Generic[TCollectionResponse, TResponse]):
 
     def _prepare_response(
         self,
-        response: HTTPResponse,
+        result: Result[HTTPResponse, HTTPError],
         response_schema: Optional[Type[Response]],
         method: HTTPMethod,
         path: Path,
     ) -> ResponseBox[TResponse]:
         return ResponseBox[TResponse](
-            response,
+            result,
             response_schema,
             method,
             path,
@@ -115,24 +118,27 @@ class AsyncRouteProxy(Generic[TCollectionResponse, TResponse]):
 
     def _prepare_collection_response(
         self,
-        response: HTTPResponse,
+        result: Result[HTTPResponse, HTTPError],
         response_schema: Optional[Type[Response]],
         collection_parser: Optional[Type[AbstractCollectionParser]],
     ) -> CollectionIterator[TCollectionResponse]:
 
         return CollectionIterator(
-            response, response_schema, collection_parser or self.collection_parser
+            result, response_schema, collection_parser or self.collection_parser
         )
 
     async def _handle_req_with_middlewares(
         self, req: HTTPRequest, timeout: HTTPTimeout, path: Path
-    ) -> HTTPResponse:
+    ) -> Result[HTTPResponse, HTTPError]:
         next: AsyncMiddleware = self.transport
         for middleware in self.middlewares:
             next = middleware(next)
 
-        resp = await next(req, self.client_name, path, timeout)
-        return resp
+        try:
+            resp = await next(req, self.client_name, path, timeout)
+        except HTTPError as exc:
+            return Err(exc)
+        return Ok(resp)
 
     async def _yield_collection_request(
         self,

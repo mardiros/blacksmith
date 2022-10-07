@@ -15,13 +15,14 @@ from typing import (
 )
 
 from pydantic import BaseModel, Field
+from result import Result
 
 if TYPE_CHECKING:
     from pydantic.typing import IntStr
 else:
     IntStr = str
 
-from ...domain.exceptions import NoResponseSchemaException
+from ...domain.exceptions import HTTPError, NoResponseSchemaException
 from ...typing import (
     ClientName,
     HttpLocation,
@@ -202,14 +203,16 @@ class ResponseBox(Generic[TResponse]):
 
     def __init__(
         self,
-        response: HTTPResponse,
+        result: Result[HTTPResponse, HTTPError],
         response_schema: Optional[Type[Response]],
         method: HTTPMethod,
         path: Path,
         name: ResourceName,
         client_name: ClientName,
     ) -> None:
-        self.http_response = response
+        if result.is_err():
+            raise result.unwrap_err()
+        self.http_response = result.unwrap()
         self.response_schema = response_schema
         self.method: HTTPMethod = method
         self.path: Path = path
@@ -246,13 +249,15 @@ class CollectionIterator(Iterator[TResponse]):
 
     def __init__(
         self,
-        response: HTTPResponse,
+        response: Result[HTTPResponse, HTTPError],
         response_schema: Optional[Type[Response]],
         collection_parser: Type[AbstractCollectionParser],
     ) -> None:
         self.pos = 0
         self.response_schema = response_schema
-        self.response = collection_parser(response)
+        if response.is_err():
+            raise response.unwrap_err()
+        self.response = collection_parser(response.unwrap())
         self.json_resp = self.response.json
 
     @property

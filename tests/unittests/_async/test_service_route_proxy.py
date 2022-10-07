@@ -77,11 +77,13 @@ async def test_route_proxy_prepare_middleware(
             AsyncHTTPAddHeadersMiddleware({"Eggs": "egg"}),
         ],
     )
-    resp = await proxy._handle_req_with_middlewares(
+    result = await proxy._handle_req_with_middlewares(
         dummy_http_request,
         HTTPTimeout(4.2),
         "/",
     )
+    assert result.is_ok()
+    resp = result.unwrap()
     assert resp.headers == {
         "Authorization": "Bearer abc",
         "X-Req-Id": "42",

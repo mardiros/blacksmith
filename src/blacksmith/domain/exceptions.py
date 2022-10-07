@@ -1,4 +1,4 @@
-from typing import Any, Type
+from typing import TYPE_CHECKING, Any, Type
 
 from blacksmith.typing import (
     ClientName,
@@ -10,6 +10,9 @@ from blacksmith.typing import (
     ServiceName,
     Version,
 )
+
+if TYPE_CHECKING:
+    from .model.http import HTTPRequest, HTTPResponse
 
 
 class ConfigurationError(Exception):
@@ -97,9 +100,7 @@ class WrongRequestTypeException(TypeError):
 class HTTPError(Exception):
     """Represent the http error."""
 
-    from .model.http import HTTPRequest, HTTPResponse
-
-    def __init__(self, message: str, request: HTTPRequest, response: HTTPResponse):
+    def __init__(self, message: str, request: "HTTPRequest", response: "HTTPResponse"):
         super().__init__(message)
         self.request = request
         self.response = response

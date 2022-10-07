@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import Any, Optional
 
 import pytest
+from result import Ok
 
 from blacksmith.domain.exceptions import NoResponseSchemaException
 from blacksmith.domain.model import (
@@ -115,14 +116,16 @@ def test_collection_parser():
 
 def test_response_box():
     resp = ResponseBox(
-        HTTPResponse(
-            200,
-            {},
-            {
-                "name": "Alice",
-                "age": 24,
-                "useless": True,
-            },
+        Ok(
+            HTTPResponse(
+                200,
+                {},
+                {
+                    "name": "Alice",
+                    "age": 24,
+                    "useless": True,
+                },
+            )
         ),
         GetResponse,
         "GET",
@@ -136,14 +139,16 @@ def test_response_box():
 
 def test_response_box_no_schema():
     resp = ResponseBox(
-        HTTPResponse(
-            200,
-            {},
-            {
-                "name": "Alice",
-                "age": 24,
-                "useless": True,
-            },
+        Ok(
+            HTTPResponse(
+                200,
+                {},
+                {
+                    "name": "Alice",
+                    "age": 24,
+                    "useless": True,
+                },
+            )
         ),
         None,
         "GET",
@@ -162,20 +167,22 @@ def test_response_box_no_schema():
 
 def test_collection_iterator():
     collec: CollectionIterator[Any] = CollectionIterator(
-        HTTPResponse(
-            200,
-            {"Total-Count": "5"},
-            [
-                {
-                    "name": "Alice",
-                    "age": 24,
-                    "useless": True,
-                },
-                {
-                    "name": "Bob",
-                    "age": 42,
-                },
-            ],
+        Ok(
+            HTTPResponse(
+                200,
+                {"Total-Count": "5"},
+                [
+                    {
+                        "name": "Alice",
+                        "age": 24,
+                        "useless": True,
+                    },
+                    {
+                        "name": "Bob",
+                        "age": 42,
+                    },
+                ],
+            )
         ),
         GetResponse,
         CollectionParser,
