@@ -2,6 +2,7 @@ from enum import Enum
 from typing import Any, Optional
 
 import pytest
+from result import Result
 
 from blacksmith import (
     AsyncClientFactory,
@@ -74,20 +75,21 @@ async def test_crud(dummy_api_endpoint: str):
     cli: AsyncClientFactory[Any, Any] = AsyncClientFactory(sd)
     api = await cli("api")
 
-    items: CollectionIterator[Any] = await api.item.collection_get()
-    llitems = list(items)
+    items: Result[CollectionIterator[Any], HTTPError] = await api.item.collection_get()
+    llitems = list(items.unwrap())
     assert llitems == []
 
     await api.item.collection_post(CreateItem(name="dummy0", size=SizeEnum.s))
 
     items = await api.item.collection_get(ListItem())
-    litems = list(items)
+    litems = list(items.unwrap())
     assert litems == [Item(name="dummy0", size=SizeEnum.s)]
 
     await api.item.collection_post({"name": "dummy1", "size": SizeEnum.m})
 
     items = await api.item.collection_get(ListItem())
-    litems = list(items)
+    assert items.is_ok
+    litems = list(items.unwrap())
     assert litems == [
         Item(name="dummy0", size=SizeEnum.s),
         Item(name="dummy1", size=SizeEnum.m),
@@ -103,14 +105,14 @@ async def test_crud(dummy_api_endpoint: str):
     # Test the filter parameter in query string
     await api.item.collection_post({"name": "zdummy", "size": "L"})
     items = await api.item.collection_get(ListItem(name="z"))
-    litems = list(items)
+    litems = list(items.unwrap())
     assert litems == [
         Item(name="zdummy", size=SizeEnum.l),
     ]
 
     # Test with the dict syntax
     items = await api.item.collection_get({"name": "z"})
-    litems = list(items)
+    litems = list(items.unwrap())
     assert litems == [
         Item(name="zdummy", size=SizeEnum.l),
     ]
@@ -130,7 +132,7 @@ async def test_crud(dummy_api_endpoint: str):
     # Test delete
     await api.item.delete({"item_name": "zdummy"})
     items = await api.item.collection_get({})
-    litems = list(items)
+    litems = list(items.unwrap())
     assert litems == [
         Item(name="dummy0", size=SizeEnum.s),
         Item(name="dummy1", size=SizeEnum.m),
@@ -139,7 +141,7 @@ async def test_crud(dummy_api_endpoint: str):
     # Test patch
     await api.item.patch({"item_name": "dummy1", "name": "dummy2"})
     items = await api.item.collection_get()
-    litems = list(items)
+    litems = list(items.unwrap())
     assert litems == [
         Item(name="dummy0", size=SizeEnum.s),
         Item(name="dummy2", size=SizeEnum.m),
@@ -147,7 +149,7 @@ async def test_crud(dummy_api_endpoint: str):
 
     await api.item.patch({"item_name": "dummy2", "size": "L"})
     items = await api.item.collection_get()
-    litems = list(items)
+    litems = list(items.unwrap())
     assert litems == [
         Item(name="dummy0", size=SizeEnum.s),
         Item(name="dummy2", size=SizeEnum.l),

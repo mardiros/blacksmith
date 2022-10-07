@@ -121,11 +121,16 @@ class AsyncRouteProxy(Generic[TCollectionResponse, TResponse]):
         result: Result[HTTPResponse, HTTPError],
         response_schema: Optional[Type[Response]],
         collection_parser: Optional[Type[AbstractCollectionParser]],
-    ) -> CollectionIterator[TCollectionResponse]:
+    ) -> Result[CollectionIterator[TCollectionResponse], HTTPError]:
 
-        return CollectionIterator(
-            result, response_schema, collection_parser or self.collection_parser
-        )
+        if result.is_err():
+            return Err(result.unwrap_err())
+        else:
+            return Ok(
+                CollectionIterator(
+                    result, response_schema, collection_parser or self.collection_parser
+                )
+            )
 
     async def _handle_req_with_middlewares(
         self, req: HTTPRequest, timeout: HTTPTimeout, path: Path
@@ -146,7 +151,7 @@ class AsyncRouteProxy(Generic[TCollectionResponse, TResponse]):
         params: Union[Optional[Request], Dict[Any, Any]],
         timeout: HTTPTimeout,
         collection: HttpCollection,
-    ) -> CollectionIterator[TCollectionResponse]:
+    ) -> Result[CollectionIterator[TCollectionResponse], HTTPError]:
         path, req, resp_schema = self._prepare_request(method, params, collection)
         resp = await self._handle_req_with_middlewares(req, timeout, path)
         return self._prepare_collection_response(
@@ -190,7 +195,7 @@ class AsyncRouteProxy(Generic[TCollectionResponse, TResponse]):
         self,
         params: Union[Optional[Request], Dict[Any, Any]] = None,
         timeout: Optional[ClientTimeout] = None,
-    ) -> CollectionIterator[TCollectionResponse]:
+    ) -> Result[CollectionIterator[TCollectionResponse], HTTPError]:
         if not self.routes.collection:
             raise UnregisteredRouteException("GET", self.name, self.client_name)
         return await self._yield_collection_request(

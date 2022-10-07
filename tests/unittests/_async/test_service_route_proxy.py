@@ -1,6 +1,7 @@
 from typing import Any
 
 import pytest
+from result import Result
 
 from blacksmith import Request
 from blacksmith.domain.exceptions import (
@@ -280,7 +281,9 @@ async def test_route_proxy_collection_get():
         collection_parser=CollectionParser,
         middlewares=[],
     )
-    resp: CollectionIterator[Any] = await proxy.collection_get()
+    result: Result[CollectionIterator[Any], HTTPError] = await proxy.collection_get()
+    assert result.is_ok()
+    resp = result.unwrap()
     assert resp.meta.total_count == 10
     assert resp.meta.count == 2
     lresp = list(resp)
@@ -312,7 +315,9 @@ async def test_route_proxy_collection_get_with_parser():
         collection_parser=CollectionParser,
         middlewares=[],
     )
-    resp: CollectionIterator[Any] = await proxy.collection_get()
+    result: Result[CollectionIterator[Any], HTTPError] = await proxy.collection_get()
+    assert result.is_ok()
+    resp = result.unwrap()
     assert resp.meta.total_count == 10
     assert resp.meta.count == 2
     lresp = list(resp)

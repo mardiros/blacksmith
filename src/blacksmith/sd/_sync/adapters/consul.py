@@ -7,6 +7,7 @@ import random
 from typing import Any, Callable, List
 
 from pydantic.fields import Field
+from result import Result
 
 from blacksmith.domain.exceptions import HTTPError, UnregisteredServiceException
 from blacksmith.domain.model import PathInfoField, Request, Response
@@ -123,14 +124,15 @@ class SyncConsulDiscovery(SyncAbstractServiceDiscovery):
         """
         name = self.format_service_name(service, version)
         consul = self.blacksmith_cli("consul")
-        try:
-            iresp: CollectionIterator[Service] = consul.services.collection_get(
-                ServiceRequest(name=name)
-            )
-        except HTTPError as exc:
-            raise ConsulApiError(exc)  # rewrite the class to avoid confusion
+        rresp: Result[
+            CollectionIterator[Service], HTTPError
+        ] = consul.services.collection_get(ServiceRequest(name=name))
+        if rresp.is_err():
+            raise ConsulApiError(
+                rresp.unwrap_err()
+            )  # rewrite the class to avoid confusion
         else:
-            resp: List[Service] = list(iresp)
+            resp: List[Service] = list(rresp.unwrap())
             if not resp:
                 raise UnregisteredServiceException(service, version)
             return random.choice(resp)
