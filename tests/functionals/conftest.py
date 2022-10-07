@@ -1,10 +1,9 @@
 from enum import Enum
 from multiprocessing import Process
-from typing import Dict, Iterable, List, Optional, Type, cast
+from typing import Dict, Iterable, List, Optional, Type
 
 import pytest
 import uvicorn  # type: ignore
-from asgiref.typing import ASGI3Application
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from pydantic.fields import Field
@@ -80,7 +79,7 @@ def delete_item(item_name: str, item: PatchItem):
 
 
 def run_server(port: int):
-    uvicorn.run(cast(ASGI3Application, app), port=port)
+    uvicorn.run(app, port=port)
 
 
 @pytest.fixture
