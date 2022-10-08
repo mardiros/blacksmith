@@ -119,6 +119,7 @@ async def test_crud(dummy_api_endpoint: str):
 
     # Test with the dict syntax
     items = await api.item.collection_get({"name": "z"})
+    assert items.is_ok()
     litems = list(items.unwrap())
     assert litems == [
         Item(name="zdummy", size=SizeEnum.l),

@@ -54,7 +54,7 @@ async def main():
         auth
     )
     api = await cli("gandi")
-    tld = (await api.tld.get(TLDInfoGetParam(name="eu"))).response
+    tld = (await api.tld.get(TLDInfoGetParam(name="eu"))).unwrap()
     print(tld)
 
 

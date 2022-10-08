@@ -13,6 +13,6 @@ async def post_notif(
 ):
     body = await request.json()
     api_user = await app.get_client("api_user")
-    user: User = (await api_user.users.get({"username": body["username"]})).response
+    user: User = (await api_user.users.get({"username": body["username"]})).unwrap()
     await app.send_email(user, body["message"])
     return JSONResponse({"detail": f"{user.email} accepted"}, status_code=202)
