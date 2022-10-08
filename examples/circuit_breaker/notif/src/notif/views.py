@@ -13,7 +13,9 @@ from blacksmith import (
     AsyncClientFactory,
     AsyncConsulDiscovery,
     AsyncPrometheusMiddleware,
+    HTTPError,
     PrometheusMetrics,
+    ResponseBox,
 )
 
 app = Starlette(debug=True)
@@ -63,9 +65,18 @@ async def get_notif(request):
 async def post_notif(request):
     body = await request.json()
     api_user = await cli("api_user")
-    user: User = (await api_user.users.get({"username": body["username"]})).unwrap()
-    await send_email(user, body["message"])
-    return JSONResponse({"detail": f"{user.email} accepted"}, status_code=202)
+
+    ruser: ResponseBox[User, HTTPError] = await api_user.users.get(
+        {"username": body["username"]}
+    )
+    if ruser.is_ok():
+        user = ruser.unwrap()
+        await send_email(user, body["message"])
+        return JSONResponse({"detail": f"{user.email} accepted"}, status_code=202)
+
+    return JSONResponse(
+        {"detail": f"{body['username']} not delivered"}, status_code=500
+    )
 
 
 @app.route("/metrics", methods=["GET"])
