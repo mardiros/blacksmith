@@ -137,10 +137,14 @@ def test_response_box():
     alice = GetResponse(name="Alice", age=24)
     bob = GetResponse(name="Bob", age=40)
     assert resp.is_ok()
+    assert resp.is_err() is False
     assert resp.unwrap() == alice
     with pytest.raises(UnwrapError):
         assert resp.unwrap_err()
+
+    assert resp.unwrap_or(bob) == alice
     assert resp.unwrap_or_else(lambda err: bob) == alice
+
     assert resp.expect("To never fail") == alice
     with pytest.raises(UnwrapError):
         assert resp.expect_err("To always fail")
@@ -156,6 +160,7 @@ def test_response_box():
 
 
 def test_response_box_err():
+    bob = GetResponse(name="Bob", age=40)
     http_error = HTTPError(
         "500 Internal Server Error",
         HTTPRequest("GET", "/", {}, {}, {}),
@@ -176,11 +181,13 @@ def test_response_box_err():
         "",
     )
     assert resp.is_err()
+    assert resp.is_ok() is False
     assert resp.unwrap_err() == http_error
     assert resp.json == {"message": "Internal Server Error"}
-    assert resp.unwrap_or_else(
-        lambda err: GetResponse(name="Bob", age=40)
-    ) == GetResponse(name="Bob", age=40)
+
+    assert resp.unwrap_or(bob) == bob
+    assert resp.unwrap_or_else(lambda err: bob) == bob
+
     with pytest.raises(UnwrapError):
         assert resp.expect("To never fail")
     assert resp.expect_err("To always fail") == http_error

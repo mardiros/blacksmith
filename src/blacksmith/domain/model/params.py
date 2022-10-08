@@ -276,8 +276,13 @@ class ResponseBox(Generic[TResponse]):
         """Return the response error."""
         return self.raw_result.unwrap_err()
 
+    def unwrap_or(self, default: TResponse) -> TResponse:
+        """Return the response or the default value in case of error."""
+        resp = self.raw_result.map(self._cast_resp)
+        return cast(Result[TResponse, HTTPError], resp).unwrap_or(default)
+
     def unwrap_or_else(self, op: Callable[[HTTPError], TResponse]) -> TResponse:
-        """Return the response or the op return in case of error."""
+        """Return the response or the callable return in case of error."""
         resp = self.raw_result.map(self._cast_resp)
         return cast(Result[TResponse, HTTPError], resp).unwrap_or_else(op)
 
