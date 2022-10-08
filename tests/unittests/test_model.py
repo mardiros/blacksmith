@@ -145,6 +145,12 @@ def test_response_box():
     assert resp.unwrap_or(bob) == alice
     assert resp.unwrap_or_else(lambda err: bob) == alice
 
+    assert resp.map(lambda x: x.name) == Ok("Alice")  # type: ignore
+    assert resp.map_or("Bob", lambda x: x.name) == "Alice"  # type: ignore
+    assert resp.map_or_else(lambda: "Bob", lambda x: x.name) == "Alice"  # type: ignore
+
+    assert resp.map_err(lambda err: err.status_code) == Ok(alice)  # type: ignore
+
     assert resp.expect("To never fail") == alice
     with pytest.raises(UnwrapError):
         assert resp.expect_err("To always fail")
@@ -187,6 +193,12 @@ def test_response_box_err():
 
     assert resp.unwrap_or(bob) == bob
     assert resp.unwrap_or_else(lambda err: bob) == bob
+
+    assert resp.map(lambda x: x.name) == Err(http_error)  # type: ignore
+    assert resp.map_or("Bob", lambda x: x.name) == "Bob"  # type: ignore
+    assert resp.map_or_else(lambda: "Bob", lambda x: x.name) == "Bob"  # type: ignore
+
+    assert resp.map_err(lambda err: err.status_code) == Err(500)  # type: ignore
 
     with pytest.raises(UnwrapError):
         assert resp.expect("To never fail")

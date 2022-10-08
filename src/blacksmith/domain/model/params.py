@@ -18,6 +18,7 @@ from typing import (
 
 from pydantic import BaseModel, Field
 from result import Result
+from result.result import F, U
 
 if TYPE_CHECKING:
     from pydantic.typing import IntStr
@@ -293,6 +294,33 @@ class ResponseBox(Generic[TResponse]):
     def expect_err(self, message: str) -> HTTPError:
         """Return the error or raise an UnwrapError exception with the given message."""
         return self.raw_result.expect_err(message)
+
+    def map(self, op: Callable[[TResponse], U]) -> Result[U, HTTPError]:
+        """
+        Apply op on response in case of success, and return the new result.
+        """
+        # works in mypy, not in pylance
+        return self.raw_result.map(self._cast_resp).map(op)  # type: ignore
+
+    def map_or(self, default: U, op: Callable[[TResponse], U]) -> U:
+        """
+        Apply and return op on response in case of success, default in case of error.
+        """
+        return self.raw_result.map(self._cast_resp).map_or(default, op)
+
+    def map_or_else(
+        self, default_op: Callable[[], U], op: Callable[[TResponse], U]
+    ) -> U:
+        """
+        Return the result of default_op in case of error otherwise the result of op.
+        """
+        return self.raw_result.map(self._cast_resp).map_or_else(default_op, op)
+
+    def map_err(self, op: Callable[[HTTPError], F]) -> Result[TResponse, F]:
+        """
+        Apply op on error in case of error, and return the new result.
+        """
+        return self.raw_result.map(self._cast_resp).map_err(op)  # type: ignore
 
 
 class CollectionIterator(Iterator[TResponse]):
