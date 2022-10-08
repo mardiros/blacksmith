@@ -1,11 +1,12 @@
 import json
+import warnings
 from datetime import datetime
 from typing import Any, Optional
 
 import pytest
-from result import Ok
+from result import Err, Ok
 
-from blacksmith.domain.exceptions import NoResponseSchemaException
+from blacksmith.domain.exceptions import HTTPError, NoResponseSchemaException
 from blacksmith.domain.model import (
     CollectionIterator,
     CollectionParser,
@@ -133,8 +134,51 @@ def test_response_box():
         "",
         "",
     )
-    assert resp.response.dict() == {"age": 24, "name": "Alice"}
+    assert resp.is_ok()
+    assert resp.unwrap().dict() == {"age": 24, "name": "Alice"}
+
+    with warnings.catch_warnings(record=True) as ctx:
+        warnings.simplefilter("always")
+        assert resp.response.dict() == {"age": 24, "name": "Alice"}
+    assert [str(w.message) for w in ctx] == [
+        ".response is deprecated, use .unwrap() instead"
+    ]
+
     assert resp.json == {"age": 24, "name": "Alice", "useless": True}
+
+
+def test_response_box_err():
+    http_error = HTTPError(
+        "500 Internal Server Error",
+        HTTPRequest("GET", "/", {}, {}, {}),
+        HTTPResponse(
+            500,
+            {},
+            {
+                "message": "Internal Server Error",
+            },
+        ),
+    )
+    resp = ResponseBox(
+        Err(http_error),
+        GetResponse,
+        "GET",
+        "/",
+        "",
+        "",
+    )
+    assert resp.is_err()
+    assert resp.unwrap_err() == http_error
+    assert resp.json == {"message": "Internal Server Error"}
+
+    with warnings.catch_warnings(record=True) as ctx_warn:
+        warnings.simplefilter("always")
+        with pytest.raises(HTTPError) as ctx_err:
+            resp.response.dict()
+    assert [str(w.message) for w in ctx_warn] == [
+        ".response is deprecated, use .unwrap() instead"
+    ]
+    assert ctx_err.value.json == {"message": "Internal Server Error"}
 
 
 def test_response_box_no_schema():

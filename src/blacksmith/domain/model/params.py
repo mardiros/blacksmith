@@ -1,4 +1,5 @@
 import abc
+import warnings
 from dataclasses import dataclass
 from functools import partial
 from typing import (
@@ -210,9 +211,7 @@ class ResponseBox(Generic[TResponse]):
         name: ResourceName,
         client_name: ClientName,
     ) -> None:
-        if result.is_err():
-            raise result.unwrap_err()
-        self.http_response = result.unwrap()
+        self.raw_result = result
         self.response_schema = response_schema
         self.method: HTTPMethod = method
         self.path: Path = path
@@ -222,22 +221,56 @@ class ResponseBox(Generic[TResponse]):
     @property
     def json(self) -> Optional[Dict[str, Any]]:
         """Return the raw json response."""
-        return self.http_response.json
+        if self.raw_result.is_ok():
+            return self.raw_result.unwrap().json
+        return self.raw_result.unwrap_err().response.json
 
     @property
     def response(self) -> TResponse:
         """
         Parse the response using the schema.
 
+        .. deprecated:: 2.0
+            Use :meth:`ResponseBox.unwrap()`
+
+        :raises HTTPError: if the response conains an error.
         :raises NoResponseSchemaException: if the response_schema has not been
             set in the contract.
         """
+        warnings.warn(
+            ".response is deprecated, use .unwrap() instead",
+            category=DeprecationWarning,
+        )
+        if self.raw_result.is_err():
+            raise self.raw_result.unwrap_err()
         if self.response_schema is None:
             raise NoResponseSchemaException(
                 self.method, self.path, self.name, self.client_name
             )
         resp = self.response_schema(**(self.json or {}))
         return cast(TResponse, resp)
+
+    def is_ok(self) -> bool:
+        """Return True if the response was an http success."""
+        return self.raw_result.is_ok()
+
+    def is_err(self) -> bool:
+        """Return True if the response was an http error."""
+        return self.raw_result.is_err()
+
+    def unwrap(self) -> TResponse:
+        """Return the response parsed"""
+        raw_resp = self.raw_result.unwrap()
+
+        if self.response_schema is None:
+            raise NoResponseSchemaException(
+                self.method, self.path, self.name, self.client_name
+            )
+        resp = self.response_schema(**(raw_resp.json or {}))
+        return cast(TResponse, resp)
+
+    def unwrap_err(self) -> HTTPError:
+        return self.raw_result.unwrap_err()
 
 
 class CollectionIterator(Iterator[TResponse]):
