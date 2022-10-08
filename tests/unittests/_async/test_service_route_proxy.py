@@ -1,4 +1,5 @@
 from typing import Any
+from pydantic import BaseModel, Field
 
 import pytest
 from result import Result
@@ -24,6 +25,15 @@ from blacksmith.service._async.base import AsyncAbstractTransport
 from blacksmith.service._async.route_proxy import AsyncRouteProxy, build_timeout
 from blacksmith.typing import ClientName, Path
 from tests.unittests.dummy_registry import GetParam, GetResponse, PostParam
+
+
+class MyErrorFormat(BaseModel):
+    message: str = Field(...)
+    detail: str = Field(...)
+
+
+def error_parser(error: HTTPError) -> MyErrorFormat:
+    return MyErrorFormat(**error.json)  # type: ignore
 
 
 class FakeTransport(AsyncAbstractTransport):
@@ -58,7 +68,7 @@ async def test_route_proxy_prepare_middleware(
 ):
     resp = HTTPResponse(200, {}, "")
 
-    proxy: AsyncRouteProxy[Any, Any] = AsyncRouteProxy(
+    proxy: AsyncRouteProxy[Any, Any, Any] = AsyncRouteProxy(
         "dummy",
         "dummies",
         "http://dummy/",
@@ -77,6 +87,7 @@ async def test_route_proxy_prepare_middleware(
             AsyncHTTPAddHeadersMiddleware({"foo": "bar"}),
             AsyncHTTPAddHeadersMiddleware({"Eggs": "egg"}),
         ],
+        error_parser=error_parser,
     )
     result = await proxy._handle_req_with_middlewares(
         dummy_http_request,
@@ -112,6 +123,7 @@ async def test_route_proxy_prepare_unregistered_method_resource():
         timeout=HTTPTimeout(),
         collection_parser=CollectionParser,
         middlewares=[],
+        error_parser=error_parser,
     )
     with pytest.raises(NoContractException) as exc:
         resp = proxy._prepare_request("GET", {}, proxy.routes.resource)
@@ -140,6 +152,7 @@ async def test_route_proxy_prepare_unregistered_method_collection():
         timeout=HTTPTimeout(),
         collection_parser=CollectionParser,
         middlewares=[],
+        error_parser=error_parser,
     )
     with pytest.raises(NoContractException) as exc:
         resp = proxy._prepare_request("GET", {}, proxy.routes.collection)
@@ -168,6 +181,7 @@ async def test_route_proxy_prepare_unregistered_resource():
         timeout=HTTPTimeout(),
         collection_parser=CollectionParser,
         middlewares=[],
+        error_parser=error_parser,
     )
     with pytest.raises(UnregisteredRouteException) as exc:
         resp = proxy._prepare_request("GET", {}, proxy.routes.resource)
@@ -196,6 +210,7 @@ async def test_route_proxy_prepare_unregistered_collection():
         timeout=HTTPTimeout(),
         collection_parser=CollectionParser,
         middlewares=[],
+        error_parser=error_parser,
     )
     with pytest.raises(UnregisteredRouteException) as exc:
         resp = proxy._prepare_request("GET", {}, proxy.routes.collection)
@@ -224,6 +239,7 @@ async def test_route_proxy_prepare_wrong_type():
         timeout=HTTPTimeout(),
         collection_parser=CollectionParser,
         middlewares=[],
+        error_parser=error_parser,
     )
     with pytest.raises(WrongRequestTypeException) as exc:
         resp = proxy._prepare_request(
@@ -254,6 +270,7 @@ async def test_route_proxy_collection_head():
         timeout=HTTPTimeout(),
         collection_parser=CollectionParser,
         middlewares=[],
+        error_parser=error_parser,
     )
     resp = (await proxy.collection_head({"name": "baby"})).json
     assert resp == ""
@@ -280,13 +297,16 @@ async def test_route_proxy_collection_get():
         timeout=HTTPTimeout(),
         collection_parser=CollectionParser,
         middlewares=[],
+        error_parser=error_parser,
     )
-    result: Result[CollectionIterator[Any], HTTPError] = await proxy.collection_get()
+    result: Result[
+        CollectionIterator[Any], MyErrorFormat
+    ] = await proxy.collection_get()
     assert result.is_ok()
     resp = result.unwrap()
     assert resp.meta.total_count == 10
     assert resp.meta.count == 2
-    lresp = list(resp)
+    lresp = list(resp)  # type: ignore
     assert lresp == [{"name": "alice"}, {"name": "bob"}]
 
 
@@ -314,13 +334,16 @@ async def test_route_proxy_collection_get_with_parser():
         timeout=HTTPTimeout(),
         collection_parser=CollectionParser,
         middlewares=[],
+        error_parser=error_parser,
     )
-    result: Result[CollectionIterator[Any], HTTPError] = await proxy.collection_get()
+    result: Result[
+        CollectionIterator[Any], MyErrorFormat
+    ] = await proxy.collection_get()
     assert result.is_ok()
     resp = result.unwrap()
     assert resp.meta.total_count == 10
     assert resp.meta.count == 2
-    lresp = list(resp)
+    lresp = list(resp)  # type: ignore
     assert lresp == [{"name": "alice"}, {"name": "bob"}]
 
 
@@ -343,6 +366,7 @@ async def test_route_proxy_collection_post():
         timeout=HTTPTimeout(),
         collection_parser=CollectionParser,
         middlewares=[],
+        error_parser=error_parser,
     )
     resp = (await proxy.collection_post({})).json
     assert resp == {"detail": "accepted"}
@@ -367,6 +391,7 @@ async def test_route_proxy_collection_put():
         timeout=HTTPTimeout(),
         collection_parser=CollectionParser,
         middlewares=[],
+        error_parser=error_parser,
     )
     resp = (await proxy.collection_put({})).json
     assert resp == {"detail": "accepted"}
@@ -391,6 +416,7 @@ async def test_route_proxy_collection_patch():
         timeout=HTTPTimeout(),
         collection_parser=CollectionParser,
         middlewares=[],
+        error_parser=error_parser,
     )
     resp = (await proxy.collection_patch({})).json
     assert resp == {"detail": "accepted"}
@@ -415,6 +441,7 @@ async def test_route_proxy_collection_delete():
         timeout=HTTPTimeout(),
         collection_parser=CollectionParser,
         middlewares=[],
+        error_parser=error_parser,
     )
     resp = (await proxy.collection_delete({})).json
     assert resp == {"detail": "accepted"}
@@ -439,6 +466,7 @@ async def test_route_proxy_collection_options():
         timeout=HTTPTimeout(),
         collection_parser=CollectionParser,
         middlewares=[],
+        error_parser=error_parser,
     )
     resp = (await proxy.collection_options({})).json
     assert resp == {"detail": "accepted"}
@@ -462,6 +490,7 @@ async def test_route_proxy_head():
         timeout=HTTPTimeout(),
         collection_parser=CollectionParser,
         middlewares=[],
+        error_parser=error_parser,
     )
     resp = (await proxy.head({"name": "baby"})).json
     assert resp == ""
@@ -486,6 +515,7 @@ async def test_route_proxy_get():
         timeout=HTTPTimeout(),
         collection_parser=CollectionParser,
         middlewares=[],
+        error_parser=error_parser,
     )
     resp = (await proxy.get({})).json
     assert resp == [{"name": "alice"}, {"name": "bob"}]
@@ -510,6 +540,7 @@ async def test_route_proxy_post():
         timeout=HTTPTimeout(),
         collection_parser=CollectionParser,
         middlewares=[],
+        error_parser=error_parser,
     )
     resp = (await proxy.post({})).json
     assert resp == {"detail": "accepted"}
@@ -534,6 +565,7 @@ async def test_route_proxy_put():
         timeout=HTTPTimeout(),
         collection_parser=CollectionParser,
         middlewares=[],
+        error_parser=error_parser,
     )
     resp = (await proxy.put({})).json
     assert resp == {"detail": "accepted"}
@@ -558,6 +590,7 @@ async def test_route_proxy_patch():
         timeout=HTTPTimeout(),
         collection_parser=CollectionParser,
         middlewares=[],
+        error_parser=error_parser,
     )
     resp = (await proxy.patch({})).json
     assert resp == {"detail": "accepted"}
@@ -582,6 +615,7 @@ async def test_route_proxy_delete():
         timeout=HTTPTimeout(),
         collection_parser=CollectionParser,
         middlewares=[],
+        error_parser=error_parser,
     )
     resp = (await proxy.delete({})).json
     assert resp == {"detail": "accepted"}
@@ -606,13 +640,14 @@ async def test_route_proxy_options():
         timeout=HTTPTimeout(),
         collection_parser=CollectionParser,
         middlewares=[],
+        error_parser=error_parser,
     )
     resp = (await proxy.options({})).json
     assert resp == {"detail": "accepted"}
 
 
 async def test_unregistered_collection(echo_middleware: AsyncAbstractTransport):
-    proxy: AsyncRouteProxy[Any, Any] = AsyncRouteProxy(
+    proxy: AsyncRouteProxy[Any, Any, Any] = AsyncRouteProxy(
         "dummy",
         "dummies",
         "http://dummy/",
@@ -631,6 +666,7 @@ async def test_unregistered_collection(echo_middleware: AsyncAbstractTransport):
             AsyncHTTPAddHeadersMiddleware({"foo": "bar"}),
             AsyncHTTPAddHeadersMiddleware({"Eggs": "egg"}),
         ],
+        error_parser=error_parser,
     )
     for verb in ("get", "post", "put", "patch", "delete", "options", "head"):
         with pytest.raises(UnregisteredRouteException) as ctx:

@@ -73,7 +73,7 @@ register(
 
 async def test_crud(dummy_api_endpoint: str):
     sd = AsyncStaticDiscovery({("api", None): dummy_api_endpoint})
-    cli: AsyncClientFactory[Any, Any] = AsyncClientFactory(sd)
+    cli: AsyncClientFactory[Any, Any, Any] = AsyncClientFactory(sd)
     api = await cli("api")
 
     items: Result[CollectionIterator[Any], HTTPError] = await api.item.collection_get()
@@ -126,7 +126,7 @@ async def test_crud(dummy_api_endpoint: str):
     ]
 
     # Test get
-    item: ResponseBox[Item] = await api.item.get(GetItem(item_name="zdummy"))
+    item: ResponseBox[Item, Any] = await api.item.get(GetItem(item_name="zdummy"))
     assert item.is_ok()
     assert item.unwrap() == Item(name="zdummy", size=SizeEnum.l)
 

@@ -2,10 +2,13 @@ import json
 import warnings
 from datetime import datetime
 from typing import Any, Optional
+from pydantic import BaseModel, Field
 
 import pytest
 from result import Err, Ok, UnwrapError
+from blacksmith.domain.error import default_error_parser
 
+# type: ignore
 from blacksmith.domain.exceptions import HTTPError, NoResponseSchemaException
 from blacksmith.domain.model import (
     CollectionIterator,
@@ -21,6 +24,19 @@ from blacksmith.domain.model import (
     ResponseBox,
 )
 from blacksmith.domain.model.http import HTTPTimeout, parse_header_links
+
+
+class MyErrorFormat(BaseModel):
+    status_code: int = Field(...)
+    message: str = Field(...)
+    detail: str = Field(...)
+
+
+def error_parser(error: HTTPError) -> MyErrorFormat:
+    return MyErrorFormat(
+        status_code=error.status_code,
+        **error.json,  # type: ignore
+    )
 
 
 class GetResponse(Response):
@@ -133,6 +149,7 @@ def test_response_box():
         "",
         "",
         "",
+        error_parser=error_parser,
     )
     alice = GetResponse(name="Alice", age=24)
     bob = GetResponse(name="Bob", age=40)
@@ -177,6 +194,73 @@ def test_response_box_err():
             {},
             {
                 "message": "Internal Server Error",
+                "detail": "too many connections",
+            },
+        ),
+    )
+    my_parsed_error = MyErrorFormat(
+        status_code=500,
+        message="Internal Server Error",
+        detail="too many connections",
+    )
+    resp = ResponseBox(
+        Err(http_error),
+        GetResponse,
+        "GET",
+        "/",
+        "",
+        "",
+        error_parser=error_parser,
+    )
+    assert resp.is_err()
+    assert resp.is_ok() is False
+    assert resp.unwrap_err() == my_parsed_error
+    assert resp.json == {
+        "message": "Internal Server Error",
+        "detail": "too many connections",
+    }
+
+    assert resp.unwrap_or(bob) == bob
+    assert resp.unwrap_or_else(lambda err: bob) == bob
+
+    assert resp.map(lambda x: x.name) == Err(my_parsed_error)  # type: ignore
+    assert resp.map_or("Bob", lambda x: x.name) == "Bob"  # type: ignore
+    assert resp.map_or_else(lambda: "Bob", lambda x: x.name) == "Bob"  # type: ignore
+    assert resp.map_err(lambda err: err.status_code) == Err(500)  # type: ignore
+
+    assert resp.and_then(lambda x: x.name) == Err(my_parsed_error)  # type: ignore
+    assert resp.or_else(lambda err: err.status_code) == 500  # type: ignore
+
+    with pytest.raises(UnwrapError):
+        assert resp.expect("To never fail")
+    assert resp.expect_err("To always fail") == my_parsed_error
+
+    with warnings.catch_warnings(record=True) as ctx_warn:
+        warnings.simplefilter("always")
+        with pytest.raises(HTTPError) as ctx_err:
+            resp.response.dict()
+    assert [str(w.message) for w in ctx_warn] == [
+        ".response is deprecated, use .unwrap() instead"
+    ]
+    assert ctx_err.value.json == {
+        "detail": "too many connections",
+        "message": "Internal Server Error",
+    }
+
+    with pytest.raises(UnwrapError):
+        assert resp.unwrap()
+
+
+def test_response_box_err_default_handler():
+    http_error = HTTPError(
+        "500 Internal Server Error",
+        HTTPRequest("GET", "/", {}, {}, {}),
+        HTTPResponse(
+            500,
+            {},
+            {
+                "message": "Internal Server Error",
+                "detail": "too many connections",
             },
         ),
     )
@@ -187,38 +271,9 @@ def test_response_box_err():
         "/",
         "",
         "",
+        error_parser=default_error_parser,  # type: ignore
     )
-    assert resp.is_err()
-    assert resp.is_ok() is False
     assert resp.unwrap_err() == http_error
-    assert resp.json == {"message": "Internal Server Error"}
-
-    assert resp.unwrap_or(bob) == bob
-    assert resp.unwrap_or_else(lambda err: bob) == bob
-
-    assert resp.map(lambda x: x.name) == Err(http_error)  # type: ignore
-    assert resp.map_or("Bob", lambda x: x.name) == "Bob"  # type: ignore
-    assert resp.map_or_else(lambda: "Bob", lambda x: x.name) == "Bob"  # type: ignore
-    assert resp.map_err(lambda err: err.status_code) == Err(500)  # type: ignore
-
-    assert resp.and_then(lambda x: x.name) == Err(http_error)  # type: ignore
-    assert resp.or_else(lambda err: err.status_code) == 500  # type: ignore
-
-    with pytest.raises(UnwrapError):
-        assert resp.expect("To never fail")
-    assert resp.expect_err("To always fail") == http_error
-
-    with warnings.catch_warnings(record=True) as ctx_warn:
-        warnings.simplefilter("always")
-        with pytest.raises(HTTPError) as ctx_err:
-            resp.response.dict()
-    assert [str(w.message) for w in ctx_warn] == [
-        ".response is deprecated, use .unwrap() instead"
-    ]
-    assert ctx_err.value.json == {"message": "Internal Server Error"}
-
-    with pytest.raises(UnwrapError):
-        assert resp.unwrap()
 
 
 def test_response_box_no_schema():
@@ -239,6 +294,7 @@ def test_response_box_no_schema():
         "/dummies",
         "Dummy",
         "api",
+        error_parser=error_parser,
     )
     with pytest.raises(NoResponseSchemaException) as ctx:
         assert resp.unwrap()

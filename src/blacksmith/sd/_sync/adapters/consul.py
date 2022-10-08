@@ -54,9 +54,13 @@ _registry.register(
 )
 
 
-def blacksmith_cli(endpoint: Url, consul_token: str) -> SyncClientFactory[Service, Any]:
+def blacksmith_cli(
+    endpoint: Url, consul_token: str
+) -> SyncClientFactory[Service, Any, Any]:
     sd = SyncStaticDiscovery({("consul", "v1"): endpoint})
-    fact: SyncClientFactory[Service, Any] = SyncClientFactory(sd, registry=_registry)
+    fact: SyncClientFactory[Service, Any, Any] = SyncClientFactory(
+        sd, registry=_registry
+    )
     if consul_token:
         fact.add_middleware(SyncHTTPBearerMiddleware(consul_token))
     return fact
@@ -87,7 +91,7 @@ class SyncConsulDiscovery(SyncAbstractServiceDiscovery):
         unversioned_service_url_fmt: str = "http://{address}:{port}",
         consul_token: str = "",
         _client_factory: Callable[
-            [Url, str], SyncClientFactory[Service, Any]
+            [Url, str], SyncClientFactory[Service, Any, Any]
         ] = blacksmith_cli,
     ) -> None:
         self.blacksmith_cli = _client_factory(addr, consul_token)

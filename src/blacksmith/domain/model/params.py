@@ -20,6 +20,8 @@ from pydantic import BaseModel, Field
 from result import Result
 from result.result import F, U
 
+from blacksmith.domain.error import AbstractErrorParser, TError_co
+
 if TYPE_CHECKING:
     from pydantic.typing import IntStr
 else:
@@ -192,7 +194,7 @@ class CollectionParser(AbstractCollectionParser):
         return self.resp.json or []
 
 
-class ResponseBox(Generic[TResponse]):
+class ResponseBox(Generic[TResponse, TError_co]):
     """
     Wrap an http response to deseriaze it.
 
@@ -212,6 +214,7 @@ class ResponseBox(Generic[TResponse]):
         path: Path,
         name: ResourceName,
         client_name: ClientName,
+        error_parser: AbstractErrorParser[TError_co],
     ) -> None:
         self.raw_result = result
         self.response_schema = response_schema
@@ -219,6 +222,7 @@ class ResponseBox(Generic[TResponse]):
         self.path: Path = path
         self.name: ResourceName = name
         self.client_name: ClientName = client_name
+        self.error_parser = error_parser
 
     def _cast_resp(self, resp: HTTPResponse) -> TResponse:
         if self.response_schema is None:
@@ -260,6 +264,12 @@ class ResponseBox(Generic[TResponse]):
         resp = self.response_schema(**(self.json or {}))
         return cast(TResponse, resp)
 
+    @property
+    def result(self) -> Result[TResponse, TError_co]:
+        return self.raw_result.map(self._cast_resp).map_err(
+            self.error_parser  # type: ignore
+        )
+
     def is_ok(self) -> bool:
         """Return True if the response was an http success."""
         return self.raw_result.is_ok()
@@ -270,43 +280,40 @@ class ResponseBox(Generic[TResponse]):
 
     def unwrap(self) -> TResponse:
         """Return the response parsed."""
-        resp = self.raw_result.map(self._cast_resp).unwrap()
+        resp = self.result.unwrap()
         return resp
 
-    def unwrap_err(self) -> HTTPError:
+    def unwrap_err(self) -> TError_co:
         """Return the response error."""
-        return self.raw_result.unwrap_err()
+        return self.result.unwrap_err()
 
     def unwrap_or(self, default: TResponse) -> TResponse:
         """Return the response or the default value in case of error."""
-        resp = self.raw_result.map(self._cast_resp)
-        return cast(Result[TResponse, HTTPError], resp).unwrap_or(default)
+        return self.result.unwrap_or(default)
 
-    def unwrap_or_else(self, op: Callable[[HTTPError], TResponse]) -> TResponse:
+    def unwrap_or_else(self, op: Callable[[TError_co], TResponse]) -> TResponse:
         """Return the response or the callable return in case of error."""
-        resp = self.raw_result.map(self._cast_resp)
-        return cast(Result[TResponse, HTTPError], resp).unwrap_or_else(op)
+        return self.result.unwrap_or_else(op)
 
     def expect(self, message: str) -> TResponse:
         """Return the response raise an UnwrapError exception with the given message."""
-        return self.raw_result.map(self._cast_resp).expect(message)
+        return self.result.expect(message)
 
-    def expect_err(self, message: str) -> HTTPError:
+    def expect_err(self, message: str) -> TError_co:
         """Return the error or raise an UnwrapError exception with the given message."""
-        return self.raw_result.expect_err(message)
+        return self.result.expect_err(message)
 
-    def map(self, op: Callable[[TResponse], U]) -> Result[U, HTTPError]:
+    def map(self, op: Callable[[TResponse], U]) -> Result[U, TError_co]:
         """
         Apply op on response in case of success, and return the new result.
         """
-        # works in mypy, not in pylance
-        return self.raw_result.map(self._cast_resp).map(op)  # type: ignore
+        return self.result.map(op)  # type: ignore
 
     def map_or(self, default: U, op: Callable[[TResponse], U]) -> U:
         """
         Apply and return op on response in case of success, default in case of error.
         """
-        return self.raw_result.map(self._cast_resp).map_or(default, op)
+        return self.result.map_or(default, op)
 
     def map_or_else(
         self, default_op: Callable[[], U], op: Callable[[TResponse], U]
@@ -314,7 +321,7 @@ class ResponseBox(Generic[TResponse]):
         """
         Return the result of default_op in case of error otherwise the result of op.
         """
-        return self.raw_result.map(self._cast_resp).map_or_else(default_op, op)
+        return self.result.map_or_else(default_op, op)
 
     def map_err(self, op: Callable[[HTTPError], F]) -> Result[TResponse, F]:
         """
@@ -330,7 +337,7 @@ class ResponseBox(Generic[TResponse]):
         Apply the op function on the response and return it if success
         """
         # works in mypy, not in pylance
-        return self.raw_result.map(self._cast_resp).and_then(op)  # type: ignore
+        return self.result.and_then(op)  # type: ignore
 
     def or_else(
         self, op: Callable[[HTTPError], Result[TResponse, F]]
@@ -338,7 +345,7 @@ class ResponseBox(Generic[TResponse]):
         """
         Apply the op function on the error and return it if error
         """
-        return self.raw_result.map(self._cast_resp).or_else(op)  # type: ignore
+        return self.result.or_else(op)  # type: ignore
 
 
 class CollectionIterator(Iterator[TResponse]):
