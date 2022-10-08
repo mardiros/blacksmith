@@ -241,12 +241,20 @@ def test_response_box_no_schema():
         "api",
     )
     with pytest.raises(NoResponseSchemaException) as ctx:
-        assert resp.response
+        assert resp.unwrap()
+
+    with warnings.catch_warnings(record=True) as ctx_warn:
+        warnings.simplefilter("always")
+        with pytest.raises(NoResponseSchemaException) as ctx:
+            assert resp.response
     assert (
         str(ctx.value)
         == "No response schema in route 'GET /dummies' in resource'Dummy' "
         "in client 'api'"
     )
+    assert [str(w.message) for w in ctx_warn] == [
+        ".response is deprecated, use .unwrap() instead"
+    ]
 
 
 def test_collection_iterator():
