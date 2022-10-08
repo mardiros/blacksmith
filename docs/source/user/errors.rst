@@ -34,19 +34,30 @@ Sync example
 .. literalinclude:: errors_02.py
 
 
-
 .. note::
 
-   Blacksmith does not declare schema for errors.
-   It could be an improvement in the future.
+   The error is supposed to be a json document, under attribute ``json``.
+   If it is not the case, the content of the document will be in plain text
+   under the key ``detail``.
 
-   Usually, a set of API share the same format for all the errors,
-   but sometime, errors may also be html, so it is not possible to
-   have a schema for errors.
+HTTP Errors Parser
+~~~~~~~~~~~~~~~~~~
 
-The error is supposed to be a json document, under attribute ``json``.
-If it is not the case, the content of the document will be in plain text
-under the key ``detail``.
+To get better error handling, a parser can be passed to the Client Factory to
+replace the raw HTTPError received by a parsed version.
+
+Usually, API have a consistent way to represent error in the set of route.
+
+
+Async example
+~~~~~~~~~~~~~
+
+.. literalinclude:: errors_03.py
+
+Sync example
+~~~~~~~~~~~~
+
+.. literalinclude:: errors_04.py
 
 
 Timeout
@@ -70,3 +81,20 @@ and then, that circuit has been opened.
 
 .. _`OpenedState`: https://purgatory.readthedocs.io/en/latest/develop/domain/model.html#purgatory.domain.model.OpenedState
 .. _`Circuit Breaker library`: https://purgatory.readthedocs.io/
+
+
+.. note::
+
+   While writing your own Middleware, Exceptions, such as the HTTPError must be raise
+   to let the Circuit Breaker track them.
+   The ``Result[T, E]`` exposed on client resources is a layer that consume the whole
+   middleware stack response, and is not used internaly in middlewares.
+
+
+Runtime Errors
+--------------
+
+During the development, blacksmith may raises different RuntimeError or TypeError while
+consuming unregistered resources, or typo in consumers.
+Those exception are sanity check with an explicit message to get the source of the
+error.
