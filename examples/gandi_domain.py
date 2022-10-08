@@ -35,12 +35,15 @@ class PartialDomain(Response):
     owner: str
     dates: Dates
 
+
 class Contact(BaseModel):
     firstname: str = Field(alias="given")
     lastname: str = Field(alias="family")
 
+
 class Contacts(BaseModel):
     owner: Contact = Field(...)
+
 
 class Domain(Response):
     name: str = Field(alias="fqdn_unicode")
@@ -97,5 +100,6 @@ async def main():
         print()
         for domain in domains:
             print(domain)
+
 
 asyncio.run(main())

@@ -243,7 +243,7 @@ class ResponseBox(Generic[TResponse]):
         .. deprecated:: 2.0
             Use :meth:`ResponseBox.unwrap()`
 
-        :raises HTTPError: if the response conains an error.
+        :raises blacksmith.HTTPError: if the response conains an error.
         :raises NoResponseSchemaException: if the response_schema has not been
             set in the contract.
         """
