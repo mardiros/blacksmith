@@ -128,6 +128,8 @@ class AsyncClientFactory(Generic[TCollectionResponse, TResponse, TError_co]):
         )
         self.timeout = build_timeout(timeout)
         self.collection_parser = collection_parser
+        # no default in TypeVar, wait for https://peps.python.org/pep-0696/
+        # so the default_error_parser assume than TError_co, is HTTPError here
         self.error_parser = error_parser or default_error_parser  # type: ignore
         self.middlewares = []
 

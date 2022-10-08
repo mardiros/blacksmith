@@ -1,12 +1,11 @@
 """Parsing Errors"""
 from typing import Generic, TypeVar
 
-from pydantic import BaseModel
 from typing_extensions import Protocol
 
 from .exceptions import HTTPError
 
-TError_co = TypeVar("TError_co", bound=BaseModel, covariant=True)
+TError_co = TypeVar("TError_co", covariant=True)
 
 
 class AbstractErrorParser(Protocol, Generic[TError_co]):
