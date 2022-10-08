@@ -5,6 +5,7 @@ from functools import partial
 from typing import (
     TYPE_CHECKING,
     Any,
+    Callable,
     Dict,
     Generic,
     Iterator,
@@ -218,6 +219,14 @@ class ResponseBox(Generic[TResponse]):
         self.name: ResourceName = name
         self.client_name: ClientName = client_name
 
+    def _cast_resp(self, resp: HTTPResponse) -> TResponse:
+        if self.response_schema is None:
+            raise NoResponseSchemaException(
+                self.method, self.path, self.name, self.client_name
+            )
+        schema_cls = self.response_schema
+        return cast(TResponse, schema_cls(**(resp.json or {})))
+
     @property
     def json(self) -> Optional[Dict[str, Any]]:
         """Return the raw json response."""
@@ -259,18 +268,18 @@ class ResponseBox(Generic[TResponse]):
         return self.raw_result.is_err()
 
     def unwrap(self) -> TResponse:
-        """Return the response parsed"""
-        raw_resp = self.raw_result.unwrap()
-
-        if self.response_schema is None:
-            raise NoResponseSchemaException(
-                self.method, self.path, self.name, self.client_name
-            )
-        resp = self.response_schema(**(raw_resp.json or {}))
-        return cast(TResponse, resp)
+        """Return the response parsed."""
+        resp = self.raw_result.map(self._cast_resp).unwrap()
+        return resp
 
     def unwrap_err(self) -> HTTPError:
+        """Return the response error."""
         return self.raw_result.unwrap_err()
+
+    def unwrap_or_else(self, op: Callable[[HTTPError], TResponse]) -> TResponse:
+        """Return the response or the op return in case of error."""
+        resp = self.raw_result.map(self._cast_resp)
+        return cast(Result[TResponse, HTTPError], resp).unwrap_or_else(op)
 
 
 class CollectionIterator(Iterator[TResponse]):

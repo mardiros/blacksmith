@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Any, Optional
 
 import pytest
-from result import Err, Ok
+from result import Err, Ok, UnwrapError
 
 from blacksmith.domain.exceptions import HTTPError, NoResponseSchemaException
 from blacksmith.domain.model import (
@@ -136,6 +136,11 @@ def test_response_box():
     )
     assert resp.is_ok()
     assert resp.unwrap().dict() == {"age": 24, "name": "Alice"}
+    with pytest.raises(UnwrapError):
+        assert resp.unwrap_err()
+    assert resp.unwrap_or_else(
+        lambda err: GetResponse(name="Bob", age=40)
+    ) == GetResponse(name="Alice", age=24)
 
     with warnings.catch_warnings(record=True) as ctx:
         warnings.simplefilter("always")
@@ -170,6 +175,9 @@ def test_response_box_err():
     assert resp.is_err()
     assert resp.unwrap_err() == http_error
     assert resp.json == {"message": "Internal Server Error"}
+    assert resp.unwrap_or_else(
+        lambda err: GetResponse(name="Bob", age=40)
+    ) == GetResponse(name="Bob", age=40)
 
     with warnings.catch_warnings(record=True) as ctx_warn:
         warnings.simplefilter("always")
@@ -179,6 +187,9 @@ def test_response_box_err():
         ".response is deprecated, use .unwrap() instead"
     ]
     assert ctx_err.value.json == {"message": "Internal Server Error"}
+
+    with pytest.raises(UnwrapError):
+        assert resp.unwrap()
 
 
 def test_response_box_no_schema():
