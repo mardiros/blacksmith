@@ -73,49 +73,80 @@ def test_get_vary_header_split(params: Tuple[HTTPResponse, List[str]]):
 def test_policy_handle_request(params: Tuple[HTTPMethod, bool]):
     method, expected = params
     policy = CacheControlPolicy("$")
-    req = HTTPRequest(method, "/")
+    req = HTTPRequest(method=method, url_pattern="/")
     assert policy.handle_request(req, "", "") == expected
 
 
 @pytest.mark.parametrize(
     "params",
     [
-        ("dummies", "/", HTTPRequest("GET", "/", {}, {}), "dummies$/"),
-        ("bar", "/", HTTPRequest("GET", "/", {}, {}), "bar$/"),
+        (
+            "dummies",
+            "/",
+            HTTPRequest(method="GET", url_pattern="/", path={}, querystring={}),
+            "dummies$/",
+        ),
+        (
+            "bar",
+            "/",
+            HTTPRequest(method="GET", url_pattern="/", path={}, querystring={}),
+            "bar$/",
+        ),
         (
             "dummies",
             "/names/{name}",
-            HTTPRequest("GET", "/", {"name": "dummy"}, {}),
+            HTTPRequest(
+                method="GET", url_pattern="/", path={"name": "dummy"}, querystring={}
+            ),
             "dummies$/names/dummy",
         ),
         (
             "dummies",
             "/names",
-            HTTPRequest("GET", "/", {}, {"name": "dummy"}),
+            HTTPRequest(
+                method="GET", url_pattern="/", path={}, querystring={"name": "dummy"}
+            ),
             "dummies$/names?name=dummy",
         ),
         (
             "dummies",
             "/names/{name}",
-            HTTPRequest("GET", "/", {"name": "dummy"}, {"foo": "bar"}),
+            HTTPRequest(
+                method="GET",
+                url_pattern="/",
+                path={"name": "dummy"},
+                querystring={"foo": "bar"},
+            ),
             "dummies$/names/dummy?foo=bar",
         ),
         (
             "dummies",
             "/",
-            HTTPRequest("GET", "/", {}, {"foo": ["egg", "bar"]}),
+            HTTPRequest(
+                method="GET",
+                url_pattern="/",
+                path={},
+                querystring={"foo": ["egg", "bar"]},
+            ),
             "dummies$/?foo=egg&foo=bar",
         ),
         (
             "dummies",
             "/",
-            HTTPRequest("GET", "/", {}, {"foo": ["e g", "bàr"]}),
+            HTTPRequest(
+                method="GET",
+                url_pattern="/",
+                path={},
+                querystring={"foo": ["e g", "bàr"]},
+            ),
             "dummies$/?foo=e+g&foo=b%C3%A0r",
         ),
         (
             "dummies",
             "/",
-            HTTPRequest("GET", "/", {}, {"foo": ["our$sep"]}),
+            HTTPRequest(
+                method="GET", url_pattern="/", path={}, querystring={"foo": ["our$sep"]}
+            ),
             "dummies$/?foo=our%24sep",
         ),
     ],
@@ -131,21 +162,25 @@ def test_policy_get_vary_key(params: Tuple[str, str, HTTPRequest, str]):
         (
             "dummies",
             "/",
-            HTTPRequest("GET", "/", headers={"Accept-Encoding": "gzip"}),
+            HTTPRequest(
+                method="GET", url_pattern="/", headers={"Accept-Encoding": "gzip"}
+            ),
             [],
             "dummies$/$",
         ),
         (
             "dummies",
             "/",
-            HTTPRequest("GET", "/", headers={"Accept-Encoding": "gzip"}),
+            HTTPRequest(
+                method="GET", url_pattern="/", headers={"Accept-Encoding": "gzip"}
+            ),
             ["Accept-Encoding"],
             "dummies$/$Accept-Encoding=gzip",
         ),
         (
             "dummies",
             "/",
-            HTTPRequest("GET", "/", headers={}),
+            HTTPRequest(method="GET", url_pattern="/", headers={}),
             ["Accept-Encoding"],
             "dummies$/$Accept-Encoding=",
         ),
@@ -167,21 +202,27 @@ def test_policy_get_response_cache_key(
         (
             "dummies",
             "/",
-            HTTPRequest("GET", ""),
+            HTTPRequest(method="GET", url_pattern=""),
             HTTPResponse(200, {}, ""),
             (0, "", []),
         ),
         (
             "dummies",
             "/",
-            HTTPRequest("GET", "/", headers={"Cache-Control": "max-age=60, public"}),
+            HTTPRequest(
+                method="GET",
+                url_pattern="/",
+                headers={"Cache-Control": "max-age=60, public"},
+            ),
             HTTPResponse(200, {"cache-control": "max-age=60, public"}, ""),
             (60, "dummies$/", []),
         ),
         (
             "dummies",
             "/",
-            HTTPRequest("GET", "/", headers={"Accept-Encoding": "gzip"}),
+            HTTPRequest(
+                method="GET", url_pattern="/", headers={"Accept-Encoding": "gzip"}
+            ),
             HTTPResponse(
                 200,
                 {"vary": "Accept-Encoding", "cache-control": "max-age=60, public"},

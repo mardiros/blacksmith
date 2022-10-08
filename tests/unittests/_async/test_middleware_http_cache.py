@@ -18,13 +18,15 @@ from blacksmith.middleware._async.http_cache import (
     [
         {
             "path": "/",
-            "request": HTTPRequest("GET", "/", headers={}),
+            "request": HTTPRequest(method="GET", url_pattern="/", headers={}),
             "initial_cache": {},
             "expected_response_from_cache": None,
         },
         {
             "path": "/",
-            "request": HTTPRequest("GET", "/", headers={"x-country-code": "FR"}),
+            "request": HTTPRequest(
+                method="GET", url_pattern="/", headers={"x-country-code": "FR"}
+            ),
             "initial_cache": {
                 "dummies$/": (42, '["x-country-code"]'),
             },
@@ -32,7 +34,9 @@ from blacksmith.middleware._async.http_cache import (
         },
         {
             "path": "/",
-            "request": HTTPRequest("GET", "/", headers={"x-country-code": "FR"}),
+            "request": HTTPRequest(
+                method="GET", url_pattern="/", headers={"x-country-code": "FR"}
+            ),
             "initial_cache": {
                 "dummies$/": (42, '["x-country-code"]'),
                 "dummies$/$x-country-code=FR": (
@@ -68,14 +72,14 @@ async def test_get_from_cache(
     [
         {
             "path": "/",
-            "request": HTTPRequest("GET", "/", {}, {}),
+            "request": HTTPRequest(method="GET", url_pattern="/"),
             "response": HTTPResponse(200, {}, ""),
             "expected_cachable": False,
             "expected_cache": {},
         },
         {
             "path": "/",
-            "request": HTTPRequest("GET", "/", {}, {}),
+            "request": HTTPRequest(method="GET", url_pattern="/"),
             "response": HTTPResponse(200, {"cache-control": "max-age=42, public"}, ""),
             "expected_cachable": True,
             "expected_cache": {
@@ -89,7 +93,9 @@ async def test_get_from_cache(
         },
         {
             "path": "/",
-            "request": HTTPRequest("GET", "/", headers={"x-country-code": "FR"}),
+            "request": HTTPRequest(
+                method="GET", url_pattern="/", headers={"x-country-code": "FR"}
+            ),
             "response": HTTPResponse(
                 200,
                 {"cache-control": "max-age=42, public", "vary": "X-Country-Code"},
@@ -108,7 +114,7 @@ async def test_get_from_cache(
         },
         {
             "path": "/",
-            "request": HTTPRequest("GET", "/", headers={}),
+            "request": HTTPRequest(method="GET", url_pattern="/"),
             "response": HTTPResponse(
                 200,
                 {"cache-control": "max-age=42, public", "vary": "X-Country-Code"},
@@ -127,7 +133,9 @@ async def test_get_from_cache(
         },
         {
             "path": "/",
-            "request": HTTPRequest("GET", "/", headers={"a": "A", "B": "B", "c": "C"}),
+            "request": HTTPRequest(
+                method="GET", url_pattern="/", headers={"a": "A", "B": "B", "c": "C"}
+            ),
             "response": HTTPResponse(
                 200,
                 {"cache-control": "max-age=42, public", "vary": "a, b"},

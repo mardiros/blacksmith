@@ -15,6 +15,7 @@ from blacksmith import (
     Response,
     register,
 )
+from blacksmith.domain.model.http import HTTPRequest
 
 
 class TLDInfoGetParam(Request):
@@ -35,6 +36,7 @@ class TLDResponse(Response):
 
 
 class APIError(BaseModel):
+    request: HTTPRequest
     message: str
     object: str
     cause: str
@@ -42,7 +44,7 @@ class APIError(BaseModel):
 
 
 def error_parser(err: HTTPError) -> APIError:
-    return APIError(**err.json)
+    return APIError(request=err.request, **err.json)
 
 
 register(

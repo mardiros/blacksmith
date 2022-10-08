@@ -17,12 +17,12 @@ def registry():
 @pytest.fixture
 def dummy_http_request():
     return HTTPRequest(
-        "GET",
-        "/dummy/{name}",
-        {"name": 42},
-        {"foo": "bar"},
-        {"X-Req-Id": "42"},
-        '{"bandi_manchot": "777"}',
+        method="GET",
+        url_pattern="/dummy/{name}",
+        path={"name": 42},
+        querystring={"foo": "bar"},
+        headers={"X-Req-Id": "42"},
+        body='{"bandi_manchot": "777"}',
     )
 
 

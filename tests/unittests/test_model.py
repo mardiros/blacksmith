@@ -2,10 +2,11 @@ import json
 import warnings
 from datetime import datetime
 from typing import Any, Optional
-from pydantic import BaseModel, Field
 
 import pytest
+from pydantic import BaseModel, Field
 from result import Err, Ok, UnwrapError
+
 from blacksmith.domain.error import default_error_parser
 
 # type: ignore
@@ -58,8 +59,8 @@ def test_timeout_neq():
 
 def test_request_url():
     req = HTTPRequest(
-        "GET",
-        "/foo/{name}/bar/{id}",
+        method="GET",
+        url_pattern="/foo/{name}/bar/{id}",
         path={"id": 42, "name": "John"},
         querystring={},
         headers={"H": "h"},
@@ -85,16 +86,6 @@ def test_param_to_req():
     assert req.headers == {"X-Message-Id": "123"}
     assert req.querystring == {"country": "FR"}
     assert json.loads(req.body) == {"age": 23, "birthdate": "1956-12-13T00:00:00"}
-
-
-def test_response_from_http_response():
-    class Dummy(Response):
-        name: str
-
-    resp = HTTPResponse(200, {}, {"name": "Jane", "age": 23})
-    dummy = Dummy.from_http_response(resp)
-
-    assert dummy == Dummy(name="Jane")
 
 
 def test_parse_header_links():
@@ -188,7 +179,7 @@ def test_response_box_err():
     bob = GetResponse(name="Bob", age=40)
     http_error = HTTPError(
         "500 Internal Server Error",
-        HTTPRequest("GET", "/", {}, {}, {}),
+        HTTPRequest(method="GET", url_pattern="/"),
         HTTPResponse(
             500,
             {},
@@ -254,7 +245,7 @@ def test_response_box_err():
 def test_response_box_err_default_handler():
     http_error = HTTPError(
         "500 Internal Server Error",
-        HTTPRequest("GET", "/", {}, {}, {}),
+        HTTPRequest(method="GET", url_pattern="/"),
         HTTPResponse(
             500,
             {},

@@ -208,16 +208,16 @@ async def test_prom_metrics_error(
     "exc",
     [
         HTTPError(
-            "Mmm", HTTPRequest("GET", "/", {}, {}, {}), HTTPResponse(400, {}, {})
+            "Mmm", HTTPRequest(method="GET", url_pattern="/"), HTTPResponse(400, {}, {})
         ),
         HTTPError(
-            "Mmm", HTTPRequest("GET", "/", {}, {}, {}), HTTPResponse(401, {}, {})
+            "Mmm", HTTPRequest(method="GET", url_pattern="/"), HTTPResponse(401, {}, {})
         ),
         HTTPError(
-            "Mmm", HTTPRequest("GET", "/", {}, {}, {}), HTTPResponse(403, {}, {})
+            "Mmm", HTTPRequest(method="GET", url_pattern="/"), HTTPResponse(403, {}, {})
         ),
         HTTPError(
-            "Mmm", HTTPRequest("GET", "/", {}, {}, {}), HTTPResponse(422, {}, {})
+            "Mmm", HTTPRequest(method="GET", url_pattern="/"), HTTPResponse(422, {}, {})
         ),
     ],
 )
@@ -229,10 +229,10 @@ def test_excluded_list(exc: HTTPError):
     "exc",
     [
         HTTPError(
-            "Mmm", HTTPRequest("GET", "/", {}, {}, {}), HTTPResponse(500, {}, {})
+            "Mmm", HTTPRequest(method="GET", url_pattern="/"), HTTPResponse(500, {}, {})
         ),
         HTTPError(
-            "Mmm", HTTPRequest("GET", "/", {}, {}, {}), HTTPResponse(503, {}, {})
+            "Mmm", HTTPRequest(method="GET", url_pattern="/"), HTTPResponse(503, {}, {})
         ),
     ],
 )

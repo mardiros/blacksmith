@@ -1,9 +1,9 @@
 from typing import Any, cast
-from pydantic import BaseModel, Field
 
 import pytest
 from _pytest._code.code import ExceptionInfo  # type: ignore
 from prometheus_client import CollectorRegistry  # type: ignore
+from pydantic import BaseModel, Field
 
 from blacksmith.domain.exceptions import (
     HTTPError,

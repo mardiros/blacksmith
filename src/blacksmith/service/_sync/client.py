@@ -1,6 +1,6 @@
 from typing import Generic, List, Optional, Type
 
-from blacksmith.domain.error import AbstractErrorParser, default_error_parser, TError_co
+from blacksmith.domain.error import AbstractErrorParser, TError_co, default_error_parser
 from blacksmith.domain.exceptions import UnregisteredResourceException
 from blacksmith.domain.model.http import HTTPTimeout
 from blacksmith.domain.model.params import (

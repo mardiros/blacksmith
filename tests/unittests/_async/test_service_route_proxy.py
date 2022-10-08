@@ -1,7 +1,7 @@
 from typing import Any
-from pydantic import BaseModel, Field
 
 import pytest
+from pydantic import BaseModel, Field
 from result import Result
 
 from blacksmith import Request

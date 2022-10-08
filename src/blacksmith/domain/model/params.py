@@ -67,7 +67,7 @@ class Request(BaseModel):
         """Convert the request params to an http request in order to serialize
         the http request for the client.
         """
-        req = HTTPRequest(method, url_pattern)
+        req = HTTPRequest(method=method, url_pattern=url_pattern)
         fields_by_loc: Dict[HttpLocation, Dict[IntStr, Any]] = {
             HEADER: {},
             PATH: {},
@@ -103,13 +103,6 @@ TCollectionResponse = TypeVar("TCollectionResponse", bound="Response")
 
 class Response(BaseModel):
     """Response Model."""
-
-    @classmethod
-    def from_http_response(
-        cls: Type[TResponse], response: HTTPResponse
-    ) -> Optional[TResponse]:
-        """Build the response from the given HTTPResponse."""
-        return cls(**response.json) if response.json else None
 
 
 @dataclass

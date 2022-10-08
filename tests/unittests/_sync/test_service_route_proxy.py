@@ -17,7 +17,7 @@ from blacksmith.domain.model import (
     HTTPResponse,
     HTTPTimeout,
 )
-from blacksmith.domain.model.params import CollectionIterator, ResponseBox
+from blacksmith.domain.model.params import CollectionIterator
 from blacksmith.domain.registry import ApiRoutes
 from blacksmith.middleware._sync.auth import SyncHTTPAuthorizationMiddleware
 from blacksmith.middleware._sync.base import SyncHTTPAddHeadersMiddleware
@@ -29,6 +29,7 @@ from tests.unittests.dummy_registry import GetParam, GetResponse, PostParam
 
 class MyErrorFormat(BaseModel):
     message: str = Field(...)
+    detail: str = Field(...)
 
 
 def error_parser(error: HTTPError) -> MyErrorFormat:
@@ -306,14 +307,6 @@ def test_route_proxy_collection_get():
     lresp = list(resp)  # type: ignore
     assert lresp == [{"name": "alice"}, {"name": "bob"}]
 
-    httperr = HTTPResponse(404, {}, {"message": "Page Not Found"})
-    tperr = FakeTransport(httperr)
-    proxy.transport = tperr
-    result: Result[CollectionIterator[Any], MyErrorFormat] = proxy.collection_get()
-    assert result.is_err()
-    err = result.unwrap_err()
-    assert err == MyErrorFormat(message="Page Not Found")
-
 
 def test_route_proxy_collection_get_with_parser():
     class MyCollectionParser(CollectionParser):
@@ -522,14 +515,6 @@ def test_route_proxy_get():
     )
     resp = (proxy.get({})).json
     assert resp == [{"name": "alice"}, {"name": "bob"}]
-
-    httperr = HTTPResponse(404, {}, {"message": "Page Not Found"})
-    tperr = FakeTransport(httperr)
-    proxy.transport = tperr
-    result: ResponseBox[Any, MyErrorFormat] = proxy.get({})
-    assert result.is_err()
-    err = result.unwrap_err()
-    assert err == MyErrorFormat(message="Page Not Found")
 
 
 def test_route_proxy_post():
