@@ -281,6 +281,14 @@ class ResponseBox(Generic[TResponse]):
         resp = self.raw_result.map(self._cast_resp)
         return cast(Result[TResponse, HTTPError], resp).unwrap_or_else(op)
 
+    def expect(self, message: str) -> TResponse:
+        """Return the response raise an UnwrapError exception with the given message."""
+        return self.raw_result.map(self._cast_resp).expect(message)
+
+    def expect_err(self, message: str) -> HTTPError:
+        """Return the error or raise an UnwrapError exception with the given message."""
+        return self.raw_result.expect_err(message)
+
 
 class CollectionIterator(Iterator[TResponse]):
     """

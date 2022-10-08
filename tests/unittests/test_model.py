@@ -134,13 +134,16 @@ def test_response_box():
         "",
         "",
     )
+    alice = GetResponse(name="Alice", age=24)
+    bob = GetResponse(name="Bob", age=40)
     assert resp.is_ok()
-    assert resp.unwrap().dict() == {"age": 24, "name": "Alice"}
+    assert resp.unwrap() == alice
     with pytest.raises(UnwrapError):
         assert resp.unwrap_err()
-    assert resp.unwrap_or_else(
-        lambda err: GetResponse(name="Bob", age=40)
-    ) == GetResponse(name="Alice", age=24)
+    assert resp.unwrap_or_else(lambda err: bob) == alice
+    assert resp.expect("To never fail") == alice
+    with pytest.raises(UnwrapError):
+        assert resp.expect_err("To always fail")
 
     with warnings.catch_warnings(record=True) as ctx:
         warnings.simplefilter("always")
@@ -178,6 +181,9 @@ def test_response_box_err():
     assert resp.unwrap_or_else(
         lambda err: GetResponse(name="Bob", age=40)
     ) == GetResponse(name="Bob", age=40)
+    with pytest.raises(UnwrapError):
+        assert resp.expect("To never fail")
+    assert resp.expect_err("To always fail") == http_error
 
     with warnings.catch_warnings(record=True) as ctx_warn:
         warnings.simplefilter("always")
