@@ -148,8 +148,10 @@ def test_response_box():
     assert resp.map(lambda x: x.name) == Ok("Alice")  # type: ignore
     assert resp.map_or("Bob", lambda x: x.name) == "Alice"  # type: ignore
     assert resp.map_or_else(lambda: "Bob", lambda x: x.name) == "Alice"  # type: ignore
-
     assert resp.map_err(lambda err: err.status_code) == Ok(alice)  # type: ignore
+
+    assert resp.and_then(lambda x: x.name) == "Alice"  # type: ignore
+    assert resp.or_else(lambda err: err.status_code) == Ok(alice)  # type: ignore
 
     assert resp.expect("To never fail") == alice
     with pytest.raises(UnwrapError):
@@ -197,8 +199,10 @@ def test_response_box_err():
     assert resp.map(lambda x: x.name) == Err(http_error)  # type: ignore
     assert resp.map_or("Bob", lambda x: x.name) == "Bob"  # type: ignore
     assert resp.map_or_else(lambda: "Bob", lambda x: x.name) == "Bob"  # type: ignore
-
     assert resp.map_err(lambda err: err.status_code) == Err(500)  # type: ignore
+
+    assert resp.and_then(lambda x: x.name) == Err(http_error)  # type: ignore
+    assert resp.or_else(lambda err: err.status_code) == 500  # type: ignore
 
     with pytest.raises(UnwrapError):
         assert resp.expect("To never fail")

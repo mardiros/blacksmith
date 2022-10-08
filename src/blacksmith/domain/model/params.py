@@ -320,7 +320,25 @@ class ResponseBox(Generic[TResponse]):
         """
         Apply op on error in case of error, and return the new result.
         """
+        # works in mypy, not in pylance
         return self.raw_result.map(self._cast_resp).map_err(op)  # type: ignore
+
+    def and_then(
+        self, op: Callable[[TResponse], Result[U, HTTPError]]
+    ) -> Result[U, HTTPError]:
+        """
+        Apply the op function on the response and return it if success
+        """
+        # works in mypy, not in pylance
+        return self.raw_result.map(self._cast_resp).and_then(op)  # type: ignore
+
+    def or_else(
+        self, op: Callable[[HTTPError], Result[TResponse, F]]
+    ) -> Result[TResponse, F]:
+        """
+        Apply the op function on the error and return it if error
+        """
+        return self.raw_result.map(self._cast_resp).or_else(op)  # type: ignore
 
 
 class CollectionIterator(Iterator[TResponse]):
