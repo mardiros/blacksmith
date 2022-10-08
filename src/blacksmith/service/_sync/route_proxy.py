@@ -128,7 +128,9 @@ class SyncRouteProxy(Generic[TCollectionResponse, TResponse]):
         else:
             return Ok(
                 CollectionIterator(
-                    result, response_schema, collection_parser or self.collection_parser
+                    result.unwrap(),
+                    response_schema,
+                    collection_parser or self.collection_parser,
                 )
             )
 

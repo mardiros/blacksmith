@@ -350,15 +350,13 @@ class CollectionIterator(Iterator[TResponse]):
 
     def __init__(
         self,
-        response: Result[HTTPResponse, HTTPError],
+        response: HTTPResponse,
         response_schema: Optional[Type[Response]],
         collection_parser: Type[AbstractCollectionParser],
     ) -> None:
         self.pos = 0
         self.response_schema = response_schema
-        if response.is_err():
-            raise response.unwrap_err()
-        self.response = collection_parser(response.unwrap())
+        self.response = collection_parser(response)
         self.json_resp = self.response.json
 
     @property

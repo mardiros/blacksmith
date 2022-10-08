@@ -251,22 +251,20 @@ def test_response_box_no_schema():
 
 def test_collection_iterator():
     collec: CollectionIterator[Any] = CollectionIterator(
-        Ok(
-            HTTPResponse(
-                200,
-                {"Total-Count": "5"},
-                [
-                    {
-                        "name": "Alice",
-                        "age": 24,
-                        "useless": True,
-                    },
-                    {
-                        "name": "Bob",
-                        "age": 42,
-                    },
-                ],
-            )
+        HTTPResponse(
+            200,
+            {"Total-Count": "5"},
+            [
+                {
+                    "name": "Alice",
+                    "age": 24,
+                    "useless": True,
+                },
+                {
+                    "name": "Bob",
+                    "age": 42,
+                },
+            ],
         ),
         GetResponse,
         CollectionParser,
