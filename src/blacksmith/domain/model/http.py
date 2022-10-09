@@ -1,8 +1,6 @@
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Dict, List, Mapping, Optional, Union, cast
-
-from pydantic import BaseModel, Field
 
 from blacksmith.typing import HTTPMethod, Json, Url
 
@@ -24,7 +22,8 @@ class HTTPTimeout:
         return self.read == other.read and self.connect == other.connect
 
 
-class HTTPRequest(BaseModel):
+@dataclass
+class HTTPRequest:
     """
     Internal representation of an http request.
 
@@ -33,20 +32,17 @@ class HTTPRequest(BaseModel):
 
     The HTTP Request is filled out using the
     :class:`blacksmith.domain.model.params.Request` schema.
-
-    .. versionchanged:: 2.0
-        The HTTPRequest is now based on pydantic instead of dataclass.
     """
 
-    method: HTTPMethod = Field(...)
-    url_pattern: Url = Field(...)
+    method: HTTPMethod
+    url_pattern: Url
     # the property match with the "location" of feaut
-    path: Dict[str, simpletypes] = Field(default_factory=dict)
-    querystring: Dict[str, Union[simpletypes, List[simpletypes]]] = Field(
+    path: Dict[str, simpletypes] = field(default_factory=dict)
+    querystring: Dict[str, Union[simpletypes, List[simpletypes]]] = field(
         default_factory=dict
     )
-    headers: Dict[str, str] = Field(default_factory=dict)
-    body: str = Field(default="")
+    headers: Dict[str, str] = field(default_factory=dict)
+    body: str = ""
 
     @property
     def url(self) -> str:
