@@ -4,8 +4,8 @@
 from collections import defaultdict
 from dataclasses import dataclass
 from typing import Any, Generic, Mapping, MutableMapping, Optional, Tuple, Type
-from blacksmith.domain.model.params import TCollec_co, TResp_co
 
+from blacksmith.domain.model.params import TCollec_co, TReq_co, TResp_co
 from blacksmith.typing import (
     ClientName,
     HTTPMethod,
@@ -17,29 +17,29 @@ from blacksmith.typing import (
 )
 
 from .exceptions import ConfigurationError, UnregisteredClientException
-from .model import AbstractCollectionParser, Request
+from .model import AbstractCollectionParser
 
-Schemas = Tuple[Type[Request], Optional[Type[TResp_co]]]
-Contract = Mapping[HTTPMethod, Schemas[TResp_co]]
+Schemas = Tuple[Type[TReq_co], Optional[Type[TResp_co]]]
+Contract = Mapping[HTTPMethod, Schemas[TReq_co, TResp_co]]
 
 
 @dataclass(frozen=True)
-class HttpResource(Generic[TResp_co]):
+class HttpResource(Generic[TReq_co, TResp_co]):
     """Represent a resource endpoint."""
 
     path: Path
     """Path that identify the resource."""
-    contract: Optional[Contract[TResp_co]]
+    contract: Optional[Contract[TReq_co, TResp_co]]
     """A contract is a serialization schema for the request and there response."""
 
 
 @dataclass(frozen=True)
-class HttpCollection(HttpResource[TCollec_co]):
+class HttpCollection(HttpResource[TReq_co, TCollec_co]):
     collection_parser: Optional[Type[AbstractCollectionParser]]
     """Override the default collection parlser for a given resource."""
 
 
-class ApiRoutes(Generic[TCollec_co, TResp_co]):
+class ApiRoutes(Generic[TReq_co, TCollec_co, TResp_co]):
     """
     Store different routes for a type of resource.
 
@@ -47,22 +47,22 @@ class ApiRoutes(Generic[TCollec_co, TResp_co]):
     They both have distinct contract for every http method.
     """
 
-    resource: Optional[HttpResource[TResp_co]]
+    resource: Optional[HttpResource[TReq_co, TResp_co]]
     """Resource endpoint"""
-    collection: Optional[HttpCollection[TCollec_co]]
+    collection: Optional[HttpCollection[TReq_co, TCollec_co]]
     """Collection endpoint."""
 
     def __init__(
         self,
         path: Optional[Path],
-        contract: Optional[Contract[TResp_co]],
+        contract: Optional[Contract[TReq_co, TResp_co]],
         collection_path: Optional[Path],
-        collection_contract: Optional[Contract[TCollec_co]],
+        collection_contract: Optional[Contract[TReq_co, TCollec_co]],
         collection_parser: Optional[Type[AbstractCollectionParser]],
     ) -> None:
         self.resource = HttpResource(path, contract) if path else None
         self.collection = (
-            HttpCollection[TCollec_co](
+            HttpCollection[TReq_co, TCollec_co](
                 collection_path, collection_contract, collection_parser
             )
             if collection_path
@@ -70,14 +70,14 @@ class ApiRoutes(Generic[TCollec_co, TResp_co]):
         )
 
 
-Resources = Mapping[ResourceName, ApiRoutes[Any, Any]]
+Resources = Mapping[ResourceName, ApiRoutes[Any, Any, Any]]
 
 
 class Registry:
     """Store resources in a registry."""
 
     clients: MutableMapping[
-        ClientName, MutableMapping[ResourceName, ApiRoutes[Any, Any]]
+        ClientName, MutableMapping[ResourceName, ApiRoutes[Any, Any, Any]]
     ]
     client_service: MutableMapping[ClientName, Service]
 
@@ -92,9 +92,9 @@ class Registry:
         service: ServiceName,
         version: Version,
         path: Optional[Path] = None,
-        contract: Optional[Contract[Any]] = None,
+        contract: Optional[Contract[Any, Any]] = None,
         collection_path: Optional[Path] = None,
-        collection_contract: Optional[Contract[Any]] = None,
+        collection_contract: Optional[Contract[Any, Any]] = None,
         collection_parser: Optional[Type[AbstractCollectionParser]] = None,
     ) -> None:
         """
@@ -151,9 +151,9 @@ def register(
     service: ServiceName,
     version: Version,
     path: Optional[Path] = None,
-    contract: Optional[Contract[Any]] = None,
+    contract: Optional[Contract[Any, Any]] = None,
     collection_path: Optional[Path] = None,
-    collection_contract: Optional[Contract[Any]] = None,
+    collection_contract: Optional[Contract[Any, Any]] = None,
     collection_parser: Optional[Type[AbstractCollectionParser]] = None,
 ) -> None:
     """

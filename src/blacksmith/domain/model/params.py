@@ -55,6 +55,16 @@ PostBodyField = partial(Field, location=BODY)
 """Declare field that are serialized in the json document."""
 
 
+TReq_co = TypeVar("TReq_co", bound="Request", covariant=True)
+"""Type for the request"""
+
+TResp_co = TypeVar("TResp_co", bound="Response", covariant=True)
+"""Type for the response"""
+
+TCollec_co = TypeVar("TCollec_co", bound="Response", covariant=True)
+"""Type for the collection of response (e.g. the collection_get method)."""
+
+
 class Request(BaseModel):
     """
     Request Params Model.
@@ -95,10 +105,6 @@ class Request(BaseModel):
             include=fields_by_loc[BODY], by_alias=True, exclude_none=False
         )
         return req
-
-
-TResp_co = TypeVar("TResp_co", bound="Response", covariant=True)
-TCollec_co = TypeVar("TCollec_co", bound="Response", covariant=True)
 
 
 class Response(BaseModel):

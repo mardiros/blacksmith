@@ -14,12 +14,12 @@ from blacksmith.domain.model import (
     HTTPRequest,
     HTTPResponse,
     HTTPTimeout,
-    Request,
     ResponseBox,
 )
 from blacksmith.domain.model.params import (
     AbstractCollectionParser,
     TCollec_co,
+    TReq_co,
     TResp_co,
 )
 from blacksmith.domain.registry import ApiRoutes, HttpCollection, HttpResource
@@ -42,13 +42,13 @@ def build_timeout(timeout: ClientTimeout) -> HTTPTimeout:
     return timeout
 
 
-class SyncRouteProxy(Generic[TCollec_co, TResp_co, TError_co]):
+class SyncRouteProxy(Generic[TReq_co, TCollec_co, TResp_co, TError_co]):
     """Proxy from resource to its associate routes."""
 
     client_name: ClientName
     name: ResourceName
     endpoint: Url
-    routes: ApiRoutes[TCollec_co, TResp_co]
+    routes: ApiRoutes[TReq_co, TCollec_co, TResp_co]
     transport: SyncAbstractTransport
     timeout: HTTPTimeout
     collection_parser: Type[AbstractCollectionParser]
@@ -60,7 +60,7 @@ class SyncRouteProxy(Generic[TCollec_co, TResp_co, TError_co]):
         client_name: ClientName,
         name: ResourceName,
         endpoint: Url,
-        routes: ApiRoutes[TCollec_co, TResp_co],
+        routes: ApiRoutes[TReq_co, TCollec_co, TResp_co],
         transport: SyncAbstractTransport,
         timeout: HTTPTimeout,
         collection_parser: Type[AbstractCollectionParser],
@@ -80,15 +80,11 @@ class SyncRouteProxy(Generic[TCollec_co, TResp_co, TError_co]):
     def _prepare_request(
         self,
         method: HTTPMethod,
-        params: Union[Optional[Request], Dict[Any, Any]],
+        params: Union[Optional[TReq_co], Dict[Any, Any]],
         resource: Optional[
-            Union[HttpResource[TResp_co], HttpResource[TCollec_co]]
+            Union[HttpResource[TReq_co, TResp_co], HttpResource[TReq_co, TCollec_co]]
         ],
-    ) -> Tuple[
-        Path,
-        HTTPRequest,
-        Optional[Union[Type[TResp_co], Type[TCollec_co]]],
-    ]:
+    ) -> Tuple[Path, HTTPRequest, Optional[Union[Type[TResp_co], Type[TCollec_co]]],]:
         if resource is None:
             raise UnregisteredRouteException(method, self.name, self.client_name)
         if resource.contract is None or method not in resource.contract:
@@ -160,9 +156,9 @@ class SyncRouteProxy(Generic[TCollec_co, TResp_co, TError_co]):
     def _yield_collection_request(
         self,
         method: HTTPMethod,
-        params: Union[Optional[Request], Dict[Any, Any]],
+        params: Union[Optional[TReq_co], Dict[Any, Any]],
         timeout: HTTPTimeout,
-        collection: HttpCollection[TCollec_co],
+        collection: HttpCollection[TReq_co, TCollec_co],
     ) -> Result[CollectionIterator[TCollec_co], TError_co]:
         path, req, resp_schema = self._prepare_request(method, params, collection)
         resp = self._handle_req_with_middlewares(req, timeout, path)
@@ -176,7 +172,7 @@ class SyncRouteProxy(Generic[TCollec_co, TResp_co, TError_co]):
     def _collection_request(
         self,
         method: HTTPMethod,
-        params: Union[Request, Dict[Any, Any]],
+        params: Union[TReq_co, Dict[Any, Any]],
         timeout: HTTPTimeout,
     ) -> ResponseBox[TResp_co, TError_co]:
         path, req, resp_schema = self._prepare_request(
@@ -194,7 +190,7 @@ class SyncRouteProxy(Generic[TCollec_co, TResp_co, TError_co]):
     def _request(
         self,
         method: HTTPMethod,
-        params: Union[Request, Dict[Any, Any]],
+        params: Union[TReq_co, Dict[Any, Any]],
         timeout: HTTPTimeout,
     ) -> ResponseBox[TResp_co, TError_co]:
         path, req, resp_schema = self._prepare_request(
@@ -211,7 +207,7 @@ class SyncRouteProxy(Generic[TCollec_co, TResp_co, TError_co]):
 
     def collection_head(
         self,
-        params: Union[Request, Dict[Any, Any]],
+        params: Union[TReq_co, Dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
     ) -> ResponseBox[TResp_co, TError_co]:
         """
@@ -223,7 +219,7 @@ class SyncRouteProxy(Generic[TCollec_co, TResp_co, TError_co]):
 
     def collection_get(
         self,
-        params: Union[Optional[Request], Dict[Any, Any]] = None,
+        params: Union[Optional[TReq_co], Dict[Any, Any]] = None,
         timeout: Optional[ClientTimeout] = None,
     ) -> Result[CollectionIterator[TCollec_co], TError_co]:
         """
@@ -253,7 +249,7 @@ class SyncRouteProxy(Generic[TCollec_co, TResp_co, TError_co]):
 
     def collection_post(
         self,
-        params: Union[Request, Dict[Any, Any]],
+        params: Union[TReq_co, Dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
     ) -> ResponseBox[TResp_co, TError_co]:
         """
@@ -265,7 +261,7 @@ class SyncRouteProxy(Generic[TCollec_co, TResp_co, TError_co]):
 
     def collection_put(
         self,
-        params: Union[Request, Dict[Any, Any]],
+        params: Union[TReq_co, Dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
     ) -> ResponseBox[TResp_co, TError_co]:
         """
@@ -277,7 +273,7 @@ class SyncRouteProxy(Generic[TCollec_co, TResp_co, TError_co]):
 
     def collection_patch(
         self,
-        params: Union[Request, Dict[Any, Any]],
+        params: Union[TReq_co, Dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
     ) -> ResponseBox[TResp_co, TError_co]:
         """
@@ -289,7 +285,7 @@ class SyncRouteProxy(Generic[TCollec_co, TResp_co, TError_co]):
 
     def collection_delete(
         self,
-        params: Union[Request, Dict[Any, Any]],
+        params: Union[TReq_co, Dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
     ) -> ResponseBox[TResp_co, TError_co]:
         """
@@ -301,7 +297,7 @@ class SyncRouteProxy(Generic[TCollec_co, TResp_co, TError_co]):
 
     def collection_options(
         self,
-        params: Union[Request, Dict[Any, Any]],
+        params: Union[TReq_co, Dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
     ) -> ResponseBox[TResp_co, TError_co]:
         """
@@ -313,7 +309,7 @@ class SyncRouteProxy(Generic[TCollec_co, TResp_co, TError_co]):
 
     def head(
         self,
-        params: Union[Request, Dict[Any, Any]],
+        params: Union[TReq_co, Dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
     ) -> ResponseBox[TResp_co, TError_co]:
         """
@@ -323,7 +319,7 @@ class SyncRouteProxy(Generic[TCollec_co, TResp_co, TError_co]):
 
     def get(
         self,
-        params: Union[Request, Dict[Any, Any]],
+        params: Union[TReq_co, Dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
     ) -> ResponseBox[TResp_co, TError_co]:
         """
@@ -334,7 +330,7 @@ class SyncRouteProxy(Generic[TCollec_co, TResp_co, TError_co]):
 
     def post(
         self,
-        params: Union[Request, Dict[Any, Any]],
+        params: Union[TReq_co, Dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
     ) -> ResponseBox[TResp_co, TError_co]:
         """
@@ -344,7 +340,7 @@ class SyncRouteProxy(Generic[TCollec_co, TResp_co, TError_co]):
 
     def put(
         self,
-        params: Union[Request, Dict[Any, Any]],
+        params: Union[TReq_co, Dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
     ) -> ResponseBox[TResp_co, TError_co]:
         """
@@ -354,7 +350,7 @@ class SyncRouteProxy(Generic[TCollec_co, TResp_co, TError_co]):
 
     def patch(
         self,
-        params: Union[Request, Dict[Any, Any]],
+        params: Union[TReq_co, Dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
     ) -> ResponseBox[TResp_co, TError_co]:
         """
@@ -364,7 +360,7 @@ class SyncRouteProxy(Generic[TCollec_co, TResp_co, TError_co]):
 
     def delete(
         self,
-        params: Union[Request, Dict[Any, Any]],
+        params: Union[TReq_co, Dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
     ) -> ResponseBox[TResp_co, TError_co]:
         """
@@ -374,7 +370,7 @@ class SyncRouteProxy(Generic[TCollec_co, TResp_co, TError_co]):
 
     def options(
         self,
-        params: Union[Request, Dict[Any, Any]],
+        params: Union[TReq_co, Dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
     ) -> ResponseBox[TResp_co, TError_co]:
         """

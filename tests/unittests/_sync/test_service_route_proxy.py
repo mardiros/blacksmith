@@ -68,11 +68,11 @@ def test_route_proxy_prepare_middleware(
 ):
     resp = HTTPResponse(200, {}, "")
 
-    proxy: SyncRouteProxy[Any, Any, Any] = SyncRouteProxy(
+    proxy: SyncRouteProxy[Any, Any, Any, Any] = SyncRouteProxy(
         "dummy",
         "dummies",
         "http://dummy/",
-        ApiRoutes(
+        ApiRoutes[Any, Any, Any](
             path="/",
             contract={"GET": (Request, None)},
             collection_path=None,
@@ -112,7 +112,7 @@ def test_route_proxy_prepare_unregistered_method_resource():
         "dummy",
         "dummies",
         "http://dummy/",
-        ApiRoutes(
+        ApiRoutes[Any, Any, Any](
             path="/",
             contract={},
             collection_path=None,
@@ -141,7 +141,7 @@ def test_route_proxy_prepare_unregistered_method_collection():
         "dummy",
         "dummies",
         "http://dummy/",
-        ApiRoutes(
+        ApiRoutes[Any, Any, Any](
             None,
             None,
             "/",
@@ -170,7 +170,7 @@ def test_route_proxy_prepare_unregistered_resource():
         "dummy",
         "dummies",
         "http://dummy/",
-        ApiRoutes(
+        ApiRoutes[Any, Any, Any](
             None,
             None,
             "/",
@@ -199,7 +199,7 @@ def test_route_proxy_prepare_unregistered_collection():
         "dummy",
         "dummies",
         "http://dummy/",
-        ApiRoutes(
+        ApiRoutes[Any, Any, Any](
             "/",
             {},
             None,
@@ -223,16 +223,15 @@ def test_route_proxy_prepare_unregistered_collection():
 def test_route_proxy_prepare_wrong_type():
     resp = HTTPResponse(200, {}, "")
     tp = FakeTransport(resp)
-
     proxy = SyncRouteProxy(
         "dummy",
         "dummies",
         "http://dummy/",
-        ApiRoutes(
-            "/",
-            {"GET": (GetParam, GetResponse)},
-            None,
-            None,
+        ApiRoutes[Any, Any, Any](
+            path="/",
+            contract={"GET": (GetParam, GetResponse)},
+            collection_path=None,
+            collection_contract=None,
             collection_parser=None,
         ),
         transport=tp,
@@ -259,7 +258,7 @@ def test_route_proxy_collection_head():
         "dummy",
         "dummies",
         "http://dummy/",
-        ApiRoutes(
+        ApiRoutes[Any, Any, Any](
             None,
             None,
             collection_path="/",
@@ -286,7 +285,7 @@ def test_route_proxy_collection_get():
         "dummy",
         "dummies",
         "http://dummy/",
-        ApiRoutes(
+        ApiRoutes[Any, Any, Any](
             None,
             None,
             collection_path="/",
@@ -321,7 +320,7 @@ def test_route_proxy_collection_get_with_parser():
         "dummy",
         "dummies",
         "http://dummy/",
-        ApiRoutes(
+        ApiRoutes[Any, Any, Any](
             None,
             None,
             collection_path="/",
@@ -351,7 +350,7 @@ def test_route_proxy_collection_post():
         "dummy",
         "dummies",
         "http://dummy/",
-        ApiRoutes(
+        ApiRoutes[Any, Any, Any](
             None,
             None,
             collection_path="/",
@@ -376,7 +375,7 @@ def test_route_proxy_collection_put():
         "dummy",
         "dummies",
         "http://dummy/",
-        ApiRoutes(
+        ApiRoutes[Any, Any, Any](
             None,
             None,
             collection_path="/",
@@ -401,7 +400,7 @@ def test_route_proxy_collection_patch():
         "dummy",
         "dummies",
         "http://dummy/",
-        ApiRoutes(
+        ApiRoutes[Any, Any, Any](
             None,
             None,
             collection_path="/",
@@ -426,7 +425,7 @@ def test_route_proxy_collection_delete():
         "dummy",
         "dummies",
         "http://dummy/",
-        ApiRoutes(
+        ApiRoutes[Any, Any, Any](
             None,
             None,
             collection_path="/",
@@ -451,7 +450,7 @@ def test_route_proxy_collection_options():
         "dummy",
         "dummies",
         "http://dummy/",
-        ApiRoutes(
+        ApiRoutes[Any, Any, Any](
             None,
             None,
             collection_path="/",
@@ -475,7 +474,7 @@ def test_route_proxy_head():
         "dummy",
         "dummies",
         "http://dummy/",
-        ApiRoutes(
+        ApiRoutes[Any, Any, Any](
             path="/",
             contract={"HEAD": (Request, None)},
             collection_contract=None,
@@ -500,7 +499,7 @@ def test_route_proxy_get():
         "dummy",
         "dummies",
         "http://dummy/",
-        ApiRoutes(
+        ApiRoutes[Any, Any, Any](
             path="/",
             contract={"GET": (Request, None)},
             collection_contract=None,
@@ -525,7 +524,7 @@ def test_route_proxy_post():
         "dummy",
         "dummies",
         "http://dummy/",
-        ApiRoutes(
+        ApiRoutes[Any, Any, Any](
             path="/",
             contract={"POST": (Request, None)},
             collection_contract=None,
@@ -550,7 +549,7 @@ def test_route_proxy_put():
         "dummy",
         "dummies",
         "http://dummy/",
-        ApiRoutes(
+        ApiRoutes[Any, Any, Any](
             path="/",
             contract={"PUT": (Request, None)},
             collection_contract=None,
@@ -575,7 +574,7 @@ def test_route_proxy_patch():
         "dummy",
         "dummies",
         "http://dummy/",
-        ApiRoutes(
+        ApiRoutes[Any, Any, Any](
             path="/",
             contract={"PATCH": (Request, None)},
             collection_contract=None,
@@ -600,7 +599,7 @@ def test_route_proxy_delete():
         "dummy",
         "dummies",
         "http://dummy/",
-        ApiRoutes(
+        ApiRoutes[Any, Any, Any](
             path="/",
             contract={"DELETE": (Request, None)},
             collection_contract=None,
@@ -625,7 +624,7 @@ def test_route_proxy_options():
         "dummy",
         "dummies",
         "http://dummy/",
-        ApiRoutes(
+        ApiRoutes[Any, Any, Any](
             path="/",
             contract={"OPTIONS": (Request, None)},
             collection_contract=None,
@@ -643,11 +642,11 @@ def test_route_proxy_options():
 
 
 def test_unregistered_collection(echo_middleware: SyncAbstractTransport):
-    proxy: SyncRouteProxy[Any, Any, Any] = SyncRouteProxy(
+    proxy: SyncRouteProxy[Any, Any, Any, Any] = SyncRouteProxy(
         "dummy",
         "dummies",
         "http://dummy/",
-        ApiRoutes(
+        ApiRoutes[Any, Any, Any](
             path="/",
             contract={"GET": (Request, None)},
             collection_path=None,

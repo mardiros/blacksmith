@@ -1,4 +1,4 @@
-from typing import Generic, List, Optional, Type
+from typing import Any, Generic, List, Optional, Type
 
 from blacksmith.domain.error import AbstractErrorParser, TError_co, default_error_parser
 from blacksmith.domain.exceptions import UnregisteredResourceException
@@ -7,6 +7,7 @@ from blacksmith.domain.model.params import (
     AbstractCollectionParser,
     CollectionParser,
     TCollec_co,
+    TReq_co,
     TResp_co,
 )
 from blacksmith.domain.registry import Registry, Resources
@@ -20,7 +21,7 @@ from .base import SyncAbstractTransport
 from .route_proxy import ClientTimeout, SyncRouteProxy, build_timeout
 
 
-class SyncClient(Generic[TCollec_co, TResp_co, TError_co]):
+class SyncClient(Generic[TReq_co, TCollec_co, TResp_co, TError_co]):
     """
     Client representation for the client name.
 
@@ -57,13 +58,13 @@ class SyncClient(Generic[TCollec_co, TResp_co, TError_co]):
 
     def add_middleware(
         self, middleware: SyncHTTPMiddleware
-    ) -> "SyncClient[TCollec_co, TResp_co, TError_co]":
+    ) -> "SyncClient[TReq_co, TCollec_co, TResp_co, TError_co]":
         self.middlewares.insert(0, middleware)
         return self
 
     def __getattr__(
         self, name: ResourceName
-    ) -> SyncRouteProxy[TCollec_co, TResp_co, TError_co]:
+    ) -> SyncRouteProxy[TReq_co, TCollec_co, TResp_co, TError_co]:
         """
         The client has attributes that are the registered resource.
 
@@ -85,7 +86,7 @@ class SyncClient(Generic[TCollec_co, TResp_co, TError_co]):
             raise UnregisteredResourceException(name, self.name)
 
 
-class SyncClientFactory(Generic[TCollec_co, TResp_co, TError_co]):
+class SyncClientFactory(Generic[TReq_co, TCollec_co, TResp_co, TError_co]):
     """
     Client creator, for the given configuration.
 
@@ -135,7 +136,7 @@ class SyncClientFactory(Generic[TCollec_co, TResp_co, TError_co]):
 
     def add_middleware(
         self, middleware: SyncHTTPMiddleware
-    ) -> "SyncClientFactory[TCollec_co, TResp_co, TError_co]":
+    ) -> "SyncClientFactory[Any, Any, Any, TError_co]":
         """
         Add a middleware to the client factory and return the client for chaining.
 
@@ -151,7 +152,7 @@ class SyncClientFactory(Generic[TCollec_co, TResp_co, TError_co]):
 
     def __call__(
         self, client_name: ClientName
-    ) -> SyncClient[TCollec_co, TResp_co, TError_co]:
+    ) -> SyncClient[TReq_co, TCollec_co, TResp_co, TError_co]:
         srv, resources = self.registry.get_service(client_name)
         endpoint = self.sd.get_endpoint(srv[0], srv[1])
         return SyncClient(
