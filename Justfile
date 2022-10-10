@@ -46,7 +46,7 @@ black:
     poetry run black .
 
 rtd:
-    poetry export --dev -f requirements.txt -o docs/requirements.txt --without-hashes
+    poetry export --with dev -f requirements.txt -o docs/requirements.txt --without-hashes
 
 release major_minor_patch: gensync test rtd && changelog
     poetry version {{major_minor_patch}}
