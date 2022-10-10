@@ -8,6 +8,9 @@ Dealing with errors
    the function :func:`blacksmith.scan` which are not par not
    runtime desigated runtime errors here.
 
+
+.. _`HTTP Errors`:
+
 HTTP Errors
 -----------
 
@@ -39,6 +42,8 @@ Sync example
    The error is supposed to be a json document, under attribute ``json``.
    If it is not the case, the content of the document will be in plain text
    under the key ``detail``.
+
+.. _`HTTP Errors Parser`:
 
 HTTP Errors Parser
 ~~~~~~~~~~~~~~~~~~

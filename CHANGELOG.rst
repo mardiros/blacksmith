@@ -1,3 +1,65 @@
+2.0.0 - Unrelease
+-----------------
+
+* Fix concistency for :meth:`blacksmith.AsyncRouteProxy.collection_get` with
+  other HTTP Response Object as using a result type from the
+  :term:`result library`.
+
+* Improve error handling. See :ref:`HTTP Errors`
+
+Breaking Changes
+~~~~~~~~~~~~~~~~
+
+* The ``collection_get`` method in :class:`blacksmith.AsyncRouteProxy`
+  and :class:`blacksmith.SyncRouteProxy` return a Result type instead of
+  an iterator.
+
+  ::
+
+      api = await cli("api")
+
+      # In blacksmith 1.0
+      items: CollectionIterator[PartialItem] = await api.item.collection_get()
+
+      # In blacksmith >=2.0
+      items: Result[
+         CollectionIterator[PartialItem], HTTPError
+      ] = await api.item.collection_get()
+
+  Note that the :class:`blacksmith.HTTPError` can be replaced by your own format,
+  using the new parameter `error_parser` of the :class:`blacksmith.AsyncClientFactory`
+  and :class:`blacksmith.SyncClientFactory`.
+
+  See :ref:`HTTP Errors`
+
+Deprecated
+~~~~~~~~~~
+
+* The :attr:`blacksmith.ResponseBox.response` is deprec ated in favor of
+  the :meth:`blacksmith.ResponseBox.unwrap` method.
+
+  ::
+
+      api = await cli("api")
+
+      # In blacksmith 1.0
+      item: Item = await api.item.get(Get(id=id)).response
+
+      # In blacksmith >=2.0
+      item: Item = await api.item.get(Get(id=id)).unwrap()
+      # Or better
+      result_item: ResponseBox[Item] = await api.item.get(Get(id=id))
+      if result_item.is_ok():
+         item = result_item.unwrap()  # unwrap will raise if the result is an error.
+      else:
+         error = result_item.unwrap_err()
+
+  .. important::
+     The :class:`blacksmith.ResponseBox` as plenty of new method to
+     have the same mimic of the result type from the
+     :term:`result library`.
+
+
 1.0.2 - Released on 2022-06-02
 ------------------------------
 * Update dependencies

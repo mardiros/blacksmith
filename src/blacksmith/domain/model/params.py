@@ -189,14 +189,18 @@ class CollectionParser(AbstractCollectionParser):
 
 class ResponseBox(Generic[TResponse, TError_co]):
     """
-    Wrap an http response to deseriaze it.
-
-    It's also allow users to write some userfull typing inference such as:
+    Wrap a HTTP response and deserialize it.
 
     ::
 
-        user: User = (await api.user.get({"username": username})).response
-        print(user.username)  # declaring the type User make code analyzer happy.
+        user: ResponseBox[User, HTTPError] = (
+            await api.user.get({"username": username})
+        )
+        if user.is_ok():
+            print(user.unwrap().username)
+        else:
+            print(f"API Call failed: {user.unwrap_err()}")
+
     """
 
     def __init__(
@@ -240,7 +244,7 @@ class ResponseBox(Generic[TResponse, TError_co]):
         .. deprecated:: 2.0
             Use :meth:`ResponseBox.unwrap()`
 
-        :raises blacksmith.HTTPError: if the response conains an error.
+        :raises blacksmith.HTTPError: if the response contains an error.
         :raises NoResponseSchemaException: if the response_schema has not been
             set in the contract.
         """
