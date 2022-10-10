@@ -73,7 +73,7 @@ register(
 
 async def test_crud(dummy_api_endpoint: str):
     sd = AsyncStaticDiscovery({("api", None): dummy_api_endpoint})
-    cli: AsyncClientFactory[Any, Any, Any] = AsyncClientFactory(sd)
+    cli: AsyncClientFactory[HTTPError] = AsyncClientFactory(sd)
     api = await cli("api")
 
     items: Result[CollectionIterator[Any], HTTPError] = await api.item.collection_get()
