@@ -65,8 +65,10 @@ from .sd._sync import (
 )
 from .service._async.base import AsyncAbstractTransport
 from .service._async.client import AsyncClient, AsyncClientFactory
+from .service._async.route_proxy import AsyncRouteProxy
 from .service._sync.base import SyncAbstractTransport
 from .service._sync.client import SyncClient, SyncClientFactory
+from .service._sync.route_proxy import SyncRouteProxy
 
 __all__ = [
     # Ordered for the doc
@@ -89,11 +91,13 @@ __all__ = [
     "HTTPTimeoutError",
     # Timeout Config
     "HTTPTimeout",
-    # Factories
+    # Client
     "AsyncClientFactory",
     "SyncClientFactory",
     "AsyncClient",
     "SyncClient",
+    "AsyncRouteProxy",
+    "SyncRouteProxy",
     # Service Discovery
     "AsyncAbstractServiceDiscovery",
     "SyncAbstractServiceDiscovery",
