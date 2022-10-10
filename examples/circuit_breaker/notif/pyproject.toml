@@ -10,6 +10,7 @@ python = "^3.9"
 starlette = "^0.17.0"
 aioredis = "^2.0.1"
 hypercorn = "^0.13.2"
+result = "^0.8.0"
 
 [build-system]
 build-backend = "poetry.core.masonry.api"

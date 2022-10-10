@@ -1,6 +1,10 @@
 from typing import Any, Dict, Generic, List, Optional, Tuple, Type, Union
 
+from result import Err, Ok, Result
+
+from blacksmith.domain.error import AbstractErrorParser, TError_co
 from blacksmith.domain.exceptions import (
+    HTTPError,
     NoContractException,
     UnregisteredRouteException,
     WrongRequestTypeException,
@@ -39,7 +43,7 @@ def build_timeout(timeout: ClientTimeout) -> HTTPTimeout:
     return timeout
 
 
-class SyncRouteProxy(Generic[TCollectionResponse, TResponse]):
+class SyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
     """Proxy from resource to its associate routes."""
 
     client_name: ClientName
@@ -49,6 +53,7 @@ class SyncRouteProxy(Generic[TCollectionResponse, TResponse]):
     transport: SyncAbstractTransport
     timeout: HTTPTimeout
     collection_parser: Type[AbstractCollectionParser]
+    error_parser: AbstractErrorParser[TError_co]
     middlewares: List[SyncHTTPMiddleware]
 
     def __init__(
@@ -60,6 +65,7 @@ class SyncRouteProxy(Generic[TCollectionResponse, TResponse]):
         transport: SyncAbstractTransport,
         timeout: HTTPTimeout,
         collection_parser: Type[AbstractCollectionParser],
+        error_parser: AbstractErrorParser[TError_co],
         middlewares: List[SyncHTTPMiddleware],
     ) -> None:
         self.client_name = client_name
@@ -69,6 +75,7 @@ class SyncRouteProxy(Generic[TCollectionResponse, TResponse]):
         self.transport = transport
         self.timeout = timeout
         self.collection_parser = collection_parser
+        self.error_parser = error_parser
         self.middlewares = middlewares
 
     def _prepare_request(
@@ -99,40 +106,51 @@ class SyncRouteProxy(Generic[TCollectionResponse, TResponse]):
 
     def _prepare_response(
         self,
-        response: HTTPResponse,
+        result: Result[HTTPResponse, HTTPError],
         response_schema: Optional[Type[Response]],
         method: HTTPMethod,
         path: Path,
-    ) -> ResponseBox[TResponse]:
-        return ResponseBox[TResponse](
-            response,
+    ) -> ResponseBox[TResponse, TError_co]:
+        return ResponseBox[TResponse, TError_co](
+            result,
             response_schema,
             method,
             path,
             self.name,
             self.client_name,
+            self.error_parser,
         )
 
     def _prepare_collection_response(
         self,
-        response: HTTPResponse,
+        result: Result[HTTPResponse, HTTPError],
         response_schema: Optional[Type[Response]],
         collection_parser: Optional[Type[AbstractCollectionParser]],
-    ) -> CollectionIterator[TCollectionResponse]:
+    ) -> Result[CollectionIterator[TCollectionResponse], TError_co]:
 
-        return CollectionIterator(
-            response, response_schema, collection_parser or self.collection_parser
-        )
+        if result.is_err():
+            return Err(self.error_parser(result.unwrap_err()))
+        else:
+            return Ok(
+                CollectionIterator(
+                    result.unwrap(),
+                    response_schema,
+                    collection_parser or self.collection_parser,
+                )
+            )
 
     def _handle_req_with_middlewares(
         self, req: HTTPRequest, timeout: HTTPTimeout, path: Path
-    ) -> HTTPResponse:
+    ) -> Result[HTTPResponse, HTTPError]:
         next: SyncMiddleware = self.transport
         for middleware in self.middlewares:
             next = middleware(next)
 
-        resp = next(req, self.client_name, path, timeout)
-        return resp
+        try:
+            resp = next(req, self.client_name, path, timeout)
+        except HTTPError as exc:
+            return Err(exc)
+        return Ok(resp)
 
     def _yield_collection_request(
         self,
@@ -140,7 +158,7 @@ class SyncRouteProxy(Generic[TCollectionResponse, TResponse]):
         params: Union[Optional[Request], Dict[Any, Any]],
         timeout: HTTPTimeout,
         collection: HttpCollection,
-    ) -> CollectionIterator[TCollectionResponse]:
+    ) -> Result[CollectionIterator[TCollectionResponse], TError_co]:
         path, req, resp_schema = self._prepare_request(method, params, collection)
         resp = self._handle_req_with_middlewares(req, timeout, path)
         return self._prepare_collection_response(
@@ -152,7 +170,7 @@ class SyncRouteProxy(Generic[TCollectionResponse, TResponse]):
         method: HTTPMethod,
         params: Union[Request, Dict[Any, Any]],
         timeout: HTTPTimeout,
-    ) -> ResponseBox[TResponse]:
+    ) -> ResponseBox[TResponse, TError_co]:
         path, req, resp_schema = self._prepare_request(
             method, params, self.routes.collection
         )
@@ -164,7 +182,7 @@ class SyncRouteProxy(Generic[TCollectionResponse, TResponse]):
         method: HTTPMethod,
         params: Union[Request, Dict[Any, Any]],
         timeout: HTTPTimeout,
-    ) -> ResponseBox[TResponse]:
+    ) -> ResponseBox[TResponse, TError_co]:
         path, req, resp_schema = self._prepare_request(
             method, params, self.routes.resource
         )
@@ -175,7 +193,7 @@ class SyncRouteProxy(Generic[TCollectionResponse, TResponse]):
         self,
         params: Union[Request, Dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
-    ) -> ResponseBox[TResponse]:
+    ) -> ResponseBox[TResponse, TError_co]:
         return self._collection_request(
             "HEAD", params, build_timeout(timeout or self.timeout)
         )
@@ -184,7 +202,7 @@ class SyncRouteProxy(Generic[TCollectionResponse, TResponse]):
         self,
         params: Union[Optional[Request], Dict[Any, Any]] = None,
         timeout: Optional[ClientTimeout] = None,
-    ) -> CollectionIterator[TCollectionResponse]:
+    ) -> Result[CollectionIterator[TCollectionResponse], TError_co]:
         if not self.routes.collection:
             raise UnregisteredRouteException("GET", self.name, self.client_name)
         return self._yield_collection_request(
@@ -198,7 +216,7 @@ class SyncRouteProxy(Generic[TCollectionResponse, TResponse]):
         self,
         params: Union[Request, Dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
-    ) -> ResponseBox[TResponse]:
+    ) -> ResponseBox[TResponse, TError_co]:
         return self._collection_request(
             "POST", params, build_timeout(timeout or self.timeout)
         )
@@ -207,7 +225,7 @@ class SyncRouteProxy(Generic[TCollectionResponse, TResponse]):
         self,
         params: Union[Request, Dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
-    ) -> ResponseBox[TResponse]:
+    ) -> ResponseBox[TResponse, TError_co]:
         return self._collection_request(
             "PUT", params, build_timeout(timeout or self.timeout)
         )
@@ -216,7 +234,7 @@ class SyncRouteProxy(Generic[TCollectionResponse, TResponse]):
         self,
         params: Union[Request, Dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
-    ) -> ResponseBox[TResponse]:
+    ) -> ResponseBox[TResponse, TError_co]:
         return self._collection_request(
             "PATCH", params, build_timeout(timeout or self.timeout)
         )
@@ -225,7 +243,7 @@ class SyncRouteProxy(Generic[TCollectionResponse, TResponse]):
         self,
         params: Union[Request, Dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
-    ) -> ResponseBox[TResponse]:
+    ) -> ResponseBox[TResponse, TError_co]:
         return self._collection_request(
             "DELETE", params, build_timeout(timeout or self.timeout)
         )
@@ -234,7 +252,7 @@ class SyncRouteProxy(Generic[TCollectionResponse, TResponse]):
         self,
         params: Union[Request, Dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
-    ) -> ResponseBox[TResponse]:
+    ) -> ResponseBox[TResponse, TError_co]:
         return self._collection_request(
             "OPTIONS", params, build_timeout(timeout or self.timeout)
         )
@@ -243,14 +261,14 @@ class SyncRouteProxy(Generic[TCollectionResponse, TResponse]):
         self,
         params: Union[Request, Dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
-    ) -> ResponseBox[TResponse]:
+    ) -> ResponseBox[TResponse, TError_co]:
         return self._request("HEAD", params, build_timeout(timeout or self.timeout))
 
     def get(
         self,
         params: Union[Request, Dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
-    ) -> ResponseBox[TResponse]:
+    ) -> ResponseBox[TResponse, TError_co]:
         resp = self._request("GET", params, build_timeout(timeout or self.timeout))
         return resp
 
@@ -258,33 +276,33 @@ class SyncRouteProxy(Generic[TCollectionResponse, TResponse]):
         self,
         params: Union[Request, Dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
-    ) -> ResponseBox[TResponse]:
+    ) -> ResponseBox[TResponse, TError_co]:
         return self._request("POST", params, build_timeout(timeout or self.timeout))
 
     def put(
         self,
         params: Union[Request, Dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
-    ) -> ResponseBox[TResponse]:
+    ) -> ResponseBox[TResponse, TError_co]:
         return self._request("PUT", params, build_timeout(timeout or self.timeout))
 
     def patch(
         self,
         params: Union[Request, Dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
-    ) -> ResponseBox[TResponse]:
+    ) -> ResponseBox[TResponse, TError_co]:
         return self._request("PATCH", params, build_timeout(timeout or self.timeout))
 
     def delete(
         self,
         params: Union[Request, Dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
-    ) -> ResponseBox[TResponse]:
+    ) -> ResponseBox[TResponse, TError_co]:
         return self._request("DELETE", params, build_timeout(timeout or self.timeout))
 
     def options(
         self,
         params: Union[Request, Dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
-    ) -> ResponseBox[TResponse]:
+    ) -> ResponseBox[TResponse, TError_co]:
         return self._request("OPTIONS", params, build_timeout(timeout or self.timeout))

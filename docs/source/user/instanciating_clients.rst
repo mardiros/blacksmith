@@ -50,6 +50,15 @@ example bellow:
    The method accept a dict version of the request schema.
 
 
+.. versionchanged:: 2.0
+
+   Since blacksmith 2.0, responses are wrapped using the :term:`result library`.
+
+   The collection class return a ``result.Result`` object, and the non collection,
+   return a :class:`blacksmith.ResponseBox` that have the same mimic of the
+   ``result.Result``. of the :term:`result library`.
+
+
 Synchronous API
 ---------------
 

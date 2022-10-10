@@ -1,4 +1,4 @@
-from typing import Any, Type
+from typing import TYPE_CHECKING, Any, Type
 
 from blacksmith.typing import (
     ClientName,
@@ -10,6 +10,9 @@ from blacksmith.typing import (
     ServiceName,
     Version,
 )
+
+if TYPE_CHECKING:
+    from .model.http import HTTPRequest, HTTPResponse
 
 
 class ConfigurationError(Exception):
@@ -23,7 +26,7 @@ class ConfigurationError(Exception):
 
 
 class UnregisteredServiceException(RuntimeError):
-    """Raised when an unregistered service is beeing requested."""
+    """Raised when an unregistered service is being requested."""
 
     def __init__(self, service: ServiceName, version: Version) -> None:
         srv = f"{service}/{version}" if version else service
@@ -31,21 +34,21 @@ class UnregisteredServiceException(RuntimeError):
 
 
 class UnregisteredClientException(RuntimeError):
-    """Raised when an unregistered service is beeing requested."""
+    """Raised when an unregistered client is being requested."""
 
     def __init__(self, client: ClientName) -> None:
         super().__init__(f"Unregistered client '{client}'")
 
 
 class UnregisteredResourceException(RuntimeError):
-    """Raised when an unregistered service is beeing requested."""
+    """Raised when an unregistered resource is being requested."""
 
     def __init__(self, resource: ResourceName, client: ClientName) -> None:
         super().__init__(f"Unregistered resource '{resource}' in client '{client}'")
 
 
 class UnregisteredRouteException(RuntimeError):
-    """Raised when an unregistered service is beeing requested."""
+    """Raised when an unregistered route is being requested."""
 
     def __init__(
         self, route: HTTPMethod, resource: ResourceName, client: ClientName
@@ -57,7 +60,7 @@ class UnregisteredRouteException(RuntimeError):
 
 
 class NoContractException(RuntimeError):
-    """Raised when an unregistered service is beeing requested."""
+    """Raised when an unregistered contract is being requested."""
 
     def __init__(
         self, method: HTTPMethod, resource: ResourceName, client: ClientName
@@ -69,7 +72,7 @@ class NoContractException(RuntimeError):
 
 
 class NoResponseSchemaException(RuntimeError):
-    """Raised when an unregistered service is beeing requested."""
+    """Raised when an unregistered response schema is being requested."""
 
     def __init__(
         self, method: HTTPMethod, path: Path, resource: ResourceName, client: ClientName
@@ -97,9 +100,7 @@ class WrongRequestTypeException(TypeError):
 class HTTPError(Exception):
     """Represent the http error."""
 
-    from .model.http import HTTPRequest, HTTPResponse
-
-    def __init__(self, message: str, request: HTTPRequest, response: HTTPResponse):
+    def __init__(self, message: str, request: "HTTPRequest", response: "HTTPResponse"):
         super().__init__(message)
         self.request = request
         self.response = response

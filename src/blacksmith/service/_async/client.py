@@ -1,5 +1,6 @@
 from typing import Generic, List, Optional, Type
 
+from blacksmith.domain.error import AbstractErrorParser, TError_co, default_error_parser
 from blacksmith.domain.exceptions import UnregisteredResourceException
 from blacksmith.domain.model.http import HTTPTimeout
 from blacksmith.domain.model.params import (
@@ -19,7 +20,7 @@ from .base import AsyncAbstractTransport
 from .route_proxy import AsyncRouteProxy, ClientTimeout, build_timeout
 
 
-class AsyncClient(Generic[TCollectionResponse, TResponse]):
+class AsyncClient(Generic[TCollectionResponse, TResponse, TError_co]):
     """
     Client representation for the client name.
 
@@ -43,6 +44,7 @@ class AsyncClient(Generic[TCollectionResponse, TResponse]):
         timeout: HTTPTimeout,
         collection_parser: Type[AbstractCollectionParser],
         middlewares: List[AsyncHTTPMiddleware],
+        error_parser: AbstractErrorParser[TError_co],
     ) -> None:
         self.name = name
         self.endpoint = endpoint
@@ -50,17 +52,18 @@ class AsyncClient(Generic[TCollectionResponse, TResponse]):
         self.transport = transport
         self.timeout = timeout
         self.collection_parser = collection_parser
+        self.error_parser = error_parser
         self.middlewares = middlewares.copy()
 
     def add_middleware(
         self, middleware: AsyncHTTPMiddleware
-    ) -> "AsyncClient[TCollectionResponse, TResponse]":
+    ) -> "AsyncClient[TCollectionResponse, TResponse, TError_co]":
         self.middlewares.insert(0, middleware)
         return self
 
     def __getattr__(
         self, name: ResourceName
-    ) -> AsyncRouteProxy[TCollectionResponse, TResponse]:
+    ) -> AsyncRouteProxy[TCollectionResponse, TResponse, TError_co]:
         """
         The client has attributes that are the registered resource.
 
@@ -75,13 +78,14 @@ class AsyncClient(Generic[TCollectionResponse, TResponse]):
                 self.transport,
                 self.timeout,
                 self.collection_parser,
+                self.error_parser,
                 self.middlewares,
             )
         except KeyError:
             raise UnregisteredResourceException(name, self.name)
 
 
-class AsyncClientFactory(Generic[TCollectionResponse, TResponse]):
+class AsyncClientFactory(Generic[TCollectionResponse, TResponse, TError_co]):
     """
     Client creator, for the given configuration.
 
@@ -103,6 +107,7 @@ class AsyncClientFactory(Generic[TCollectionResponse, TResponse]):
     timeout: HTTPTimeout
     collection_parser: Type[AbstractCollectionParser]
     middlewares: List[AsyncHTTPMiddleware]
+    error_parser: AbstractErrorParser[TError_co]
 
     def __init__(
         self,
@@ -113,6 +118,7 @@ class AsyncClientFactory(Generic[TCollectionResponse, TResponse]):
         proxies: Optional[Proxies] = None,
         verify_certificate: bool = False,
         collection_parser: Type[AbstractCollectionParser] = CollectionParser,
+        error_parser: Optional[AbstractErrorParser[TError_co]] = None,
     ) -> None:
         self.sd = sd
         self.registry = registry
@@ -122,11 +128,14 @@ class AsyncClientFactory(Generic[TCollectionResponse, TResponse]):
         )
         self.timeout = build_timeout(timeout)
         self.collection_parser = collection_parser
+        # no default in TypeVar, wait for https://peps.python.org/pep-0696/
+        # so the default_error_parser assume than TError_co, is HTTPError here
+        self.error_parser = error_parser or default_error_parser  # type: ignore
         self.middlewares = []
 
     def add_middleware(
         self, middleware: AsyncHTTPMiddleware
-    ) -> "AsyncClientFactory[TCollectionResponse,TResponse]":
+    ) -> "AsyncClientFactory[TCollectionResponse, TResponse, TError_co]":
         """
         Add a middleware to the client factory and return the client for chaining.
 
@@ -142,7 +151,7 @@ class AsyncClientFactory(Generic[TCollectionResponse, TResponse]):
 
     async def __call__(
         self, client_name: ClientName
-    ) -> AsyncClient[TCollectionResponse, TResponse]:
+    ) -> AsyncClient[TCollectionResponse, TResponse, TError_co]:
         srv, resources = self.registry.get_service(client_name)
         endpoint = await self.sd.get_endpoint(srv[0], srv[1])
         return AsyncClient(
@@ -153,4 +162,5 @@ class AsyncClientFactory(Generic[TCollectionResponse, TResponse]):
             self.timeout,
             self.collection_parser,
             self.middlewares,
+            self.error_parser,
         )

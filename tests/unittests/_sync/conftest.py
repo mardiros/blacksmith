@@ -147,7 +147,7 @@ def dummy_middleware():
 
 @pytest.fixture
 def consul_sd():
-    def cli(url: str, tok: str) -> SyncClientFactory[Any, Any]:
+    def cli(url: str, tok: str) -> SyncClientFactory[Any, Any, Any]:
         return SyncClientFactory(
             sd=SyncStaticDiscovery({("consul", "v1"): url}),
             registry=_registry,

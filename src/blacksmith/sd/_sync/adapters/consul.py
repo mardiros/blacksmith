@@ -7,6 +7,7 @@ import random
 from typing import Any, Callable, List
 
 from pydantic.fields import Field
+from result import Result
 
 from blacksmith.domain.exceptions import HTTPError, UnregisteredServiceException
 from blacksmith.domain.model import PathInfoField, Request, Response
@@ -53,9 +54,13 @@ _registry.register(
 )
 
 
-def blacksmith_cli(endpoint: Url, consul_token: str) -> SyncClientFactory[Service, Any]:
+def blacksmith_cli(
+    endpoint: Url, consul_token: str
+) -> SyncClientFactory[Service, Any, Any]:
     sd = SyncStaticDiscovery({("consul", "v1"): endpoint})
-    fact: SyncClientFactory[Service, Any] = SyncClientFactory(sd, registry=_registry)
+    fact: SyncClientFactory[Service, Any, Any] = SyncClientFactory(
+        sd, registry=_registry
+    )
     if consul_token:
         fact.add_middleware(SyncHTTPBearerMiddleware(consul_token))
     return fact
@@ -86,7 +91,7 @@ class SyncConsulDiscovery(SyncAbstractServiceDiscovery):
         unversioned_service_url_fmt: str = "http://{address}:{port}",
         consul_token: str = "",
         _client_factory: Callable[
-            [Url, str], SyncClientFactory[Service, Any]
+            [Url, str], SyncClientFactory[Service, Any, Any]
         ] = blacksmith_cli,
     ) -> None:
         self.blacksmith_cli = _client_factory(addr, consul_token)
@@ -123,14 +128,15 @@ class SyncConsulDiscovery(SyncAbstractServiceDiscovery):
         """
         name = self.format_service_name(service, version)
         consul = self.blacksmith_cli("consul")
-        try:
-            iresp: CollectionIterator[Service] = consul.services.collection_get(
-                ServiceRequest(name=name)
-            )
-        except HTTPError as exc:
-            raise ConsulApiError(exc)  # rewrite the class to avoid confusion
+        rresp: Result[
+            CollectionIterator[Service], HTTPError
+        ] = consul.services.collection_get(ServiceRequest(name=name))
+        if rresp.is_err():
+            raise ConsulApiError(
+                rresp.unwrap_err()
+            )  # rewrite the class to avoid confusion
         else:
-            resp: List[Service] = list(iresp)
+            resp: List[Service] = list(rresp.unwrap())
             if not resp:
                 raise UnregisteredServiceException(service, version)
             return random.choice(resp)

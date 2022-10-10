@@ -50,6 +50,10 @@ Glossary
       | Type hints provides user friendly errors when data is invalid.
       | Website: https://pydantic-docs.helpmanual.io/
 
+   result library
+      | A simple Result type for Python 3 inspired by Rust, fully type annotated.
+      | Website: https://pypi.org/project/result/
+
    server-side service discovery
       The client is calling a proxy server that maintain its backends server
       list by receiving notification of the :term:`service registry` to maintain.

@@ -3,15 +3,19 @@ import os
 import sys
 from typing import Any
 
+from pydantic import BaseModel
+
 from blacksmith import (
     AsyncClientFactory,
     AsyncHTTPAuthorizationMiddleware,
     AsyncStaticDiscovery,
+    HTTPError,
     PathInfoField,
     Request,
     Response,
     register,
 )
+from blacksmith.domain.model.http import HTTPRequest
 
 
 class TLDInfoGetParam(Request):
@@ -29,6 +33,18 @@ class TLDResponse(Response):
     # Unused parameters
     # 'full_tld': 'eu',
     # 'href': 'https://api.gandi.net/v5/domain/tlds/eu'
+
+
+class APIError(BaseModel):
+    request: HTTPRequest
+    message: str
+    object: str
+    cause: str
+    code: int
+
+
+def error_parser(err: HTTPError) -> APIError:
+    return APIError(request=err.request, **err.json)
 
 
 register(
@@ -50,11 +66,15 @@ async def main():
     apikey = os.environ["GANDIV5_API_KEY"]
     sd = AsyncStaticDiscovery({("gandi", "v5"): "https://api.gandi.net/v5"})
     auth = AsyncHTTPAuthorizationMiddleware("Apikey", apikey)
-    cli: AsyncClientFactory[Any, TLDResponse] = AsyncClientFactory(sd).add_middleware(
-        auth
-    )
+    cli: AsyncClientFactory[Any, TLDResponse, APIError] = AsyncClientFactory(
+        sd, error_parser=error_parser
+    ).add_middleware(auth)
     api = await cli("gandi")
-    tld = (await api.tld.get(TLDInfoGetParam(name="eu"))).response
+
+    tld = (await api.tld.get(TLDInfoGetParam(name="eu"))).unwrap()
+    print(tld)
+
+    tld = (await api.tld.get(TLDInfoGetParam(name="europ"))).unwrap_err()
     print(tld)
 
 

@@ -27,17 +27,32 @@ class Dates(BaseModel):
     # updated_at: datetime.datetime
 
 
-class ListDomainResponse(Response):
+class PartialDomain(Response):
     # id: uuid.UUID
     # fqdn: str
     # In this example we rename a field in the response using `alias`
-    name: str = Field(str, alias="fqdn_unicode")
+    name: str = Field(..., alias="fqdn_unicode")
     owner: str
     dates: Dates
 
 
+class Contact(BaseModel):
+    firstname: str = Field(alias="given")
+    lastname: str = Field(alias="family")
+
+
+class Contacts(BaseModel):
+    owner: Contact = Field(...)
+
+
+class Domain(Response):
+    name: str = Field(alias="fqdn_unicode")
+    contacts: Contacts
+    dates: Dates
+
+
 class DomainParam(Request):
-    name: str = PathInfoField(str)
+    name: str = PathInfoField(...)
 
 
 class CollectionDomainParam(Request):
@@ -53,11 +68,11 @@ register(
     contract={
         # In this example we don't provide the response model,
         # so we receive a dict for the json response
-        "GET": (DomainParam, None),
+        "GET": (DomainParam, Domain),
     },
     collection_path="/domain/domains",
     collection_contract={
-        "GET": (CollectionDomainParam, ListDomainResponse),
+        "GET": (CollectionDomainParam, PartialDomain),
     },
 )
 
@@ -69,22 +84,22 @@ async def main():
     apikey = os.environ["GANDIV5_API_KEY"]
     sd = AsyncStaticDiscovery({("gandi", "v5"): "https://api.gandi.net/v5"})
     auth = AsyncHTTPAuthorizationMiddleware("Apikey", apikey)
-    cli: AsyncClientFactory[ListDomainResponse, Any] = AsyncClientFactory(
+    cli: AsyncClientFactory[PartialDomain, Any] = AsyncClientFactory(
         sd, timeout=(10.0)
     ).add_middleware(auth)
     api = await cli("gandi")
     if len(sys.argv) == 2:
         domain = sys.argv[1]
-        domain = await api.domain.get(DomainParam(name=domain))
-        print(domain.json)
+        domain_result = await api.domain.get(DomainParam(name=domain))
+        domain = domain_result.unwrap()
+        print(domain)
     else:
-        domains = await api.domain.collection_get()
-
+        domain_result = await api.domain.collection_get()
+        domains = domain_result.unwrap()
         print(domains.meta)
         print()
         for domain in domains:
             print(domain)
-            print(domain.name)
 
 
 asyncio.run(main())

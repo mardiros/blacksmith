@@ -30,7 +30,9 @@ def dummy_query_timeout():
 )
 async def test_query_http(patch: Any):
     transport = AsyncHttpxTransport()
-    resp = await transport(HTTPRequest("GET", "/"), "cli", "/", HTTPTimeout())
+    resp = await transport(
+        HTTPRequest(method="GET", url_pattern="/"), "cli", "/", HTTPTimeout()
+    )
     assert resp.status_code == 200
     assert dict(resp.headers) == {
         "content-length": "17",
@@ -45,7 +47,9 @@ async def test_query_http(patch: Any):
 )
 async def test_query_http_204(patch: Any):
     transport = AsyncHttpxTransport()
-    resp = await transport(HTTPRequest("GET", "/"), "cli", "/", HTTPTimeout())
+    resp = await transport(
+        HTTPRequest(method="GET", url_pattern="/"), "cli", "/", HTTPTimeout()
+    )
     assert resp.status_code == 204
     assert dict(resp.headers) == {}
     assert resp.json == ""
@@ -58,7 +62,12 @@ async def test_query_http_204(patch: Any):
 async def test_query_http_422(patch: Any):
     transport = AsyncHttpxTransport()
     with pytest.raises(HTTPError) as ctx:
-        await transport(HTTPRequest("POST", "/", body="{}"), "cli", "/", HTTPTimeout())
+        await transport(
+            HTTPRequest(method="POST", url_pattern="/", body="{}"),
+            "cli",
+            "/",
+            HTTPTimeout(),
+        )
 
     assert str(ctx.value) == "cli - POST / - 422 Unprocessable Entity"
     assert ctx.value.status_code == 422
@@ -72,7 +81,12 @@ async def test_query_http_422(patch: Any):
 async def test_query_http_timeout(patch: Any):
     transport = AsyncHttpxTransport()
     with pytest.raises(TimeoutError) as ctx:
-        await transport(HTTPRequest("DELETE", "/slow"), "cli", "/{xx}", HTTPTimeout())
+        await transport(
+            HTTPRequest(method="DELETE", url_pattern="/slow"),
+            "cli",
+            "/{xx}",
+            HTTPTimeout(),
+        )
     assert (
         str(ctx.value)
         == "cli - DELETE /{xx} - TimeoutException while calling DELETE /slow"
@@ -86,7 +100,12 @@ async def test_query_http_timeout(patch: Any):
 async def test_query_http_no_json(patch: Any):
     transport = AsyncHttpxTransport()
     with pytest.raises(HTTPError) as ctx:
-        await transport(HTTPRequest("POST", "/", body="{}"), "cli", "/", HTTPTimeout())
+        await transport(
+            HTTPRequest(method="POST", url_pattern="/", body="{}"),
+            "cli",
+            "/",
+            HTTPTimeout(),
+        )
 
     assert str(ctx.value) == "cli - POST / - 500 Internal Server Error"
     assert ctx.value.status_code == 500

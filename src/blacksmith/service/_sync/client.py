@@ -1,5 +1,6 @@
 from typing import Generic, List, Optional, Type
 
+from blacksmith.domain.error import AbstractErrorParser, TError_co, default_error_parser
 from blacksmith.domain.exceptions import UnregisteredResourceException
 from blacksmith.domain.model.http import HTTPTimeout
 from blacksmith.domain.model.params import (
@@ -19,7 +20,7 @@ from .base import SyncAbstractTransport
 from .route_proxy import ClientTimeout, SyncRouteProxy, build_timeout
 
 
-class SyncClient(Generic[TCollectionResponse, TResponse]):
+class SyncClient(Generic[TCollectionResponse, TResponse, TError_co]):
     """
     Client representation for the client name.
 
@@ -43,6 +44,7 @@ class SyncClient(Generic[TCollectionResponse, TResponse]):
         timeout: HTTPTimeout,
         collection_parser: Type[AbstractCollectionParser],
         middlewares: List[SyncHTTPMiddleware],
+        error_parser: AbstractErrorParser[TError_co],
     ) -> None:
         self.name = name
         self.endpoint = endpoint
@@ -50,17 +52,18 @@ class SyncClient(Generic[TCollectionResponse, TResponse]):
         self.transport = transport
         self.timeout = timeout
         self.collection_parser = collection_parser
+        self.error_parser = error_parser
         self.middlewares = middlewares.copy()
 
     def add_middleware(
         self, middleware: SyncHTTPMiddleware
-    ) -> "SyncClient[TCollectionResponse, TResponse]":
+    ) -> "SyncClient[TCollectionResponse, TResponse, TError_co]":
         self.middlewares.insert(0, middleware)
         return self
 
     def __getattr__(
         self, name: ResourceName
-    ) -> SyncRouteProxy[TCollectionResponse, TResponse]:
+    ) -> SyncRouteProxy[TCollectionResponse, TResponse, TError_co]:
         """
         The client has attributes that are the registered resource.
 
@@ -75,13 +78,14 @@ class SyncClient(Generic[TCollectionResponse, TResponse]):
                 self.transport,
                 self.timeout,
                 self.collection_parser,
+                self.error_parser,
                 self.middlewares,
             )
         except KeyError:
             raise UnregisteredResourceException(name, self.name)
 
 
-class SyncClientFactory(Generic[TCollectionResponse, TResponse]):
+class SyncClientFactory(Generic[TCollectionResponse, TResponse, TError_co]):
     """
     Client creator, for the given configuration.
 
@@ -103,6 +107,7 @@ class SyncClientFactory(Generic[TCollectionResponse, TResponse]):
     timeout: HTTPTimeout
     collection_parser: Type[AbstractCollectionParser]
     middlewares: List[SyncHTTPMiddleware]
+    error_parser: AbstractErrorParser[TError_co]
 
     def __init__(
         self,
@@ -113,6 +118,7 @@ class SyncClientFactory(Generic[TCollectionResponse, TResponse]):
         proxies: Optional[Proxies] = None,
         verify_certificate: bool = False,
         collection_parser: Type[AbstractCollectionParser] = CollectionParser,
+        error_parser: Optional[AbstractErrorParser[TError_co]] = None,
     ) -> None:
         self.sd = sd
         self.registry = registry
@@ -122,11 +128,12 @@ class SyncClientFactory(Generic[TCollectionResponse, TResponse]):
         )
         self.timeout = build_timeout(timeout)
         self.collection_parser = collection_parser
+        self.error_parser = error_parser or default_error_parser  # type: ignore
         self.middlewares = []
 
     def add_middleware(
         self, middleware: SyncHTTPMiddleware
-    ) -> "SyncClientFactory[TCollectionResponse,TResponse]":
+    ) -> "SyncClientFactory[TCollectionResponse, TResponse, TError_co]":
         """
         Add a middleware to the client factory and return the client for chaining.
 
@@ -142,7 +149,7 @@ class SyncClientFactory(Generic[TCollectionResponse, TResponse]):
 
     def __call__(
         self, client_name: ClientName
-    ) -> SyncClient[TCollectionResponse, TResponse]:
+    ) -> SyncClient[TCollectionResponse, TResponse, TError_co]:
         srv, resources = self.registry.get_service(client_name)
         endpoint = self.sd.get_endpoint(srv[0], srv[1])
         return SyncClient(
@@ -153,4 +160,5 @@ class SyncClientFactory(Generic[TCollectionResponse, TResponse]):
             self.timeout,
             self.collection_parser,
             self.middlewares,
+            self.error_parser,
         )
