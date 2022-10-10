@@ -87,7 +87,7 @@ async def test_client(static_sd: AsyncAbstractServiceDiscovery):
         },
     )
 
-    routes = ApiRoutes(
+    routes = ApiRoutes[Any, GetResponse](
         "/dummies/{name}", {"GET": (GetParam, GetResponse)}, None, None, None
     )
 
@@ -142,7 +142,7 @@ async def test_client(static_sd: AsyncAbstractServiceDiscovery):
 
 async def test_client_timeout(static_sd: AsyncAbstractServiceDiscovery):
 
-    routes = ApiRoutes(
+    routes = ApiRoutes[Any, GetResponse](
         "/dummies/{name}", {"GET": (GetParam, GetResponse)}, None, None, None
     )
 

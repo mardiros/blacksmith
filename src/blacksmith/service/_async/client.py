@@ -6,8 +6,8 @@ from blacksmith.domain.model.http import HTTPTimeout
 from blacksmith.domain.model.params import (
     AbstractCollectionParser,
     CollectionParser,
-    TCollectionResponse,
-    TResponse,
+    TCollec_co,
+    TResp_co,
 )
 from blacksmith.domain.registry import Registry, Resources
 from blacksmith.domain.registry import registry as default_registry
@@ -20,7 +20,7 @@ from .base import AsyncAbstractTransport
 from .route_proxy import AsyncRouteProxy, ClientTimeout, build_timeout
 
 
-class AsyncClient(Generic[TCollectionResponse, TResponse, TError_co]):
+class AsyncClient(Generic[TCollec_co, TResp_co, TError_co]):
     """
     Client representation for the client name.
 
@@ -57,13 +57,13 @@ class AsyncClient(Generic[TCollectionResponse, TResponse, TError_co]):
 
     def add_middleware(
         self, middleware: AsyncHTTPMiddleware
-    ) -> "AsyncClient[TCollectionResponse, TResponse, TError_co]":
+    ) -> "AsyncClient[TCollec_co, TResp_co, TError_co]":
         self.middlewares.insert(0, middleware)
         return self
 
     def __getattr__(
         self, name: ResourceName
-    ) -> AsyncRouteProxy[TCollectionResponse, TResponse, TError_co]:
+    ) -> AsyncRouteProxy[TCollec_co, TResp_co, TError_co]:
         """
         The client has attributes that are the registered resource.
 
@@ -85,7 +85,7 @@ class AsyncClient(Generic[TCollectionResponse, TResponse, TError_co]):
             raise UnregisteredResourceException(name, self.name)
 
 
-class AsyncClientFactory(Generic[TCollectionResponse, TResponse, TError_co]):
+class AsyncClientFactory(Generic[TCollec_co, TResp_co, TError_co]):
     """
     Client creator, for the given configuration.
 
@@ -135,7 +135,7 @@ class AsyncClientFactory(Generic[TCollectionResponse, TResponse, TError_co]):
 
     def add_middleware(
         self, middleware: AsyncHTTPMiddleware
-    ) -> "AsyncClientFactory[TCollectionResponse, TResponse, TError_co]":
+    ) -> "AsyncClientFactory[TCollec_co, TResp_co, TError_co]":
         """
         Add a middleware to the client factory and return the client for chaining.
 
@@ -151,7 +151,7 @@ class AsyncClientFactory(Generic[TCollectionResponse, TResponse, TError_co]):
 
     async def __call__(
         self, client_name: ClientName
-    ) -> AsyncClient[TCollectionResponse, TResponse, TError_co]:
+    ) -> AsyncClient[TCollec_co, TResp_co, TError_co]:
         srv, resources = self.registry.get_service(client_name)
         endpoint = await self.sd.get_endpoint(srv[0], srv[1])
         return AsyncClient(

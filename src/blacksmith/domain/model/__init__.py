@@ -18,7 +18,7 @@ from .params import (
     Request,
     Response,
     ResponseBox,
-    TResponse,
+    TResp_co,
 )
 
 __all__ = [
@@ -32,7 +32,7 @@ __all__ = [
     "Request",
     "Response",
     "ResponseBox",
-    "TResponse",
+    "TResp_co",
     "AbstractCollectionParser",
     "CollectionParser",
     "CollectionIterator",

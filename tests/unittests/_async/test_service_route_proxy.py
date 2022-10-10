@@ -223,16 +223,15 @@ async def test_route_proxy_prepare_unregistered_collection():
 async def test_route_proxy_prepare_wrong_type():
     resp = HTTPResponse(200, {}, "")
     tp = FakeTransport(resp)
-
     proxy = AsyncRouteProxy(
         "dummy",
         "dummies",
         "http://dummy/",
-        ApiRoutes(
-            "/",
-            {"GET": (GetParam, GetResponse)},
-            None,
-            None,
+        ApiRoutes[Any, Any](
+            path="/",
+            contract={"GET": (GetParam, GetResponse)},
+            collection_path=None,
+            collection_contract=None,
             collection_parser=None,
         ),
         transport=tp,

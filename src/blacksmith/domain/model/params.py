@@ -97,8 +97,8 @@ class Request(BaseModel):
         return req
 
 
-TResponse = TypeVar("TResponse", bound="Response")
-TCollectionResponse = TypeVar("TCollectionResponse", bound="Response")
+TResp_co = TypeVar("TResp_co", bound="Response", covariant=True)
+TCollec_co = TypeVar("TCollec_co", bound="Response", covariant=True)
 
 
 class Response(BaseModel):
@@ -187,7 +187,7 @@ class CollectionParser(AbstractCollectionParser):
         return self.resp.json or []
 
 
-class ResponseBox(Generic[TResponse, TError_co]):
+class ResponseBox(Generic[TResp_co, TError_co]):
     """
     Wrap a HTTP response and deserialize it.
 
@@ -206,7 +206,7 @@ class ResponseBox(Generic[TResponse, TError_co]):
     def __init__(
         self,
         result: Result[HTTPResponse, HTTPError],
-        response_schema: Optional[Type[Response]],
+        response_schema: Optional[Type[TResp_co]],
         method: HTTPMethod,
         path: Path,
         name: ResourceName,
@@ -221,13 +221,13 @@ class ResponseBox(Generic[TResponse, TError_co]):
         self.client_name: ClientName = client_name
         self.error_parser = error_parser
 
-    def _cast_resp(self, resp: HTTPResponse) -> TResponse:
+    def _cast_resp(self, resp: HTTPResponse) -> TResp_co:
         if self.response_schema is None:
             raise NoResponseSchemaException(
                 self.method, self.path, self.name, self.client_name
             )
         schema_cls = self.response_schema
-        return cast(TResponse, schema_cls(**(resp.json or {})))
+        return cast(TResp_co, schema_cls(**(resp.json or {})))
 
     @property
     def json(self) -> Optional[Dict[str, Any]]:
@@ -237,7 +237,7 @@ class ResponseBox(Generic[TResponse, TError_co]):
         return self.raw_result.unwrap_err().response.json
 
     @property
-    def response(self) -> TResponse:
+    def response(self) -> TResp_co:
         """
         Parse the response using the schema.
 
@@ -259,10 +259,10 @@ class ResponseBox(Generic[TResponse, TError_co]):
                 self.method, self.path, self.name, self.client_name
             )
         resp = self.response_schema(**(self.json or {}))
-        return cast(TResponse, resp)
+        return cast(TResp_co, resp)
 
     @property
-    def result(self) -> Result[TResponse, TError_co]:
+    def result(self) -> Result[TResp_co, TError_co]:
         return self.raw_result.map(self._cast_resp).map_err(
             self.error_parser  # type: ignore
         )
@@ -275,7 +275,7 @@ class ResponseBox(Generic[TResponse, TError_co]):
         """Return True if the response was an http error."""
         return self.raw_result.is_err()
 
-    def unwrap(self) -> TResponse:
+    def unwrap(self) -> TResp_co:
         """Return the response parsed."""
         resp = self.result.unwrap()
         return resp
@@ -284,15 +284,19 @@ class ResponseBox(Generic[TResponse, TError_co]):
         """Return the response error."""
         return self.result.unwrap_err()
 
-    def unwrap_or(self, default: TResponse) -> TResponse:
-        """Return the response or the default value in case of error."""
-        return self.result.unwrap_or(default)
+    def unwrap_or(self, default: Any) -> TResp_co:
+        """
+        Return the response or the default value in case of error.
 
-    def unwrap_or_else(self, op: Callable[[TError_co], TResponse]) -> TResponse:
+        The default value should be of type TResp_co.
+        """
+        return cast(TResp_co, self.result.unwrap_or(default))
+
+    def unwrap_or_else(self, op: Callable[[TError_co], TResp_co]) -> TResp_co:
         """Return the response or the callable return in case of error."""
         return self.result.unwrap_or_else(op)
 
-    def expect(self, message: str) -> TResponse:
+    def expect(self, message: str) -> TResp_co:
         """Return the response raise an UnwrapError exception with the given message."""
         return self.result.expect(message)
 
@@ -300,27 +304,27 @@ class ResponseBox(Generic[TResponse, TError_co]):
         """Return the error or raise an UnwrapError exception with the given message."""
         return self.result.expect_err(message)
 
-    def map(self, op: Callable[[TResponse], U]) -> Result[U, TError_co]:
+    def map(self, op: Callable[[TResp_co], U]) -> Result[U, TError_co]:
         """
         Apply op on response in case of success, and return the new result.
         """
         return self.result.map(op)  # type: ignore
 
-    def map_or(self, default: U, op: Callable[[TResponse], U]) -> U:
+    def map_or(self, default: U, op: Callable[[TResp_co], U]) -> U:
         """
         Apply and return op on response in case of success, default in case of error.
         """
         return self.result.map_or(default, op)
 
     def map_or_else(
-        self, default_op: Callable[[], U], op: Callable[[TResponse], U]
+        self, default_op: Callable[[], U], op: Callable[[TResp_co], U]
     ) -> U:
         """
         Return the result of default_op in case of error otherwise the result of op.
         """
         return self.result.map_or_else(default_op, op)
 
-    def map_err(self, op: Callable[[HTTPError], F]) -> Result[TResponse, F]:
+    def map_err(self, op: Callable[[HTTPError], F]) -> Result[TResp_co, F]:
         """
         Apply op on error in case of error, and return the new result.
         """
@@ -328,7 +332,7 @@ class ResponseBox(Generic[TResponse, TError_co]):
         return self.raw_result.map(self._cast_resp).map_err(op)  # type: ignore
 
     def and_then(
-        self, op: Callable[[TResponse], Result[U, HTTPError]]
+        self, op: Callable[[TResp_co], Result[U, HTTPError]]
     ) -> Result[U, HTTPError]:
         """
         Apply the op function on the response and return it if success
@@ -337,15 +341,15 @@ class ResponseBox(Generic[TResponse, TError_co]):
         return self.result.and_then(op)  # type: ignore
 
     def or_else(
-        self, op: Callable[[HTTPError], Result[TResponse, F]]
-    ) -> Result[TResponse, F]:
+        self, op: Callable[[HTTPError], Result[TResp_co, F]]
+    ) -> Result[TResp_co, F]:
         """
         Apply the op function on the error and return it if error
         """
         return self.result.or_else(op)  # type: ignore
 
 
-class CollectionIterator(Iterator[TResponse]):
+class CollectionIterator(Iterator[TResp_co]):
     """
     Deserialize the models in a json response list, item by item.
     """
@@ -355,7 +359,7 @@ class CollectionIterator(Iterator[TResponse]):
     def __init__(
         self,
         response: HTTPResponse,
-        response_schema: Optional[Type[Response]],
+        response_schema: Optional[Type[TResp_co]],
         collection_parser: Type[AbstractCollectionParser],
     ) -> None:
         self.pos = 0
@@ -372,7 +376,7 @@ class CollectionIterator(Iterator[TResponse]):
         """
         return self.response.meta
 
-    def __next__(self) -> TResponse:
+    def __next__(self) -> TResp_co:
         try:
             resp = self.json_resp[self.pos]
             if self.response_schema:
@@ -381,7 +385,7 @@ class CollectionIterator(Iterator[TResponse]):
             raise StopIteration()
 
         self.pos += 1
-        return cast(TResponse, resp)  # Could be a dict
+        return cast(TResp_co, resp)  # Could be a dict
 
-    def __iter__(self) -> "CollectionIterator[TResponse]":
+    def __iter__(self) -> "CollectionIterator[TResp_co]":
         return self

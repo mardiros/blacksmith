@@ -1,4 +1,4 @@
-from typing import Any, Dict, Generic, List, Optional, Tuple, Type, Union
+from typing import Any, Dict, Generic, List, Optional, Tuple, Type, Union, cast
 
 from result import Err, Ok, Result
 
@@ -15,13 +15,12 @@ from blacksmith.domain.model import (
     HTTPResponse,
     HTTPTimeout,
     Request,
-    Response,
     ResponseBox,
 )
 from blacksmith.domain.model.params import (
     AbstractCollectionParser,
-    TCollectionResponse,
-    TResponse,
+    TCollec_co,
+    TResp_co,
 )
 from blacksmith.domain.registry import ApiRoutes, HttpCollection, HttpResource
 from blacksmith.domain.typing import SyncMiddleware
@@ -43,13 +42,13 @@ def build_timeout(timeout: ClientTimeout) -> HTTPTimeout:
     return timeout
 
 
-class SyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
+class SyncRouteProxy(Generic[TCollec_co, TResp_co, TError_co]):
     """Proxy from resource to its associate routes."""
 
     client_name: ClientName
     name: ResourceName
     endpoint: Url
-    routes: ApiRoutes
+    routes: ApiRoutes[TCollec_co, TResp_co]
     transport: SyncAbstractTransport
     timeout: HTTPTimeout
     collection_parser: Type[AbstractCollectionParser]
@@ -61,7 +60,7 @@ class SyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
         client_name: ClientName,
         name: ResourceName,
         endpoint: Url,
-        routes: ApiRoutes,
+        routes: ApiRoutes[TCollec_co, TResp_co],
         transport: SyncAbstractTransport,
         timeout: HTTPTimeout,
         collection_parser: Type[AbstractCollectionParser],
@@ -82,8 +81,14 @@ class SyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
         self,
         method: HTTPMethod,
         params: Union[Optional[Request], Dict[Any, Any]],
-        resource: Optional[HttpResource],
-    ) -> Tuple[Path, HTTPRequest, Optional[Type[Response]]]:
+        resource: Optional[
+            Union[HttpResource[TResp_co], HttpResource[TCollec_co]]
+        ],
+    ) -> Tuple[
+        Path,
+        HTTPRequest,
+        Optional[Union[Type[TResp_co], Type[TCollec_co]]],
+    ]:
         if resource is None:
             raise UnregisteredRouteException(method, self.name, self.client_name)
         if resource.contract is None or method not in resource.contract:
@@ -107,11 +112,11 @@ class SyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
     def _prepare_response(
         self,
         result: Result[HTTPResponse, HTTPError],
-        response_schema: Optional[Type[Response]],
+        response_schema: Optional[Type[TResp_co]],
         method: HTTPMethod,
         path: Path,
-    ) -> ResponseBox[TResponse, TError_co]:
-        return ResponseBox[TResponse, TError_co](
+    ) -> ResponseBox[TResp_co, TError_co]:
+        return ResponseBox[TResp_co, TError_co](
             result,
             response_schema,
             method,
@@ -124,9 +129,9 @@ class SyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
     def _prepare_collection_response(
         self,
         result: Result[HTTPResponse, HTTPError],
-        response_schema: Optional[Type[Response]],
+        response_schema: Optional[Type[TCollec_co]],
         collection_parser: Optional[Type[AbstractCollectionParser]],
-    ) -> Result[CollectionIterator[TCollectionResponse], TError_co]:
+    ) -> Result[CollectionIterator[TCollec_co], TError_co]:
 
         if result.is_err():
             return Err(self.error_parser(result.unwrap_err()))
@@ -157,12 +162,15 @@ class SyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
         method: HTTPMethod,
         params: Union[Optional[Request], Dict[Any, Any]],
         timeout: HTTPTimeout,
-        collection: HttpCollection,
-    ) -> Result[CollectionIterator[TCollectionResponse], TError_co]:
+        collection: HttpCollection[TCollec_co],
+    ) -> Result[CollectionIterator[TCollec_co], TError_co]:
         path, req, resp_schema = self._prepare_request(method, params, collection)
         resp = self._handle_req_with_middlewares(req, timeout, path)
         return self._prepare_collection_response(
-            resp, resp_schema, collection.collection_parser
+            resp,
+            # _prepare_request will return TCollec_co or TResp_co
+            cast(Optional[Type[TCollec_co]], resp_schema),
+            collection.collection_parser,
         )
 
     def _collection_request(
@@ -170,30 +178,42 @@ class SyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
         method: HTTPMethod,
         params: Union[Request, Dict[Any, Any]],
         timeout: HTTPTimeout,
-    ) -> ResponseBox[TResponse, TError_co]:
+    ) -> ResponseBox[TResp_co, TError_co]:
         path, req, resp_schema = self._prepare_request(
             method, params, self.routes.collection
         )
         resp = self._handle_req_with_middlewares(req, timeout, path)
-        return self._prepare_response(resp, resp_schema, method, path)
+        return self._prepare_response(
+            resp,
+            # _prepare_request will return TCollec_co or TResp_co
+            cast(Optional[Type[TResp_co]], resp_schema),
+            method,
+            path,
+        )
 
     def _request(
         self,
         method: HTTPMethod,
         params: Union[Request, Dict[Any, Any]],
         timeout: HTTPTimeout,
-    ) -> ResponseBox[TResponse, TError_co]:
+    ) -> ResponseBox[TResp_co, TError_co]:
         path, req, resp_schema = self._prepare_request(
             method, params, self.routes.resource
         )
         resp = self._handle_req_with_middlewares(req, timeout, path)
-        return self._prepare_response(resp, resp_schema, method, path)
+        return self._prepare_response(
+            resp,
+            # _prepare_request will return TCollec_co or TResp_co
+            cast(Optional[Type[TResp_co]], resp_schema),
+            method,
+            path,
+        )
 
     def collection_head(
         self,
         params: Union[Request, Dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
-    ) -> ResponseBox[TResponse, TError_co]:
+    ) -> ResponseBox[TResp_co, TError_co]:
         """
         Use to perform an http ``HEAD`` query on the collection_path.
         """
@@ -205,14 +225,14 @@ class SyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
         self,
         params: Union[Optional[Request], Dict[Any, Any]] = None,
         timeout: Optional[ClientTimeout] = None,
-    ) -> Result[CollectionIterator[TCollectionResponse], TError_co]:
+    ) -> Result[CollectionIterator[TCollec_co], TError_co]:
         """
         Retrieve a collection of resources.
 
         It perform an http ``GET`` query on the collection_path.
 
         The collection is return in as an iterator, and models ares validated one
-        by one using the `TCollectionResponse` schema which descrine one item
+        by one using the `TCollec_co` schema which descrine one item
         of the collection.
 
         .. important::
@@ -235,7 +255,7 @@ class SyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
         self,
         params: Union[Request, Dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
-    ) -> ResponseBox[TResponse, TError_co]:
+    ) -> ResponseBox[TResp_co, TError_co]:
         """
         Use to perform an http ``POST`` query on the collection_path.
         """
@@ -247,7 +267,7 @@ class SyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
         self,
         params: Union[Request, Dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
-    ) -> ResponseBox[TResponse, TError_co]:
+    ) -> ResponseBox[TResp_co, TError_co]:
         """
         Use to perform an http ``PUT`` query on the collection_path.
         """
@@ -259,7 +279,7 @@ class SyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
         self,
         params: Union[Request, Dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
-    ) -> ResponseBox[TResponse, TError_co]:
+    ) -> ResponseBox[TResp_co, TError_co]:
         """
         Use to perform an http ``PATCH`` query on the collection_path.
         """
@@ -271,7 +291,7 @@ class SyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
         self,
         params: Union[Request, Dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
-    ) -> ResponseBox[TResponse, TError_co]:
+    ) -> ResponseBox[TResp_co, TError_co]:
         """
         Use to perform an http ``DELETE`` query on the collection_path.
         """
@@ -283,7 +303,7 @@ class SyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
         self,
         params: Union[Request, Dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
-    ) -> ResponseBox[TResponse, TError_co]:
+    ) -> ResponseBox[TResp_co, TError_co]:
         """
         Use to perform an http ``OPTIONS`` query on the collection_path.
         """
@@ -295,7 +315,7 @@ class SyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
         self,
         params: Union[Request, Dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
-    ) -> ResponseBox[TResponse, TError_co]:
+    ) -> ResponseBox[TResp_co, TError_co]:
         """
         Use to perform an http ``HEAD`` query on the path.
         """
@@ -305,7 +325,7 @@ class SyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
         self,
         params: Union[Request, Dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
-    ) -> ResponseBox[TResponse, TError_co]:
+    ) -> ResponseBox[TResp_co, TError_co]:
         """
         Use to perform an http ``GET`` query on the path.
         """
@@ -316,7 +336,7 @@ class SyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
         self,
         params: Union[Request, Dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
-    ) -> ResponseBox[TResponse, TError_co]:
+    ) -> ResponseBox[TResp_co, TError_co]:
         """
         Use to perform an http ``POST`` query on the path.
         """
@@ -326,7 +346,7 @@ class SyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
         self,
         params: Union[Request, Dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
-    ) -> ResponseBox[TResponse, TError_co]:
+    ) -> ResponseBox[TResp_co, TError_co]:
         """
         Use to perform an http ``PUT`` query on the path.
         """
@@ -336,7 +356,7 @@ class SyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
         self,
         params: Union[Request, Dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
-    ) -> ResponseBox[TResponse, TError_co]:
+    ) -> ResponseBox[TResp_co, TError_co]:
         """
         Use to perform an http ``PATCH`` query on the path.
         """
@@ -346,7 +366,7 @@ class SyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
         self,
         params: Union[Request, Dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
-    ) -> ResponseBox[TResponse, TError_co]:
+    ) -> ResponseBox[TResp_co, TError_co]:
         """
         Use to perform an http ``DELETE`` query on the path.
         """
@@ -356,7 +376,7 @@ class SyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
         self,
         params: Union[Request, Dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
-    ) -> ResponseBox[TResponse, TError_co]:
+    ) -> ResponseBox[TResp_co, TError_co]:
         """
         Use to perform an http ``OPTIONS`` query on the path.
         """

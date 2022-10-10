@@ -3,7 +3,8 @@
 
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import Mapping, MutableMapping, Optional, Tuple, Type
+from typing import Any, Generic, Mapping, MutableMapping, Optional, Tuple, Type
+from blacksmith.domain.model.params import TCollec_co, TResp_co
 
 from blacksmith.typing import (
     ClientName,
@@ -16,29 +17,29 @@ from blacksmith.typing import (
 )
 
 from .exceptions import ConfigurationError, UnregisteredClientException
-from .model import AbstractCollectionParser, Request, Response
+from .model import AbstractCollectionParser, Request
 
-Schemas = Tuple[Type[Request], Optional[Type[Response]]]
-Contract = Mapping[HTTPMethod, Schemas]
+Schemas = Tuple[Type[Request], Optional[Type[TResp_co]]]
+Contract = Mapping[HTTPMethod, Schemas[TResp_co]]
 
 
 @dataclass(frozen=True)
-class HttpResource:
+class HttpResource(Generic[TResp_co]):
     """Represent a resource endpoint."""
 
     path: Path
     """Path that identify the resource."""
-    contract: Optional[Contract]
+    contract: Optional[Contract[TResp_co]]
     """A contract is a serialization schema for the request and there response."""
 
 
 @dataclass(frozen=True)
-class HttpCollection(HttpResource):
+class HttpCollection(HttpResource[TCollec_co]):
     collection_parser: Optional[Type[AbstractCollectionParser]]
     """Override the default collection parlser for a given resource."""
 
 
-class ApiRoutes:
+class ApiRoutes(Generic[TCollec_co, TResp_co]):
     """
     Store different routes for a type of resource.
 
@@ -46,34 +47,38 @@ class ApiRoutes:
     They both have distinct contract for every http method.
     """
 
-    resource: Optional[HttpResource]
+    resource: Optional[HttpResource[TResp_co]]
     """Resource endpoint"""
-    collection: Optional[HttpCollection]
+    collection: Optional[HttpCollection[TCollec_co]]
     """Collection endpoint."""
 
     def __init__(
         self,
         path: Optional[Path],
-        contract: Optional[Contract],
+        contract: Optional[Contract[TResp_co]],
         collection_path: Optional[Path],
-        collection_contract: Optional[Contract],
+        collection_contract: Optional[Contract[TCollec_co]],
         collection_parser: Optional[Type[AbstractCollectionParser]],
     ) -> None:
         self.resource = HttpResource(path, contract) if path else None
         self.collection = (
-            HttpCollection(collection_path, collection_contract, collection_parser)
+            HttpCollection[TCollec_co](
+                collection_path, collection_contract, collection_parser
+            )
             if collection_path
             else None
         )
 
 
-Resources = Mapping[ResourceName, ApiRoutes]
+Resources = Mapping[ResourceName, ApiRoutes[Any, Any]]
 
 
 class Registry:
     """Store resources in a registry."""
 
-    clients: MutableMapping[ClientName, MutableMapping[ResourceName, ApiRoutes]]
+    clients: MutableMapping[
+        ClientName, MutableMapping[ResourceName, ApiRoutes[Any, Any]]
+    ]
     client_service: MutableMapping[ClientName, Service]
 
     def __init__(self) -> None:
@@ -87,9 +92,9 @@ class Registry:
         service: ServiceName,
         version: Version,
         path: Optional[Path] = None,
-        contract: Optional[Contract] = None,
+        contract: Optional[Contract[Any]] = None,
         collection_path: Optional[Path] = None,
-        collection_contract: Optional[Contract] = None,
+        collection_contract: Optional[Contract[Any]] = None,
         collection_parser: Optional[Type[AbstractCollectionParser]] = None,
     ) -> None:
         """
@@ -146,9 +151,9 @@ def register(
     service: ServiceName,
     version: Version,
     path: Optional[Path] = None,
-    contract: Optional[Contract] = None,
+    contract: Optional[Contract[Any]] = None,
     collection_path: Optional[Path] = None,
-    collection_contract: Optional[Contract] = None,
+    collection_contract: Optional[Contract[Any]] = None,
     collection_parser: Optional[Type[AbstractCollectionParser]] = None,
 ) -> None:
     """
