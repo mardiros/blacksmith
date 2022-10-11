@@ -16,7 +16,7 @@ class AbstractErrorParser(Protocol, Generic[TError_co]):
     """
 
     def __call__(self, error: HTTPError) -> TError_co:
-        raise NotImplementedError
+        ...
 
 
 # The default error parser, does not parse the error,
