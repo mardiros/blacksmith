@@ -5,7 +5,7 @@ name = "notif"
 version = "0.1.0"
 
 [tool.poetry.dependencies]
-blacksmith = {version = "^0.12.1", extras = ["prometheus"]}
+blacksmith = {version = "^2.0", extras = ["prometheus"]}
 python = "^3.9"
 starlette = "^0.17.0"
 aioredis = "^2.0.1"

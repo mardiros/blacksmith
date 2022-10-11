@@ -6,9 +6,9 @@ authors = ["Guillaume Gauvrit <guillaume@gauvr.it>"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
+blacksmith = "^2.0.0"
 starlette = "^0.17.0"
 uvicorn = "^0.15.0"
-blacksmith = "0.12.1"
 "starlette-zipkin" = "^0.2.0"
 
 
