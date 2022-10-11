@@ -6,6 +6,7 @@ except pkg_resources.DistributionNotFound:
     # read the doc does not support poetry
     pass
 
+from .domain.error import AbstractErrorParser, default_error_parser, TError_co
 from .domain.exceptions import HTTPError, HTTPTimeoutError
 from .domain.model import (
     AbstractCachePolicy,
@@ -25,6 +26,8 @@ from .domain.model import (
     Request,
     Response,
     ResponseBox,
+    TCollectionResponse,
+    TResponse,
 )
 from .domain.model.http import HTTPRequest, HTTPResponse
 from .domain.registry import register
@@ -86,9 +89,15 @@ __all__ = [
     "CollectionIterator",
     "AbstractCollectionParser",
     "CollectionParser",
+    "TResponse",
+    "TCollectionResponse",
     # Exceptions
     "HTTPError",
     "HTTPTimeoutError",
+    # Errors,
+    "AbstractErrorParser",
+    "TError_co",
+    "default_error_parser",
     # Timeout Config
     "HTTPTimeout",
     # Client
