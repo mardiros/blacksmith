@@ -98,7 +98,9 @@ The :term:`whitesmith` package generate pytest fixture and handlers with fake
 implementations, its at an early stage but can be a great way to create api
 fixtures.
 
-Usage::
+Usage:
+
+.. code-block:: bash
 
    # install the deps ( use `pip install whitesmith` if you use pip)
    poetry add --group dev whitesmith
@@ -107,3 +109,14 @@ Usage::
 This command generates a folder ``tests/whitesmith`` with a ``conftest.py``
 and a ``tests/whitesmith/handlers`` containing fake api routes implemented
 but that should be overriden for your needs.
+
+Example:
+
+.. code-block:: bash
+
+   poetry run whitesmith generate -m tests
+   Generating mocks from blacksmith registry...
+   Processing client notif...
+   Writing tests/whitesmith/handlers/notif.py
+
+Check it out !
