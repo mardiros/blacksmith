@@ -1,6 +1,5 @@
-2.0.0 - Unrelease
------------------
-
+2.0.0 - Released on 2022-10-11
+------------------------------
 * Fix concistency for :meth:`blacksmith.AsyncRouteProxy.collection_get` with
   other HTTP Response Object as using a result type from the
   :term:`result library`.
