@@ -78,6 +78,11 @@ Glossary
       parameter for readability.
       The version is None in case service does not expose a version number.
 
+   whitesmith
+      | A toolbox for testing the blacksmith client.
+      | It generate skells to implement fake API consumed and pytest fixtures.
+      | Website: https://github.com/mardiros/whitesmith
+
    resource
       A resource is a json document that is accessible and manipulable using
       http method.
