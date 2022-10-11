@@ -300,7 +300,7 @@ class ResponseBox(Generic[TResponse, TError_co]):
 
     def unwrap(self) -> TResponse:
         """
-        Return the response parsed.
+        Return the parsed response.
 
         :raises NoResponseSchemaException: if there are no response schema set.
         """
