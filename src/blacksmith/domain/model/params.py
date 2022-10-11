@@ -329,7 +329,7 @@ class ResponseBox(Generic[TResponse, TError_co]):
 
     def expect(self, message: str) -> TResponse:
         """
-        Return the response raise an UnwrapError exception with the given message.
+        Return the response or raise an UnwrapError exception with the given message.
 
         :raises NoResponseSchemaException: if there are no response schema set.
         """
