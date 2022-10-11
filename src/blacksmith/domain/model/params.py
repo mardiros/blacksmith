@@ -221,6 +221,12 @@ class ResponseBox(Generic[TResponse, TError_co]):
         self.client_name: ClientName = client_name
         self.error_parser = error_parser
 
+    def _cast_optional_resp(self, resp: HTTPResponse) -> Optional[TResponse]:
+        if self.response_schema is None:
+            return None
+        schema_cls = self.response_schema
+        return cast(TResponse, schema_cls(**(resp.json or {})))
+
     def _cast_resp(self, resp: HTTPResponse) -> TResponse:
         if self.response_schema is None:
             raise NoResponseSchemaException(
@@ -265,6 +271,18 @@ class ResponseBox(Generic[TResponse, TError_co]):
             )
         resp = self.response_schema(**(self.json or {}))
         return cast(TResponse, resp)
+
+    def as_optional(self) -> Result[Optional[TResponse], TError_co]:
+        """
+        Expose the instance as an optional result.
+
+        In case no response schema has been provided while registering the resource,
+        then a ``Ok(None)`` is return to not raise any
+        :class:`blacksmith.NoResponseSchemaException`
+        """
+        return self.raw_result.map(self._cast_optional_resp).map_err(
+            self.error_parser  # type: ignore
+        )
 
     @property
     def _result(self) -> Result[TResponse, TError_co]:
