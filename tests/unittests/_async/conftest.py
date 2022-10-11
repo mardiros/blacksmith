@@ -147,7 +147,7 @@ def dummy_middleware():
 
 @pytest.fixture
 def consul_sd():
-    def cli(url: str, tok: str) -> AsyncClientFactory[Any, Any, Any]:
+    def cli(url: str, tok: str) -> AsyncClientFactory[HTTPError]:
         return AsyncClientFactory(
             sd=AsyncStaticDiscovery({("consul", "v1"): url}),
             registry=_registry,

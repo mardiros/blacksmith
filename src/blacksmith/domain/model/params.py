@@ -231,7 +231,12 @@ class ResponseBox(Generic[TResponse, TError_co]):
 
     @property
     def json(self) -> Optional[Dict[str, Any]]:
-        """Return the raw json response."""
+        """
+        Return the raw json response.
+
+        It return the raw response body without noticing if its a
+        normal or an error response.
+        """
         if self.raw_result.is_ok():
             return self.raw_result.unwrap().json
         return self.raw_result.unwrap_err().response.json
@@ -262,7 +267,7 @@ class ResponseBox(Generic[TResponse, TError_co]):
         return cast(TResponse, resp)
 
     @property
-    def result(self) -> Result[TResponse, TError_co]:
+    def _result(self) -> Result[TResponse, TError_co]:
         return self.raw_result.map(self._cast_resp).map_err(
             self.error_parser  # type: ignore
         )
@@ -277,40 +282,40 @@ class ResponseBox(Generic[TResponse, TError_co]):
 
     def unwrap(self) -> TResponse:
         """Return the response parsed."""
-        resp = self.result.unwrap()
+        resp = self._result.unwrap()
         return resp
 
     def unwrap_err(self) -> TError_co:
         """Return the response error."""
-        return self.result.unwrap_err()
+        return self._result.unwrap_err()
 
     def unwrap_or(self, default: TResponse) -> TResponse:
         """Return the response or the default value in case of error."""
-        return self.result.unwrap_or(default)
+        return self._result.unwrap_or(default)
 
     def unwrap_or_else(self, op: Callable[[TError_co], TResponse]) -> TResponse:
         """Return the response or the callable return in case of error."""
-        return self.result.unwrap_or_else(op)
+        return self._result.unwrap_or_else(op)
 
     def expect(self, message: str) -> TResponse:
         """Return the response raise an UnwrapError exception with the given message."""
-        return self.result.expect(message)
+        return self._result.expect(message)
 
     def expect_err(self, message: str) -> TError_co:
         """Return the error or raise an UnwrapError exception with the given message."""
-        return self.result.expect_err(message)
+        return self._result.expect_err(message)
 
     def map(self, op: Callable[[TResponse], U]) -> Result[U, TError_co]:
         """
         Apply op on response in case of success, and return the new result.
         """
-        return self.result.map(op)  # type: ignore
+        return self._result.map(op)  # type: ignore
 
     def map_or(self, default: U, op: Callable[[TResponse], U]) -> U:
         """
         Apply and return op on response in case of success, default in case of error.
         """
-        return self.result.map_or(default, op)
+        return self._result.map_or(default, op)
 
     def map_or_else(
         self, default_op: Callable[[], U], op: Callable[[TResponse], U]
@@ -318,7 +323,7 @@ class ResponseBox(Generic[TResponse, TError_co]):
         """
         Return the result of default_op in case of error otherwise the result of op.
         """
-        return self.result.map_or_else(default_op, op)
+        return self._result.map_or_else(default_op, op)
 
     def map_err(self, op: Callable[[HTTPError], F]) -> Result[TResponse, F]:
         """
@@ -334,7 +339,7 @@ class ResponseBox(Generic[TResponse, TError_co]):
         Apply the op function on the response and return it if success
         """
         # works in mypy, not in pylance
-        return self.result.and_then(op)  # type: ignore
+        return self._result.and_then(op)  # type: ignore
 
     def or_else(
         self, op: Callable[[HTTPError], Result[TResponse, F]]
@@ -342,7 +347,7 @@ class ResponseBox(Generic[TResponse, TError_co]):
         """
         Apply the op function on the error and return it if error
         """
-        return self.result.or_else(op)  # type: ignore
+        return self._result.or_else(op)  # type: ignore
 
 
 class CollectionIterator(Iterator[TResponse]):

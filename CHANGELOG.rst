@@ -32,6 +32,10 @@ Breaking Changes
 
   See :ref:`HTTP Errors`
 
+* The type of :class:`blacksmith.AsyncClientFactory`, :class:`blacksmith.AsyncClient`,
+  :class:`blacksmith.SyncClientFactory` and :class:`blacksmith.SyncClient` cannot be
+  used to specify collection and item types.
+
 Deprecated
 ~~~~~~~~~~
 
