@@ -54,13 +54,9 @@ _registry.register(
 )
 
 
-def blacksmith_cli(
-    endpoint: Url, consul_token: str
-) -> AsyncClientFactory[HTTPError]:
+def blacksmith_cli(endpoint: Url, consul_token: str) -> AsyncClientFactory[HTTPError]:
     sd = AsyncStaticDiscovery({("consul", "v1"): endpoint})
-    fact: AsyncClientFactory[HTTPError] = AsyncClientFactory(
-        sd, registry=_registry
-    )
+    fact: AsyncClientFactory[HTTPError] = AsyncClientFactory(sd, registry=_registry)
     if consul_token:
         fact.add_middleware(AsyncHTTPBearerMiddleware(consul_token))
     return fact
@@ -90,9 +86,7 @@ class AsyncConsulDiscovery(AsyncAbstractServiceDiscovery):
         unversioned_service_name_fmt: str = "{service}",
         unversioned_service_url_fmt: str = "http://{address}:{port}",
         consul_token: str = "",
-        _client_factory: Callable[
-            [Url, str], AsyncClientFactory[Any]
-        ] = blacksmith_cli,
+        _client_factory: Callable[[Url, str], AsyncClientFactory[Any]] = blacksmith_cli,
     ) -> None:
         self.blacksmith_cli = _client_factory(addr, consul_token)
         self.service_name_fmt = service_name_fmt

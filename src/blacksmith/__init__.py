@@ -6,7 +6,7 @@ except pkg_resources.DistributionNotFound:
     # read the doc does not support poetry
     pass
 
-from .domain.error import AbstractErrorParser, default_error_parser, TError_co
+from .domain.error import AbstractErrorParser, TError_co, default_error_parser
 from .domain.exceptions import HTTPError, HTTPTimeoutError
 from .domain.model import (
     AbstractCachePolicy,

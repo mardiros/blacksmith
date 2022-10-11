@@ -18,8 +18,8 @@ from .params import (
     Request,
     Response,
     ResponseBox,
-    TResponse,
     TCollectionResponse,
+    TResponse,
 )
 
 __all__ = [
