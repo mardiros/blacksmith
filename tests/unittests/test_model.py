@@ -146,6 +146,7 @@ def test_response_box():
     bob = GetResponse(name="Bob", age=40)
     assert resp.is_ok()
     assert resp.is_err() is False
+    assert resp.as_optional() == Ok(alice)
     assert resp.unwrap() == alice
     with pytest.raises(UnwrapError):
         assert resp.unwrap_err()
@@ -287,6 +288,9 @@ def test_response_box_no_schema():
         "api",
         error_parser=error_parser,
     )
+
+    assert resp.as_optional() == Ok(None)
+
     with pytest.raises(NoResponseSchemaException) as ctx:
         assert resp.unwrap()
 

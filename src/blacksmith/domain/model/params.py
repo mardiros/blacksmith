@@ -221,6 +221,12 @@ class ResponseBox(Generic[TResponse, TError_co]):
         self.client_name: ClientName = client_name
         self.error_parser = error_parser
 
+    def _cast_optional_resp(self, resp: HTTPResponse) -> Optional[TResponse]:
+        if self.response_schema is None:
+            return None
+        schema_cls = self.response_schema
+        return cast(TResponse, schema_cls(**(resp.json or {})))
+
     def _cast_resp(self, resp: HTTPResponse) -> TResponse:
         if self.response_schema is None:
             raise NoResponseSchemaException(
@@ -266,6 +272,18 @@ class ResponseBox(Generic[TResponse, TError_co]):
         resp = self.response_schema(**(self.json or {}))
         return cast(TResponse, resp)
 
+    def as_optional(self) -> Result[Optional[TResponse], TError_co]:
+        """
+        Expose the instance as an optional result.
+
+        In case no response schema has been provided while registering the resource,
+        then a ``Ok(None)`` is return to not raise any
+        :class:`blacksmith.NoResponseSchemaException`
+        """
+        return self.raw_result.map(self._cast_optional_resp).map_err(
+            self.error_parser  # type: ignore
+        )
+
     @property
     def _result(self) -> Result[TResponse, TError_co]:
         return self.raw_result.map(self._cast_resp).map_err(
@@ -281,39 +299,59 @@ class ResponseBox(Generic[TResponse, TError_co]):
         return self.raw_result.is_err()
 
     def unwrap(self) -> TResponse:
-        """Return the response parsed."""
+        """
+        Return the parsed response.
+
+        :raises NoResponseSchemaException: if there are no response schema set.
+        """
         resp = self._result.unwrap()
         return resp
 
     def unwrap_err(self) -> TError_co:
         """Return the response error."""
-        return self._result.unwrap_err()
+        return self.as_optional().unwrap_err()
 
     def unwrap_or(self, default: TResponse) -> TResponse:
-        """Return the response or the default value in case of error."""
+        """
+        Return the response or the default value in case of error.
+
+        :raises NoResponseSchemaException: if there are no response schema set.
+        """
         return self._result.unwrap_or(default)
 
     def unwrap_or_else(self, op: Callable[[TError_co], TResponse]) -> TResponse:
-        """Return the response or the callable return in case of error."""
+        """
+        Return the response or the callable return in case of error.
+
+        :raises NoResponseSchemaException: if there are no response schema set.
+        """
         return self._result.unwrap_or_else(op)
 
     def expect(self, message: str) -> TResponse:
-        """Return the response raise an UnwrapError exception with the given message."""
+        """
+        Return the response or raise an UnwrapError exception with the given message.
+
+        :raises NoResponseSchemaException: if there are no response schema set.
+        """
         return self._result.expect(message)
 
     def expect_err(self, message: str) -> TError_co:
         """Return the error or raise an UnwrapError exception with the given message."""
-        return self._result.expect_err(message)
+        return self.as_optional().expect_err(message)
 
     def map(self, op: Callable[[TResponse], U]) -> Result[U, TError_co]:
         """
         Apply op on response in case of success, and return the new result.
+
+        :raises NoResponseSchemaException: if there are no response schema set.
         """
         return self._result.map(op)  # type: ignore
 
     def map_or(self, default: U, op: Callable[[TResponse], U]) -> U:
         """
         Apply and return op on response in case of success, default in case of error.
+
+        :raises NoResponseSchemaException: if there are no response schema set.
         """
         return self._result.map_or(default, op)
 
@@ -322,12 +360,16 @@ class ResponseBox(Generic[TResponse, TError_co]):
     ) -> U:
         """
         Return the result of default_op in case of error otherwise the result of op.
+
+        :raises NoResponseSchemaException: if there are no response schema set.
         """
         return self._result.map_or_else(default_op, op)
 
     def map_err(self, op: Callable[[HTTPError], F]) -> Result[TResponse, F]:
         """
         Apply op on error in case of error, and return the new result.
+
+        :raises NoResponseSchemaException: if there are no response schema set.
         """
         # works in mypy, not in pylance
         return self.raw_result.map(self._cast_resp).map_err(op)  # type: ignore
@@ -337,6 +379,8 @@ class ResponseBox(Generic[TResponse, TError_co]):
     ) -> Result[U, HTTPError]:
         """
         Apply the op function on the response and return it if success
+
+        :raises NoResponseSchemaException: if there are no response schema set.
         """
         # works in mypy, not in pylance
         return self._result.and_then(op)  # type: ignore
@@ -346,6 +390,8 @@ class ResponseBox(Generic[TResponse, TError_co]):
     ) -> Result[TResponse, F]:
         """
         Apply the op function on the error and return it if error
+
+        :raises NoResponseSchemaException: if there are no response schema set.
         """
         return self._result.or_else(op)  # type: ignore
 
