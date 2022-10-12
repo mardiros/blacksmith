@@ -1,10 +1,10 @@
 2.1.0 - Released on 2022-10-11
 ------------------------------
-* New method :meth:`blacksmith.ResponseBox.as_optional` 
+* New method :meth:`blacksmith.ResponseBox.as_optional`
   This method is usefull for response that has no return
   schema and the response needs to be map to return something
   else without raising a
-  :class:`blacksmith.domain.exception.NoResponseSchemaException`
+  :class:`blacksmith.domain.exceptions.NoResponseSchemaException`
 
 2.0.0 - Released on 2022-10-11
 ------------------------------
@@ -46,7 +46,7 @@ Breaking Changes
 Deprecated
 ~~~~~~~~~~
 
-* The :attr:`blacksmith.ResponseBox.response` is deprec ated in favor of
+* The :attr:`blacksmith.ResponseBox.response` is deprecated in favor of
   the :meth:`blacksmith.ResponseBox.unwrap` method.
 
   ::
