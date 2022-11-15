@@ -4,7 +4,7 @@ The discovery based on :term:`Consul`.
 This driver implement a client side service discovery.
 """
 import random
-from typing import Any, Callable, List
+from typing import Any, Callable, List, Optional
 
 from pydantic.fields import Field
 from result import Result
@@ -37,10 +37,16 @@ class ServiceRequest(Request):
 class Service(Response):
     """Consul Service response."""
 
-    address: str = Field(alias="ServiceAddress")
-    """IP Address of an instance that host the service."""
+    node_address: str = Field(alias="Address")
+    """IP address of the Consul node on which the service is registered."""
+    service_address: Optional[str] = Field(alias="ServiceAddress")
+    """IP address of the service host. if empty, node address is used."""
     port: int = Field(alias="ServicePort")
     """TCP Port of an instance that host the service."""
+
+    @property
+    def address(self) -> str:
+        return self.service_address or self.node_address
 
 
 _registry = Registry()

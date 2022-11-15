@@ -59,14 +59,49 @@ def test_consul_discovery_get_endpoint(consul_sd: SyncConsulDiscovery):
 
 def test_consul_discovery_resolve(consul_sd: SyncConsulDiscovery):
     service = consul_sd.resolve("dummy", "v1")
-    assert service == Service(ServiceAddress="8.8.8.8", ServicePort=1234)
+    assert service == Service(
+        Address="1.1.1.1", ServiceAddress="8.8.8.8", ServicePort=1234
+    )
 
 
 def test_consul_discovery_resolve_unversionned_endpoint(
     consul_sd: SyncConsulDiscovery,
 ):
     service = consul_sd.resolve("dummy", None)
-    assert service == Service(ServiceAddress="8.8.8.8", ServicePort=1234)
+    assert service == Service(
+        Address="1.1.1.1", ServiceAddress="8.8.8.8", ServicePort=1234
+    )
+
+
+@pytest.mark.parametrize(
+    "body",
+    [
+        {
+            "Address": "2.2.2.2",
+            "ServiceAddress": "1.1.1.1",
+            "ServicePort": 1234,
+        },
+        {
+            "Address": "1.1.1.1",
+            "ServiceAddress": "",
+            "ServicePort": 1234,
+        },
+        {
+            "Address": "1.1.1.1",
+            "ServicePort": 1234,
+        },
+        {
+            "Address": "1.1.1.1",
+            "ServiceAddress": None,
+            "ServicePort": 1234,
+        },
+    ],
+)
+def test_consul_discovery_resolve_address(
+    consul_sd_with_body: SyncConsulDiscovery,
+):
+    service = consul_sd_with_body.resolve("dummy", None)
+    assert service.address == "1.1.1.1"
 
 
 def test_consul_discovery_resolve_unregistered(consul_sd: SyncConsulDiscovery):
