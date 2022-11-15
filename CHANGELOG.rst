@@ -1,3 +1,7 @@
+2.1.1 - Released on 2022-11-15
+------------------------------
+* Fix consul service discovery support when ServiceAddress is empty.
+
 2.1.0 - Released on 2022-10-11
 ------------------------------
 * New method :meth:`blacksmith.ResponseBox.as_optional`
