@@ -25,6 +25,14 @@ def static_sd():
 
 
 class FakeConsulTransport(SyncAbstractTransport):
+    _body = [
+        {
+            "Address": "1.1.1.1",
+            "ServiceAddress": "8.8.8.8",
+            "ServicePort": 1234,
+        }
+    ]
+
     def __call__(
         self,
         request: HTTPRequest,
@@ -45,12 +53,7 @@ class FakeConsulTransport(SyncAbstractTransport):
         return HTTPResponse(
             200,
             {},
-            [
-                {
-                    "ServiceAddress": "8.8.8.8",
-                    "ServicePort": 1234,
-                }
-            ],
+            self._body,
         )
 
 
@@ -143,6 +146,21 @@ class SyncDummyMiddleware(SyncHTTPAddHeadersMiddleware):
 @pytest.fixture
 def dummy_middleware():
     return SyncDummyMiddleware()
+
+
+@pytest.fixture
+def consul_sd_with_body(body: Dict[str, Any]):
+    class FakeConsulTransportNoServiceAddr(FakeConsulTransport):
+        _body = [body]
+
+    def cli(url: str, tok: str) -> SyncClientFactory[HTTPError]:
+        return SyncClientFactory(
+            sd=SyncStaticDiscovery({("consul", "v1"): url}),
+            registry=_registry,
+            transport=FakeConsulTransportNoServiceAddr(),
+        ).add_middleware(SyncHTTPAuthorizationMiddleware("Bearer", tok))
+
+    return SyncConsulDiscovery(_client_factory=cli)
 
 
 @pytest.fixture
