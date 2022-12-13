@@ -1,3 +1,7 @@
+2.1.2 - Released on 2022-12-13
+------------------------------
+* Update dependency result to 0.9
+
 2.1.1 - Released on 2022-11-15
 ------------------------------
 * Fix consul service discovery support when ServiceAddress is empty.
