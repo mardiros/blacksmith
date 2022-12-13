@@ -1,6 +1,9 @@
 package := 'blacksmith'
 default_test_suite := 'tests/unittests'
 
+install:
+    poetry install
+
 doc:
     cd docs && poetry run make html
     xdg-open docs/build/html/index.html
