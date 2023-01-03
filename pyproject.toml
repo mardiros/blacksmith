@@ -66,6 +66,7 @@ reportPrivateUsage = false
 reportUnknownMemberType = false
 reportUnknownParameterType = false
 reportUnknownVariableType = false
+reportShadowedImports = false
 typeCheckingMode = "strict"
 
 [[tool.mypy.overrides]]
