@@ -272,6 +272,19 @@ class ResponseBox(Generic[TResponse, TError_co]):
         resp = self.response_schema(**(self.json or {}))
         return cast(TResponse, resp)
 
+    @property
+    def _result(self) -> Result[TResponse, TError_co]:
+        return self.raw_result.map(self._cast_resp).map_err(self.error_parser)
+
+    def as_result(self) -> Result[TResponse, TError_co]:
+        """
+        Return the result as a ``result.Result``.
+
+        The :class:`blacksmith.ResponseBox` mimic the ``result.Result`` of the
+        :term:`result library`, but, you may want to cast the response box as a result.
+        """
+        return self._result
+
     def as_optional(self) -> Result[Optional[TResponse], TError_co]:
         """
         Expose the instance as an optional result.
@@ -281,12 +294,6 @@ class ResponseBox(Generic[TResponse, TError_co]):
         :class:`blacksmith.NoResponseSchemaException`
         """
         return self.raw_result.map(self._cast_optional_resp).map_err(
-            self.error_parser  # type: ignore
-        )
-
-    @property
-    def _result(self) -> Result[TResponse, TError_co]:
-        return self.raw_result.map(self._cast_resp).map_err(
             self.error_parser  # type: ignore
         )
 
