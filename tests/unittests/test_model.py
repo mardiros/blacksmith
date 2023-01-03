@@ -146,6 +146,7 @@ def test_response_box():
     bob = GetResponse(name="Bob", age=40)
     assert resp.is_ok()
     assert resp.is_err() is False
+    assert resp.as_result() == Ok(alice)
     assert resp.as_optional() == Ok(alice)
     assert resp.unwrap() == alice
     with pytest.raises(UnwrapError):
@@ -287,6 +288,14 @@ def test_response_box_no_schema():
         "Dummy",
         "api",
         error_parser=error_parser,
+    )
+
+    with pytest.raises(NoResponseSchemaException) as ctx:
+        assert resp.as_result()
+    assert (
+        str(ctx.value)
+        == "No response schema in route 'GET /dummies' in resource'Dummy' "
+        "in client 'api'"
     )
 
     assert resp.as_optional() == Ok(None)
