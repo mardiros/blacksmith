@@ -1,3 +1,10 @@
+2.2.0 - Released on 2023-01-03
+------------------------------
+* New method :meth:`blacksmith.ResponseBox.as_result`
+  this method is usefull to cast an http response,
+  to cast thes response box to a Result<ResponseSchema, ErrorFormat>
+* Update dependency to at least pydantic 1.9
+
 2.1.2 - Released on 2022-12-13
 ------------------------------
 * Update dependency result to 0.9
