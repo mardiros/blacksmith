@@ -1,3 +1,7 @@
+2.2.1 - Released on 2023-01-09
+------------------------------
+* Update depenencies (prometheus ^0.15) 
+
 2.2.0 - Released on 2023-01-03
 ------------------------------
 * New method :meth:`blacksmith.ResponseBox.as_result`
