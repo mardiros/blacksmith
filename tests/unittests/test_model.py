@@ -88,6 +88,24 @@ def test_param_to_req():
     assert json.loads(req.body) == {"age": 23, "birthdate": "1956-12-13T00:00:00"}
 
 
+def test_patch_none_values():
+    class Dummy(Request):
+        x_message_id: int = HeaderField(default=123, alias="X-Message-Id")
+        x_sub_id: Optional[int] = HeaderField(alias="X-Sub-Id")
+        name: str = PathInfoField()
+        country: str = PostBodyField()
+        age: int = PostBodyField(default=10)
+        state: Optional[str] = PostBodyField()
+        city: Optional[str] = PostBodyField()
+
+    dummy = Dummy(name="Jane", country="FR", state=None)
+    req = dummy.to_http_request("GET", "/dummies/{name}")
+    assert req.url == "/dummies/Jane"
+    assert req.headers == {"X-Message-Id": "123"}
+    assert req.querystring == {}
+    assert json.loads(req.body) == {"age": 10, "country": "FR", "state": None}
+
+
 def test_parse_header_links():
     links = parse_header_links("")
     assert links == []

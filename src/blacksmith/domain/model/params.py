@@ -1,4 +1,5 @@
 import abc
+import json
 import warnings
 from dataclasses import dataclass
 from functools import partial
@@ -17,6 +18,7 @@ from typing import (
 )
 
 from pydantic import BaseModel, Field
+from pydantic.json import ENCODERS_BY_TYPE
 from result import Result
 from result.result import F, U
 
@@ -55,6 +57,14 @@ PostBodyField = partial(Field, location=BODY)
 """Declare field that are serialized in the json document."""
 
 
+class JSONEncoder(json.JSONEncoder):
+    def default(self, o: Any) -> Any:
+        for typ, serializer in ENCODERS_BY_TYPE.items():
+            if isinstance(o, typ):
+                return serializer(o)
+        return super(JSONEncoder, self).default(o)
+
+
 class Request(BaseModel):
     """
     Request Params Model.
@@ -81,18 +91,60 @@ class Request(BaseModel):
             )
             fields_by_loc[loc].update({field.name: ...})
 
-        headers = self.dict(
-            include=fields_by_loc[HEADER], by_alias=True, exclude_none=True
-        )
+        headers = {
+            **{
+                k: v
+                for k, v in self.dict(
+                    include=fields_by_loc[HEADER],
+                    by_alias=True,
+                    exclude_none=True,
+                    exclude_defaults=False,
+                ).items()
+                if v is not None
+            },
+            **self.dict(
+                include=fields_by_loc[HEADER],
+                by_alias=True,
+                exclude_unset=True,
+                exclude_defaults=False,
+            ),
+        }
         req.headers = {key: str(val) for key, val in headers.items()}
         req.path = self.dict(
-            include=fields_by_loc[PATH], by_alias=True, exclude_none=False
+            include=fields_by_loc[PATH],
+            by_alias=True,
+            exclude_none=False,
+            exclude_unset=True,
+            exclude_defaults=False,
         )
         req.querystring = self.dict(
-            include=fields_by_loc[QUERY], by_alias=True, exclude_none=True
+            include=fields_by_loc[QUERY],
+            by_alias=True,
+            exclude_none=True,
+            exclude_unset=True,
+            exclude_defaults=False,
         )
-        req.body = self.json(
-            include=fields_by_loc[BODY], by_alias=True, exclude_none=False
+        req.body = json.dumps(
+            {
+                **{
+                    k: v
+                    for k, v in self.dict(
+                        include=fields_by_loc[BODY],
+                        by_alias=True,
+                        exclude_none=True,
+                        exclude_defaults=False,
+                    ).items()
+                    if v is not None
+                },
+                **self.dict(
+                    include=fields_by_loc[BODY],
+                    by_alias=True,
+                    exclude_none=False,
+                    exclude_unset=True,
+                    exclude_defaults=False,
+                ),
+            },
+            cls=JSONEncoder,
         )
         return req
 
