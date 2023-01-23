@@ -14,6 +14,7 @@ from typing import (
     Optional,
     Type,
     TypeVar,
+    Union,
     cast,
 )
 
@@ -120,7 +121,7 @@ class Request(BaseModel):
         req.headers = {key: str(val) for key, val in headers.items()}
         req.path = serialize_part(self, fields_by_loc[PATH])
         req.querystring = cast(
-            Dict[str, simpletypes | List[simpletypes]],
+            Dict[str, Union[simpletypes, List[simpletypes]]],
             serialize_part(self, fields_by_loc[QUERY]),
         )
         req.body = json.dumps(
