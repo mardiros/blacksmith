@@ -11,7 +11,7 @@ how to register a resource.
 Full example of blacksmith regitration
 --------------------------------------
 
-.. literalinclude:: resources.py
+.. literalinclude:: register_routes_01.py
 
 
 Request parameters
@@ -108,18 +108,7 @@ Not that you can only declare the path and collection_path consumed.
 
 This is completely valid to register only a single route.
 
-.. code-block::
-
-   blacksmith.register(
-      client_name="api",
-      resource="item",
-      service="api",
-      version="v1",
-      path="/item",
-      contract={
-         "GET": (GetItem, Item),
-      },
-   )
+.. literalinclude:: register_routes_02.py
 
 or event a collection to bind an api that return a list.
 

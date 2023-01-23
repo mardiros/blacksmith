@@ -12,6 +12,7 @@
    user/introduction
    user/register_routes
    user/instanciating_clients
+   user/consuming_api
    user/sd/service_discovery
    user/middleware/index
    user/errors
