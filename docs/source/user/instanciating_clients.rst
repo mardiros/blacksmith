@@ -1,8 +1,10 @@
+.. _instanciating_clients:
+
 Instanciating Clients
 =====================
 
-After registrating resources in blacksmith, to consume API, a client must be
-instanciated.
+After :ref:`registering resources<register_resources>` in blacksmith,
+to consume API, a client must be instanciated.
 To create a client, service has to be discoverable using a
 :term:`service discovery` strategy, then resources can be consumed.
 
@@ -23,9 +25,8 @@ In the example above, we consume the previously registered resource ``item``,
 from the service ``api`` at version ``None``.
 
 The ``api.item`` property has methods **collection_get**, **collection_post**,
-**collection_put**, **collection_patch**, **collection_delete**,
-**collection_options**, and **get**, **post**, **put**, **patch**,
-**delete**, **options** in order to consume api routes.
+**get**, **patch**, **delete**, to name a few to consume registered api routes.
+This section will be covered in the next section.
 
 .. important::
 
