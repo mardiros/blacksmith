@@ -1,6 +1,12 @@
+2.3.0 - Released on 2023-01-23
+------------------------------
+* Change behavior for explicit ``None`` in request parameters.
+  Before this, it was not possible to properly choose attributes to patch to null.
+  :see:`See documentation<dealing_with_none>`
+
 2.2.1 - Released on 2023-01-09
 ------------------------------
-* Update depenencies (prometheus ^0.15) 
+* Update dependencies (prometheus ^0.15) 
 
 2.2.0 - Released on 2023-01-03
 ------------------------------

@@ -44,6 +44,8 @@ All fields may use a default or a default factory that are serialized in http re
 In this code, the header ``X-Timestamp`` will contains float of, ``time.time()`` result.
 And the `X-Message-Type` is sent with foo.
 
+.. _dealing_with_none:
+
 Dealing with null values
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
