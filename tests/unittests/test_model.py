@@ -111,6 +111,26 @@ def test_serialize_part():
     }
 
 
+def test_serialize_part_default_with_none():
+    class Dummy(Request):
+        name: str = PostBodyField()
+        age: Optional[int] = PostBodyField(default=10)
+
+    dummy = Dummy(name="Jane", age=None)
+    obj = serialize_part(
+        dummy,
+        {
+            "name": ...,
+            "age": ...,
+            "created_at": ...,
+        },
+    )
+    assert obj == {
+        "name": "Jane",
+        "age": None,
+    }
+
+
 def test_param_to_req():
     class Dummy(Request):
         x_message_id: int = HeaderField(default=123, alias="X-Message-Id")
