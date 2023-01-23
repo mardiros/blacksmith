@@ -58,6 +58,7 @@ uvicorn = "^0.18.3"
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 norecursedirs = "tests/unittests/scanned_resources"
+testpaths = ["tests"]
 
 [tool.pyright]
 ignore = ["examples"]
