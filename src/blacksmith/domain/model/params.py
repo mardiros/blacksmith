@@ -39,7 +39,7 @@ from ...typing import (
     ResourceName,
     Url,
 )
-from .http import HTTPRequest, HTTPResponse, Links
+from .http import HTTPRequest, HTTPResponse, Links, simpletypes
 
 PATH: HttpLocation = "path"
 HEADER: HttpLocation = "headers"
@@ -63,6 +63,31 @@ class JSONEncoder(json.JSONEncoder):
             if isinstance(o, typ):
                 return serializer(o)
         return super(JSONEncoder, self).default(o)
+
+
+def serialize_part(req: "Request", part: Dict[IntStr, Any]) -> Dict[str, simpletypes]:
+    return cast(
+        Dict[str, simpletypes],
+        {
+            **{
+                k: v
+                for k, v in req.dict(
+                    include=part,
+                    by_alias=True,
+                    exclude_none=True,
+                    exclude_defaults=False,
+                ).items()
+                if v is not None
+            },
+            **req.dict(
+                include=part,
+                by_alias=True,
+                exclude_none=False,
+                exclude_unset=True,
+                exclude_defaults=False,
+            ),
+        },
+    )
 
 
 class Request(BaseModel):
@@ -91,60 +116,15 @@ class Request(BaseModel):
             )
             fields_by_loc[loc].update({field.name: ...})
 
-        headers = {
-            **{
-                k: v
-                for k, v in self.dict(
-                    include=fields_by_loc[HEADER],
-                    by_alias=True,
-                    exclude_none=True,
-                    exclude_defaults=False,
-                ).items()
-                if v is not None
-            },
-            **self.dict(
-                include=fields_by_loc[HEADER],
-                by_alias=True,
-                exclude_unset=True,
-                exclude_defaults=False,
-            ),
-        }
+        headers = serialize_part(self, fields_by_loc[HEADER])
         req.headers = {key: str(val) for key, val in headers.items()}
-        req.path = self.dict(
-            include=fields_by_loc[PATH],
-            by_alias=True,
-            exclude_none=False,
-            exclude_unset=True,
-            exclude_defaults=False,
-        )
-        req.querystring = self.dict(
-            include=fields_by_loc[QUERY],
-            by_alias=True,
-            exclude_none=True,
-            exclude_unset=True,
-            exclude_defaults=False,
+        req.path = serialize_part(self, fields_by_loc[PATH])
+        req.querystring = cast(
+            Dict[str, simpletypes | List[simpletypes]],
+            serialize_part(self, fields_by_loc[QUERY]),
         )
         req.body = json.dumps(
-            {
-                **{
-                    k: v
-                    for k, v in self.dict(
-                        include=fields_by_loc[BODY],
-                        by_alias=True,
-                        exclude_none=True,
-                        exclude_defaults=False,
-                    ).items()
-                    if v is not None
-                },
-                **self.dict(
-                    include=fields_by_loc[BODY],
-                    by_alias=True,
-                    exclude_none=False,
-                    exclude_unset=True,
-                    exclude_defaults=False,
-                ),
-            },
-            cls=JSONEncoder,
+            serialize_part(self, fields_by_loc[BODY]), cls=JSONEncoder
         )
         return req
 

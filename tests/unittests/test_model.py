@@ -25,6 +25,7 @@ from blacksmith.domain.model import (
     ResponseBox,
 )
 from blacksmith.domain.model.http import HTTPTimeout, parse_header_links
+from blacksmith.domain.model.params import JSONEncoder, serialize_part
 
 
 class MyErrorFormat(BaseModel):
@@ -43,6 +44,17 @@ def error_parser(error: HTTPError) -> MyErrorFormat:
 class GetResponse(Response):
     name: str
     age: int
+
+
+def test_json_encoder():
+    assert (
+        json.dumps({"date": datetime(2020, 10, 5)}, cls=JSONEncoder)
+        == '{"date": "2020-10-05T00:00:00"}'
+    )
+
+    with pytest.raises(TypeError) as ctx:
+        json.dumps({"oops": object()}, cls=JSONEncoder)
+    assert str(ctx.value) == "Object of type object is not JSON serializable"
 
 
 def test_timeout_eq():
@@ -68,6 +80,35 @@ def test_request_url():
     )
 
     assert req.url == "/foo/John/bar/42"
+
+
+def test_serialize_part():
+    class Dummy(Request):
+        x_message_id: int = HeaderField(default=123, alias="X-Message-Id")
+        name: str = PostBodyField()
+        age: int = PostBodyField(default=10)
+        city: Optional[str] = PostBodyField()
+        state: Optional[str] = PostBodyField()
+        country: str = PostBodyField()
+
+    dummy = Dummy(name="Jane", country="FR", city="Saint Palais s/mer", state=None)
+    obj = serialize_part(
+        dummy,
+        {
+            "name": ...,
+            "age": ...,
+            "city": ...,
+            "state": ...,
+            "country": ...,
+        },
+    )
+    assert obj == {
+        "name": "Jane",
+        "age": 10,
+        "city": "Saint Palais s/mer",
+        "state": None,
+        "country": "FR",
+    }
 
 
 def test_param_to_req():
