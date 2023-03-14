@@ -19,6 +19,13 @@ def safe_json(r: HttpxResponse) -> Json:
         return {"error": r.text}
 
 
+def build_headers(req: HTTPRequest) -> Mapping[str, str]:
+    headers = req.headers.copy()
+    if req.body and "Content-Type" not in headers:
+        headers["Content-Type"] = "application/json"
+    return headers
+
+
 class SyncHttpxTransport(SyncAbstractTransport):
     """
     Transport implemented using `httpx`_.
@@ -34,9 +41,7 @@ class SyncHttpxTransport(SyncAbstractTransport):
         path: Path,
         timeout: HTTPTimeout,
     ) -> HTTPResponse:
-        headers = req.headers.copy()
-        if req.body:
-            headers["Content-Type"] = "application/json"
+        headers = build_headers(req)
         with SyncClient(
             verify=self.verify_certificate,
             proxies=self.proxies,  # type: ignore

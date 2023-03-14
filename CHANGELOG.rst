@@ -1,3 +1,7 @@
+2.3.1 - Released on 2023-03-14
+------------------------------
+* Do not override the content-type if it has already been set.
+
 2.3.0 - Released on 2023-01-23
 ------------------------------
 * Change behavior for explicit ``None`` in request parameters.
