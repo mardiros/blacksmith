@@ -7,7 +7,7 @@ from httpx import TimeoutException as HttpxTimeoutException
 
 from blacksmith.domain.exceptions import HTTPError
 from blacksmith.domain.model import HTTPRequest, HTTPTimeout
-from blacksmith.service._async.adapters.httpx import AsyncHttpxTransport
+from blacksmith.service._async.adapters.httpx import AsyncHttpxTransport, build_headers
 
 headers = Headers()
 headers["Content-Type"] = "application/json"
@@ -39,6 +39,32 @@ async def test_query_http(patch: Any):
         "content-type": "application/json",
     }
     assert resp.json == dummy_json
+
+
+async def test_build_headers_default():
+    req = HTTPRequest(method="GET", url_pattern="/", headers={}, body="{}")
+    assert build_headers(req) == {"Content-Type": "application/json"}
+
+
+async def test_build_headers_no_body():
+    req = HTTPRequest(method="GET", url_pattern="/", headers={}, body="")
+    assert build_headers(req) == {}
+
+
+async def test_build_headers_copy():
+    req = HTTPRequest(method="GET", url_pattern="/", headers={"A": "a"}, body="")
+    copy = build_headers(req)
+    assert copy is not req.headers
+
+
+async def test_build_headers():
+    req = HTTPRequest(
+        method="GET",
+        url_pattern="/",
+        headers={"Content-Type": "application/json+magic"},
+        body="{}",
+    )
+    assert build_headers(req) == {"Content-Type": "application/json+magic"}
 
 
 @mock.patch(
