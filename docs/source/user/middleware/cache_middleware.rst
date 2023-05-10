@@ -71,8 +71,9 @@ GOOD
 In the example above, prometheus **will not count** cached request:
 
 .. code-block:: python
-   :emphasize-lines: 6,7
+   :emphasize-lines: 8,9
    :linenos:
+   from redis import asyncio as aioredis
 
    cache = aioredis.from_url("redis://redis/0")
    sd = AsyncConsulDiscovery()
@@ -90,8 +91,9 @@ BAD
 In the example above, prometheus **will count** cached request:
 
 .. code-block:: python
-   :emphasize-lines: 6,7
+   :emphasize-lines: 8,9
    :linenos:
+   from redis import asyncio as aioredis
 
    cache = aioredis.from_url("redis://redis/0")
    sd = AsyncConsulDiscovery()

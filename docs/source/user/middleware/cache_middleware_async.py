@@ -1,6 +1,6 @@
 import asyncio
 
-import aioredis
+from redis import asyncio as aioredis
 
 from blacksmith import (
     AsyncClientFactory,
