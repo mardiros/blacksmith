@@ -39,7 +39,7 @@ class SyncAbstractCache(abc.ABC):
 
 
 try:
-    from redis import Redis
+    from redis.asyncio import Redis
 
     SyncAbstractCache.register(Redis)
 except ImportError:
