@@ -19,6 +19,7 @@ for path in DIRECTORIES:
                 path.replace("_async", "_sync"),
                 additional_replacements={
                     "_async": "_sync",
+                    "asyncio": "client",  # replace redis.asyncio -> redis.client
                 },
             ),
         ],
