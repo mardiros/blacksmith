@@ -1,6 +1,6 @@
 from pathlib import Path
 
-import unasync
+import unasync  # type: ignore
 
 DIRECTORIES = [
     "src/blacksmith/middleware/_async",
