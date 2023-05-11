@@ -1,3 +1,8 @@
+2.3.2 - Released on 2023-05-11
+------------------------------
+* Remove aioredis, use redis.asyncio since it is deprecated
+* Make it compat with python 3.11
+
 2.3.1 - Released on 2023-03-14
 ------------------------------
 * Do not override the content-type if it has already been set.
@@ -10,7 +15,7 @@
 
 2.2.1 - Released on 2023-01-09
 ------------------------------
-* Update dependencies (prometheus ^0.15) 
+* Update dependencies (prometheus ^0.15)
 
 2.2.0 - Released on 2023-01-03
 ------------------------------
