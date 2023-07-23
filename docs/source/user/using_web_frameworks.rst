@@ -9,7 +9,7 @@ Django
 The Django plugin `dj-blacksmith`_ is available and create and initialize clients
 from the django settings. It support sync and async clients.
 
-.. _`dj-blacksmith`: https://dj-blacksmith.readthedocs.io/
+.. _`dj-blacksmith`: https://mardiros.github.io/dj-blacksmith/
 
 
 Pyramid
@@ -18,7 +18,7 @@ Pyramid
 The plugin `pyramid-blacksmith`_ create a request property `blacksmith` that bind
 blacksmith clients configured via the Pyramid configurator.
 
-.. _`pyramid-blacksmith`: https://pyramid-blacksmith.readthedocs.io/
+.. _`pyramid-blacksmith`: https://mardiros.github.io/dj-blacksmith/
 
 FastAPI
 -------
