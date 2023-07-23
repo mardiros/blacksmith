@@ -84,8 +84,8 @@ While using the :ref:`Circuit Breaker Middleware`, the `OpenedState`_ exception 
 raised from the `Circuit Breaker library`_, when a service is detected down,
 and then, that circuit has been opened.
 
-.. _`OpenedState`: https://purgatory.readthedocs.io/en/latest/develop/domain/model.html#purgatory.domain.model.OpenedState
-.. _`Circuit Breaker library`: https://purgatory.readthedocs.io/
+.. _`OpenedState`: https://mardiros.github.io/purgatory/develop/domain/model.html#purgatory.domain.model.OpenedState
+.. _`Circuit Breaker library`: https://mardiros.github.io/purgatory/
 
 
 .. note::
