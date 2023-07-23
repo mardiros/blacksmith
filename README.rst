@@ -1,9 +1,9 @@
 Blacksmith
 ==========
 
-.. image:: https://readthedocs.org/projects/python-blacksmith/badge/?version=latest
-   :target: https://python-blacksmith.readthedocs.io/en/latest/?badge=latest
-   :alt: Documentation Status
+.. image:: https://github.com/mardiros/blacksmith/actions/workflows/gh-pages.yml/badge.svg
+   :target: https://mardiros.github.io/blacksmith/user/introduction.html
+   :alt: Documentation
 
 .. image:: https://github.com/mardiros/blacksmith/actions/workflows/main.yml/badge.svg
    :target: https://github.com/mardiros/blacksmith/actions/workflows/main.yml
@@ -104,4 +104,4 @@ Read More
 
 You can read the `full documentation of this library here`_.
 
-.. _`full documentation of this library here`: https://python-blacksmith.readthedocs.io/en/latest/user/introduction.html
+.. _`full documentation of this library here`: https://mardiros.github.io/blacksmith/user/introduction.html

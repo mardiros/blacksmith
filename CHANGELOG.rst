@@ -11,7 +11,7 @@
 ------------------------------
 * Change behavior for explicit ``None`` in request parameters.
   Before this, it was not possible to properly choose attributes to patch to null.
-  :see:`See documentation<dealing_with_none>`
+  :ref:`See documentation<dealing_with_none>`
 
 2.2.1 - Released on 2023-01-09
 ------------------------------
