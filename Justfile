@@ -49,10 +49,10 @@ black:
     poetry run isort .
     poetry run black .
 
-rtd:
+gh-pages:
     poetry export --with dev -f requirements.txt -o docs/requirements.txt --without-hashes
 
-release major_minor_patch: gensync test rtd && changelog
+release major_minor_patch: gensync test gh-pages && changelog
     poetry version {{major_minor_patch}}
     poetry install
 
