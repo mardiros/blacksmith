@@ -105,3 +105,8 @@ Read More
 You can read the `full documentation of this library here`_.
 
 .. _`full documentation of this library here`: https://mardiros.github.io/blacksmith/user/introduction.html
+
+.. important::
+
+   | The documentation has been moved to github pages.
+   | The documentation under readthedocs is obsolete.
