@@ -1670,6 +1670,24 @@ lint = ["docutils-stubs", "flake8 (>=3.5.0)", "isort", "mypy (>=0.920)", "types-
 test = ["cython", "html5lib", "pytest", "pytest-cov", "typed-ast"]
 
 [[package]]
+name = "sphinx-autodoc-typehints"
+version = "1.17.1"
+description = "Type hints (PEP 484) support for the Sphinx autodoc extension"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "sphinx_autodoc_typehints-1.17.1-py3-none-any.whl", hash = "sha256:f16491cad05a13f4825ecdf9ee4ff02925d9a3b1cf103d4d02f2f81802cce653"},
+    {file = "sphinx_autodoc_typehints-1.17.1.tar.gz", hash = "sha256:844d7237d3f6280b0416f5375d9556cfd84df1945356fcc34b82e8aaacab40f3"},
+]
+
+[package.dependencies]
+Sphinx = ">=4"
+
+[package.extras]
+testing = ["covdefaults (>=2)", "coverage (>=6)", "diff-cover (>=6.4)", "nptyping (>=1,<2)", "pytest (>=6)", "pytest-cov (>=3)", "sphobjinv (>=2)", "typing-extensions (>=3.5)"]
+type-comments = ["typed-ast (>=1.4.0)"]
+
+[[package]]
 name = "sphinx-basic-ng"
 version = "1.0.0b2"
 description = "A modern skeleton for Sphinx themes."
@@ -2118,4 +2136,4 @@ prometheus = ["prometheus-client"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7"
-content-hash = "10a484c326914ff1007b7b209807fbb99626dd5a0825cc4c8e818f61f61ed5f3"
+content-hash = "806bc4ae042a7ce03937b6e351f153b7ce0ef29f803fc3eebc5b7e8f870d99e1"
