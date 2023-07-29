@@ -25,7 +25,12 @@ from blacksmith.domain.model import (
     ResponseBox,
 )
 from blacksmith.domain.model.http import HTTPTimeout, parse_header_links
-from blacksmith.domain.model.params import JSONEncoder, serialize_part
+from blacksmith.domain.model.params import (
+    QUERY,
+    JSONEncoder,
+    get_location,
+    serialize_part,
+)
 
 
 class MyErrorFormat(BaseModel):
@@ -129,6 +134,31 @@ def test_serialize_part_default_with_none():
         "name": "Jane",
         "age": None,
     }
+
+
+def test_get_location_from_pydantic_v2() -> None:
+    class DummyFieldInfo:
+        json_schema_extra = {"location": QUERY}
+
+    assert get_location(DummyFieldInfo()) == QUERY
+
+
+def test_get_location_from_pydantic_v1() -> None:
+    class DummyFieldInfo:
+        class field_info:
+            extra = {"location": QUERY}
+
+    assert get_location(DummyFieldInfo()) == QUERY
+
+
+def test_get_location_raises_value_error() -> None:
+    class Dummy:
+        def __str__(self):
+            return "dummy"
+
+    with pytest.raises(ValueError) as ctx:
+        get_location(Dummy())
+    assert str(ctx.value) == "dummy is not a FieldInfo"
 
 
 def test_param_to_req():
@@ -249,9 +279,9 @@ def test_response_box():
     with warnings.catch_warnings(record=True) as ctx:
         warnings.simplefilter("always")
         assert resp.response.dict() == {"age": 24, "name": "Alice"}
-    assert [str(w.message) for w in ctx] == [
+    assert [str(w.message) for w in ctx][0] == (
         ".response is deprecated, use .unwrap() instead"
-    ]
+    )
 
     assert resp.json == {"age": 24, "name": "Alice", "useless": True}
 
@@ -418,7 +448,7 @@ def test_collection_iterator():
     )
     assert collec.meta.count == 2
     assert collec.meta.total_count == 5
-    list_collec = list(collec)
+    list_collec = [res.dict() for res in collec]
     assert list_collec == [
         {
             "name": "Alice",

@@ -19,7 +19,15 @@ from typing import (
 )
 
 from pydantic import BaseModel, Field
-from pydantic.json import ENCODERS_BY_TYPE
+
+# assume we can use deprecated stuff until we support both version
+try:
+    # pydantic 2
+    from pydantic.deprecated.json import ENCODERS_BY_TYPE  # type: ignore
+except ImportError:  # type: ignore # coverage: ignore
+    # pydantic 1
+    from pydantic.json import ENCODERS_BY_TYPE  # type: ignore  # coverage: ignore
+
 from result import Result
 from result.result import F, U
 
@@ -48,6 +56,9 @@ QUERY: HttpLocation = "querystring"
 BODY: HttpLocation = "body"
 
 
+# in pydantic 2, the extra keys for location is deprecated,
+# the json_schema_extra should be used.
+
 PathInfoField = partial(Field, location=PATH)
 """Declare field that are serialized to the path info."""
 HeaderField = partial(Field, location=HEADER)
@@ -56,6 +67,17 @@ QueryStringField = partial(Field, location=QUERY)
 """Declare field that are serialized in the http querystring."""
 PostBodyField = partial(Field, location=BODY)
 """Declare field that are serialized in the json document."""
+
+
+def get_location(field: Any) -> HttpLocation:
+    # field is of type FieldInfo, which differ on pydantic 2 and pydantic 1
+    if hasattr(field, "json_schema_extra"):
+        extra = field.json_schema_extra
+    elif hasattr(field, "field_info"):
+        extra = field.field_info.extra
+    else:
+        raise ValueError(f"{field} is not a FieldInfo")
+    return extra["location"]
 
 
 class JSONEncoder(json.JSONEncoder):
@@ -110,12 +132,9 @@ class Request(BaseModel):
             QUERY: {},
             BODY: {},
         }
-        for field in self.__fields__.values():
-            loc = cast(
-                HttpLocation,
-                field.field_info.extra["location"],  # type: ignore
-            )
-            fields_by_loc[loc].update({field.name: ...})
+        for name, field in self.__fields__.items():
+            loc = get_location(field)
+            fields_by_loc[loc].update({name: ...})
 
         headers = serialize_part(self, fields_by_loc[HEADER])
         req.headers = {key: str(val) for key, val in headers.items()}
