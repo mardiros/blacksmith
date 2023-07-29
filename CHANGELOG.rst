@@ -1,3 +1,7 @@
+2.3.3 - Released on 2023-07-29
+------------------------------
+* Update dependencies
+
 2.3.2 - Released on 2023-05-11
 ------------------------------
 * Remove aioredis, use redis.asyncio since it is deprecated
