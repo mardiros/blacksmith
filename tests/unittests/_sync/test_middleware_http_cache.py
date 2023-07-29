@@ -59,7 +59,7 @@ from blacksmith.middleware._sync.http_cache import (
 )
 def test_get_from_cache(
     params: Dict[str, Any], fake_http_middleware_cache_with_data: SyncAbstractCache
-):
+) -> None:
     middleware = SyncHTTPCacheMiddleware(fake_http_middleware_cache_with_data)
     resp_from_cache = middleware.get_from_cache(
         "dummies", params["path"], params["request"]
@@ -156,7 +156,7 @@ def test_get_from_cache(
 )
 def test_http_cache_response(
     params: Dict[str, Any], fake_http_middleware_cache: SyncAbstractCache
-):
+) -> None:
     middleware = SyncHTTPCacheMiddleware(fake_http_middleware_cache)
 
     resp_from_cache = middleware.get_from_cache(
@@ -183,7 +183,7 @@ def test_cache_middleware(
     fake_http_middleware_cache: SyncAbstractCache,
     dummy_http_request: HTTPRequest,
     dummy_timeout: HTTPTimeout,
-):
+) -> None:
     caching = SyncHTTPCacheMiddleware(fake_http_middleware_cache)
     next = caching(cachable_response)
     resp = next(dummy_http_request, "dummy", "/dummies/{name}", dummy_timeout)
@@ -213,13 +213,13 @@ def test_cache_middleware_policy_handle(
     fake_http_middleware_cache: SyncAbstractCache,
     dummy_http_request: HTTPRequest,
     dummy_timeout: HTTPTimeout,
-):
+) -> None:
     class TrackHandleCacheControlPolicy(CacheControlPolicy):
-        def __init__(self):
+        def __init__(self) -> None:
             super().__init__("%")
             self.handle_request_called = False
 
-        def handle_request(self, req, client_name, path):  # type: ignore
+        def handle_request(self, req, client_name, path) -> bool:  # type: ignore
             self.handle_request_called = True
             return False
 
@@ -238,7 +238,7 @@ def test_cache_middleware_metrics_helpers(
     fake_http_middleware_cache: SyncAbstractCache,
     prometheus_registry: CollectorRegistry,
     metrics: PrometheusMetrics,
-):
+) -> None:
     caching = SyncHTTPCacheMiddleware(fake_http_middleware_cache, metrics)
     caching.inc_cache_miss("dummy", "cached", "GET", "/", 200)
     assert (
@@ -304,7 +304,7 @@ def test_cache_middleware_metrics(
     dummy_timeout: HTTPTimeout,
     prometheus_registry: CollectorRegistry,
     metrics: PrometheusMetrics,
-):
+) -> None:
     caching = SyncHTTPCacheMiddleware(fake_http_middleware_cache, metrics)
     next = caching(uncachable_response)
     next(dummy_http_request, "dummy", "/dummies/{name}", dummy_timeout)
@@ -339,7 +339,7 @@ def test_cache_middleware_metrics(
     )
 
 
-def test_http_cache_initialize(fake_http_middleware_cache: Any):
+def test_http_cache_initialize(fake_http_middleware_cache: Any) -> None:
     caching = SyncHTTPCacheMiddleware(fake_http_middleware_cache)
     caching.initialize()
     assert fake_http_middleware_cache.initialize_called is True

@@ -6,6 +6,7 @@ import pytest
 from blacksmith.domain.exceptions import HTTPError
 from blacksmith.domain.model import HTTPRequest, HTTPResponse, HTTPTimeout
 from blacksmith.domain.model.middleware.zipkin import AbstractTraceContext
+from blacksmith.middleware._async import AsyncMiddleware
 from blacksmith.middleware._async.auth import AsyncHTTPAuthorizationMiddleware
 from blacksmith.middleware._async.base import AsyncHTTPAddHeadersMiddleware
 from blacksmith.middleware._async.http_cache import AsyncAbstractCache
@@ -19,7 +20,7 @@ from tests.unittests.time import AsyncSleep
 
 
 @pytest.fixture
-def static_sd():
+def static_sd() -> AsyncStaticDiscovery:
     dummy_endpoints: Endpoints = {("dummy", "v1"): "https://dummy.v1/"}
     return AsyncStaticDiscovery(dummy_endpoints)
 
@@ -58,7 +59,7 @@ class FakeConsulTransport(AsyncAbstractTransport):
 
 
 @pytest.fixture
-def echo_middleware():
+def echo_middleware() -> AsyncMiddleware:
     async def next(
         req: HTTPRequest,
         client_name: ClientName,
@@ -74,7 +75,7 @@ uncachable_response = echo_middleware
 
 
 @pytest.fixture
-def cachable_response():
+def cachable_response() -> AsyncMiddleware:
     async def next(
         req: HTTPRequest,
         client_name: ClientName,
@@ -89,7 +90,7 @@ def cachable_response():
 
 
 @pytest.fixture
-def slow_middleware():
+def slow_middleware() -> AsyncMiddleware:
     async def next(
         req: HTTPRequest,
         client_name: ClientName,
@@ -103,7 +104,7 @@ def slow_middleware():
 
 
 @pytest.fixture
-def boom_middleware():
+def boom_middleware() -> AsyncMiddleware:
     async def next(
         req: HTTPRequest,
         client_name: ClientName,
@@ -118,7 +119,7 @@ def boom_middleware():
 
 
 @pytest.fixture
-def invalid_middleware():
+def invalid_middleware() -> AsyncMiddleware:
     async def next(
         req: HTTPRequest,
         client_name: ClientName,
@@ -135,21 +136,21 @@ def invalid_middleware():
 
 
 class AsyncDummyMiddleware(AsyncHTTPAddHeadersMiddleware):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(headers={"x-dummy": "test"})
         self.initialized = 0
 
-    async def initialize(self):
+    async def initialize(self) -> None:
         self.initialized += 1
 
 
 @pytest.fixture
-def dummy_middleware():
+def dummy_middleware() -> AsyncHTTPAddHeadersMiddleware:
     return AsyncDummyMiddleware()
 
 
 @pytest.fixture
-def consul_sd_with_body(body: Dict[str, Any]):
+def consul_sd_with_body(body: Dict[str, Any]) -> AsyncConsulDiscovery:
     class FakeConsulTransportNoServiceAddr(FakeConsulTransport):
         _body = [body]
 
@@ -164,7 +165,7 @@ def consul_sd_with_body(body: Dict[str, Any]):
 
 
 @pytest.fixture
-def consul_sd():
+def consul_sd() -> AsyncConsulDiscovery:
     def cli(url: str, tok: str) -> AsyncClientFactory[HTTPError]:
         return AsyncClientFactory(
             sd=AsyncStaticDiscovery({("consul", "v1"): url}),
@@ -176,7 +177,7 @@ def consul_sd():
 
 
 @pytest.fixture
-def router_sd():
+def router_sd() -> AsyncRouterDiscovery:
     return AsyncRouterDiscovery()
 
 
@@ -188,7 +189,7 @@ class AsyncFakeHttpMiddlewareCache(AsyncAbstractCache):
         self.val: Dict[str, Tuple[int, str]] = data or {}
         self.initialize_called = False
 
-    async def initialize(self):
+    async def initialize(self) -> None:
         self.initialize_called = True
 
     async def get(self, key: str) -> Optional[str]:
@@ -198,18 +199,20 @@ class AsyncFakeHttpMiddlewareCache(AsyncAbstractCache):
         except KeyError:
             return None
 
-    async def set(self, key: str, val: str, ex: timedelta):
+    async def set(self, key: str, val: str, ex: timedelta) -> None:
         """Get a value from redis"""
         self.val[key] = (ex.seconds, val)
 
 
 @pytest.fixture
-def fake_http_middleware_cache():
+def fake_http_middleware_cache() -> AsyncFakeHttpMiddlewareCache:
     return AsyncFakeHttpMiddlewareCache()
 
 
 @pytest.fixture
-def fake_http_middleware_cache_with_data(params: Mapping[str, Any]):
+def fake_http_middleware_cache_with_data(
+    params: Mapping[str, Any]
+) -> AsyncFakeHttpMiddlewareCache:
     return AsyncFakeHttpMiddlewareCache(params["initial_cache"])
 
 
@@ -232,7 +235,7 @@ class Trace(AbstractTraceContext):
     def __enter__(self) -> "Trace":
         return self
 
-    def __exit__(self, *exc: Any):
+    def __exit__(self, *exc: Any) -> None:
         pass
 
     def tag(self, key: str, value: str) -> "Trace":

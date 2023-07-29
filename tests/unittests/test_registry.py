@@ -7,7 +7,7 @@ from blacksmith.domain.model import PathInfoField, PostBodyField, Request, Respo
 from blacksmith.domain.registry import Registry
 
 
-def test_default_registry():
+def test_default_registry() -> None:
     class DummyRequest(Request):
         name: str = PathInfoField()
 
@@ -47,7 +47,7 @@ def test_default_registry():
         registry_module.registry = Registry()
 
 
-def test_registry_without_collection():
+def test_registry_without_collection() -> None:
     class DummyRequest(Request):
         name: str = PathInfoField()
 
@@ -81,7 +81,7 @@ def test_registry_without_collection():
     assert api["dummies"].collection is None
 
 
-def test_registry_without_response():
+def test_registry_without_response() -> None:
     class DummyRequest(Request):
         name: str = PathInfoField()
 
@@ -111,7 +111,7 @@ def test_registry_without_response():
     assert api["dummies"].resource.contract["GET"][1] is None
 
 
-def test_registry_only_collection():
+def test_registry_only_collection() -> None:
     class DummyRequest(Request):
         pass
 
@@ -145,7 +145,7 @@ def test_registry_only_collection():
     assert api["dummies"].resource is None
 
 
-def test_registry_complete():
+def test_registry_complete() -> None:
     class CreateDummyRequest(Request):
         name: str = PostBodyField()
 
@@ -198,7 +198,7 @@ def test_registry_complete():
     assert api["dummies"].resource.contract["DELETE"][1] is None
 
 
-def test_get_service():
+def test_get_service() -> None:
     class DummyRequest(Request):
         pass
 
@@ -227,7 +227,7 @@ def test_get_service():
     assert str(ctx.value) == "Unregistered client 'DUMMIES_API'"
 
 
-def test_registry_conflict():
+def test_registry_conflict() -> None:
     registry = Registry()
     registry.register(
         "client_name",

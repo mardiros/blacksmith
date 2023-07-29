@@ -6,6 +6,7 @@ import pytest
 from blacksmith.domain.exceptions import HTTPError
 from blacksmith.domain.model import HTTPRequest, HTTPResponse, HTTPTimeout
 from blacksmith.domain.model.middleware.zipkin import AbstractTraceContext
+from blacksmith.middleware._sync import SyncMiddleware
 from blacksmith.middleware._sync.auth import SyncHTTPAuthorizationMiddleware
 from blacksmith.middleware._sync.base import SyncHTTPAddHeadersMiddleware
 from blacksmith.middleware._sync.http_cache import SyncAbstractCache
@@ -19,7 +20,7 @@ from tests.unittests.time import SyncSleep
 
 
 @pytest.fixture
-def static_sd():
+def static_sd() -> SyncStaticDiscovery:
     dummy_endpoints: Endpoints = {("dummy", "v1"): "https://dummy.v1/"}
     return SyncStaticDiscovery(dummy_endpoints)
 
@@ -58,7 +59,7 @@ class FakeConsulTransport(SyncAbstractTransport):
 
 
 @pytest.fixture
-def echo_middleware():
+def echo_middleware() -> SyncMiddleware:
     def next(
         req: HTTPRequest,
         client_name: ClientName,
@@ -74,7 +75,7 @@ uncachable_response = echo_middleware
 
 
 @pytest.fixture
-def cachable_response():
+def cachable_response() -> SyncMiddleware:
     def next(
         req: HTTPRequest,
         client_name: ClientName,
@@ -89,7 +90,7 @@ def cachable_response():
 
 
 @pytest.fixture
-def slow_middleware():
+def slow_middleware() -> SyncMiddleware:
     def next(
         req: HTTPRequest,
         client_name: ClientName,
@@ -103,7 +104,7 @@ def slow_middleware():
 
 
 @pytest.fixture
-def boom_middleware():
+def boom_middleware() -> SyncMiddleware:
     def next(
         req: HTTPRequest,
         client_name: ClientName,
@@ -118,7 +119,7 @@ def boom_middleware():
 
 
 @pytest.fixture
-def invalid_middleware():
+def invalid_middleware() -> SyncMiddleware:
     def next(
         req: HTTPRequest,
         client_name: ClientName,
@@ -135,21 +136,21 @@ def invalid_middleware():
 
 
 class SyncDummyMiddleware(SyncHTTPAddHeadersMiddleware):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(headers={"x-dummy": "test"})
         self.initialized = 0
 
-    def initialize(self):
+    def initialize(self) -> None:
         self.initialized += 1
 
 
 @pytest.fixture
-def dummy_middleware():
+def dummy_middleware() -> SyncHTTPAddHeadersMiddleware:
     return SyncDummyMiddleware()
 
 
 @pytest.fixture
-def consul_sd_with_body(body: Dict[str, Any]):
+def consul_sd_with_body(body: Dict[str, Any]) -> SyncConsulDiscovery:
     class FakeConsulTransportNoServiceAddr(FakeConsulTransport):
         _body = [body]
 
@@ -164,7 +165,7 @@ def consul_sd_with_body(body: Dict[str, Any]):
 
 
 @pytest.fixture
-def consul_sd():
+def consul_sd() -> SyncConsulDiscovery:
     def cli(url: str, tok: str) -> SyncClientFactory[HTTPError]:
         return SyncClientFactory(
             sd=SyncStaticDiscovery({("consul", "v1"): url}),
@@ -176,7 +177,7 @@ def consul_sd():
 
 
 @pytest.fixture
-def router_sd():
+def router_sd() -> SyncRouterDiscovery:
     return SyncRouterDiscovery()
 
 
@@ -188,7 +189,7 @@ class SyncFakeHttpMiddlewareCache(SyncAbstractCache):
         self.val: Dict[str, Tuple[int, str]] = data or {}
         self.initialize_called = False
 
-    def initialize(self):
+    def initialize(self) -> None:
         self.initialize_called = True
 
     def get(self, key: str) -> Optional[str]:
@@ -198,18 +199,20 @@ class SyncFakeHttpMiddlewareCache(SyncAbstractCache):
         except KeyError:
             return None
 
-    def set(self, key: str, val: str, ex: timedelta):
+    def set(self, key: str, val: str, ex: timedelta) -> None:
         """Get a value from redis"""
         self.val[key] = (ex.seconds, val)
 
 
 @pytest.fixture
-def fake_http_middleware_cache():
+def fake_http_middleware_cache() -> SyncFakeHttpMiddlewareCache:
     return SyncFakeHttpMiddlewareCache()
 
 
 @pytest.fixture
-def fake_http_middleware_cache_with_data(params: Mapping[str, Any]):
+def fake_http_middleware_cache_with_data(
+    params: Mapping[str, Any]
+) -> SyncFakeHttpMiddlewareCache:
     return SyncFakeHttpMiddlewareCache(params["initial_cache"])
 
 
@@ -232,7 +235,7 @@ class Trace(AbstractTraceContext):
     def __enter__(self) -> "Trace":
         return self
 
-    def __exit__(self, *exc: Any):
+    def __exit__(self, *exc: Any) -> None:
         pass
 
     def tag(self, key: str, value: str) -> "Trace":

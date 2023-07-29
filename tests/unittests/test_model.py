@@ -51,7 +51,7 @@ class GetResponse(Response):
     age: int
 
 
-def test_json_encoder():
+def test_json_encoder() -> None:
     assert (
         json.dumps({"date": datetime(2020, 10, 5)}, cls=JSONEncoder)
         == '{"date": "2020-10-05T00:00:00"}'
@@ -62,19 +62,19 @@ def test_json_encoder():
     assert str(ctx.value) == "Object of type object is not JSON serializable"
 
 
-def test_timeout_eq():
+def test_timeout_eq() -> None:
     assert HTTPTimeout() == HTTPTimeout()
     assert HTTPTimeout(10) == HTTPTimeout(10)
     assert HTTPTimeout(10, 20) == HTTPTimeout(10, 20)
 
 
-def test_timeout_neq():
+def test_timeout_neq() -> None:
     assert HTTPTimeout() != HTTPTimeout(42)
     assert HTTPTimeout(42) != HTTPTimeout(42, 42)
     assert HTTPTimeout(42, 42) != HTTPTimeout(42, 43)
 
 
-def test_request_url():
+def test_request_url() -> None:
     req = HTTPRequest(
         method="GET",
         url_pattern="/foo/{name}/bar/{id}",
@@ -87,7 +87,7 @@ def test_request_url():
     assert req.url == "/foo/John/bar/42"
 
 
-def test_serialize_part():
+def test_serialize_part() -> None:
     class Dummy(Request):
         x_message_id: int = HeaderField(default=123, alias="X-Message-Id")
         name: str = PostBodyField()
@@ -116,7 +116,7 @@ def test_serialize_part():
     }
 
 
-def test_serialize_part_default_with_none():
+def test_serialize_part_default_with_none() -> None:
     class Dummy(Request):
         name: str = PostBodyField()
         age: Optional[int] = PostBodyField(default=10)
@@ -161,7 +161,7 @@ def test_get_location_raises_value_error() -> None:
     assert str(ctx.value) == "dummy is not a FieldInfo"
 
 
-def test_param_to_req():
+def test_param_to_req() -> None:
     class Dummy(Request):
         x_message_id: int = HeaderField(default=123, alias="X-Message-Id")
         x_sub_id: Optional[int] = HeaderField(default=None, alias="X-Sub-Id")
@@ -179,7 +179,7 @@ def test_param_to_req():
     assert json.loads(req.body) == {"age": 23, "birthdate": "1956-12-13T00:00:00"}
 
 
-def test_patch_none_values():
+def test_patch_none_values() -> None:
     class Dummy(Request):
         x_message_id: int = HeaderField(default=123, alias="X-Message-Id")
         x_sub_id: Optional[int] = HeaderField(None, alias="X-Sub-Id")
@@ -197,7 +197,7 @@ def test_patch_none_values():
     assert json.loads(req.body) == {"age": 10, "country": "FR", "state": None}
 
 
-def test_parse_header_links():
+def test_parse_header_links() -> None:
     links = parse_header_links("")
     assert links == []
     links = parse_header_links(
@@ -212,7 +212,7 @@ def test_parse_header_links():
     assert links == [{"url": "https://la.st/"}]
 
 
-def test_collection_parser():
+def test_collection_parser() -> None:
     resp = HTTPResponse(
         200,
         {
@@ -222,17 +222,17 @@ def test_collection_parser():
         },
         [{"id": 1}, {"id": 1}],
     )
-    resp = CollectionParser(resp)
-    assert resp.meta.count == 2
-    assert resp.meta.total_count == 20
-    assert resp.meta.links == {
+    parsed = CollectionParser(resp)
+    assert parsed.meta.count == 2
+    assert parsed.meta.total_count == 20
+    assert parsed.meta.links == {
         "last": {"rel": "last", "url": "https://dummy/?page=4"},
         "next": {"rel": "next", "url": "https://dummy/?page=2"},
     }
 
 
-def test_response_box():
-    resp = ResponseBox(
+def test_response_box() -> None:
+    resp: ResponseBox[GetResponse, MyErrorFormat] = ResponseBox(
         Ok(
             HTTPResponse(
                 200,
@@ -286,7 +286,7 @@ def test_response_box():
     assert resp.json == {"age": 24, "name": "Alice", "useless": True}
 
 
-def test_response_box_err():
+def test_response_box_err() -> None:
     bob = GetResponse(name="Bob", age=40)
     http_error = HTTPError(
         "500 Internal Server Error",
@@ -305,7 +305,7 @@ def test_response_box_err():
         message="Internal Server Error",
         detail="too many connections",
     )
-    resp = ResponseBox(
+    resp: ResponseBox[GetResponse, MyErrorFormat] = ResponseBox(
         Err(http_error),
         GetResponse,
         "GET",
@@ -353,7 +353,7 @@ def test_response_box_err():
         assert resp.unwrap()
 
 
-def test_response_box_err_default_handler():
+def test_response_box_err_default_handler() -> None:
     http_error = HTTPError(
         "500 Internal Server Error",
         HTTPRequest(method="GET", url_pattern="/"),
@@ -378,8 +378,8 @@ def test_response_box_err_default_handler():
     assert resp.unwrap_err() == http_error
 
 
-def test_response_box_no_schema():
-    resp = ResponseBox(
+def test_response_box_no_schema() -> None:
+    resp: ResponseBox[GetResponse, MyErrorFormat] = ResponseBox(
         Ok(
             HTTPResponse(
                 200,
@@ -426,7 +426,7 @@ def test_response_box_no_schema():
     ]
 
 
-def test_collection_iterator():
+def test_collection_iterator() -> None:
     collec: CollectionIterator[Any] = CollectionIterator(
         HTTPResponse(
             200,

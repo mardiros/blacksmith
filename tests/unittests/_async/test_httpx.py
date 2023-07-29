@@ -20,7 +20,7 @@ dummy_error_response = Response(422, headers=headers, json=dummy_error)
 dummy_error_500_response = Response(500, headers=headers, text="internal server error")
 
 
-def dummy_query_timeout():
+def dummy_query_timeout() -> None:
     raise HttpxTimeoutException("ReadTimeout", request=None)  # type: ignore
 
 
@@ -28,7 +28,7 @@ def dummy_query_timeout():
     "httpx._client.AsyncClient.request",
     return_value=dummy_response,
 )
-async def test_query_http(patch: Any):
+async def test_query_http(patch: Any) -> None:
     transport = AsyncHttpxTransport()
     resp = await transport(
         HTTPRequest(method="GET", url_pattern="/"), "cli", "/", HTTPTimeout()
@@ -41,23 +41,23 @@ async def test_query_http(patch: Any):
     assert resp.json == dummy_json
 
 
-async def test_build_headers_default():
+async def test_build_headers_default() -> None:
     req = HTTPRequest(method="GET", url_pattern="/", headers={}, body="{}")
     assert build_headers(req) == {"Content-Type": "application/json"}
 
 
-async def test_build_headers_no_body():
+async def test_build_headers_no_body() -> None:
     req = HTTPRequest(method="GET", url_pattern="/", headers={}, body="")
     assert build_headers(req) == {}
 
 
-async def test_build_headers_copy():
+async def test_build_headers_copy() -> None:
     req = HTTPRequest(method="GET", url_pattern="/", headers={"A": "a"}, body="")
     copy = build_headers(req)
     assert copy is not req.headers
 
 
-async def test_build_headers():
+async def test_build_headers() -> None:
     req = HTTPRequest(
         method="GET",
         url_pattern="/",
@@ -71,7 +71,7 @@ async def test_build_headers():
     "httpx._client.AsyncClient.request",
     return_value=dummy_empty_response,
 )
-async def test_query_http_204(patch: Any):
+async def test_query_http_204(patch: Any) -> None:
     transport = AsyncHttpxTransport()
     resp = await transport(
         HTTPRequest(method="GET", url_pattern="/"), "cli", "/", HTTPTimeout()
@@ -85,7 +85,7 @@ async def test_query_http_204(patch: Any):
     "httpx._client.AsyncClient.request",
     return_value=dummy_error_response,
 )
-async def test_query_http_422(patch: Any):
+async def test_query_http_422(patch: Any) -> None:
     transport = AsyncHttpxTransport()
     with pytest.raises(HTTPError) as ctx:
         await transport(
@@ -104,7 +104,7 @@ async def test_query_http_422(patch: Any):
     "httpx._client.AsyncClient.request",
     side_effect=lambda *args, **kwargs: dummy_query_timeout(),  # type: ignore
 )
-async def test_query_http_timeout(patch: Any):
+async def test_query_http_timeout(patch: Any) -> None:
     transport = AsyncHttpxTransport()
     with pytest.raises(TimeoutError) as ctx:
         await transport(
@@ -123,7 +123,7 @@ async def test_query_http_timeout(patch: Any):
     "httpx._client.AsyncClient.request",
     return_value=dummy_error_500_response,
 )
-async def test_query_http_no_json(patch: Any):
+async def test_query_http_no_json(patch: Any) -> None:
     transport = AsyncHttpxTransport()
     with pytest.raises(HTTPError) as ctx:
         await transport(
