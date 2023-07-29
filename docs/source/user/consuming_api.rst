@@ -59,8 +59,8 @@ See example below:
 
    class PatchDummy(Request):
       name: str = PathInfoField()
-      state: Optional[str] = PostBodyField()
-      country: Optional[str] = PostBodyField()
+      state: Optional[str] = PostBodyField(None)
+      country: Optional[str] = PostBodyField(None)
 
    blacksmith.register(
       client_name="api",

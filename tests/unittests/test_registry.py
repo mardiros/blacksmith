@@ -9,10 +9,10 @@ from blacksmith.domain.registry import Registry
 
 def test_default_registry():
     class DummyRequest(Request):
-        name = PathInfoField(str)
+        name: str = PathInfoField()
 
     class Dummy(Response):
-        name = str
+        name: str
 
     default_registry = registry.registry = Registry()
 
@@ -49,10 +49,10 @@ def test_default_registry():
 
 def test_registry_without_collection():
     class DummyRequest(Request):
-        name = PathInfoField(str)
+        name: str = PathInfoField()
 
     class Dummy(Response):
-        name = str
+        name: str
 
     registry = Registry()
     registry.register(
@@ -83,7 +83,7 @@ def test_registry_without_collection():
 
 def test_registry_without_response():
     class DummyRequest(Request):
-        name = PathInfoField(str)
+        name: str = PathInfoField()
 
     registry = Registry()
     registry.register(
@@ -116,7 +116,7 @@ def test_registry_only_collection():
         pass
 
     class Dummy(Response):
-        name = str
+        name: str
 
     registry = Registry()
     registry.register(
@@ -147,13 +147,13 @@ def test_registry_only_collection():
 
 def test_registry_complete():
     class CreateDummyRequest(Request):
-        name = PostBodyField(str)
+        name: str = PostBodyField()
 
     class DummyRequest(Request):
-        name = PathInfoField(str)
+        name: str = PathInfoField()
 
     class Dummy(Response):
-        name = str
+        name: str
 
     registry = Registry()
     registry.register(
@@ -203,7 +203,7 @@ def test_get_service():
         pass
 
     class Dummy(Response):
-        name = str
+        name: str
 
     registry = Registry()
     registry.register(

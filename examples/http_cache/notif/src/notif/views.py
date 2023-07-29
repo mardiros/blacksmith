@@ -2,9 +2,9 @@ import email as emaillib
 import smtplib
 from textwrap import dedent
 
-from redis import asyncio as aioredis
 from notif.resources.user import User
 from prometheus_client import CONTENT_TYPE_LATEST, REGISTRY, generate_latest
+from redis import asyncio as aioredis
 from starlette.applications import Starlette
 from starlette.responses import JSONResponse, Response
 

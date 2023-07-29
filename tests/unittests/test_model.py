@@ -87,8 +87,8 @@ def test_serialize_part():
         x_message_id: int = HeaderField(default=123, alias="X-Message-Id")
         name: str = PostBodyField()
         age: int = PostBodyField(default=10)
-        city: Optional[str] = PostBodyField()
-        state: Optional[str] = PostBodyField()
+        city: Optional[str] = PostBodyField(None)
+        state: Optional[str] = PostBodyField(None)
         country: str = PostBodyField()
 
     dummy = Dummy(name="Jane", country="FR", city="Saint Palais s/mer", state=None)
@@ -134,10 +134,10 @@ def test_serialize_part_default_with_none():
 def test_param_to_req():
     class Dummy(Request):
         x_message_id: int = HeaderField(default=123, alias="X-Message-Id")
-        x_sub_id: Optional[int] = HeaderField(alias="X-Sub-Id")
+        x_sub_id: Optional[int] = HeaderField(default=None, alias="X-Sub-Id")
         name: str = PathInfoField()
         country: str = QueryStringField()
-        state: Optional[str] = QueryStringField()
+        state: Optional[str] = QueryStringField(default=None)
         age: int = PostBodyField()
         birthdate: datetime = PostBodyField()
 
@@ -152,12 +152,12 @@ def test_param_to_req():
 def test_patch_none_values():
     class Dummy(Request):
         x_message_id: int = HeaderField(default=123, alias="X-Message-Id")
-        x_sub_id: Optional[int] = HeaderField(alias="X-Sub-Id")
+        x_sub_id: Optional[int] = HeaderField(None, alias="X-Sub-Id")
         name: str = PathInfoField()
         country: str = PostBodyField()
         age: int = PostBodyField(default=10)
-        state: Optional[str] = PostBodyField()
-        city: Optional[str] = PostBodyField()
+        state: Optional[str] = PostBodyField(None)
+        city: Optional[str] = PostBodyField(None)
 
     dummy = Dummy(name="Jane", country="FR", state=None)
     req = dummy.to_http_request("GET", "/dummies/{name}")
