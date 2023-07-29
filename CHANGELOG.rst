@@ -1,3 +1,9 @@
+2.4.0 - Released on 2023-07-29
+------------------------------
+* Add pydantic 2 support
+
+note that pydantic 1 is still supported until blacksmith 3.0
+
 2.3.3 - Released on 2023-07-29
 ------------------------------
 * Update dependencies
