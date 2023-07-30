@@ -57,7 +57,7 @@ async def post_notif(request):
 
     api_user = await cli("api_user")
     try:
-        user: User = (await api_user.users.get({"username": body["username"]})).unwarp()
+        user: User = (await api_user.users.get({"username": body["username"]})).unwrap()
     except HTTPError as exc:
         status_code = exc.response.status_code
         resp = exc.response.json
