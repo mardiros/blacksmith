@@ -2,7 +2,6 @@ version: "3"
 
 networks:
   proxy:
-    external: true
   internal:
     external: false
 
@@ -70,7 +69,7 @@ services:
       - "traefik.http.routers.router.entrypoints=web"
       - "traefik.http.routers.router.rule=Host(`router.${DOMAIN_NAME}`)"
       - "traefik.http.services.router.loadbalancer.server.port=80"
-  
+
   api_user:
     build: ./user
     environment:
