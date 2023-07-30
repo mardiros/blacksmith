@@ -5,11 +5,11 @@ description = ""
 authors = ["Guillaume Gauvrit <guillaume@gauvr.it>"]
 
 [tool.poetry.dependencies]
-python = "^3.9"
-starlette = "^0.17.0"
-hypercorn = "^0.13.2"
-blacksmith = { version = "^0.12.1", extras = ["prometheus"] }
-aioredis = {version = "^2.0.0"}
+python = "^3.10"
+blacksmith = { version = "^2.4.0", extras = ["prometheus"] }
+hypercorn = "^0.14.4"
+redis = "^4.6.0"
+starlette = "^0.31.0"
 
 
 [build-system]
