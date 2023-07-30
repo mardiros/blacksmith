@@ -2,10 +2,6 @@ version: "3"
 
 networks:
   proxy:
-    # external: true
-    ipam:
-      config:
-        - subnet: "172.30.30.0/24"
   internal:
     external: false
 
