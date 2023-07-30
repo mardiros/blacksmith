@@ -7,8 +7,13 @@ from notif.config import FastConfig
 from notif.emailing import AbstractEmailSender
 from notif.views import fastapi
 
-from blacksmith.domain.model.http import HTTPRequest, HTTPResponse, HTTPTimeout
-from blacksmith.service._async.base import AsyncAbstractTransport
+from blacksmith import (
+    AsyncAbstractTransport,
+    AsyncRouterDiscovery,
+    HTTPRequest,
+    HTTPResponse,
+    HTTPTimeout,
+)
 
 
 class FakeTransport(AsyncAbstractTransport):
@@ -51,6 +56,10 @@ def settings():
 @pytest.fixture
 async def configure_dependency_injection(params, settings):
     settings["transport"] = FakeTransport(params["blacksmith_responses"])
+    settings["sd"] = AsyncRouterDiscovery(
+        settings["service_url_fmt"],
+        settings["unversioned_service_url_fmt"],
+    )
     await FastConfig.configure(settings)
 
 

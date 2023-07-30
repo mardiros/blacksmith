@@ -9,7 +9,7 @@ from blacksmith import AsyncClientFactory, AsyncConsulDiscovery
 class AppConfig:
     def __init__(self, settings: Mapping[str, Any]):
         transport = settings.get("transport")
-        sd = AsyncConsulDiscovery()
+        sd = settings.get("sd") or AsyncConsulDiscovery()
         self.get_client = AsyncClientFactory(sd=sd, transport=transport)
         self.send_email = settings.get("email_sender") or EmailSender(sd)
 

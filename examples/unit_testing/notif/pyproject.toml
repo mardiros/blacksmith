@@ -5,15 +5,15 @@ description = ""
 authors = ["Guillaume Gauvrit <guillaume@gauvr.it>"]
 
 [tool.poetry.dependencies]
-python = "^3.9"
-blacksmith = "^2.0"
-fastapi = "^0.73.0"
-hypercorn = "^0.13.2"
+python = "^3.10"
+blacksmith = { version = "^2.4.0", extras = ["prometheus"] }
+fastapi = "^0.100.1"
+hypercorn = "^0.14.4"
 
 [tool.poetry.dev-dependencies]
-pytest = "^6.2.5"
-pytest-asyncio = "^0.16.0"
-requests = "^2.27.1"
+pytest = "^7.4.0"
+pytest-asyncio = "^0.21.1"
+requests = "^2.31.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
