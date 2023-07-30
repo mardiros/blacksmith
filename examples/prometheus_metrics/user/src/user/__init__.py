@@ -1,9 +1,7 @@
 import asyncio
 import random
-from typing import cast
 
 import uvicorn
-from asgiref.typing import ASGI3Application
 from starlette.applications import Starlette
 from starlette.responses import JSONResponse
 
@@ -38,4 +36,4 @@ async def show_user(request):
 
 
 if __name__ == "__main__":
-    uvicorn.run(cast(ASGI3Application, app), host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8000)
