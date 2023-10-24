@@ -24,8 +24,7 @@ prometheus-client = {version = "^0.17.1", optional = true}
 purgatory = "^1.0.3"
 pydantic = ">=1.10.12, <3"
 typing-extensions = "^4.7.0"
-result = "^0.11.0"
-pytest-cov = "^4.1.0"
+result = ">=0.11.0, <1"
 
 [tool.poetry.extras]
 http_cache_async = ["redis"]
