@@ -1,3 +1,7 @@
+2.4.1 - Released on 2023-10-24
+------------------------------
+* Update dependencies
+
 2.4.0 - Released on 2023-07-29
 ------------------------------
 * Add pydantic 2 support
