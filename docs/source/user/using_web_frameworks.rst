@@ -18,7 +18,7 @@ Pyramid
 The plugin `pyramid-blacksmith`_ create a request property `blacksmith` that bind
 blacksmith clients configured via the Pyramid configurator.
 
-.. _`pyramid-blacksmith`: https://mardiros.github.io/dj-blacksmith/
+.. _`pyramid-blacksmith`: https://mardiros.github.io/pyramid-blacksmith/
 
 FastAPI
 -------
