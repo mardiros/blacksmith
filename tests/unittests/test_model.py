@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Any, Optional
 
 import pytest
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, SecretStr
 from result import Err, Ok, UnwrapError
 
 from blacksmith.domain.error import default_error_parser
@@ -164,19 +164,32 @@ def test_get_location_raises_value_error() -> None:
 def test_param_to_req() -> None:
     class Dummy(Request):
         x_message_id: int = HeaderField(default=123, alias="X-Message-Id")
+        x_token: SecretStr = HeaderField(alias="X-Token")
         x_sub_id: Optional[int] = HeaderField(default=None, alias="X-Sub-Id")
         name: str = PathInfoField()
         country: str = QueryStringField()
         state: Optional[str] = QueryStringField(default=None)
         age: int = PostBodyField()
         birthdate: datetime = PostBodyField()
+        password: SecretStr = PostBodyField()
 
-    dummy = Dummy(name="Jane", country="FR", age=23, birthdate=datetime(1956, 12, 13))
+    dummy = Dummy(
+        name="Jane",
+        country="FR",
+        age=23,
+        birthdate=datetime(1956, 12, 13),
+        password=SecretStr("myownsecret"),
+        **{"X-Token": "plokiploki"},  # type: ignore
+    )
     req = dummy.to_http_request("GET", "/dummies/{name}")
     assert req.url == "/dummies/Jane"
-    assert req.headers == {"X-Message-Id": "123"}
+    assert req.headers == {"X-Message-Id": "123", "X-Token": "plokiploki"}
     assert req.querystring == {"country": "FR"}
-    assert json.loads(req.body) == {"age": 23, "birthdate": "1956-12-13T00:00:00"}
+    assert json.loads(req.body) == {
+        "age": 23,
+        "birthdate": "1956-12-13T00:00:00",
+        "password": "myownsecret",
+    }
 
 
 def test_patch_none_values() -> None:
