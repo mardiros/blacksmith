@@ -1,3 +1,8 @@
+2.5.0 - Released on 2023-12-20
+------------------------------
+* Add SecretStr support for parameters
+* Update dependencies
+
 2.4.1 - Released on 2023-10-24
 ------------------------------
 * Update dependencies
