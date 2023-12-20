@@ -18,7 +18,7 @@ from typing import (
     cast,
 )
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, SecretBytes, SecretStr
 
 # assume we can use deprecated stuff until we support both version
 try:
@@ -88,29 +88,35 @@ class JSONEncoder(json.JSONEncoder):
         return super(JSONEncoder, self).default(o)
 
 
+def get_value(v: Union[simpletypes, SecretStr, SecretBytes]) -> simpletypes:
+    if hasattr(v, "get_secret_value"):
+        return getattr(v, "get_secret_value")()
+    return v  # type: ignore
+
+
 def serialize_part(req: "Request", part: Dict[IntStr, Any]) -> Dict[str, simpletypes]:
-    return cast(
-        Dict[str, simpletypes],
-        {
-            **{
-                k: v
-                for k, v in req.dict(
-                    include=part,
-                    by_alias=True,
-                    exclude_none=True,
-                    exclude_defaults=False,
-                ).items()
-                if v is not None
-            },
-            **req.dict(
+    return {
+        **{
+            k: get_value(v)
+            for k, v in req.dict(
+                include=part,
+                by_alias=True,
+                exclude_none=True,
+                exclude_defaults=False,
+            ).items()
+            if v is not None
+        },
+        **{
+            k: get_value(v)
+            for k, v in req.dict(
                 include=part,
                 by_alias=True,
                 exclude_none=False,
                 exclude_unset=True,
                 exclude_defaults=False,
-            ),
+            ).items()
         },
-    )
+    }
 
 
 class Request(BaseModel):
