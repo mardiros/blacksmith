@@ -66,9 +66,9 @@ class SyncHTTPCacheMiddleware(SyncHTTPMiddleware):
     def initialize(self) -> None:
         try:
             self._cache.initialize()
-        except AttributeError:  # coverage-ignore
+        except AttributeError:  # coverage: ignore
             # the redis sync version does not implement this method
-            pass
+            ...
 
     def cache_response(
         self,

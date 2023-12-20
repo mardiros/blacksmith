@@ -66,9 +66,9 @@ class AsyncHTTPCacheMiddleware(AsyncHTTPMiddleware):
     async def initialize(self) -> None:
         try:
             await self._cache.initialize()
-        except AttributeError:  # coverage-ignore
+        except AttributeError:  # coverage: ignore
             # the redis sync version does not implement this method
-            pass
+            ...
 
     async def cache_response(
         self,
