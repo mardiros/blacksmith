@@ -19,7 +19,10 @@ version = "2.5.0"
 
 [tool.poetry.dependencies]
 python = "^3.7"
-httpx = "^0.24.1"
+httpx = [
+  {python = "3.7", version = "^0.24.1"},
+  {python = ">=3.8", version = ">=0.24, <1"},
+]
 prometheus-client = {version = "^0.17.1", optional = true}
 purgatory = "^1.0.3"
 pydantic = ">=1.10.12, <3"
