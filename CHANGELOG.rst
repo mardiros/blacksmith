@@ -1,3 +1,7 @@
+2.5.1 - Released on 2023-12-21
+------------------------------
+* Update httpx dependency for python > 3.7
+
 2.5.0 - Released on 2023-12-20
 ------------------------------
 * Add SecretStr support for parameters
