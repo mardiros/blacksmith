@@ -26,5 +26,5 @@ FastAPI
 There is no plugins for FastAPI, but the example `unittesting`_ is based
 on `FastAPI Dependency Injection`_.
 
-.. _unittesting: https://github.com/mardiros/blacksmith/tree/main/examples/unittesting/notif
+.. _unittesting: https://github.com/mardiros/blacksmith/tree/main/examples/unit_testing/notif
 .. _`FastAPI Dependency Injection`: https://fastapi.tiangolo.com/tutorial/dependencies/
