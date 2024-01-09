@@ -178,7 +178,6 @@ def test_build_request(params: Mapping[str, Any]):
 def test_build_request_error(params: Mapping[str, Any]):
     with pytest.raises(ValidationError) as ctx:
         build_request(params["type"], params["params"])
-    breakpoint()
     assert str(ctx.value.errors()[0]["msg"]) == params["err"]
 
 
