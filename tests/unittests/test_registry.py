@@ -1,9 +1,12 @@
+from typing import Literal
+
 import pytest
 
 import blacksmith
 from blacksmith.domain import registry
 from blacksmith.domain.exceptions import ConfigurationError, UnregisteredClientException
 from blacksmith.domain.model import PathInfoField, PostBodyField, Request, Response
+from blacksmith.domain.model.params import QueryStringField
 from blacksmith.domain.registry import Registry
 
 
@@ -108,6 +111,41 @@ def test_registry_without_response() -> None:
     assert api["dummies"].resource.path == "/dummies/{name}"
     assert set(api["dummies"].resource.contract.keys()) == {"GET"}
     assert api["dummies"].resource.contract["GET"][0] == DummyRequest
+    assert api["dummies"].resource.contract["GET"][1] is None
+
+
+def test_registry_with_union_type() -> None:
+    class FooRequest(Request):
+        name: str = PathInfoField()
+        type: Literal["foo"] = QueryStringField()
+
+    class BarRequest(Request):
+        name: str = PathInfoField()
+        type: Literal["bar"] = QueryStringField()
+
+    registry = Registry()
+    registry.register(
+        "dummies_api",
+        "dummies",
+        "api",
+        "v5",
+        path="/dummies/{name}",
+        contract={
+            "GET": (FooRequest | BarRequest, None),
+        },
+    )
+
+    assert registry.client_service == {"dummies_api": ("api", "v5")}
+    assert set(registry.clients.keys()) == {"dummies_api"}
+
+    assert set(registry.clients["dummies_api"].keys()) == {"dummies"}
+
+    api = registry.clients["dummies_api"]
+    assert api["dummies"].resource is not None
+    assert api["dummies"].resource.contract is not None
+    assert api["dummies"].resource.path == "/dummies/{name}"
+    assert set(api["dummies"].resource.contract.keys()) == {"GET"}
+    assert api["dummies"].resource.contract["GET"][0] == FooRequest | BarRequest
     assert api["dummies"].resource.contract["GET"][1] is None
 
 

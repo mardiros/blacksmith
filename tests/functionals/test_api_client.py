@@ -36,6 +36,11 @@ class CreateItem(Request):
     size: SizeEnum = PostBodyField(SizeEnum.m)
 
 
+class CreateItemIntSize(Request):
+    name: str = PostBodyField()
+    size: int = PostBodyField(2)
+
+
 class ListItem(Request):
     name: Optional[str] = QueryStringField(None)
 
@@ -60,7 +65,7 @@ register(
     collection_path="/items",
     collection_contract={
         "GET": (ListItem, Item),
-        "POST": (CreateItem, None),
+        "POST": (CreateItem | CreateItemIntSize, None),
     },
     path="/items/{item_name}",
     contract={

@@ -1,6 +1,14 @@
-from typing import Any, Dict, Generic, List, Optional, Tuple, Type, Union
+from typing import Any, Dict, Generic, List, Mapping, Optional, Tuple, Type, Union
 
+try:
+    from types import UnionType
+except ImportError:  # coverage: ignore
+    # python 3.7 compat
+    UnionType = Union  # type: ignore
+
+from pydantic import ValidationError
 from result import Err, Ok, Result
+from typing_extensions import get_origin
 
 from blacksmith.domain.error import AbstractErrorParser, TError_co
 from blacksmith.domain.exceptions import (
@@ -41,6 +49,30 @@ def build_timeout(timeout: ClientTimeout) -> HTTPTimeout:
     elif isinstance(timeout, tuple):
         timeout = HTTPTimeout(*timeout)
     return timeout
+
+
+def is_union(typ: Type[Any]) -> bool:
+    type_origin = get_origin(typ)
+    if type_origin:
+        if type_origin is Union:  # Union[T, U] or even Optional[T]
+            return True
+
+        if type_origin is UnionType:  # T | U
+            return True
+    return False
+
+
+def build_request(typ: Type[Any], params: Mapping[str, Any]) -> Request:
+    if is_union(typ):
+        err: Optional[Exception] = None
+        for t in typ.__args__:  # type: ignore
+            try:
+                return build_request(t, params)  # type: ignore
+            except ValidationError as e:
+                err = e
+        if err:
+            raise err
+    return typ(**params)
 
 
 class SyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
@@ -90,10 +122,11 @@ class SyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
             raise NoContractException(method, self.name, self.client_name)
 
         param_schema, return_schema = resource.contract[method]
+        build_params: Request
         if isinstance(params, dict):
-            params = param_schema(**params)
+            build_params = build_request(param_schema, params)
         elif params is None:
-            params = param_schema()
+            build_params = param_schema()
         elif not isinstance(params, param_schema):
             raise WrongRequestTypeException(
                 params.__class__,  # type: ignore
@@ -101,7 +134,9 @@ class SyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
                 self.name,
                 self.client_name,
             )
-        req = params.to_http_request(method, self.endpoint + resource.path)
+        else:
+            build_params = params
+        req = build_params.to_http_request(method, self.endpoint + resource.path)
         return (resource.path, req, return_schema)
 
     def _prepare_response(
@@ -127,7 +162,6 @@ class SyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
         response_schema: Optional[Type[Response]],
         collection_parser: Optional[Type[AbstractCollectionParser]],
     ) -> Result[CollectionIterator[TCollectionResponse], TError_co]:
-
         if result.is_err():
             return Err(self.error_parser(result.unwrap_err()))
         else:
