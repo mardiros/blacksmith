@@ -1,7 +1,7 @@
 from typing import Any, Mapping, Union
 
 import pytest
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ValidationError
 from result import Result
 from typing_extensions import Literal
 
@@ -156,6 +156,29 @@ class Bar(BaseModel):
 def test_build_request(params: Mapping[str, Any]):
     req = build_request(params["type"], params["params"])
     assert req == params["expected"]
+
+
+@pytest.mark.parametrize(
+    "params",
+    [
+        pytest.param(
+            {"type": Foo, "params": {"typ": "bar"}, "err": "Input should be 'foo'"},
+            id="simple",
+        ),
+        pytest.param(
+            {
+                "type": Union[Foo, Bar],
+                "params": {"typ": "baz"},
+                "err": "Input should be 'bar'",
+            },
+            id="union",
+        ),
+    ],
+)
+def test_build_request_error(params: Mapping[str, Any]):
+    with pytest.raises(ValidationError) as ctx:
+        build_request(params["type"], params["params"])
+    assert str(ctx.value.errors()[0]["msg"]) == params["err"]
 
 
 def test_route_proxy_prepare_middleware(
