@@ -20,10 +20,10 @@ Request parameters
 The first things to do is to create models that represent every routes.
 
 To represent a request parameter, the base class :class:`blacksmith.Request`
-has to be overridden, with special fields 
+has to be overridden, with special fields
 :class:`blacksmith.HeaderField`,
 :class:`blacksmith.PathInfoField`,
-:class:`blacksmith.PostBodyField` or 
+:class:`blacksmith.PostBodyField` or
 :class:`blacksmith.QueryStringField`.
 
 For instance:
@@ -67,7 +67,7 @@ Registration
 
 The :term:`client_name` is the name to access to the :term:`resource` using the
 client factory.
-Everytime the client_name is used, it must always match the same 
+Everytime the client_name is used, it must always match the same
 (:term:`service`, :term:`version`) otherwise an exception will be raised
 during the load of the application.
 
@@ -81,7 +81,7 @@ different schema for that.
 
 Lastly, the resource will be accessible as a property of the client that will be
 manipulable using methods where the Request define the parameter type of the
-method, and the Response define the response type. 
+method, and the Response define the response type.
 
 .. code-block::
 
@@ -132,6 +132,14 @@ or event a collection to bind an api that return a list.
    been declared. No http request will be made.
 
 
+
+To improve your request typing, you may use to have a set of distinct parameters,
+such as in the example above. This is usefull to deal with exclusive parameters.
+
+.. literalinclude:: register_routes_03.py
+
+
+
 Scanning resources
 ------------------
 
@@ -163,7 +171,7 @@ Then to load all the resources, use the :func:`blacksmith.scan` method:
    blacksmith.scan("mypkg.resources")
 
 
-.. important:: 
+.. important::
 
    There is no difference in the resources declaration for asynchronous
    and synchronous API.
