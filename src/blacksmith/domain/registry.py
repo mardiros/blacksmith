@@ -18,7 +18,6 @@ from blacksmith.typing import (
 from .exceptions import ConfigurationError, UnregisteredClientException
 from .model import AbstractCollectionParser, Request, Response
 
-
 TRequest = TypeVar("TRequest", bound=Request)
 
 Schemas = Tuple[TRequest, Optional[Type[Response]]]

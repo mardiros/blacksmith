@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Any, Optional
+from typing import Any, Optional, Union
 
 import pytest
 from result import Result
@@ -65,7 +65,7 @@ register(
     collection_path="/items",
     collection_contract={
         "GET": (ListItem, Item),
-        "POST": (CreateItem | CreateItemIntSize, None),
+        "POST": (Union[CreateItem, CreateItemIntSize], None),
     },
     path="/items/{item_name}",
     contract={

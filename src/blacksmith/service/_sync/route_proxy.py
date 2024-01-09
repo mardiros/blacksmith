@@ -1,7 +1,7 @@
 from typing import Any, Dict, Generic, List, Mapping, Optional, Tuple, Type, Union
 
 try:
-    from types import UnionType
+    from types import UnionType  # type: ignore
 except ImportError:  # coverage: ignore
     # python 3.7 compat
     UnionType = Union  # type: ignore
@@ -60,6 +60,14 @@ def is_union(typ: Type[Any]) -> bool:
         if type_origin is UnionType:  # T | U
             return True
     return False
+
+
+def is_instance_with_union(val: Any, typ: Type[Any]) -> bool:
+    # isinstance does not support union type in old interpreter,
+    if is_union(typ):
+        r = [isinstance(val, t) for t in typ.__args__]  # type: ignore
+        return any(r)
+    return isinstance(val, typ)
 
 
 def build_request(typ: Type[Any], params: Mapping[str, Any]) -> Request:
@@ -127,7 +135,7 @@ class SyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
             build_params = build_request(param_schema, params)
         elif params is None:
             build_params = param_schema()
-        elif not isinstance(params, param_schema):
+        elif not is_instance_with_union(params, param_schema):
             raise WrongRequestTypeException(
                 params.__class__,  # type: ignore
                 method,
