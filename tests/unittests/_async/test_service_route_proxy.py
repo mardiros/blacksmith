@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Mapping, Union
 
 import pytest
 from pydantic import BaseModel, Field
@@ -22,7 +22,11 @@ from blacksmith.domain.registry import ApiRoutes
 from blacksmith.middleware._async.auth import AsyncHTTPAuthorizationMiddleware
 from blacksmith.middleware._async.base import AsyncHTTPAddHeadersMiddleware
 from blacksmith.service._async.base import AsyncAbstractTransport
-from blacksmith.service._async.route_proxy import AsyncRouteProxy, build_timeout
+from blacksmith.service._async.route_proxy import (
+    AsyncRouteProxy,
+    build_timeout,
+    is_union,
+)
 from blacksmith.typing import ClientName, Path
 from tests.unittests.dummy_registry import GetParam, GetResponse, PostParam
 
@@ -48,7 +52,6 @@ class FakeTransport(AsyncAbstractTransport):
         path: Path,
         timeout: HTTPTimeout,
     ) -> HTTPResponse:
-
         if self.resp.status_code >= 400:
             raise HTTPError(f"{self.resp.status_code} blah", req, self.resp)
         return self.resp
@@ -61,6 +64,19 @@ def test_build_timeout() -> None:
     assert timeout == HTTPTimeout(5.0, 15.0)
     timeout = build_timeout((5.0, 2.0))
     assert timeout == HTTPTimeout(5.0, 2.0)
+
+
+@pytest.mark.parametrize(
+    "params",
+    [
+        pytest.param({"type": int, "expected": False}, id="int"),
+        pytest.param({"type": str, "expected": False}, id="str"),
+        pytest.param({"type": int | str, "expected": True}, id="int | str"),
+        pytest.param({"type": Union[int, str], "expected": True}, id="Union[int, str]"),
+    ],
+)
+def test_is_union(params: Mapping[str, Any]):
+    assert is_union(params["type"]) is params["expected"]
 
 
 async def test_route_proxy_prepare_middleware(
