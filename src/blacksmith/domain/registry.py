@@ -3,7 +3,7 @@
 
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import Mapping, MutableMapping, Optional, Tuple, Type
+from typing import Any, Mapping, MutableMapping, Optional, Tuple, Type, TypeVar
 
 from blacksmith.typing import (
     ClientName,
@@ -18,8 +18,11 @@ from blacksmith.typing import (
 from .exceptions import ConfigurationError, UnregisteredClientException
 from .model import AbstractCollectionParser, Request, Response
 
-Schemas = Tuple[Type[Request], Optional[Type[Response]]]
-Contract = Mapping[HTTPMethod, Schemas]
+
+TRequest = TypeVar("TRequest", bound=Request)
+
+Schemas = Tuple[TRequest, Optional[Type[Response]]]
+Contract = Mapping[HTTPMethod, Schemas[Any]]
 
 
 @dataclass(frozen=True)
