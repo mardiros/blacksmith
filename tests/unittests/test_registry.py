@@ -1,6 +1,7 @@
-from typing import Literal
+from typing import Union
 
 import pytest
+from typing_extensions import Literal
 
 import blacksmith
 from blacksmith.domain import registry
@@ -131,7 +132,7 @@ def test_registry_with_union_type() -> None:
         "v5",
         path="/dummies/{name}",
         contract={
-            "GET": (FooRequest | BarRequest, None),
+            "GET": (Union[FooRequest, BarRequest], None),
         },
     )
 
@@ -145,7 +146,7 @@ def test_registry_with_union_type() -> None:
     assert api["dummies"].resource.contract is not None
     assert api["dummies"].resource.path == "/dummies/{name}"
     assert set(api["dummies"].resource.contract.keys()) == {"GET"}
-    assert api["dummies"].resource.contract["GET"][0] == FooRequest | BarRequest
+    assert api["dummies"].resource.contract["GET"][0] == Union[FooRequest, BarRequest]
     assert api["dummies"].resource.contract["GET"][1] is None
 
 

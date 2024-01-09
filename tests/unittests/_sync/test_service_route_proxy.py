@@ -27,6 +27,7 @@ from blacksmith.service._sync.route_proxy import (
     SyncRouteProxy,
     build_request,
     build_timeout,
+    is_instance_with_union,
     is_union,
 )
 from blacksmith.typing import ClientName, Path
@@ -73,7 +74,6 @@ def test_build_timeout() -> None:
     [
         pytest.param({"type": int, "expected": False}, id="int"),
         pytest.param({"type": str, "expected": False}, id="str"),
-        pytest.param({"type": int | str, "expected": True}, id="int | str"),
         pytest.param({"type": Union[int, str], "expected": True}, id="Union[int, str]"),
     ],
 )
@@ -94,6 +94,30 @@ try:
 
 except TypeError:
     ...
+
+
+@pytest.mark.parametrize(
+    "params",
+    [
+        pytest.param({"type": str, "value": "bob", "expected": True}, id="str"),
+        pytest.param({"type": str, "value": 0.42, "expected": False}, id="str / float"),
+        pytest.param(
+            {"type": Union[int, str], "value": "bob", "expected": True},
+            id="int | str / str",
+        ),
+        pytest.param(
+            {"type": Union[int, str], "value": 42, "expected": True},
+            id="int | str / int",
+        ),
+        pytest.param(
+            {"type": Union[int, str], "value": 0.42, "expected": False},
+            id="int | str / float",
+        ),
+    ],
+)
+def test_is_instance_with_union(params: Mapping[str, Any]):
+    resp = is_instance_with_union(params["value"], params["type"])
+    assert resp == params["expected"]
 
 
 class Foo(BaseModel):
