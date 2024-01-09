@@ -3,6 +3,7 @@ from typing import Any, Mapping, Union
 import pytest
 from pydantic import BaseModel, Field
 from result import Result
+from typing_extensions import Literal
 
 from blacksmith import Request
 from blacksmith.domain.exceptions import (
@@ -24,6 +25,7 @@ from blacksmith.middleware._async.base import AsyncHTTPAddHeadersMiddleware
 from blacksmith.service._async.base import AsyncAbstractTransport
 from blacksmith.service._async.route_proxy import (
     AsyncRouteProxy,
+    build_request,
     build_timeout,
     is_union,
 )
@@ -77,6 +79,44 @@ def test_build_timeout() -> None:
 )
 def test_is_union(params: Mapping[str, Any]):
     assert is_union(params["type"]) is params["expected"]
+
+
+class Foo(BaseModel):
+    typ: Literal["foo"]
+
+
+class Bar(BaseModel):
+    typ: Literal["bar"]
+
+
+@pytest.mark.parametrize(
+    "params",
+    [
+        pytest.param(
+            {"type": Foo, "params": {"typ": "foo"}, "expected": Foo(typ="foo")},
+            id="simple",
+        ),
+        pytest.param(
+            {
+                "type": Union[Foo, Bar],
+                "params": {"typ": "foo"},
+                "expected": Foo(typ="foo"),
+            },
+            id="union",
+        ),
+        pytest.param(
+            {
+                "type": Union[Foo, Bar],
+                "params": {"typ": "bar"},
+                "expected": Bar(typ="bar"),
+            },
+            id="union",
+        ),
+    ],
+)
+def test_build_request(params: Mapping[str, Any]):
+    req = build_request(params["type"], params["params"])
+    assert req == params["expected"]
 
 
 async def test_route_proxy_prepare_middleware(
