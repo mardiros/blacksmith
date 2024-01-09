@@ -1,3 +1,7 @@
+2.6.0 - Released on 2024-01-09
+------------------------------
+* Add support of Union types for request parameters
+
 2.5.1 - Released on 2023-12-21
 ------------------------------
 * Update httpx dependency for python > 3.7
