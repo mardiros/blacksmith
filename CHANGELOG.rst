@@ -1,3 +1,7 @@
+2.6.1 - Released on 2024-01-11
+------------------------------
+* Add missing method :meth:`blacksmith.ResponseBox.unwrap_or_raise`
+
 2.6.0 - Released on 2024-01-09
 ------------------------------
 * Add support of Union types for request parameters
