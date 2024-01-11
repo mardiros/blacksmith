@@ -392,6 +392,20 @@ class ResponseBox(Generic[TResponse, TError_co]):
         """
         return self._result.unwrap_or_else(op)
 
+    def unwrap_or_raise(self, exc: Type[Exception]) -> TResponse:
+        """
+        Return the response or raise the exception exc.
+
+        :raises exc: it the response is an error.
+        :raises NoResponseSchemaException: if there are no response schema set.
+        """
+        # not that we can't use the unwrap_or_raise from the result
+        # because/until we support version that don't have the method
+        # for python 3.7 compatibility.
+        if self._result.is_err():
+            raise exc(self._result.unwrap_err())
+        return self._result.unwrap()
+
     def expect(self, message: str) -> TResponse:
         """
         Return the response or raise an UnwrapError exception with the given message.
