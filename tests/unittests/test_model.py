@@ -276,6 +276,7 @@ def test_response_box() -> None:
 
     assert resp.unwrap_or(bob) == alice
     assert resp.unwrap_or_else(lambda err: bob) == alice
+    assert resp.unwrap_or_raise(ValueError) == alice
 
     assert resp.map(lambda x: x.name) == Ok("Alice")  # type: ignore
     assert resp.map_or("Bob", lambda x: x.name) == "Alice"  # type: ignore
@@ -337,6 +338,9 @@ def test_response_box_err() -> None:
 
     assert resp.unwrap_or(bob) == bob
     assert resp.unwrap_or_else(lambda err: bob) == bob
+    with pytest.raises(ValueError) as ctx:
+        resp.unwrap_or_raise(ValueError)
+    assert ctx.value.args[0] == my_parsed_error
 
     assert resp.map(lambda x: x.name) == Err(my_parsed_error)  # type: ignore
     assert resp.map_or("Bob", lambda x: x.name) == "Bob"  # type: ignore
