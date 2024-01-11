@@ -399,7 +399,7 @@ class ResponseBox(Generic[TResponse, TError_co]):
         :raises exc: it the response is an error.
         :raises NoResponseSchemaException: if there are no response schema set.
         """
-        # not that we can't use the unwrap_or_raise from the result
+        # note that we can't use the unwrap_or_raise from the result
         # because/until we support version that don't have the method
         # for python 3.7 compatibility.
         if self._result.is_err():
