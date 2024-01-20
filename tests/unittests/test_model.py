@@ -1,10 +1,8 @@
-import json
 import warnings
-from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 
 import pytest
-from pydantic import BaseModel, Field, SecretStr
+from pydantic import BaseModel, Field
 from result import Err, Ok, UnwrapError
 
 from blacksmith.domain.error import default_error_parser
@@ -14,23 +12,12 @@ from blacksmith.domain.exceptions import HTTPError, NoResponseSchemaException
 from blacksmith.domain.model import (
     CollectionIterator,
     CollectionParser,
-    HeaderField,
     HTTPRequest,
     HTTPResponse,
-    PathInfoField,
-    PostBodyField,
-    QueryStringField,
-    Request,
     Response,
     ResponseBox,
 )
 from blacksmith.domain.model.http import HTTPTimeout, parse_header_links
-from blacksmith.domain.model.params import (
-    QUERY,
-    JSONEncoder,
-    get_location,
-    serialize_part,
-)
 
 
 class MyErrorFormat(BaseModel):
@@ -49,17 +36,6 @@ def error_parser(error: HTTPError) -> MyErrorFormat:
 class GetResponse(Response):
     name: str
     age: int
-
-
-def test_json_encoder() -> None:
-    assert (
-        json.dumps({"date": datetime(2020, 10, 5)}, cls=JSONEncoder)
-        == '{"date": "2020-10-05T00:00:00"}'
-    )
-
-    with pytest.raises(TypeError) as ctx:
-        json.dumps({"oops": object()}, cls=JSONEncoder)
-    assert str(ctx.value) == "Object of type object is not JSON serializable"
 
 
 def test_timeout_eq() -> None:
@@ -85,129 +61,6 @@ def test_request_url() -> None:
     )
 
     assert req.url == "/foo/John/bar/42"
-
-
-def test_serialize_part() -> None:
-    class Dummy(Request):
-        x_message_id: int = HeaderField(default=123, alias="X-Message-Id")
-        name: str = PostBodyField()
-        age: int = PostBodyField(default=10)
-        city: Optional[str] = PostBodyField(None)
-        state: Optional[str] = PostBodyField(None)
-        country: str = PostBodyField()
-
-    dummy = Dummy(name="Jane", country="FR", city="Saint Palais s/mer", state=None)
-    obj = serialize_part(
-        dummy,
-        {
-            "name": ...,
-            "age": ...,
-            "city": ...,
-            "state": ...,
-            "country": ...,
-        },
-    )
-    assert obj == {
-        "name": "Jane",
-        "age": 10,
-        "city": "Saint Palais s/mer",
-        "state": None,
-        "country": "FR",
-    }
-
-
-def test_serialize_part_default_with_none() -> None:
-    class Dummy(Request):
-        name: str = PostBodyField()
-        age: Optional[int] = PostBodyField(default=10)
-
-    dummy = Dummy(name="Jane", age=None)
-    obj = serialize_part(
-        dummy,
-        {
-            "name": ...,
-            "age": ...,
-            "created_at": ...,
-        },
-    )
-    assert obj == {
-        "name": "Jane",
-        "age": None,
-    }
-
-
-def test_get_location_from_pydantic_v2() -> None:
-    class DummyFieldInfo:
-        json_schema_extra = {"location": QUERY}
-
-    assert get_location(DummyFieldInfo()) == QUERY
-
-
-def test_get_location_from_pydantic_v1() -> None:
-    class DummyFieldInfo:
-        class field_info:
-            extra = {"location": QUERY}
-
-    assert get_location(DummyFieldInfo()) == QUERY
-
-
-def test_get_location_raises_value_error() -> None:
-    class Dummy:
-        def __str__(self):
-            return "dummy"
-
-    with pytest.raises(ValueError) as ctx:
-        get_location(Dummy())
-    assert str(ctx.value) == "dummy is not a FieldInfo"
-
-
-def test_param_to_req() -> None:
-    class Dummy(Request):
-        x_message_id: int = HeaderField(default=123, alias="X-Message-Id")
-        x_token: SecretStr = HeaderField(alias="X-Token")
-        x_sub_id: Optional[int] = HeaderField(default=None, alias="X-Sub-Id")
-        name: str = PathInfoField()
-        country: str = QueryStringField()
-        state: Optional[str] = QueryStringField(default=None)
-        age: int = PostBodyField()
-        birthdate: datetime = PostBodyField()
-        password: SecretStr = PostBodyField()
-
-    dummy = Dummy(
-        name="Jane",
-        country="FR",
-        age=23,
-        birthdate=datetime(1956, 12, 13),
-        password=SecretStr("myownsecret"),
-        **{"X-Token": "plokiploki"},  # type: ignore
-    )
-    req = dummy.to_http_request("GET", "/dummies/{name}")
-    assert req.url == "/dummies/Jane"
-    assert req.headers == {"X-Message-Id": "123", "X-Token": "plokiploki"}
-    assert req.querystring == {"country": "FR"}
-    assert json.loads(req.body) == {
-        "age": 23,
-        "birthdate": "1956-12-13T00:00:00",
-        "password": "myownsecret",
-    }
-
-
-def test_patch_none_values() -> None:
-    class Dummy(Request):
-        x_message_id: int = HeaderField(default=123, alias="X-Message-Id")
-        x_sub_id: Optional[int] = HeaderField(None, alias="X-Sub-Id")
-        name: str = PathInfoField()
-        country: str = PostBodyField()
-        age: int = PostBodyField(default=10)
-        state: Optional[str] = PostBodyField(None)
-        city: Optional[str] = PostBodyField(None)
-
-    dummy = Dummy(name="Jane", country="FR", state=None)
-    req = dummy.to_http_request("GET", "/dummies/{name}")
-    assert req.url == "/dummies/Jane"
-    assert req.headers == {"X-Message-Id": "123"}
-    assert req.querystring == {}
-    assert json.loads(req.body) == {"age": 10, "country": "FR", "state": None}
 
 
 def test_parse_header_links() -> None:
