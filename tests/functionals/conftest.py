@@ -70,7 +70,7 @@ def update_item(item_name: str, item: PatchItem):
 
 
 @app.delete("/items/{item_name}")
-def delete_item(item_name: str, item: PatchItem):
+def delete_item(item_name: str):
     try:
         del items_db[item_name]
         return Response("", 204)
