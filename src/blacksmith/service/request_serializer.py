@@ -61,7 +61,7 @@ class JsonRequestSerializer(AbstractRequestBodySerializer):
     def accept(self, content_type: str) -> bool:
         return content_type.startswith("application/json")
 
-    def serialize(self, body: Dict[str, Any] | Sequence[Any]) -> str:
+    def serialize(self, body: Union[Dict[str, Any], Sequence[Any]]) -> str:
         return json.dumps(body, cls=JSONEncoder)
 
 
