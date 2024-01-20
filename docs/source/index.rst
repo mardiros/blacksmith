@@ -15,6 +15,7 @@
    user/consuming_api
    user/sd/service_discovery
    user/middleware/index
+   user/request_serialization
    user/errors
    user/testing
    user/using_web_frameworks
