@@ -17,6 +17,7 @@ from blacksmith.service.request_serializer import (
     QUERY,
     JSONEncoder,
     JsonRequestSerializer,
+    UrlencodedRequestSerializer,
     get_location,
     serialize_body,
     serialize_part,
@@ -235,6 +236,16 @@ def test_serializer_request(params: Mapping[str, Any]):
             "accept": "text/xml",
             "expected": False,
         },
+        {
+            "srlz": UrlencodedRequestSerializer(),
+            "accept": "application/x-www-form-urlencoded",
+            "expected": True,
+        },
+        {
+            "srlz": UrlencodedRequestSerializer(),
+            "accept": "text/xml",
+            "expected": False,
+        },
     ],
 )
 def test_request_serializer_accept(params: Mapping[str, Any]):
@@ -249,6 +260,16 @@ def test_request_serializer_accept(params: Mapping[str, Any]):
             "srlz": JsonRequestSerializer(),
             "data": {"foo": "bar"},
             "expected": '{"foo": "bar"}',
+        },
+        {
+            "srlz": UrlencodedRequestSerializer(),
+            "data": {"foo": "bar"},
+            "expected": "foo=bar",
+        },
+        {
+            "srlz": UrlencodedRequestSerializer(),
+            "data": {"foo": ["bar", "baz"]},
+            "expected": "foo=bar&foo=baz",
         },
     ],
 )
