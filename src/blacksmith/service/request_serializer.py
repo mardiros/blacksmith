@@ -16,6 +16,7 @@ from urllib.parse import urlencode
 from pydantic import BaseModel, SecretBytes, SecretStr
 from pydantic.fields import FieldInfo
 
+from blacksmith.domain.exceptions import UnregisteredContentTypeException
 from blacksmith.domain.model.http import HTTPRequest
 from blacksmith.domain.model.params import Request
 from blacksmith.typing import HttpLocation, HTTPMethod, Url
@@ -49,7 +50,7 @@ class AbstractRequestBodySerializer(abc.ABC):
         """Return true in case it can handle the request."""
 
     @abc.abstractmethod
-    def serialize(self, body: Dict[str, Any] | Sequence[Any]) -> str:
+    def serialize(self, body: Union[Dict[str, Any], Sequence[Any]]) -> str:
         """
         Serialize a python simple types to a python request body.
 
@@ -58,6 +59,8 @@ class AbstractRequestBodySerializer(abc.ABC):
 
 
 class JsonRequestSerializer(AbstractRequestBodySerializer):
+    """The default serializer that serialize to json"""
+
     def accept(self, content_type: str) -> bool:
         return content_type.startswith("application/json")
 
@@ -66,10 +69,12 @@ class JsonRequestSerializer(AbstractRequestBodySerializer):
 
 
 class UrlencodedRequestSerializer(AbstractRequestBodySerializer):
+    """A serializer for application/x-www-form-urlencoded request."""
+
     def accept(self, content_type: str) -> bool:
         return content_type == "application/x-www-form-urlencoded"
 
-    def serialize(self, body: Dict[str, Any] | Sequence[Any]) -> str:
+    def serialize(self, body: Union[Dict[str, Any], Sequence[Any]]) -> str:
         return urlencode(body, doseq=True)
 
 
@@ -108,7 +113,7 @@ def serialize_part(req: "Request", part: Dict[IntStr, Any]) -> Dict[str, simplet
     return {
         **{
             k: get_value(v)
-            for k, v in req.dict(
+            for k, v in req.dict(  # pydantic 1
                 include=part,
                 by_alias=True,
                 exclude_none=True,
@@ -118,7 +123,7 @@ def serialize_part(req: "Request", part: Dict[IntStr, Any]) -> Dict[str, simplet
         },
         **{
             k: get_value(v)
-            for k, v in req.dict(
+            for k, v in req.dict(  # pydantic 1
                 include=part,
                 by_alias=True,
                 exclude_none=False,
@@ -129,24 +134,45 @@ def serialize_part(req: "Request", part: Dict[IntStr, Any]) -> Dict[str, simplet
     }
 
 
-SERIALIZERS: List[AbstractRequestBodySerializer] = [
+_SERIALIZERS: List[AbstractRequestBodySerializer] = [
     JsonRequestSerializer(),
     UrlencodedRequestSerializer(),
 ]
-"""Serializers used to serialize request body."""
+
+
+def register_request_body_serializer(serializer: AbstractRequestBodySerializer) -> None:
+    """Register a serializer to serialize some kind of request."""
+    _SERIALIZERS.insert(0, serializer)
+
+
+def unregister_request_body_serializer(
+    serializer: AbstractRequestBodySerializer,
+) -> None:
+    """
+    Unregister a serializer previously added.
+
+    Usefull for testing purpose.
+    """
+    _SERIALIZERS.remove(serializer)
 
 
 def serialize_body(
     req: "Request", body: Dict[str, str], content_type: Optional[str] = None
 ) -> str:
-    """Serialize the body of the request. In case there is some."""
+    """
+    Serialize the body of the request.
+
+    Note that the content_type is optional, but if it is set,
+
+    the request will contains
+    """
     if not body and not content_type:
         return ""
     content_type = content_type or "application/json"
-    for serializer in SERIALIZERS:
+    for serializer in _SERIALIZERS:
         if serializer.accept(content_type):
             return serializer.serialize(serialize_part(req, body))
-    return ""
+    raise UnregisteredContentTypeException(content_type, req)
 
 
 def serialize_request(
@@ -154,6 +180,16 @@ def serialize_request(
     url_pattern: Url,
     request_model: Request,
 ) -> HTTPRequest:
+    """
+    Serialize :class:`blacksmith.Request` subclasses to :class:`blacksmith.HTTPRequest`.
+
+    While processing an http request, the request models are serialize to an
+    intermediate object :class:`blacksmith.HTTPRequest`, that will be passed over
+    middleware and finally to the transport in order to build the final http request.
+
+    Note that the body of the :class:`blacksmith.HTTPRequest` is a string, here,
+    serialized by a registered serializer.
+    """
     req = HTTPRequest(method=method, url_pattern=url_pattern)
     fields_by_loc: Dict[HttpLocation, Dict[IntStr, Any]] = {
         HEADER: {},

@@ -1,4 +1,4 @@
-from blacksmith import Request, HeaderField, PostBodyField
+from blacksmith import HeaderField, PostBodyField, Request
 
 
 class MyFormURLEncodedRequest(Request):

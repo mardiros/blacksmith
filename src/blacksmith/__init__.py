@@ -72,6 +72,11 @@ from .service._async.route_proxy import AsyncRouteProxy
 from .service._sync.base import SyncAbstractTransport
 from .service._sync.client import SyncClient, SyncClientFactory
 from .service._sync.route_proxy import SyncRouteProxy
+from .service.request_serializer import (
+    AbstractRequestBodySerializer,
+    register_request_body_serializer,
+    unregister_request_body_serializer,
+)
 
 __all__ = [
     # Ordered for the doc
@@ -148,4 +153,8 @@ __all__ = [
     "SyncAbstractTransport",
     "HTTPRequest",
     "HTTPResponse",
+    # Serializer,
+    "AbstractRequestBodySerializer",
+    "register_request_body_serializer",
+    "unregister_request_body_serializer",
 ]
