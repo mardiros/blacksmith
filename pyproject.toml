@@ -70,6 +70,7 @@ filterwarnings = [
   "ignore:.*pkg_resources.declare_namespace.*:DeprecationWarning",
   "ignore:.*Accessing `.value` on Result type is deprecated.*:DeprecationWarning",
   "ignore:`general_plain_validator_function` is deprecated.*:DeprecationWarning",
+  "ignore:.*:pytest.PytestUnhandledCoroutineWarning",
 ]
 
 [tool.pyright]
