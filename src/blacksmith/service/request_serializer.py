@@ -11,6 +11,7 @@ from typing import (
     Union,
     cast,
 )
+from urllib.parse import urlencode
 
 from pydantic import BaseModel, SecretBytes, SecretStr
 from pydantic.fields import FieldInfo
@@ -62,6 +63,14 @@ class JsonRequestSerializer(AbstractRequestBodySerializer):
 
     def serialize(self, body: Dict[str, Any] | Sequence[Any]) -> str:
         return json.dumps(body, cls=JSONEncoder)
+
+
+class UrlencodedRequestSerializer(AbstractRequestBodySerializer):
+    def accept(self, content_type: str) -> bool:
+        return content_type == "application/x-www-form-urlencoded"
+
+    def serialize(self, body: Dict[str, Any] | Sequence[Any]) -> str:
+        return urlencode(body, doseq=True)
 
 
 class JSONEncoder(json.JSONEncoder):
@@ -120,8 +129,11 @@ def serialize_part(req: "Request", part: Dict[IntStr, Any]) -> Dict[str, simplet
     }
 
 
-SERIALIZERS: List[AbstractRequestBodySerializer] = [JsonRequestSerializer()]
-"""Serializers to """
+SERIALIZERS: List[AbstractRequestBodySerializer] = [
+    JsonRequestSerializer(),
+    UrlencodedRequestSerializer(),
+]
+"""Serializers used to serialize request body."""
 
 
 def serialize_body(
