@@ -1,5 +1,5 @@
 import json
-from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Union, cast
 
 from pydantic import BaseModel, SecretBytes, SecretStr
 from pydantic.fields import FieldInfo
@@ -85,6 +85,17 @@ def serialize_part(req: "Request", part: Dict[IntStr, Any]) -> Dict[str, simplet
     }
 
 
+def serialize_body(
+    req: "Request", body: Dict[str, str], content_type: Optional[str] = None
+) -> str:
+    """Serialize the body of the request. In case there is some."""
+    if not body and not content_type:
+        return ""
+    if content_type is None or content_type.startswith("application/json"):
+        return json.dumps(serialize_part(req, body), cls=JSONEncoder)
+    return ""
+
+
 def serialize_request(
     method: HTTPMethod,
     url_pattern: Url,
@@ -109,8 +120,9 @@ def serialize_request(
         serialize_part(request_model, fields_by_loc[QUERY]),
     )
 
-    if fields_by_loc[BODY]:
-        req.body = json.dumps(
-            serialize_part(request_model, fields_by_loc[BODY]), cls=JSONEncoder
-        )
+    req.body = serialize_body(
+        request_model,
+        fields_by_loc[BODY],
+        cast(Optional[str], headers.get("Content-Type")),
+    )
     return req

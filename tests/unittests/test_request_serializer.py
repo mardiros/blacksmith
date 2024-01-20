@@ -17,9 +17,14 @@ from blacksmith.service.request_serializer import (
     QUERY,
     JSONEncoder,
     get_location,
+    serialize_body,
     serialize_part,
     serialize_request,
 )
+
+
+class GetRequest(Request):
+    ...
 
 
 class DummyGetRequest(Request):
@@ -115,6 +120,67 @@ def test_serialize_part_default_with_none() -> None:
         "name": "Jane",
         "age": None,
     }
+
+
+@pytest.mark.parametrize(
+    "params",
+    [
+        pytest.param(
+            {
+                "req": GetRequest(),
+                "body": {},
+                "content_type": None,
+                "expected": "",
+            },
+            id="empty",
+        ),
+        pytest.param(
+            {
+                "req": GetRequest(),
+                "body": {},
+                "content_type": "application/json",
+                "expected": "{}",
+            },
+            id="empty",
+        ),
+        pytest.param(
+            {
+                "req": DummyPostRequest(
+                    secret=SecretStr("yolo"), bar=1, name="jon", foo="bar"
+                ),
+                "body": {"foo"},
+                "content_type": None,
+                "expected": '{"foo": "bar"}',
+            },
+            id="body, default content-type is json",
+        ),
+        pytest.param(
+            {
+                "req": DummyPostRequest(
+                    secret=SecretStr("yolo"), bar=1, name="jon", foo="bar"
+                ),
+                "body": {"foo"},
+                "content_type": "application/json",
+                "expected": '{"foo": "bar"}',
+            },
+            id="body with json",
+        ),
+        pytest.param(
+            {
+                "req": DummyPostRequest(
+                    secret=SecretStr("yolo"), bar=1, name="jon", foo="bar"
+                ),
+                "body": {"foo"},
+                "content_type": "application/json; charset=utf-8",
+                "expected": '{"foo": "bar"}',
+            },
+            id="body with json",
+        ),
+    ],
+)
+def test_serialize_body(params: Mapping[str, Any]):
+    body = serialize_body(params["req"], params["body"], params["content_type"])
+    assert body == params["expected"]
 
 
 @pytest.mark.parametrize(
