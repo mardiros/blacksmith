@@ -16,6 +16,7 @@ from blacksmith import (
 from blacksmith.service.request_serializer import (
     QUERY,
     JSONEncoder,
+    JsonRequestSerializer,
     get_location,
     serialize_body,
     serialize_part,
@@ -165,17 +166,6 @@ def test_serialize_part_default_with_none() -> None:
             },
             id="body with json",
         ),
-        pytest.param(
-            {
-                "req": DummyPostRequest(
-                    secret=SecretStr("yolo"), bar=1, name="jon", foo="bar"
-                ),
-                "body": {"foo"},
-                "content_type": "application/json; charset=utf-8",
-                "expected": '{"foo": "bar"}',
-            },
-            id="body with json",
-        ),
     ],
 )
 def test_serialize_body(params: Mapping[str, Any]):
@@ -225,3 +215,43 @@ def test_serialize_body(params: Mapping[str, Any]):
 def test_serializer_request(params: Mapping[str, Any]):
     req = serialize_request(params["method"], params["url_pattern"], params["request"])
     assert req == params["expected"]
+
+
+@pytest.mark.parametrize(
+    "params",
+    [
+        {
+            "srlz": JsonRequestSerializer(),
+            "accept": "application/json",
+            "expected": True,
+        },
+        {
+            "srlz": JsonRequestSerializer(),
+            "accept": "application/json; charset=utf-8",
+            "expected": True,
+        },
+        {
+            "srlz": JsonRequestSerializer(),
+            "accept": "text/xml",
+            "expected": False,
+        },
+    ],
+)
+def test_request_serializer_accept(params: Mapping[str, Any]):
+    ret = params["srlz"].accept(params["accept"])
+    assert ret == params["expected"]
+
+
+@pytest.mark.parametrize(
+    "params",
+    [
+        {
+            "srlz": JsonRequestSerializer(),
+            "data": {"foo": "bar"},
+            "expected": '{"foo": "bar"}',
+        },
+    ],
+)
+def test_request_serializer_serialize(params: Mapping[str, Any]):
+    ret = params["srlz"].serialize(params["data"])
+    assert ret == params["expected"]

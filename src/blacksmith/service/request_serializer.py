@@ -1,5 +1,16 @@
+import abc
 import json
-from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Union, cast
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    List,
+    Mapping,
+    Optional,
+    Sequence,
+    Union,
+    cast,
+)
 
 from pydantic import BaseModel, SecretBytes, SecretStr
 from pydantic.fields import FieldInfo
@@ -27,6 +38,30 @@ HEADER: HttpLocation = "headers"
 QUERY: HttpLocation = "querystring"
 BODY: HttpLocation = "body"
 simpletypes = Union[str, int, float, bool]
+
+
+class AbstractRequestBodySerializer(abc.ABC):
+    """Request body serializer."""
+
+    @abc.abstractmethod
+    def accept(self, content_type: str) -> bool:
+        """Return true in case it can handle the request."""
+
+    @abc.abstractmethod
+    def serialize(self, body: Dict[str, Any] | Sequence[Any]) -> str:
+        """
+        Serialize a python simple types to a python request body.
+
+        The body received here is the extracted object from the request model.
+        """
+
+
+class JsonRequestSerializer(AbstractRequestBodySerializer):
+    def accept(self, content_type: str) -> bool:
+        return content_type.startswith("application/json")
+
+    def serialize(self, body: Dict[str, Any] | Sequence[Any]) -> str:
+        return json.dumps(body, cls=JSONEncoder)
 
 
 class JSONEncoder(json.JSONEncoder):
@@ -85,14 +120,20 @@ def serialize_part(req: "Request", part: Dict[IntStr, Any]) -> Dict[str, simplet
     }
 
 
+SERIALIZERS: List[AbstractRequestBodySerializer] = [JsonRequestSerializer()]
+"""Serializers to """
+
+
 def serialize_body(
     req: "Request", body: Dict[str, str], content_type: Optional[str] = None
 ) -> str:
     """Serialize the body of the request. In case there is some."""
     if not body and not content_type:
         return ""
-    if content_type is None or content_type.startswith("application/json"):
-        return json.dumps(serialize_part(req, body), cls=JSONEncoder)
+    content_type = content_type or "application/json"
+    for serializer in SERIALIZERS:
+        if serializer.accept(content_type):
+            return serializer.serialize(serialize_part(req, body))
     return ""
 
 
