@@ -89,7 +89,7 @@ class JSONEncoder(json.JSONEncoder):
 def get_fields(model: BaseModel) -> Mapping[str, FieldInfo]:
     if hasattr(model, "model_fields"):
         return model.model_fields
-    return model.__fields__  # pydantic 1
+    return model.__fields__  # coverage: ignore - pydantic 1
 
 
 def get_location(field: Any) -> HttpLocation:
