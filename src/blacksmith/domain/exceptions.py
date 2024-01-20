@@ -13,6 +13,7 @@ from blacksmith.typing import (
 
 if TYPE_CHECKING:
     from .model.http import HTTPRequest, HTTPResponse
+    from .model.params import Request
 
 
 class ConfigurationError(Exception):
@@ -68,6 +69,15 @@ class NoContractException(RuntimeError):
         super().__init__(
             f"Unregistered route '{method}' in resource '{resource}' in "
             f"client '{client}'"
+        )
+
+
+class UnregisteredContentTypeException(RuntimeError):
+    """Raised when an unregistered contract is being requested."""
+
+    def __init__(self, content_type: str, request: "Request") -> None:
+        super().__init__(
+            f"Unregistered content type '{content_type}' in request <{request}>"
         )
 
 

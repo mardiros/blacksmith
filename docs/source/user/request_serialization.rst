@@ -41,3 +41,29 @@ serialized to
    You may also note that the embeded urlencoded form version only supports flat
    structure, as is just a wrapper around the standar library function
    ``urllib.parse.urlencode``.
+
+
+
+Registering serializer
+----------------------
+
+For extensibility, Blacksmith expose serialization are not a per client feature,
+serializers are globals and register unsing the function
+:func:`blacksmith.register_request_body_serializer`.
+
+When a method serializer is added, it will have the highest priority of all the
+serializers. You may use it to override the default Blacksmith serializer.
+
+Now its time to add a dummy serializer.
+
+.. literalinclude:: request_serialization_02.py
+
+Now, if a request contains a `Content-Type` `text/xml+dummy` it will be serialized using
+that serializer, and the body will always be `<foo/>`
+
+
+.. important::
+
+   If a request receive a ``Content-Type`` that is not handled by anyu serializer,
+   an runtime exception ``UnregisteredContentTypeException`` will be raised during
+   the serialization.

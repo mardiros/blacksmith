@@ -8,3 +8,4 @@ Service
    base
    client
    adapters/httpx
+   request_serializer

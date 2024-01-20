@@ -1,6 +1,6 @@
 import json
 from datetime import datetime
-from typing import Any, Mapping, Optional
+from typing import Any, Dict, Mapping, Optional, Sequence, Union
 
 import pytest
 from pydantic import SecretStr
@@ -13,15 +13,19 @@ from blacksmith import (
     QueryStringField,
     Request,
 )
+from blacksmith.domain.exceptions import UnregisteredContentTypeException
 from blacksmith.service.request_serializer import (
     QUERY,
+    AbstractRequestBodySerializer,
     JSONEncoder,
     JsonRequestSerializer,
     UrlencodedRequestSerializer,
     get_location,
+    register_request_body_serializer,
     serialize_body,
     serialize_part,
     serialize_request,
+    unregister_request_body_serializer,
 )
 
 
@@ -276,3 +280,48 @@ def test_request_serializer_accept(params: Mapping[str, Any]):
 def test_request_serializer_serialize(params: Mapping[str, Any]):
     ret = params["srlz"].serialize(params["data"])
     assert ret == params["expected"]
+
+
+def test_register_serializer():
+    class MySerializer(AbstractRequestBodySerializer):
+        def accept(self, content_type: str) -> bool:
+            return content_type == "text/xml"
+
+        def serialize(self, body: Union[Dict[str, Any], Sequence[Any]]) -> str:
+            return "<foo/>"
+
+    srlz = MySerializer()
+    register_request_body_serializer(srlz)
+
+    class DummyPostRequestXML(Request):
+        foo: str = PostBodyField()
+        content_type: str = HeaderField(default="text/xml", alias="Content-Type")
+
+    httpreq = serialize_request(
+        "POST",
+        "/",
+        DummyPostRequestXML(foo="bar"),
+    )
+
+    assert httpreq.body == "<foo/>"
+
+    httpreq = serialize_request(
+        "POST",
+        "/",
+        DummyPostRequestXML(foo="bar", **{"Content-Type": "application/json"}),
+    )
+
+    assert httpreq.body == '{"foo": "bar"}'
+
+    unregister_request_body_serializer(srlz)
+
+    with pytest.raises(UnregisteredContentTypeException) as ctx:
+        serialize_request(
+            "POST",
+            "/",
+            DummyPostRequestXML(foo="bar"),
+        )
+    assert (
+        str(ctx.value) == "Unregistered content type 'text/xml' in request <foo='bar' "
+        "content_type='text/xml'>"
+    )
