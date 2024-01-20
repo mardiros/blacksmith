@@ -13,6 +13,10 @@ Blacksmith
    :target: https://codecov.io/gh/mardiros/blacksmith
    :alt: Coverage Report
 
+.. image:: https://api.codeclimate.com/v1/badges/4d36d0011afda749039a/maintainability
+   :target: https://codeclimate.com/github/mardiros/blacksmith/maintainability
+   :alt: Maintainability
+
 
 Blacksmith is a library to build a solid microservices architecture based on REST API.
 
