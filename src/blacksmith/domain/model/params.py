@@ -149,6 +149,7 @@ class Request(BaseModel):
             Dict[str, Union[simpletypes, List[simpletypes]]],
             serialize_part(self, fields_by_loc[QUERY]),
         )
+
         req.body = json.dumps(
             serialize_part(self, fields_by_loc[BODY]), cls=JSONEncoder
         )
