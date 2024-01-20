@@ -1,10 +1,8 @@
 import abc
-import json
 import warnings
 from dataclasses import dataclass
 from functools import partial
 from typing import (
-    TYPE_CHECKING,
     Any,
     Callable,
     Dict,
@@ -14,41 +12,18 @@ from typing import (
     Optional,
     Type,
     TypeVar,
-    Union,
     cast,
 )
 
-from pydantic import BaseModel, Field, SecretBytes, SecretStr
-
-# assume we can use deprecated stuff until we support both version
-try:
-    # pydantic 2
-    from pydantic.deprecated.json import ENCODERS_BY_TYPE  # type: ignore
-except ImportError:  # type: ignore # coverage: ignore
-    # pydantic 1
-    from pydantic.json import ENCODERS_BY_TYPE  # type: ignore  # coverage: ignore
-
+from pydantic import BaseModel, Field
 from result import Result
 from result.result import F, U
 
 from blacksmith.domain.error import AbstractErrorParser, TError_co
 
-if TYPE_CHECKING:
-    from pydantic.typing import IntStr
-else:
-    IntStr = str
-
 from ...domain.exceptions import HTTPError, NoResponseSchemaException
-from ...typing import (
-    ClientName,
-    HttpLocation,
-    HTTPMethod,
-    Json,
-    Path,
-    ResourceName,
-    Url,
-)
-from .http import HTTPRequest, HTTPResponse, Links, simpletypes
+from ...typing import ClientName, HttpLocation, HTTPMethod, Json, Path, ResourceName
+from .http import HTTPResponse, Links
 
 PATH: HttpLocation = "path"
 HEADER: HttpLocation = "headers"
@@ -69,56 +44,6 @@ PostBodyField = partial(Field, location=BODY)
 """Declare field that are serialized in the json document."""
 
 
-def get_location(field: Any) -> HttpLocation:
-    # field is of type FieldInfo, which differ on pydantic 2 and pydantic 1
-    if hasattr(field, "json_schema_extra"):
-        extra = field.json_schema_extra
-    elif hasattr(field, "field_info"):
-        extra = field.field_info.extra
-    else:
-        raise ValueError(f"{field} is not a FieldInfo")
-    return extra["location"]
-
-
-class JSONEncoder(json.JSONEncoder):
-    def default(self, o: Any) -> Any:
-        for typ, serializer in ENCODERS_BY_TYPE.items():
-            if isinstance(o, typ):
-                return serializer(o)
-        return super(JSONEncoder, self).default(o)
-
-
-def get_value(v: Union[simpletypes, SecretStr, SecretBytes]) -> simpletypes:
-    if hasattr(v, "get_secret_value"):
-        return getattr(v, "get_secret_value")()
-    return v  # type: ignore
-
-
-def serialize_part(req: "Request", part: Dict[IntStr, Any]) -> Dict[str, simpletypes]:
-    return {
-        **{
-            k: get_value(v)
-            for k, v in req.dict(
-                include=part,
-                by_alias=True,
-                exclude_none=True,
-                exclude_defaults=False,
-            ).items()
-            if v is not None
-        },
-        **{
-            k: get_value(v)
-            for k, v in req.dict(
-                include=part,
-                by_alias=True,
-                exclude_none=False,
-                exclude_unset=True,
-                exclude_defaults=False,
-            ).items()
-        },
-    }
-
-
 class Request(BaseModel):
     """
     Request Params Model.
@@ -126,34 +51,6 @@ class Request(BaseModel):
     Fields must use subclass :func:`.PathInfoField`, :func:`.HeaderField`,
     :func:`.QueryStringField` or :func:`.PostBodyField` to declare each fields.
     """
-
-    def to_http_request(self, method: HTTPMethod, url_pattern: Url) -> HTTPRequest:
-        """Convert the request params to an http request in order to serialize
-        the http request for the client.
-        """
-        req = HTTPRequest(method=method, url_pattern=url_pattern)
-        fields_by_loc: Dict[HttpLocation, Dict[IntStr, Any]] = {
-            HEADER: {},
-            PATH: {},
-            QUERY: {},
-            BODY: {},
-        }
-        for name, field in self.__fields__.items():
-            loc = get_location(field)
-            fields_by_loc[loc].update({name: ...})
-
-        headers = serialize_part(self, fields_by_loc[HEADER])
-        req.headers = {key: str(val) for key, val in headers.items()}
-        req.path = serialize_part(self, fields_by_loc[PATH])
-        req.querystring = cast(
-            Dict[str, Union[simpletypes, List[simpletypes]]],
-            serialize_part(self, fields_by_loc[QUERY]),
-        )
-
-        req.body = json.dumps(
-            serialize_part(self, fields_by_loc[BODY]), cls=JSONEncoder
-        )
-        return req
 
 
 TResponse = TypeVar("TResponse", bound="Response")

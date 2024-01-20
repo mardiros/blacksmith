@@ -34,6 +34,7 @@ from blacksmith.domain.model.params import (
 from blacksmith.domain.registry import ApiRoutes, HttpCollection, HttpResource
 from blacksmith.domain.typing import AsyncMiddleware
 from blacksmith.middleware._async.base import AsyncHTTPMiddleware
+from blacksmith.service.request_serializer import serialize_request
 from blacksmith.typing import ClientName, HTTPMethod, Path, ResourceName, Url
 
 from .base import AsyncAbstractTransport
@@ -144,7 +145,7 @@ class AsyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
             )
         else:
             build_params = params
-        req = build_params.to_http_request(method, self.endpoint + resource.path)
+        req = serialize_request(method, self.endpoint + resource.path, build_params)
         return (resource.path, req, return_schema)
 
     def _prepare_response(

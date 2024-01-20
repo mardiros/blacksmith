@@ -4,8 +4,8 @@ from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Union, cast
 from pydantic import BaseModel, SecretBytes, SecretStr
 from pydantic.fields import FieldInfo
 
-from blacksmith.domain.model.params import Request
 from blacksmith.domain.model.http import HTTPRequest
+from blacksmith.domain.model.params import Request
 from blacksmith.typing import HttpLocation, HTTPMethod, Url
 
 # assume we can use deprecated stuff until we support both version
