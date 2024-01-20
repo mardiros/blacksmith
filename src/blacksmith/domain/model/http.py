@@ -1,11 +1,22 @@
 import re
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Mapping, Optional, Union, cast
+from typing import (
+    Any,
+    AsyncIterable,
+    Dict,
+    Iterable,
+    List,
+    Mapping,
+    Optional,
+    Union,
+    cast,
+)
 
 from blacksmith.typing import HTTPMethod, Json, Url
 
 simpletypes = Union[str, int, float, bool]
 Links = Dict[Optional[str], Dict[str, str]]
+RequestBody = Union[str, bytes, Iterable[bytes], AsyncIterable[bytes]]
 
 
 class HTTPTimeout:
@@ -42,7 +53,7 @@ class HTTPRequest:
         default_factory=dict
     )
     headers: Dict[str, str] = field(default_factory=dict)
-    body: str = ""
+    body: RequestBody = ""
 
     @property
     def url(self) -> str:

@@ -17,7 +17,7 @@ from pydantic import BaseModel, SecretBytes, SecretStr
 from pydantic.fields import FieldInfo
 
 from blacksmith.domain.exceptions import UnregisteredContentTypeException
-from blacksmith.domain.model.http import HTTPRequest
+from blacksmith.domain.model.http import HTTPRequest, RequestBody
 from blacksmith.domain.model.params import Request
 from blacksmith.typing import HttpLocation, HTTPMethod, Url
 
@@ -50,7 +50,7 @@ class AbstractRequestBodySerializer(abc.ABC):
         """Return true in case it can handle the request."""
 
     @abc.abstractmethod
-    def serialize(self, body: Union[Dict[str, Any], Sequence[Any]]) -> str:
+    def serialize(self, body: Union[Dict[str, Any], Sequence[Any]]) -> RequestBody:
         """
         Serialize a python simple types to a python request body.
 
@@ -64,7 +64,7 @@ class JsonRequestSerializer(AbstractRequestBodySerializer):
     def accept(self, content_type: str) -> bool:
         return content_type.startswith("application/json")
 
-    def serialize(self, body: Union[Dict[str, Any], Sequence[Any]]) -> str:
+    def serialize(self, body: Union[Dict[str, Any], Sequence[Any]]) -> RequestBody:
         return json.dumps(body, cls=JSONEncoder)
 
 
@@ -74,7 +74,7 @@ class UrlencodedRequestSerializer(AbstractRequestBodySerializer):
     def accept(self, content_type: str) -> bool:
         return content_type == "application/x-www-form-urlencoded"
 
-    def serialize(self, body: Union[Dict[str, Any], Sequence[Any]]) -> str:
+    def serialize(self, body: Union[Dict[str, Any], Sequence[Any]]) -> RequestBody:
         return urlencode(body, doseq=True)
 
 
@@ -158,7 +158,7 @@ def unregister_request_body_serializer(
 
 def serialize_body(
     req: "Request", body: Dict[str, str], content_type: Optional[str] = None
-) -> str:
+) -> RequestBody:
     """
     Serialize the body of the request.
 
