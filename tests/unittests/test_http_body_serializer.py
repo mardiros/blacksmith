@@ -17,7 +17,7 @@ from blacksmith.domain.exceptions import UnregisteredContentTypeException
 from blacksmith.domain.model.http import HTTPRawResponse, HTTPResponse
 from blacksmith.service.http_body_serializer import (
     QUERY,
-    AbstractRequestBodySerializer,
+    AbstractHttpBodySerializer,
     JSONEncoder,
     JsonRequestSerializer,
     UrlencodedRequestSerializer,
@@ -68,7 +68,7 @@ class DummyHTTPRepsonse(HTTPRawResponse):
         return "utf-8"
 
 
-class MySerializer(AbstractRequestBodySerializer):
+class MySerializer(AbstractHttpBodySerializer):
     def accept(self, content_type: str) -> bool:
         return content_type == "text/xml"
 
