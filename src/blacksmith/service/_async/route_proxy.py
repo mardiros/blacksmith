@@ -34,7 +34,7 @@ from blacksmith.domain.model.params import (
 from blacksmith.domain.registry import ApiRoutes, HttpCollection, HttpResource
 from blacksmith.domain.typing import AsyncMiddleware
 from blacksmith.middleware._async.base import AsyncHTTPMiddleware
-from blacksmith.service.request_serializer import serialize_request
+from blacksmith.service.http_body_serializer import serialize_request
 from blacksmith.typing import ClientName, HTTPMethod, Path, ResourceName, Url
 
 from .base import AsyncAbstractTransport

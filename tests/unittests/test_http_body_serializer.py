@@ -14,7 +14,7 @@ from blacksmith import (
     Request,
 )
 from blacksmith.domain.exceptions import UnregisteredContentTypeException
-from blacksmith.service.request_serializer import (
+from blacksmith.service.http_body_serializer import (
     QUERY,
     AbstractRequestBodySerializer,
     JSONEncoder,
