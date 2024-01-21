@@ -1,3 +1,13 @@
+2.7.0 - Released on 2024-01-21
+------------------------------
+* Add a way to support multiple serialization format, more than json.
+  In this release, support of ``application/x-www-form-urlencoded`` is
+  natively support. A new abstract class
+  :class:`blacksmith.AbstractHttpBodySerializer` is available to handle
+  new kind of serialization format.
+  The function :func:`blacksmith.register_http_body_serializer` has been
+  added to register new format.
+
 2.6.1 - Released on 2024-01-11
 ------------------------------
 * Add missing method :meth:`blacksmith.ResponseBox.unwrap_or_raise`
