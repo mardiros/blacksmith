@@ -34,12 +34,12 @@ used by the `get_client` method.
 
 Now that we can bootstrap an application, then we can write the tests.
 
-.. literalinclude:: ../../../examples/unittesting/notif/tests/test_views.py
+.. literalinclude:: ../../../examples/unit_testing/notif/tests/test_views.py
    :emphasize-lines: 16-26
 
 Then we can write the view that implement the notification sent.
 
-.. literalinclude:: ../../../examples/unittesting/notif/src/notif/views.py
+.. literalinclude:: ../../../examples/unit_testing/notif/src/notif/views.py
    :emphasize-lines: 12,15
 
 The object ``AppConfig`` is retrieved by FastAPI using its dependency
@@ -83,12 +83,12 @@ Now to finalize our ``conftest.py``, some fixture must be written to.
    Note that the ``configure`` method is a couroutine in this example,
    but it was a simple method before, to simplify the example.
 
-   .. literalinclude:: ../../../examples/unittesting/notif/src/notif/entrypoint.py
+   .. literalinclude:: ../../../examples/unit_testing/notif/src/notif/entrypoint.py
 
 
 The full example can be found in the examples directory on github:
 
-https://github.com/mardiros/blacksmith/tree/main/examples/unittesting/notif
+https://github.com/mardiros/blacksmith/tree/main/examples/unit_testing/notif
 
 
 Using whitesmith
