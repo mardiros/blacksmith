@@ -73,7 +73,7 @@ from .service._sync.base import SyncAbstractTransport
 from .service._sync.client import SyncClient, SyncClientFactory
 from .service._sync.route_proxy import SyncRouteProxy
 from .service.http_body_serializer import (
-    AbstractRequestBodySerializer,
+    AbstractHttpBodySerializer,
     register_http_body_serializer,
     unregister_http_body_serializer,
 )
@@ -154,7 +154,7 @@ __all__ = [
     "HTTPRequest",
     "HTTPResponse",
     # Serializer,
-    "AbstractRequestBodySerializer",
+    "AbstractHttpBodySerializer",
     "register_http_body_serializer",
     "unregister_http_body_serializer",
 ]

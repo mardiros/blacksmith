@@ -64,6 +64,14 @@ that serializer, and the body will always be `<foo/>`
 
 .. important::
 
-   If a request receive a ``Content-Type`` that is not handled by anyu serializer,
+   If a request receive a ``Content-Type`` that is not handled by any serializer,
    an runtime exception ``UnregisteredContentTypeException`` will be raised during
    the serialization.
+
+
+You can also not that the serializer implement a
+:meth:`blacksmith.AbstractHttpBodySerializer.deserialize` method to handle response.
+
+If you request is talking to a specific request body, there is chance that the API
+respond in its own format too, this is where the
+:meth:`blacksmith.AbstractHttpBodySerializer.deserialize` will be consumed.

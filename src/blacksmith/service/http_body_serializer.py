@@ -47,7 +47,7 @@ BODY: HttpLocation = "body"
 simpletypes = Union[str, int, float, bool]
 
 
-class AbstractRequestBodySerializer(abc.ABC):
+class AbstractHttpBodySerializer(abc.ABC):
     """Request body serializer."""
 
     @abc.abstractmethod
@@ -65,11 +65,11 @@ class AbstractRequestBodySerializer(abc.ABC):
     @abc.abstractmethod
     def deserialize(self, body: bytes, encoding: Optional[str]) -> Json:
         """
-        Deserialize a raw http response body to a python simple types represenstaion.
+        Deserialize a raw http response body to a python simple types representation.
         """
 
 
-class JsonRequestSerializer(AbstractRequestBodySerializer):
+class JsonRequestSerializer(AbstractHttpBodySerializer):
     """The default serializer that serialize to json"""
 
     def accept(self, content_type: str) -> bool:
@@ -82,7 +82,7 @@ class JsonRequestSerializer(AbstractRequestBodySerializer):
         return json.loads(body)
 
 
-class UrlencodedRequestSerializer(AbstractRequestBodySerializer):
+class UrlencodedRequestSerializer(AbstractHttpBodySerializer):
     """A serializer for application/x-www-form-urlencoded request."""
 
     def accept(self, content_type: str) -> bool:
@@ -151,19 +151,19 @@ def serialize_part(req: "Request", part: Dict[IntStr, Any]) -> Dict[str, simplet
     }
 
 
-_SERIALIZERS: List[AbstractRequestBodySerializer] = [
+_SERIALIZERS: List[AbstractHttpBodySerializer] = [
     JsonRequestSerializer(),
     UrlencodedRequestSerializer(),
 ]
 
 
-def register_http_body_serializer(serializer: AbstractRequestBodySerializer) -> None:
+def register_http_body_serializer(serializer: AbstractHttpBodySerializer) -> None:
     """Register a serializer to serialize some kind of request."""
     _SERIALIZERS.insert(0, serializer)
 
 
 def unregister_http_body_serializer(
-    serializer: AbstractRequestBodySerializer,
+    serializer: AbstractHttpBodySerializer,
 ) -> None:
     """
     Unregister a serializer previously added.
