@@ -1,5 +1,5 @@
 Request Serializer
 ==================
 
-.. automodule:: blacksmith.service.request_serializer
+.. automodule:: blacksmith.service.http_body_serializer
    :members:
