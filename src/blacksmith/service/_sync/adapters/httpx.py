@@ -1,22 +1,20 @@
-from typing import Mapping
+from typing import Mapping, cast
 
-from httpx import Response as HttpxResponse
 from httpx import Timeout as HttpxTimeout
 from httpx import TimeoutException
 
 from blacksmith.domain.exceptions import HTTPError, HTTPTimeoutError
-from blacksmith.domain.model import HTTPRequest, HTTPResponse, HTTPTimeout
+from blacksmith.domain.model import (
+    HTTPRawResponse,
+    HTTPRequest,
+    HTTPResponse,
+    HTTPTimeout,
+)
+from blacksmith.service.http_body_serializer import serialize_response
 from blacksmith.service.ports import SyncClient
-from blacksmith.typing import ClientName, Json, Path
+from blacksmith.typing import ClientName, Path
 
 from ..base import SyncAbstractTransport
-
-
-def safe_json(r: HttpxResponse) -> Json:
-    try:
-        return r.json()
-    except Exception:
-        return {"error": r.text}
 
 
 def build_headers(req: HTTPRequest) -> Mapping[str, str]:
@@ -61,10 +59,7 @@ class SyncHttpxTransport(SyncAbstractTransport):
                     f"{exc.__class__.__name__} while calling {req.method} {req.url}"
                 )
 
-        status_code: int = r.status_code  # type: ignore
-        headers: Mapping[str, str] = r.headers  # type: ignore
-        json = "" if status_code == 204 else safe_json(r)
-        resp = HTTPResponse(status_code, headers, json=json)
+        resp = serialize_response(cast(HTTPRawResponse, r))
         if not r.is_success:
             raise HTTPError(
                 f"{client_name} - {req.method} {path} - "

@@ -123,7 +123,7 @@ def test_query_http_timeout(patch: Any) -> None:
     "httpx._client.Client.request",
     return_value=dummy_error_500_response,
 )
-def test_query_http_no_json(patch: Any) -> None:
+def test_query_http_not_json(patch: Any) -> None:
     transport = SyncHttpxTransport()
     with pytest.raises(HTTPError) as ctx:
         transport(
