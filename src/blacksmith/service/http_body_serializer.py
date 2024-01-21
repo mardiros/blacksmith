@@ -140,12 +140,12 @@ _SERIALIZERS: List[AbstractRequestBodySerializer] = [
 ]
 
 
-def register_request_body_serializer(serializer: AbstractRequestBodySerializer) -> None:
+def register_http_body_serializer(serializer: AbstractRequestBodySerializer) -> None:
     """Register a serializer to serialize some kind of request."""
     _SERIALIZERS.insert(0, serializer)
 
 
-def unregister_request_body_serializer(
+def unregister_http_body_serializer(
     serializer: AbstractRequestBodySerializer,
 ) -> None:
     """

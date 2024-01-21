@@ -1,6 +1,6 @@
 from typing import Any, Dict, Sequence, Union
 
-from blacksmith import AbstractRequestBodySerializer, register_request_body_serializer
+from blacksmith import AbstractRequestBodySerializer, register_http_body_serializer
 
 
 class MySerializer(AbstractRequestBodySerializer):
@@ -11,4 +11,4 @@ class MySerializer(AbstractRequestBodySerializer):
         return "<foo/>"
 
 
-register_request_body_serializer(MySerializer())
+register_http_body_serializer(MySerializer())

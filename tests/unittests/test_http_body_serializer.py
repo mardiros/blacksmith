@@ -21,11 +21,11 @@ from blacksmith.service.http_body_serializer import (
     JsonRequestSerializer,
     UrlencodedRequestSerializer,
     get_location,
-    register_request_body_serializer,
+    register_http_body_serializer,
     serialize_body,
     serialize_part,
     serialize_request,
-    unregister_request_body_serializer,
+    unregister_http_body_serializer,
 )
 
 
@@ -291,7 +291,7 @@ def test_register_serializer():
             return "<foo/>"
 
     srlz = MySerializer()
-    register_request_body_serializer(srlz)
+    register_http_body_serializer(srlz)
 
     class DummyPostRequestXML(Request):
         foo: str = PostBodyField()
@@ -313,7 +313,7 @@ def test_register_serializer():
 
     assert httpreq.body == '{"foo": "bar"}'
 
-    unregister_request_body_serializer(srlz)
+    unregister_http_body_serializer(srlz)
 
     with pytest.raises(UnregisteredContentTypeException) as ctx:
         serialize_request(
