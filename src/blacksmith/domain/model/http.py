@@ -11,6 +11,7 @@ from typing import (
     Union,
     cast,
 )
+
 from typing_extensions import Protocol
 
 from blacksmith.typing import HTTPMethod, Json, Url

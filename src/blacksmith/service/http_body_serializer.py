@@ -11,7 +11,7 @@ from typing import (
     Union,
     cast,
 )
-from urllib.parse import urlencode, parse_qs
+from urllib.parse import parse_qs, urlencode
 
 from pydantic import BaseModel, SecretBytes, SecretStr
 from pydantic.fields import FieldInfo
@@ -241,13 +241,18 @@ def serialize_response(resp: HTTPRawResponse) -> HTTPResponse:
     Basically it parse json bytes a a python structure. But this function is here
     to supports serializations format depending on the content-type.
     """
-    json_ = None
+    json_: Json = ""
     if resp.status_code != 204:
         content_type = resp.headers.get("Content-Type") or "application/json"
         for serializer in _SERIALIZERS:
             if serializer.accept(content_type):
-                json_ = serializer.deserialize(resp.content, resp.encoding)
-                break
+                try:
+                    json_ = serializer.deserialize(resp.content, resp.encoding)
+                except Exception:
+                    json_ = {"error": resp.text}
+                else:
+                    # we can assume that a serializer will work ?
+                    break
 
     return HTTPResponse(
         status_code=resp.status_code,
