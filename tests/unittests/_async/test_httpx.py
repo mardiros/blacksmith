@@ -123,7 +123,7 @@ async def test_query_http_timeout(patch: Any) -> None:
     "httpx._client.AsyncClient.request",
     return_value=dummy_error_500_response,
 )
-async def test_query_http_no_json(patch: Any) -> None:
+async def test_query_http_not_json(patch: Any) -> None:
     transport = AsyncHttpxTransport()
     with pytest.raises(HTTPError) as ctx:
         await transport(

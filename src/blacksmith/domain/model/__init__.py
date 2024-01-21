@@ -1,4 +1,4 @@
-from .http import HTTPRequest, HTTPResponse, HTTPTimeout
+from .http import HTTPRawResponse, HTTPRequest, HTTPResponse, HTTPTimeout
 from .middleware.http_cache import (
     AbstractCachePolicy,
     AbstractSerializer,
@@ -25,6 +25,7 @@ from .params import (
 __all__ = [
     "HeaderField",
     "HTTPRequest",
+    "HTTPRawResponse",
     "HTTPResponse",
     "HTTPTimeout",
     "PathInfoField",

@@ -23,9 +23,9 @@ from blacksmith.service.http_body_serializer import (
     UrlencodedRequestSerializer,
     get_location,
     register_http_body_serializer,
-    serialize_request_body,
     serialize_part,
     serialize_request,
+    serialize_request_body,
     serialize_response,
     unregister_http_body_serializer,
 )
@@ -57,11 +57,15 @@ class DummyHTTPRepsonse(HTTPRawResponse):
 
     @property
     def content(self) -> bytes:
-        return self._content.encode("utf-8")
+        return self._content.encode(self.encoding)
 
     @property
     def text(self) -> str:
         return self._content
+
+    @property
+    def encoding(self) -> str:
+        return "utf-8"
 
 
 class MySerializer(AbstractRequestBodySerializer):
@@ -71,8 +75,13 @@ class MySerializer(AbstractRequestBodySerializer):
     def serialize(self, body: Union[Dict[str, Any], Sequence[Any]]) -> str:
         return "<foo/>"
 
-    def deserialize(self, body: bytes) -> Json:
+    def deserialize(self, body: bytes, encoding: Optional[str]) -> Json:
         return {"foo": "bar"}
+
+
+class DummyPostRequestXML(Request):
+    foo: str = PostBodyField()
+    content_type: str = HeaderField(default="text/xml", alias="Content-Type")
 
 
 def test_json_encoder() -> None:
@@ -318,10 +327,6 @@ def test_register_serializer():
     srlz = MySerializer()
     register_http_body_serializer(srlz)
 
-    class DummyPostRequestXML(Request):
-        foo: str = PostBodyField()
-        content_type: str = HeaderField(default="text/xml", alias="Content-Type")
-
     httpreq = serialize_request(
         "POST",
         "/",
@@ -369,6 +374,19 @@ def test_register_serializer():
         pytest.param(
             {
                 "raw_response": DummyHTTPRepsonse(
+                    200, {"Content-Type": "application/json"}, '{"foo": "bar"'
+                ),
+                "expected": HTTPResponse(
+                    200,
+                    {"Content-Type": "application/json"},
+                    {"error": '{"foo": "bar"'},
+                ),
+            },
+            id="bad json",
+        ),
+        pytest.param(
+            {
+                "raw_response": DummyHTTPRepsonse(
                     200,
                     {"Content-Type": "application/x-www-form-urlencoded"},
                     "x=42&y=1",
@@ -384,7 +402,7 @@ def test_register_serializer():
         pytest.param(
             {
                 "raw_response": DummyHTTPRepsonse(204, {}, ""),
-                "expected": HTTPResponse(204, {}, None),
+                "expected": HTTPResponse(204, {}, ""),
             },
             id="nocontent",
         ),
