@@ -74,8 +74,8 @@ from .service._sync.client import SyncClient, SyncClientFactory
 from .service._sync.route_proxy import SyncRouteProxy
 from .service.http_body_serializer import (
     AbstractRequestBodySerializer,
-    register_request_body_serializer,
-    unregister_request_body_serializer,
+    register_http_body_serializer,
+    unregister_http_body_serializer,
 )
 
 __all__ = [
@@ -155,6 +155,6 @@ __all__ = [
     "HTTPResponse",
     # Serializer,
     "AbstractRequestBodySerializer",
-    "register_request_body_serializer",
-    "unregister_request_body_serializer",
+    "register_http_body_serializer",
+    "unregister_http_body_serializer",
 ]

@@ -49,7 +49,7 @@ Registering serializer
 
 For extensibility, Blacksmith expose serialization are not a per client feature,
 serializers are globals and register unsing the function
-:func:`blacksmith.register_request_body_serializer`.
+:func:`blacksmith.register_http_body_serializer`.
 
 When a method serializer is added, it will have the highest priority of all the
 serializers. You may use it to override the default Blacksmith serializer.
