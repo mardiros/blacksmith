@@ -15,7 +15,7 @@ name = "blacksmith"
 
 readme = "README.rst"
 repository = "https://github.com/mardiros/blacksmith"
-version = "2.6.1"
+version = "2.7.0"
 
 [tool.poetry.dependencies]
 python = "^3.7"
@@ -23,7 +23,7 @@ httpx = [
   {python = "3.7", version = "^0.24.1"},
   {python = ">=3.8", version = ">=0.24, <1"},
 ]
-prometheus-client = {version = "^0.17.1", optional = true}
+prometheus-client = {version = ">=0.17.1 <1", optional = true}
 purgatory = "^1.0.3"
 pydantic = ">=1.10.12, <3"
 typing-extensions = "^4.7.0"
@@ -43,7 +43,7 @@ flake8 = "^5.0.4"
 furo = "^2022"
 isort = "^5.9.3"
 mypy = "^1.4.1"
-prometheus-client = "^0.17.1"
+prometheus-client = ">=0.17.1 <1"
 pytest = "^7.4.0"
 pytest-asyncio = "^0.21.0"
 pytest-cov = "^4.1.0"
