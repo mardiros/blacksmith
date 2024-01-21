@@ -11,15 +11,20 @@ from typing import (
     Union,
     cast,
 )
-from urllib.parse import urlencode
+from urllib.parse import urlencode, parse_qs
 
 from pydantic import BaseModel, SecretBytes, SecretStr
 from pydantic.fields import FieldInfo
 
 from blacksmith.domain.exceptions import UnregisteredContentTypeException
-from blacksmith.domain.model.http import HTTPRequest, RequestBody
+from blacksmith.domain.model.http import (
+    HTTPRawResponse,
+    HTTPRequest,
+    HTTPResponse,
+    RequestBody,
+)
 from blacksmith.domain.model.params import Request
-from blacksmith.typing import HttpLocation, HTTPMethod, Url
+from blacksmith.typing import HttpLocation, HTTPMethod, Json, Url
 
 # assume we can use deprecated stuff until we support both version
 try:
@@ -57,6 +62,12 @@ class AbstractRequestBodySerializer(abc.ABC):
         The body received here is the extracted object from the request model.
         """
 
+    @abc.abstractmethod
+    def deserialize(self, body: bytes, encoding: Optional[str]) -> Json:
+        """
+        Deserialize a raw http response body to a python simple types represenstaion.
+        """
+
 
 class JsonRequestSerializer(AbstractRequestBodySerializer):
     """The default serializer that serialize to json"""
@@ -67,6 +78,9 @@ class JsonRequestSerializer(AbstractRequestBodySerializer):
     def serialize(self, body: Union[Dict[str, Any], Sequence[Any]]) -> RequestBody:
         return json.dumps(body, cls=JSONEncoder)
 
+    def deserialize(self, body: bytes, encoding: Optional[str]) -> Json:
+        return json.loads(body)
+
 
 class UrlencodedRequestSerializer(AbstractRequestBodySerializer):
     """A serializer for application/x-www-form-urlencoded request."""
@@ -76,6 +90,9 @@ class UrlencodedRequestSerializer(AbstractRequestBodySerializer):
 
     def serialize(self, body: Union[Dict[str, Any], Sequence[Any]]) -> RequestBody:
         return urlencode(body, doseq=True)
+
+    def deserialize(self, body: bytes, encoding: Optional[str]) -> Json:
+        return parse_qs(body.decode(encoding=encoding or "utf-8", errors="replace"))
 
 
 class JSONEncoder(json.JSONEncoder):
@@ -156,7 +173,7 @@ def unregister_http_body_serializer(
     _SERIALIZERS.remove(serializer)
 
 
-def serialize_body(
+def serialize_request_body(
     req: "Request", body: Dict[str, str], content_type: Optional[str] = None
 ) -> RequestBody:
     """
@@ -209,9 +226,31 @@ def serialize_request(
         serialize_part(request_model, fields_by_loc[QUERY]),
     )
 
-    req.body = serialize_body(
+    req.body = serialize_request_body(
         request_model,
         fields_by_loc[BODY],
         cast(Optional[str], headers.get("Content-Type")),
     )
     return req
+
+
+def serialize_response(resp: HTTPRawResponse) -> HTTPResponse:
+    """
+    Deserialize an http response to the http intermediate representation that will
+    become the pydantic based response.
+    Basically it parse json bytes a a python structure. But this function is here
+    to supports serializations format depending on the content-type.
+    """
+    json_ = None
+    if resp.status_code != 204:
+        content_type = resp.headers.get("Content-Type") or "application/json"
+        for serializer in _SERIALIZERS:
+            if serializer.accept(content_type):
+                json_ = serializer.deserialize(resp.content, resp.encoding)
+                break
+
+    return HTTPResponse(
+        status_code=resp.status_code,
+        headers=resp.headers,
+        json=json_,
+    )

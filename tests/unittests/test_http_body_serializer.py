@@ -14,6 +14,7 @@ from blacksmith import (
     Request,
 )
 from blacksmith.domain.exceptions import UnregisteredContentTypeException
+from blacksmith.domain.model.http import HTTPRawResponse, HTTPResponse
 from blacksmith.service.http_body_serializer import (
     QUERY,
     AbstractRequestBodySerializer,
@@ -22,11 +23,13 @@ from blacksmith.service.http_body_serializer import (
     UrlencodedRequestSerializer,
     get_location,
     register_http_body_serializer,
-    serialize_body,
+    serialize_request_body,
     serialize_part,
     serialize_request,
+    serialize_response,
     unregister_http_body_serializer,
 )
+from blacksmith.typing import Json
 
 
 class GetRequest(Request):
@@ -41,6 +44,35 @@ class DummyGetRequest(Request):
 
 class DummyPostRequest(DummyGetRequest):
     foo: str = PostBodyField()
+
+
+class DummyHTTPRepsonse(HTTPRawResponse):
+    status_code: int
+    headers: Mapping[str, str]
+
+    def __init__(self, status_code: int, headers: Mapping[str, str], content: str):
+        self.status_code = status_code
+        self.headers = headers
+        self._content = content
+
+    @property
+    def content(self) -> bytes:
+        return self._content.encode("utf-8")
+
+    @property
+    def text(self) -> str:
+        return self._content
+
+
+class MySerializer(AbstractRequestBodySerializer):
+    def accept(self, content_type: str) -> bool:
+        return content_type == "text/xml"
+
+    def serialize(self, body: Union[Dict[str, Any], Sequence[Any]]) -> str:
+        return "<foo/>"
+
+    def deserialize(self, body: bytes) -> Json:
+        return {"foo": "bar"}
 
 
 def test_json_encoder() -> None:
@@ -173,8 +205,8 @@ def test_serialize_part_default_with_none() -> None:
         ),
     ],
 )
-def test_serialize_body(params: Mapping[str, Any]):
-    body = serialize_body(params["req"], params["body"], params["content_type"])
+def test_serialize_request_body(params: Mapping[str, Any]):
+    body = serialize_request_body(params["req"], params["body"], params["content_type"])
     assert body == params["expected"]
 
 
@@ -283,13 +315,6 @@ def test_request_serializer_serialize(params: Mapping[str, Any]):
 
 
 def test_register_serializer():
-    class MySerializer(AbstractRequestBodySerializer):
-        def accept(self, content_type: str) -> bool:
-            return content_type == "text/xml"
-
-        def serialize(self, body: Union[Dict[str, Any], Sequence[Any]]) -> str:
-            return "<foo/>"
-
     srlz = MySerializer()
     register_http_body_serializer(srlz)
 
@@ -325,3 +350,46 @@ def test_register_serializer():
         str(ctx.value) == "Unregistered content type 'text/xml' in request <foo='bar' "
         "content_type='text/xml'>"
     )
+
+
+@pytest.mark.parametrize(
+    "params",
+    [
+        pytest.param(
+            {
+                "raw_response": DummyHTTPRepsonse(
+                    200, {"Content-Type": "application/json"}, '{"foo": "bar"}'
+                ),
+                "expected": HTTPResponse(
+                    200, {"Content-Type": "application/json"}, {"foo": "bar"}
+                ),
+            },
+            id="json",
+        ),
+        pytest.param(
+            {
+                "raw_response": DummyHTTPRepsonse(
+                    200,
+                    {"Content-Type": "application/x-www-form-urlencoded"},
+                    "x=42&y=1",
+                ),
+                "expected": HTTPResponse(
+                    200,
+                    {"Content-Type": "application/x-www-form-urlencoded"},
+                    {"x": ["42"], "y": ["1"]},
+                ),
+            },
+            id="urlencoded",
+        ),
+        pytest.param(
+            {
+                "raw_response": DummyHTTPRepsonse(204, {}, ""),
+                "expected": HTTPResponse(204, {}, None),
+            },
+            id="nocontent",
+        ),
+    ],
+)
+def test_serialize_response(params: Mapping[str, Any]):
+    resp = serialize_response(params["raw_response"])
+    assert resp == params["expected"]

@@ -11,6 +11,7 @@ from typing import (
     Union,
     cast,
 )
+from typing_extensions import Protocol
 
 from blacksmith.typing import HTTPMethod, Json, Url
 
@@ -112,10 +113,41 @@ def parse_header_links(value: str) -> List[Dict[str, str]]:
     return links
 
 
+class HTTPRawResponse(Protocol):
+    """
+    Internal representation of an http response.
+    This format is used to deserialize the response body to the HTTPResponse.
+    """
+
+    status_code: int
+    headers: Mapping[str, str]
+    """
+    The headers response implmentation should be key insensitive, http standard.
+
+    Blacksmith rely on httpx as the default implementation, key are insensitive.
+    """
+
+    @property
+    def content(self) -> bytes:
+        ...
+
+    @property
+    def text(self) -> str:
+        ...
+
+    @property
+    def encoding(self) -> str:
+        ...
+
+
 @dataclass
 class HTTPResponse:
     """
-    Internal representation of an http response.
+    Intermediate representation of an http response.
+
+    In this representation, the response body has been parsed to the property ``json``,
+    which is a python structure containing simple python types. This http response
+    representation will be used create pydantic response object.
     """
 
     status_code: int
