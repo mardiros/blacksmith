@@ -233,7 +233,18 @@ def test_serialize_request_body(params: Mapping[str, Any]):
                 "content_type": "application/json",
                 "expected": '{"url": "http://mardiros.github.io/"}',
             },
-            id="url type",
+            id="bared url",
+        ),
+        pytest.param(
+            {
+                "req": DummyPostRequestTypes(
+                    url=HttpUrl("https://mardiros.github.io/blacksmith")
+                ),
+                "body": {"url"},
+                "content_type": "application/json",
+                "expected": '{"url": "https://mardiros.github.io/blacksmith"}',
+            },
+            id="url type with path",
         ),
     ],
 )
