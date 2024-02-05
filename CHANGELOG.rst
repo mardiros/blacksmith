@@ -1,3 +1,7 @@
+2.7.1 - Released on 2024-02-05
+------------------------------
+* Small fix for type Url with pydantic 2
+
 2.7.0 - Released on 2024-01-21
 ------------------------------
 * Add a way to support multiple serialization format, more than json.
