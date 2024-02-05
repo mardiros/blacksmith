@@ -3,11 +3,13 @@ import json
 from typing import (
     TYPE_CHECKING,
     Any,
+    Callable,
     Dict,
     List,
     Mapping,
     Optional,
     Sequence,
+    Type,
     Union,
     cast,
 )
@@ -29,7 +31,13 @@ from blacksmith.typing import HttpLocation, HTTPMethod, Json, Url
 # assume we can use deprecated stuff until we support both version
 try:
     # pydantic 2
-    from pydantic.deprecated.json import ENCODERS_BY_TYPE  # type: ignore
+    from pydantic.deprecated.json import ENCODERS_BY_TYPE as BASE_TYPES  # type: ignore
+    from pydantic_core import Url as PydanticUrl
+
+    ENCODERS_BY_TYPE: Mapping[Type[Any], Callable[[Any], Any]] = {
+        PydanticUrl: str,
+        **BASE_TYPES,
+    }
 except ImportError:  # type: ignore # coverage: ignore
     # pydantic 1
     from pydantic.json import ENCODERS_BY_TYPE  # type: ignore  # coverage: ignore

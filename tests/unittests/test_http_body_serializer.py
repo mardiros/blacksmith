@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import Any, Dict, Mapping, Optional, Sequence, Union
 
 import pytest
-from pydantic import SecretStr
+from pydantic import HttpUrl, SecretStr
 
 from blacksmith import (
     HeaderField,
@@ -44,6 +44,10 @@ class DummyGetRequest(Request):
 
 class DummyPostRequest(DummyGetRequest):
     foo: str = PostBodyField()
+
+
+class DummyPostRequestTypes(Request):
+    url: HttpUrl = PostBodyField()
 
 
 class DummyHTTPRepsonse(HTTPRawResponse):
@@ -215,6 +219,25 @@ def test_serialize_part_default_with_none() -> None:
     ],
 )
 def test_serialize_request_body(params: Mapping[str, Any]):
+    body = serialize_request_body(params["req"], params["body"], params["content_type"])
+    assert body == params["expected"]
+
+
+@pytest.mark.parametrize(
+    "params",
+    [
+        pytest.param(
+            {
+                "req": DummyPostRequestTypes(url=HttpUrl("http://mardiros.github.io")),
+                "body": {"url"},
+                "content_type": "application/json",
+                "expected": '{"url": "http://mardiros.github.io/"}',
+            },
+            id="url type",
+        ),
+    ],
+)
+def test_serialize_request_body_pydantic_2(params: Mapping[str, Any]):
     body = serialize_request_body(params["req"], params["body"], params["content_type"])
     assert body == params["expected"]
 
