@@ -50,6 +50,10 @@ class DummyPostRequestTypes(Request):
     url: HttpUrl = PostBodyField()
 
 
+class DummyAliasRequestTypes(Request):
+    for_: str = QueryStringField(alias="for")
+
+
 class DummyHTTPRepsonse(HTTPRawResponse):
     status_code: int
     headers: Mapping[str, str]
@@ -289,6 +293,22 @@ def test_serialize_request_body_pydantic_2(params: Mapping[str, Any]):
                 ),
             },
             id="post json",
+        ),
+        pytest.param(
+            {
+                "method": "GET",
+                "url_pattern": "/",
+                "request": DummyAliasRequestTypes(**{"for": "alice"}),
+                "expected": HTTPRequest(
+                    method="GET",
+                    headers={},
+                    path={},
+                    body="",
+                    querystring={"for": "alice"},
+                    url_pattern="/",
+                ),
+            },
+            id="querystring with alias",
         ),
     ],
 )
