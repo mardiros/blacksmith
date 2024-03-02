@@ -53,8 +53,8 @@ class Request(BaseModel):
     """
 
 
-TResponse = TypeVar("TResponse", bound="Response")
-TCollectionResponse = TypeVar("TCollectionResponse", bound="Response")
+TResponse = TypeVar("TResponse", bound="Optional[Response]")
+TCollectionResponse = TypeVar("TCollectionResponse", bound="Optional[Response]")
 
 
 class Response(BaseModel):
