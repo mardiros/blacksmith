@@ -1,3 +1,7 @@
+2.7.2 - Released on 2024-04-06
+------------------------------
+* Fix small typing issue
+
 2.7.1 - Released on 2024-02-05
 ------------------------------
 * Small fix for type Url with pydantic 2
