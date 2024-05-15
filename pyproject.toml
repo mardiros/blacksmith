@@ -33,7 +33,7 @@ prometheus = ["prometheus-client"]
 
 [tool.poetry.dev-dependencies]
 python = "^3.8"
-black = "^22.3.0"
+black = "^24.4.2"
 coverage = {version = "^7.2.7", extras = ["toml"]}
 esbonio = "^0.16.1"
 fastapi = "^0.100.1"

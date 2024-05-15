@@ -3,6 +3,7 @@ The discovery based on :term:`Consul`.
 
 This driver implement a client side service discovery.
 """
+
 import random
 from typing import Any, Callable, List, Optional
 
@@ -128,9 +129,9 @@ class AsyncConsulDiscovery(AsyncAbstractServiceDiscovery):
         """
         name = self.format_service_name(service, version)
         consul = await self.blacksmith_cli("consul")
-        rresp: Result[
-            CollectionIterator[Service], HTTPError
-        ] = await consul.services.collection_get(ServiceRequest(name=name))
+        rresp: Result[CollectionIterator[Service], HTTPError] = (
+            await consul.services.collection_get(ServiceRequest(name=name))
+        )
         if rresp.is_err():
             raise ConsulApiError(
                 rresp.unwrap_err()

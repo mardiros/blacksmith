@@ -32,8 +32,7 @@ from blacksmith.service.http_body_serializer import (
 from blacksmith.typing import Json
 
 
-class GetRequest(Request):
-    ...
+class GetRequest(Request): ...
 
 
 class DummyGetRequest(Request):

@@ -1,4 +1,5 @@
 """Collect metrics based on prometheus."""
+
 import abc
 import json
 from typing import Any, List, Tuple
