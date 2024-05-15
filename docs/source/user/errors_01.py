@@ -15,9 +15,9 @@ async def main():
     sd = AsyncStaticDiscovery({("api", None): "http://srv:8000/"})
     cli = AsyncClientFactory(sd)
     api = await cli("api")
-    items: Result[
-        CollectionIterator[PartialItem], HTTPError
-    ] = await api.item.collection_get()
+    items: Result[CollectionIterator[PartialItem], HTTPError] = (
+        await api.item.collection_get()
+    )
     if items.is_ok():
         for item in items.unwrap():
             rfull_item: ResponseBox[Item, HTTPError] = await api.item.get(

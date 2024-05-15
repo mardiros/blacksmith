@@ -1,4 +1,5 @@
 """Parsing Errors"""
+
 from typing import Generic, TypeVar
 
 from typing_extensions import Protocol
@@ -15,8 +16,7 @@ class AbstractErrorParser(Protocol, Generic[TError_co]):
     SyncClientFactory and AsyncClientFactory.
     """
 
-    def __call__(self, error: HTTPError) -> TError_co:
-        ...
+    def __call__(self, error: HTTPError) -> TError_co: ...
 
 
 # The default error parser, does not parse the error,

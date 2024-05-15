@@ -1,6 +1,5 @@
 """Register resources on services."""
 
-
 from collections import defaultdict
 from dataclasses import dataclass
 from typing import Any, Mapping, MutableMapping, Optional, Tuple, Type, TypeVar

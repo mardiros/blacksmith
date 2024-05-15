@@ -6,6 +6,7 @@ Convenient method to fillout an blacksmith registry.
   import blacksmith
   blacksmith.scan('mypkg.resources', 'other.resources')
 """
+
 import importlib
 import pkgutil
 

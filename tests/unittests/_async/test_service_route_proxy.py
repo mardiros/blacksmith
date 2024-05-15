@@ -415,9 +415,9 @@ async def test_route_proxy_collection_get() -> None:
         middlewares=[],
         error_parser=error_parser,
     )
-    result: Result[
-        CollectionIterator[Any], MyErrorFormat
-    ] = await proxy.collection_get()
+    result: Result[CollectionIterator[Any], MyErrorFormat] = (
+        await proxy.collection_get()
+    )
     assert result.is_ok()
     resp = result.unwrap()
     assert resp.meta.total_count == 10
@@ -452,9 +452,9 @@ async def test_route_proxy_collection_get_with_parser() -> None:
         middlewares=[],
         error_parser=error_parser,
     )
-    result: Result[
-        CollectionIterator[Any], MyErrorFormat
-    ] = await proxy.collection_get()
+    result: Result[CollectionIterator[Any], MyErrorFormat] = (
+        await proxy.collection_get()
+    )
     assert result.is_ok()
     resp = result.unwrap()
     assert resp.meta.total_count == 10

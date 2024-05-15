@@ -15,9 +15,9 @@ def main():
     sd = SyncStaticDiscovery({("api", None): "http://srv:8000/"})
     cli = SyncClientFactory(sd)
     api = cli("api")
-    items: Result[
-        CollectionIterator[PartialItem], HTTPError
-    ] = api.item.collection_get()
+    items: Result[CollectionIterator[PartialItem], HTTPError] = (
+        api.item.collection_get()
+    )
     if items.is_ok():
         for item in items.unwrap():
             rfull_item: ResponseBox[Item, HTTPError] = api.item.get({"name": item.name})

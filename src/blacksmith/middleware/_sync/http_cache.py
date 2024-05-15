@@ -1,4 +1,5 @@
 """Collect metrics based on prometheus."""
+
 import abc
 import time
 from dataclasses import asdict

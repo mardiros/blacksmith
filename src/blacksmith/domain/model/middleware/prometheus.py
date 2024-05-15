@@ -1,7 +1,7 @@
 """Collect metrics based on prometheus."""
-from typing import TYPE_CHECKING, Any, List, Optional
 
 from importlib import metadata
+from typing import TYPE_CHECKING, Any, List, Optional
 
 if TYPE_CHECKING:
     try:

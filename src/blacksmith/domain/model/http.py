@@ -129,16 +129,13 @@ class HTTPRawResponse(Protocol):
     """
 
     @property
-    def content(self) -> bytes:
-        ...
+    def content(self) -> bytes: ...
 
     @property
-    def text(self) -> str:
-        ...
+    def text(self) -> str: ...
 
     @property
-    def encoding(self) -> str:
-        ...
+    def encoding(self) -> str: ...
 
 
 @dataclass

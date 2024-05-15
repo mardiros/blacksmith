@@ -2,6 +2,7 @@
 The Server-Side Service discovery strategy.
 
 """
+
 from blacksmith.typing import ServiceName, Version
 
 from ..base import AsyncAbstractServiceDiscovery, Url

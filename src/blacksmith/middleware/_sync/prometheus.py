@@ -1,4 +1,5 @@
 """Collect metrics based on prometheus."""
+
 import time
 from typing import TYPE_CHECKING, Any, Optional
 
