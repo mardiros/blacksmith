@@ -1,5 +1,6 @@
 from enum import Enum
 from multiprocessing import Process
+import time
 from typing import Dict, Iterable, List, Optional, Type
 
 import pytest
@@ -87,6 +88,7 @@ def dummy_api_endpoint() -> Iterable[str]:
     port = 6556
     proc = Process(target=run_server, args=(port,), daemon=True)
     proc.start()
+    time.sleep(0.1)
     yield f"http://localhost:{port}"
     proc.kill()  # Cleanup after test
 
