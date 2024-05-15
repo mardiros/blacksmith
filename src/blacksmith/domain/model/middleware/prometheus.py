@@ -1,7 +1,7 @@
 """Collect metrics based on prometheus."""
 from typing import TYPE_CHECKING, Any, List, Optional
 
-import pkg_resources
+from importlib import metadata
 
 if TYPE_CHECKING:
     try:
@@ -28,7 +28,7 @@ class PrometheusMetrics:
             buckets = [0.05 * 2**x for x in range(10)]
         if hit_cache_buckets is None:
             hit_cache_buckets = [0.005 * 2**x for x in range(10)]
-        version_info = {"version": pkg_resources.get_distribution("blacksmith").version}
+        version_info = {"version": metadata.version("blacksmith")}
         self.blacksmith_info = Gauge(
             "blacksmith_info",
             "Blacksmith Information",

@@ -1219,13 +1219,13 @@ files = [
 
 [[package]]
 name = "platformdirs"
-version = "4.2.1"
+version = "4.2.2"
 description = "A small Python package for determining appropriate platform-specific dirs, e.g. a `user data dir`."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "platformdirs-4.2.1-py3-none-any.whl", hash = "sha256:17d5a1161b3fd67b390023cb2d3b026bbd40abde6fdb052dfbd3a29c3ba22ee1"},
-    {file = "platformdirs-4.2.1.tar.gz", hash = "sha256:031cd18d4ec63ec53e82dceaac0417d218a6863f7745dfcc9efe7793b7039bdf"},
+    {file = "platformdirs-4.2.2-py3-none-any.whl", hash = "sha256:2d7a1657e36a80ea911db832a8a6ece5ee53d8de21edd5cc5879af6530b1bfee"},
+    {file = "platformdirs-4.2.2.tar.gz", hash = "sha256:38b7b51f512eed9e84a22788b4bce1de17c0adb134d6becb09836e37d8654cd3"},
 ]
 
 [package.extras]
@@ -1264,18 +1264,17 @@ twisted = ["twisted"]
 
 [[package]]
 name = "purgatory"
-version = "1.0.3"
+version = "2.0.0"
 description = "A circuit breaker implementation for asyncio"
 optional = false
-python-versions = ">=3.7,<4.0"
+python-versions = "<4.0,>=3.8"
 files = [
-    {file = "purgatory-1.0.3-py3-none-any.whl", hash = "sha256:11b9526a6793d415bb7394019c85d885b34b524e200274efd57bdca728005e93"},
-    {file = "purgatory-1.0.3.tar.gz", hash = "sha256:4aafcf503181befd5a2ff7640bd6e61f0a5e812ad48c605a922743d98dfb99d0"},
+    {file = "purgatory-2.0.0-py3-none-any.whl", hash = "sha256:b122bed20b04f6ac61027c346ee549641aee13e99599e0d175228745273163e3"},
+    {file = "purgatory-2.0.0.tar.gz", hash = "sha256:5e1ed4378a444203a6694dfebfedb97ffcd26fd07f135a00f70f041e0f6c045b"},
 ]
 
 [package.extras]
-aioredis = ["redis (>=4.6.0,<5.0.0)"]
-redis = ["redis (>=4.6.0,<5.0.0)"]
+redis = ["redis (>=5.0.4,<6.0.0)"]
 
 [[package]]
 name = "pycodestyle"
@@ -2070,4 +2069,4 @@ prometheus = ["prometheus-client"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "1424f5504b1c503a199325a4d2064ff73b21a8e29fb13e8811506032bf515b65"
+content-hash = "bf5cde31d01d47c73c99df94a2d4467e8d1c6747659bbadd40e0f8607ff039a9"

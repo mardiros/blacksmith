@@ -1,10 +1,6 @@
-import pkg_resources
+from importlib import metadata
 
-try:
-    __version__ = pkg_resources.get_distribution("blacksmith").version
-except pkg_resources.DistributionNotFound:
-    # read the doc does not support poetry
-    pass
+__version__ = metadata.version("blacksmith")
 
 from .domain.error import AbstractErrorParser, TError_co, default_error_parser
 from .domain.exceptions import HTTPError, HTTPTimeoutError
