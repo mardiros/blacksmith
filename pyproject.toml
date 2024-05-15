@@ -21,7 +21,7 @@ version = "2.7.2"
 python = "^3.8"
 httpx = ">=0.24"
 prometheus-client = {version = ">=0.17.1 <1", optional = true}
-purgatory = "^1.0.3"
+purgatory = "^2.0.0"
 pydantic = ">=1.10.12, <3"
 typing-extensions = "^4.7.0"
 result = ">=0.11.0, <1"
@@ -64,9 +64,7 @@ filterwarnings = [
   "error",
   "ignore:.*:pydantic.warnings.PydanticDeprecatedSince20",
   "ignore:.*.response is deprecated, use .unwrap.*:DeprecationWarning",
-  "ignore:.*pkg_resources is deprecated as an API.*:DeprecationWarning",
   "ignore:.*Implementing implicit namespace packages.*:DeprecationWarning",
-  "ignore:.*pkg_resources.declare_namespace.*:DeprecationWarning",
   "ignore:.*Accessing `.value` on Result type is deprecated.*:DeprecationWarning",
   "ignore:`general_plain_validator_function` is deprecated.*:DeprecationWarning",
   "ignore:.*:pytest.PytestUnhandledCoroutineWarning",
@@ -94,7 +92,6 @@ profile = "black"
 exclude_lines = [
   "if TYPE_CHECKING:",
   "except ImportError:",
-  "except pkg_resources.DistributionNotFound:",
   "\\s+\\.\\.\\.$",
   "# coverage: ignore",
 ]
