@@ -1,5 +1,4 @@
 import abc
-import warnings
 from dataclasses import dataclass
 from functools import partial
 from typing import (
@@ -202,31 +201,6 @@ class ResponseBox(Generic[TResponse, TError_co]):
         if self.raw_result.is_ok():
             return self.raw_result.unwrap().json
         return self.raw_result.unwrap_err().response.json
-
-    @property
-    def response(self) -> TResponse:
-        """
-        Parse the response using the schema.
-
-        .. deprecated:: 2.0
-            Use :meth:`ResponseBox.unwrap()`
-
-        :raises blacksmith.HTTPError: if the response contains an error.
-        :raises NoResponseSchemaException: if the response_schema has not been
-            set in the contract.
-        """
-        warnings.warn(
-            ".response is deprecated, use .unwrap() instead",
-            category=DeprecationWarning,
-        )
-        if self.raw_result.is_err():
-            raise self.raw_result.unwrap_err()
-        if self.response_schema is None:
-            raise NoResponseSchemaException(
-                self.method, self.path, self.name, self.client_name
-            )
-        resp = self.response_schema(**(self.json or {}))
-        return cast(TResponse, resp)
 
     @property
     def _result(self) -> Result[TResponse, TError_co]:

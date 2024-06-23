@@ -1,4 +1,3 @@
-import warnings
 from typing import Any
 
 import pytest
@@ -143,13 +142,6 @@ def test_response_box() -> None:
     with pytest.raises(UnwrapError):
         assert resp.expect_err("To always fail")
 
-    with warnings.catch_warnings(record=True) as ctx:
-        warnings.simplefilter("always")
-        assert resp.response.model_dump() == {"age": 24, "name": "Alice"}
-    assert [str(w.message) for w in ctx][0] == (
-        ".response is deprecated, use .unwrap() instead"
-    )
-
     assert resp.json == {"age": 24, "name": "Alice", "useless": True}
 
 
@@ -206,18 +198,6 @@ def test_response_box_err() -> None:
     with pytest.raises(UnwrapError):
         assert resp.expect("To never fail")
     assert resp.expect_err("To always fail") == my_parsed_error
-
-    with warnings.catch_warnings(record=True) as ctx_warn:
-        warnings.simplefilter("always")
-        with pytest.raises(HTTPError) as ctx_err:
-            resp.response.model_dump()
-    assert [str(w.message) for w in ctx_warn] == [
-        ".response is deprecated, use .unwrap() instead"
-    ]
-    assert ctx_err.value.json == {
-        "detail": "too many connections",
-        "message": "Internal Server Error",
-    }
 
     with pytest.raises(UnwrapError):
         assert resp.unwrap()
@@ -281,19 +261,6 @@ def test_response_box_no_schema() -> None:
 
     with pytest.raises(NoResponseSchemaException) as ctx:
         assert resp.unwrap()
-
-    with warnings.catch_warnings(record=True) as ctx_warn:
-        warnings.simplefilter("always")
-        with pytest.raises(NoResponseSchemaException) as ctx:
-            assert resp.response
-    assert (
-        str(ctx.value)
-        == "No response schema in route 'GET /dummies' in resource'Dummy' "
-        "in client 'api'"
-    )
-    assert [str(w.message) for w in ctx_warn] == [
-        ".response is deprecated, use .unwrap() instead"
-    ]
 
 
 def test_collection_iterator() -> None:
