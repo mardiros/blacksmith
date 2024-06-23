@@ -1,3 +1,8 @@
+3.0.0 - Released on 2024-06-23
+------------------------------
+* Drop support of python 3.7, add support of python 3.12
+* Remove the deprecated result.response property replaced by result.unwrap()
+
 2.7.2 - Released on 2024-04-06
 ------------------------------
 * Fix small typing issue

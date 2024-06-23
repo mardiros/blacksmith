@@ -15,7 +15,7 @@ name = "blacksmith"
 
 readme = "README.rst"
 repository = "https://github.com/mardiros/blacksmith"
-version = "2.7.2"
+version = "3.0.0"
 
 [tool.poetry.dependencies]
 python = "^3.8.1"
