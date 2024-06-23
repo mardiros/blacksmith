@@ -145,7 +145,7 @@ def test_response_box() -> None:
 
     with warnings.catch_warnings(record=True) as ctx:
         warnings.simplefilter("always")
-        assert resp.response.dict() == {"age": 24, "name": "Alice"}
+        assert resp.response.model_dump() == {"age": 24, "name": "Alice"}
     assert [str(w.message) for w in ctx][0] == (
         ".response is deprecated, use .unwrap() instead"
     )
@@ -210,7 +210,7 @@ def test_response_box_err() -> None:
     with warnings.catch_warnings(record=True) as ctx_warn:
         warnings.simplefilter("always")
         with pytest.raises(HTTPError) as ctx_err:
-            resp.response.dict()
+            resp.response.model_dump()
     assert [str(w.message) for w in ctx_warn] == [
         ".response is deprecated, use .unwrap() instead"
     ]
@@ -318,7 +318,7 @@ def test_collection_iterator() -> None:
     )
     assert collec.meta.count == 2
     assert collec.meta.total_count == 5
-    list_collec = [res.dict() for res in collec]
+    list_collec = [res.model_dump() for res in collec]
     assert list_collec == [
         {
             "name": "Alice",

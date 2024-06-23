@@ -138,7 +138,7 @@ def serialize_part(req: "Request", part: Dict[IntStr, Any]) -> Dict[str, simplet
     return {
         **{
             k: get_value(v)
-            for k, v in req.dict(  # pydantic 1
+            for k, v in req.model_dump(  # pydantic 1
                 include=part,
                 by_alias=True,
                 exclude_none=True,
@@ -148,7 +148,7 @@ def serialize_part(req: "Request", part: Dict[IntStr, Any]) -> Dict[str, simplet
         },
         **{
             k: get_value(v)
-            for k, v in req.dict(  # pydantic 1
+            for k, v in req.model_dump(  # pydantic 1
                 include=part,
                 by_alias=True,
                 exclude_none=False,

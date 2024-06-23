@@ -2740,4 +2740,4 @@ prometheus = ["prometheus-client"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8.1"
-content-hash = "e7db81a0d13d524b10b0f3b110641a450376887af1e1b2b6139e4de03713f7fc"
+content-hash = "2be25f2567e4b1c5d28b509cad10f0f85fa289b89cafc8e06282bf09c6a4d281"

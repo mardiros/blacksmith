@@ -22,7 +22,7 @@ python = "^3.8.1"
 httpx = ">=0.24"
 prometheus-client = {version = ">=0.17.1 <1", optional = true}
 purgatory = "^2.0.0"
-pydantic = ">=1.10.12, <3"
+pydantic = "^2.6.0"
 typing-extensions = "^4.7.0"
 result = ">=0.11.0, <1"
 
@@ -60,7 +60,6 @@ norecursedirs = "tests/unittests/scanned_resources"
 testpaths = ["tests"]
 filterwarnings = [
   "error",
-  "ignore:.*:pydantic.warnings.PydanticDeprecatedSince20",
   "ignore:.*.response is deprecated, use .unwrap.*:DeprecationWarning",
   "ignore:.*Implementing implicit namespace packages.*:DeprecationWarning",
   "ignore:.*Accessing `.value` on Result type is deprecated.*:DeprecationWarning",

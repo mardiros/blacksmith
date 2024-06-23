@@ -34,13 +34,13 @@ BODY: HttpLocation = "body"
 # in pydantic 2, the extra keys for location is deprecated,
 # the json_schema_extra should be used.
 
-PathInfoField = partial(Field, location=PATH)
+PathInfoField = partial(Field, json_schema_extra={"location": PATH})
 """Declare field that are serialized to the path info."""
-HeaderField = partial(Field, location=HEADER)
+HeaderField = partial(Field, json_schema_extra={"location": HEADER})
 """Declare field that are serialized in http request header."""
-QueryStringField = partial(Field, location=QUERY)
+QueryStringField = partial(Field, json_schema_extra={"location": QUERY})
 """Declare field that are serialized in the http querystring."""
-PostBodyField = partial(Field, location=BODY)
+PostBodyField = partial(Field, json_schema_extra={"location": BODY})
 """Declare field that are serialized in the json document."""
 
 

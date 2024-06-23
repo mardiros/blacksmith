@@ -104,13 +104,13 @@ async def test_client(static_sd: AsyncAbstractServiceDiscovery):
     api_resp = await client.dummies.get({"name": "barbie"})
     assert isinstance(api_resp, ResponseBox)
     assert isinstance(api_resp.response, GetResponse)
-    assert api_resp.response.dict() == {"name": "Barbie", "age": 42}
+    assert api_resp.response.model_dump() == {"name": "Barbie", "age": 42}
     assert api_resp.json == {
         "name": "Barbie",
         "age": 42,
         "hair_color": "blond",
     }
-    assert api_resp.response.dict() == {"name": "Barbie", "age": 42}
+    assert api_resp.response.model_dump() == {"name": "Barbie", "age": 42}
 
     ctx: ExceptionInfo[Any]
     with pytest.raises(UnregisteredResourceException) as ctx:
