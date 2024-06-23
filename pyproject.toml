@@ -60,10 +60,6 @@ norecursedirs = "tests/unittests/scanned_resources"
 testpaths = ["tests"]
 filterwarnings = [
   "error",
-  "ignore:.*Implementing implicit namespace packages.*:DeprecationWarning",
-  "ignore:.*Accessing `.value` on Result type is deprecated.*:DeprecationWarning",
-  "ignore:`general_plain_validator_function` is deprecated.*:DeprecationWarning",
-  "ignore:.*:pytest.PytestUnhandledCoroutineWarning",
 ]
 
 [tool.pyright]
