@@ -60,7 +60,6 @@ norecursedirs = "tests/unittests/scanned_resources"
 testpaths = ["tests"]
 filterwarnings = [
   "error",
-  "ignore:.*.response is deprecated, use .unwrap.*:DeprecationWarning",
   "ignore:.*Implementing implicit namespace packages.*:DeprecationWarning",
   "ignore:.*Accessing `.value` on Result type is deprecated.*:DeprecationWarning",
   "ignore:`general_plain_validator_function` is deprecated.*:DeprecationWarning",
