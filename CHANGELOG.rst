@@ -2,6 +2,7 @@
 ------------------------------
 * Drop support of python 3.7, add support of python 3.12
 * Remove the deprecated result.response property replaced by result.unwrap()
+* Drop support of pydantic 1
 
 2.7.2 - Released on 2024-04-06
 ------------------------------
