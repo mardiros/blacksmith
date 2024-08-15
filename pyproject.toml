@@ -31,7 +31,10 @@ http_cache_async = ["redis"]
 http_cache_sync = ["redis"]
 prometheus = ["prometheus-client"]
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev]
+optional = true
+
+[tool.poetry.group.dev.dependencies]
 black = "^24.4.2"
 coverage = {version = "^7.5.1", extras = ["toml"]}
 esbonio = "^0.16.4"

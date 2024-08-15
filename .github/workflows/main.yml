@@ -38,7 +38,7 @@ jobs:
           poetry-version: ${{ matrix.poetry-version }}
 
       - name: Install blacksmith
-        run: poetry install
+        run: poetry install --with dev
 
       - name: Check lint
         run: |
