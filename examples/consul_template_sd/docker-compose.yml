@@ -23,7 +23,6 @@ services:
       - "traefik.http.routers.traefik.entrypoints=web"
       - "traefik.http.routers.traefik.rule=Host(`traefik.${DOMAIN_NAME}`)"
       - "traefik.http.services.traefik.loadbalancer.server.port=8080"
-    restart: always
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     networks:
