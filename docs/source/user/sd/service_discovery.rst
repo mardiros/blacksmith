@@ -1,7 +1,7 @@
 Service Discovery
 =================
 
-While consuming a lot of different API, the problem to solve is to 
+While consuming a lot of different API, the problem to solve is to
 simplify the registration of services and its discoverability.
 
 So the first approach is to have a static discovery, like we have
@@ -72,6 +72,25 @@ Sync
    https://github.com/mardiros/blacksmith/tree/master/examples/consul_sd
 
 
+Nomad Example
+~~~~~~~~~~~~~
+
+When using Consul Connect in a Nomad cluster, upstreams declared in a jobspec
+make available a mTLS connection on a `local_bind_port`. Addresses of these
+services are injected as environment variables during deployment of the job.
+
+Async
+~~~~~
+
+.. literalinclude:: sd_nomad_async.py
+
+Sync
+~~~~~
+
+.. literalinclude:: sd_nomad_sync.py
+
+
+
 Server Side Service Discovery
 -----------------------------
 
@@ -106,4 +125,3 @@ Sync
    **Take a look at the example!**
 
    https://github.com/mardiros/blacksmith/tree/master/examples/consul_template_sd
-
