@@ -21,7 +21,7 @@ class SyncNomadDiscovery(SyncAbstractServiceDiscovery):
         """
         Retrieve endpoint using the given parameters from `endpoints`.
         """
-        env_addr: str = os.getenv(f"NOMAD_UPSTREAM_ADDR_{service}")
+        env_addr = os.getenv(f"NOMAD_UPSTREAM_ADDR_{service}")
         if not env_addr:
             raise UnregisteredServiceException(service, version)
         return f"http://{env_addr}"
