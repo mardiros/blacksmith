@@ -11,6 +11,7 @@ from blacksmith.middleware._async.auth import AsyncHTTPAuthorizationMiddleware
 from blacksmith.middleware._async.base import AsyncHTTPAddHeadersMiddleware
 from blacksmith.middleware._async.http_cache import AsyncAbstractCache
 from blacksmith.sd._async.adapters.consul import AsyncConsulDiscovery, _registry
+from blacksmith.sd._async.adapters.nomad import AsyncNomadDiscovery
 from blacksmith.sd._async.adapters.router import AsyncRouterDiscovery
 from blacksmith.sd._async.adapters.static import AsyncStaticDiscovery, Endpoints
 from blacksmith.service._async.base import AsyncAbstractTransport
@@ -177,6 +178,11 @@ def consul_sd() -> AsyncConsulDiscovery:
 
 
 @pytest.fixture
+def nomad_sd() -> AsyncNomadDiscovery:
+    return AsyncNomadDiscovery()
+
+
+@pytest.fixture
 def router_sd() -> AsyncRouterDiscovery:
     return AsyncRouterDiscovery()
 
@@ -211,7 +217,7 @@ def fake_http_middleware_cache() -> AsyncFakeHttpMiddlewareCache:
 
 @pytest.fixture
 def fake_http_middleware_cache_with_data(
-    params: Mapping[str, Any]
+    params: Mapping[str, Any],
 ) -> AsyncFakeHttpMiddlewareCache:
     return AsyncFakeHttpMiddlewareCache(params["initial_cache"])
 

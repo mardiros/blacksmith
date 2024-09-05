@@ -132,10 +132,22 @@ def test_consul_resolve_consul_error(consul_sd: SyncConsulDiscovery):
     assert str(ctx.value) == "422 Unprocessable entity"
 
 
-def test_nomad_resolve(nomad_sd: SyncNomadDiscovery, monkeypatch):
+def test_nomad_resolve_dummy(nomad_sd: SyncNomadDiscovery, monkeypatch):
     monkeypatch.setenv("NOMAD_UPSTREAM_ADDR_dummy", "127.0.0.1:8000")
     endpoint: str = nomad_sd.get_endpoint("dummy", "v1")
     assert endpoint == "http://127.0.0.1:8000"
+
+
+def test_nomad_resolve_dummy_noversion(nomad_sd: SyncNomadDiscovery, monkeypatch):
+    monkeypatch.setenv("NOMAD_UPSTREAM_ADDR_dummy", "127.0.0.1:8000")
+    endpoint: str = nomad_sd.get_endpoint("dummy")
+    assert endpoint == "http://127.0.0.1:8000"
+
+
+def test_nomad_resolve_unregistered(nomad_sd: SyncNomadDiscovery):
+    with pytest.raises(UnregisteredServiceException) as ctx:
+        nomad_sd.get_endpoint("dummy", "v2")
+    assert str(ctx.value) == "Unregistered service 'dummy/v2'"
 
 
 def test_router_sd_get_endpoint_versionned(router_sd: SyncRouterDiscovery):

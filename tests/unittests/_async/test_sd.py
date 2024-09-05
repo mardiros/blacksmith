@@ -8,6 +8,7 @@ from blacksmith.sd._async.adapters.consul import (
     ServiceRequest,
     blacksmith_cli,
 )
+from blacksmith.sd._async.adapters.nomad import AsyncNomadDiscovery
 from blacksmith.sd._async.adapters.router import AsyncRouterDiscovery
 from blacksmith.sd._async.adapters.static import AsyncStaticDiscovery
 
@@ -129,6 +130,24 @@ async def test_consul_resolve_consul_error(consul_sd: AsyncConsulDiscovery):
     with pytest.raises(ConsulApiError) as ctx:
         await consul_sd.resolve("dummy", "v3")
     assert str(ctx.value) == "422 Unprocessable entity"
+
+
+async def test_nomad_resolve_dummy(nomad_sd: AsyncNomadDiscovery, monkeypatch):
+    monkeypatch.setenv("NOMAD_UPSTREAM_ADDR_dummy", "127.0.0.1:8000")
+    endpoint: str = await nomad_sd.get_endpoint("dummy", "v1")
+    assert endpoint == "http://127.0.0.1:8000"
+
+
+async def test_nomad_resolve_dummy_noversion(nomad_sd: AsyncNomadDiscovery, monkeypatch):
+    monkeypatch.setenv("NOMAD_UPSTREAM_ADDR_dummy", "127.0.0.1:8000")
+    endpoint: str = await nomad_sd.get_endpoint("dummy")
+    assert endpoint == "http://127.0.0.1:8000"
+
+
+async def test_nomad_resolve_unregistered(nomad_sd: AsyncNomadDiscovery):
+    with pytest.raises(UnregisteredServiceException) as ctx:
+        await nomad_sd.get_endpoint("dummy", "v2")
+    assert str(ctx.value) == "Unregistered service 'dummy/v2'"
 
 
 async def test_router_sd_get_endpoint_versionned(router_sd: AsyncRouterDiscovery):
