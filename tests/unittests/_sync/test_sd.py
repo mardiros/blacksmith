@@ -8,6 +8,7 @@ from blacksmith.sd._sync.adapters.consul import (
     SyncConsulDiscovery,
     blacksmith_cli,
 )
+from blacksmith.sd._sync.adapters.nomad import SyncNomadDiscovery
 from blacksmith.sd._sync.adapters.router import SyncRouterDiscovery
 from blacksmith.sd._sync.adapters.static import SyncStaticDiscovery
 
@@ -129,6 +130,12 @@ def test_consul_resolve_consul_error(consul_sd: SyncConsulDiscovery):
     with pytest.raises(ConsulApiError) as ctx:
         consul_sd.resolve("dummy", "v3")
     assert str(ctx.value) == "422 Unprocessable entity"
+
+
+def test_nomad_resolve(nomad_sd: SyncNomadDiscovery, monkeypatch):
+    monkeypatch.setenv("NOMAD_UPSTREAM_ADDR_dummy", "127.0.0.1:8000")
+    endpoint: str = nomad_sd.get_endpoint("dummy", "v1")
+    assert endpoint == "http://127.0.0.1:8000"
 
 
 def test_router_sd_get_endpoint_versionned(router_sd: SyncRouterDiscovery):
