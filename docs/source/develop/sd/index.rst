@@ -8,4 +8,5 @@ Service Discovery
    base
    static
    consul
+   nomad
    router
