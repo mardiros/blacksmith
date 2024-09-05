@@ -17,7 +17,7 @@ class SyncNomadDiscovery(SyncAbstractServiceDiscovery):
     A discovery instance based on Nomad environment variables.
     """
 
-    def get_endpoint(self, service: ServiceName, version: Version) -> Url:
+    def get_endpoint(self, service: ServiceName, version: Version = None) -> Url:
         """
         Retrieve endpoint using the given parameters from `endpoints`.
         """

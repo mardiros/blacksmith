@@ -17,7 +17,7 @@ class AsyncNomadDiscovery(AsyncAbstractServiceDiscovery):
     A discovery instance based on Nomad environment variables.
     """
 
-    async def get_endpoint(self, service: ServiceName, version: Version) -> Url:
+    async def get_endpoint(self, service: ServiceName, version: Version = None) -> Url:
         """
         Retrieve endpoint using the given parameters from `endpoints`.
         """
