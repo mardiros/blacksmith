@@ -138,7 +138,7 @@ async def test_nomad_resolve_dummy(nomad_sd: AsyncNomadDiscovery, monkeypatch):
     assert endpoint == "http://127.0.0.1:8000"
 
 
-async def test_nomad_resolve_dummy_noversion(nomad_sd: AsyncNomadDiscovery, monkeypatch):
+async def test_nomad_resolve_dummy_nover(nomad_sd: AsyncNomadDiscovery, monkeypatch):
     monkeypatch.setenv("NOMAD_UPSTREAM_ADDR_dummy", "127.0.0.1:8000")
     endpoint: str = await nomad_sd.get_endpoint("dummy")
     assert endpoint == "http://127.0.0.1:8000"
