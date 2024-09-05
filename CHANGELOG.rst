@@ -1,3 +1,8 @@
+3.1.0 - Released on 2024-09-05
+------------------------------
+* Add support of nomad for service discovery.
+  See :class:`blacksmith.AsyncNomadDiscovery` - contrib from @gdchamal
+
 3.0.0 - Released on 2024-06-23
 ------------------------------
 * Drop support of python 3.7, add support of python 3.12
