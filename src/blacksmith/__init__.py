@@ -53,12 +53,14 @@ from .middleware._sync import (
 from .sd._async import (
     AsyncAbstractServiceDiscovery,
     AsyncConsulDiscovery,
+    AsyncNomadDiscovery,
     AsyncRouterDiscovery,
     AsyncStaticDiscovery,
 )
 from .sd._sync import (
     SyncAbstractServiceDiscovery,
     SyncConsulDiscovery,
+    SyncNomadDiscovery,
     SyncRouterDiscovery,
     SyncStaticDiscovery,
 )
@@ -113,6 +115,8 @@ __all__ = [
     "SyncAbstractServiceDiscovery",
     "AsyncConsulDiscovery",
     "SyncConsulDiscovery",
+    "AsyncNomadDiscovery",
+    "SyncNomadDiscovery",
     "AsyncRouterDiscovery",
     "SyncRouterDiscovery",
     "AsyncStaticDiscovery",
