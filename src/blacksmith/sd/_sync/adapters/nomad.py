@@ -1,6 +1,6 @@
 """
 
-The Nomad discovery strategy use environment variables injected to discover
+The Nomad discovery strategy uses environment variables injected to discover
 Consul Connect services, thus defined as upstreams to an application.
 """
 
