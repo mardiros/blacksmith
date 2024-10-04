@@ -73,17 +73,20 @@ class AsyncConsulDiscovery(AsyncAbstractServiceDiscovery):
     """
     A discovery instance based on a :term:`Consul` server.
 
-    :param service_name_fmt: pattern for name of versionned service
-    :param service_url_fmt: pattern for url of versionned service
-    :param unversioned_service_name_fmt: pattern for name of unversioned service
-    :param unversioned_service_url_fmt: pattern for url of unversioned service
-
+    :param addr: endpoint of the consul v1 http api.
+    :param service_name_fmt: pattern for name of versionned service.
+    :param service_url_fmt: pattern for url of versionned service.
+    :param unversioned_service_name_fmt: pattern for name of unversioned service.
+    :param unversioned_service_url_fmt: pattern for url of unversioned service.
+    :param consul_token: If set, the consul token is sent on http api call.
     """
 
+    addr: str
     service_name_fmt: str
     service_url_fmt: str
     unversioned_service_name_fmt: str
     unversioned_service_url_fmt: str
+    consul_token: str
 
     def __init__(
         self,
