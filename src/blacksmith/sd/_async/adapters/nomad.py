@@ -17,11 +17,28 @@ class AsyncNomadDiscovery(AsyncAbstractServiceDiscovery):
     A discovery instance based on Nomad environment variables.
     """
 
+    def __init__(
+        self,
+        service_url_fmt: str = "http://{nomad_upstream_addr}/{version}",
+        service_env_fmt: str = "NOMAD_UPSTREAM_ADDR_{service}-{version}",
+        unversioned_service_url_fmt: str = "http://{nomad_upstream_addr}",
+        unversioned_service_env_fmt: str = "NOMAD_UPSTREAM_ADDR_{service}",
+    ) -> None:
+        """ """
+        self.service_url_fmt = service_url_fmt
+        self.service_env_fmt = service_env_fmt
+        self.unversioned_service_url_fmt = unversioned_service_url_fmt
+        self.unversioned_service_env_fmt = unversioned_service_env_fmt
+
     async def get_endpoint(self, service: ServiceName, version: Version = None) -> Url:
         """
         Retrieve endpoint using the given parameters from `endpoints`.
         """
-        env_addr = os.getenv(f"NOMAD_UPSTREAM_ADDR_{service}")
-        if not env_addr:
+        env_fmt = self.service_env_fmt if version else self.unversioned_service_env_fmt
+        nomad_upstream_addr = os.getenv(
+            env_fmt.format(service=service, version=version)
+        )
+        if not nomad_upstream_addr:
             raise UnregisteredServiceException(service, version)
-        return f"http://{env_addr}"
+        url_fmt = self.service_url_fmt if version else self.unversioned_service_url_fmt
+        return url_fmt.format(nomad_upstream_addr=nomad_upstream_addr, version=version)
