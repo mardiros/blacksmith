@@ -1,3 +1,5 @@
+from typing import Any
+
 import pytest
 
 from blacksmith.domain.exceptions import UnregisteredServiceException
@@ -132,13 +134,13 @@ def test_consul_resolve_consul_error(consul_sd: SyncConsulDiscovery):
     assert str(ctx.value) == "422 Unprocessable entity"
 
 
-def test_nomad_resolve_dummy(nomad_sd: SyncNomadDiscovery, monkeypatch):
-    monkeypatch.setenv("NOMAD_UPSTREAM_ADDR_dummy", "127.0.0.1:8000")
+def test_nomad_resolve_dummy(nomad_sd: SyncNomadDiscovery, monkeypatch: Any):
+    monkeypatch.setenv("NOMAD_UPSTREAM_ADDR_dummy_v1", "127.0.0.1:8000")
     endpoint: str = nomad_sd.get_endpoint("dummy", "v1")
-    assert endpoint == "http://127.0.0.1:8000"
+    assert endpoint == "http://127.0.0.1:8000/v1"
 
 
-def test_nomad_resolve_dummy_nover(nomad_sd: SyncNomadDiscovery, monkeypatch):
+def test_nomad_resolve_dummy_nover(nomad_sd: SyncNomadDiscovery, monkeypatch: Any):
     monkeypatch.setenv("NOMAD_UPSTREAM_ADDR_dummy", "127.0.0.1:8000")
     endpoint: str = nomad_sd.get_endpoint("dummy")
     assert endpoint == "http://127.0.0.1:8000"
