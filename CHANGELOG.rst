@@ -1,3 +1,9 @@
+3.1.1 - Released on 2024-10-10
+------------------------------
+* Update the nomad service discovery for versionned service.
+  Now the version is added in the environment variable by default.
+  All the service and url are configurable.
+
 3.1.0 - Released on 2024-09-05
 ------------------------------
 * Add support of nomad for service discovery.
