@@ -1,6 +1,6 @@
+import time
 from enum import Enum
 from multiprocessing import Process
-import time
 from typing import Dict, Iterable, List, Optional, Type
 
 import pytest
