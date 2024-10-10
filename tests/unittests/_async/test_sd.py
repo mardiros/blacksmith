@@ -135,7 +135,7 @@ async def test_consul_resolve_consul_error(consul_sd: AsyncConsulDiscovery):
 
 
 async def test_nomad_resolve_dummy(nomad_sd: AsyncNomadDiscovery, monkeypatch: Any):
-    monkeypatch.setenv("NOMAD_UPSTREAM_ADDR_dummy-v1", "127.0.0.1:8000")
+    monkeypatch.setenv("NOMAD_UPSTREAM_ADDR_dummy_v1", "127.0.0.1:8000")
     endpoint: str = await nomad_sd.get_endpoint("dummy", "v1")
     assert endpoint == "http://127.0.0.1:8000/v1"
 

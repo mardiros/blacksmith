@@ -20,7 +20,7 @@ class AsyncNomadDiscovery(AsyncAbstractServiceDiscovery):
     def __init__(
         self,
         service_url_fmt: str = "http://{nomad_upstream_addr}/{version}",
-        service_env_fmt: str = "NOMAD_UPSTREAM_ADDR_{service}-{version}",
+        service_env_fmt: str = "NOMAD_UPSTREAM_ADDR_{service}_{version}",
         unversioned_service_url_fmt: str = "http://{nomad_upstream_addr}",
         unversioned_service_env_fmt: str = "NOMAD_UPSTREAM_ADDR_{service}",
     ) -> None:
