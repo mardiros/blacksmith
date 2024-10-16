@@ -57,7 +57,7 @@ class SyncHttpxTransport(SyncAbstractTransport):
                 raise HTTPTimeoutError(
                     f"{client_name} - {req.method} {path} - "
                     f"{exc.__class__.__name__} while calling {req.method} {req.url}"
-                )
+                ) from exc
 
         resp = serialize_response(cast(HTTPRawResponse, r))
         if not r.is_success:

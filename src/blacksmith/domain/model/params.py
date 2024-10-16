@@ -376,8 +376,8 @@ class CollectionIterator(Iterator[TResponse]):
             resp = self.json_resp[self.pos]
             if self.response_schema:
                 resp = self.response_schema(**resp)
-        except IndexError:
-            raise StopIteration()
+        except IndexError as exc:
+            raise StopIteration() from exc
 
         self.pos += 1
         return cast(TResponse, resp)  # Could be a dict

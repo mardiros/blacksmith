@@ -52,8 +52,8 @@ def create_item(item: Item):
 def read_item(item_name: str, response_model: Type[BaseModel] = Item):
     try:
         return items_db[item_name]
-    except KeyError:
-        raise not_found
+    except KeyError as exc:
+        raise not_found from exc
 
 
 @app.patch("/items/{item_name}")
@@ -66,8 +66,8 @@ def update_item(item_name: str, item: PatchItem):
             cur.size = item.size
         items_db[cur.name] = cur
         return {"href": app.url_path_for("read_item", item_name=cur.name)}
-    except KeyError:
-        raise not_found
+    except KeyError as exc:
+        raise not_found from exc
 
 
 @app.delete("/items/{item_name}")
@@ -75,8 +75,8 @@ def delete_item(item_name: str):
     try:
         del items_db[item_name]
         return Response("", 204)
-    except KeyError:
-        raise not_found
+    except KeyError as exc:
+        raise not_found from exc
 
 
 def run_server(port: int):

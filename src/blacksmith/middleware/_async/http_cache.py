@@ -21,6 +21,7 @@ from blacksmith.typing import ClientName, HTTPMethod, Path
 from .base import AsyncHTTPMiddleware, AsyncMiddleware
 
 CachableState = Literal["uncachable_request", "uncachable_response", "cached"]
+default_cache_control = CacheControlPolicy()
 
 
 class AsyncAbstractCache(abc.ABC):
@@ -56,7 +57,7 @@ class AsyncHTTPCacheMiddleware(AsyncHTTPMiddleware):
         self,
         cache: AsyncAbstractCache,
         metrics: Optional[PrometheusMetrics] = None,
-        policy: AbstractCachePolicy = CacheControlPolicy(),
+        policy: AbstractCachePolicy = default_cache_control,
         serializer: Type[AbstractSerializer] = JsonSerializer,
     ) -> None:
         self._cache = cache
