@@ -1,8 +1,8 @@
 import uvicorn
-from notif.views import app
 from starlette_zipkin import ZipkinConfig, ZipkinMiddleware
 
 import blacksmith
+from notif.views import app
 
 if __name__ == "__main__":
     blacksmith.scan("notif.resources")

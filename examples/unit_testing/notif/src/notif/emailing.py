@@ -5,9 +5,8 @@ from email.message import Message
 from textwrap import dedent
 from typing import Tuple
 
-from notif.resources.user import User
-
 from blacksmith.sd._async.adapters.consul import AsyncConsulDiscovery
+from notif.resources.user import User
 
 
 class AbstractEmailSender(abc.ABC):

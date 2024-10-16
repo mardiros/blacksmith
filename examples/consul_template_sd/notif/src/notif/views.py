@@ -2,11 +2,11 @@ import email as emaillib
 import smtplib
 from textwrap import dedent
 
-from notif.resources.user import User
 from starlette.applications import Starlette
 from starlette.responses import JSONResponse
 
 from blacksmith import AsyncClientFactory, AsyncConsulDiscovery, AsyncRouterDiscovery
+from notif.resources.user import User
 
 app = Starlette(debug=True)
 

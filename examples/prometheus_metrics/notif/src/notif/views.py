@@ -2,7 +2,6 @@ import email as emaillib
 import smtplib
 from textwrap import dedent
 
-from notif.resources.user import User
 from prometheus_client import CONTENT_TYPE_LATEST, REGISTRY, generate_latest
 from starlette.applications import Starlette
 from starlette.responses import JSONResponse, Response
@@ -12,6 +11,7 @@ from blacksmith import (
     AsyncConsulDiscovery,
     AsyncPrometheusMiddleware,
 )
+from notif.resources.user import User
 
 app = Starlette(debug=True)
 
