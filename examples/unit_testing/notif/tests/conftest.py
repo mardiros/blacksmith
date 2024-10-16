@@ -1,5 +1,5 @@
 from email.message import Message
-from typing import Dict, Tuple
+from typing import ClassVar, Dict, List, Tuple
 
 import pytest
 from fastapi.testclient import TestClient
@@ -33,7 +33,7 @@ class FakeTransport(AsyncAbstractTransport):
 
 
 class Mailboxes:
-    boxes = []
+    boxes: ClassVar[List[str]] = []
 
 
 class FakeEmailSender(AbstractEmailSender):
