@@ -14,6 +14,8 @@ from blacksmith.typing import ClientName, Proxies, ResourceName, Url
 from .base import SyncAbstractTransport
 from .route_proxy import ClientTimeout, SyncRouteProxy, build_timeout
 
+default_timeout = HTTPTimeout()
+
 
 class SyncClient(Generic[TError_co]):
     """
@@ -72,8 +74,8 @@ class SyncClient(Generic[TError_co]):
                 self.error_parser,
                 self.middlewares,
             )
-        except KeyError:
-            raise UnregisteredResourceException(name, self.name)
+        except KeyError as exc:
+            raise UnregisteredResourceException(name, self.name) from exc
 
 
 class SyncClientFactory(Generic[TError_co]):
@@ -105,7 +107,7 @@ class SyncClientFactory(Generic[TError_co]):
         sd: SyncAbstractServiceDiscovery,
         transport: Optional[SyncAbstractTransport] = None,
         registry: Registry = default_registry,
-        timeout: ClientTimeout = HTTPTimeout(),
+        timeout: ClientTimeout = default_timeout,
         proxies: Optional[Proxies] = None,
         verify_certificate: bool = False,
         collection_parser: Type[AbstractCollectionParser] = CollectionParser,

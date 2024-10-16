@@ -111,7 +111,7 @@ def test_client(static_sd: SyncAbstractServiceDiscovery):
 
     ctx: ExceptionInfo[Any]
     with pytest.raises(UnregisteredResourceException) as ctx:
-        client.daemon
+        client.daemon  # noqa: B018
     assert str(ctx.value) == "Unregistered resource 'daemon' in client 'api'"
 
     with pytest.raises(NoContractException) as ctx:

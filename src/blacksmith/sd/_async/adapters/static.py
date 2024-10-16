@@ -32,5 +32,5 @@ class AsyncStaticDiscovery(AsyncAbstractServiceDiscovery):
         """
         try:
             return self.endpoints[(service, version)]
-        except KeyError:
-            raise UnregisteredServiceException(service, version)
+        except KeyError as exc:
+            raise UnregisteredServiceException(service, version) from exc

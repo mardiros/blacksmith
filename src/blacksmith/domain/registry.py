@@ -133,8 +133,8 @@ class Registry:
         """
         try:
             return self.client_service[client_name], self.clients[client_name]
-        except KeyError:
-            raise UnregisteredClientException(client_name)
+        except KeyError as exc:
+            raise UnregisteredClientException(client_name) from exc
 
 
 registry = Registry()
