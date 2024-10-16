@@ -16,7 +16,11 @@ from typing import (
 from urllib.parse import parse_qs, urlencode
 
 from pydantic import BaseModel, SecretBytes, SecretStr
+
+# assume we can use deprecated stuff until we support both version
+from pydantic.deprecated.json import ENCODERS_BY_TYPE as BASE_TYPES  # type: ignore
 from pydantic.fields import FieldInfo
+from pydantic_core import Url as PydanticUrl
 
 from blacksmith.domain.exceptions import UnregisteredContentTypeException
 from blacksmith.domain.model.http import (
@@ -28,19 +32,10 @@ from blacksmith.domain.model.http import (
 from blacksmith.domain.model.params import Request
 from blacksmith.typing import HttpLocation, HTTPMethod, Json, Url
 
-# assume we can use deprecated stuff until we support both version
-try:
-    # pydantic 2
-    from pydantic.deprecated.json import ENCODERS_BY_TYPE as BASE_TYPES  # type: ignore
-    from pydantic_core import Url as PydanticUrl
-
-    ENCODERS_BY_TYPE: Mapping[Type[Any], Callable[[Any], Any]] = {
-        PydanticUrl: str,
-        **BASE_TYPES,
-    }
-except ImportError:  # type: ignore # coverage: ignore
-    # pydantic 1
-    from pydantic.json import ENCODERS_BY_TYPE  # type: ignore  # coverage: ignore
+ENCODERS_BY_TYPE: Mapping[Type[Any], Callable[[Any], Any]] = {
+    PydanticUrl: str,
+    **BASE_TYPES,
+}
 
 if TYPE_CHECKING:
     from pydantic.typing import IntStr
@@ -112,9 +107,7 @@ class JSONEncoder(json.JSONEncoder):
 
 
 def get_fields(model: BaseModel) -> Mapping[str, FieldInfo]:
-    if hasattr(model, "model_fields"):
-        return model.model_fields
-    return model.__fields__  # coverage: ignore - pydantic 1
+    return model.model_fields
 
 
 def get_location(field: Any) -> HttpLocation:
@@ -130,7 +123,7 @@ def get_location(field: Any) -> HttpLocation:
 
 def get_value(v: Union[simpletypes, SecretStr, SecretBytes]) -> simpletypes:
     if hasattr(v, "get_secret_value"):
-        return v.get_secret_value()
+        return v.get_secret_value()  # type: ignore
     return v  # type: ignore
 
 
@@ -138,7 +131,7 @@ def serialize_part(req: "Request", part: Dict[IntStr, Any]) -> Dict[str, simplet
     return {
         **{
             k: get_value(v)
-            for k, v in req.model_dump(  # pydantic 1
+            for k, v in req.model_dump(
                 include=part,
                 by_alias=True,
                 exclude_none=True,
@@ -148,7 +141,7 @@ def serialize_part(req: "Request", part: Dict[IntStr, Any]) -> Dict[str, simplet
         },
         **{
             k: get_value(v)
-            for k, v in req.model_dump(  # pydantic 1
+            for k, v in req.model_dump(
                 include=part,
                 by_alias=True,
                 exclude_none=False,
