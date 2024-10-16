@@ -110,15 +110,9 @@ def get_fields(model: BaseModel) -> Mapping[str, FieldInfo]:
     return model.model_fields
 
 
-def get_location(field: Any) -> HttpLocation:
-    # field is of type FieldInfo, which differ on pydantic 2 and pydantic 1
-    if hasattr(field, "json_schema_extra"):
-        extra = field.json_schema_extra
-    elif hasattr(field, "field_info"):
-        extra = field.field_info.extra
-    else:
-        raise ValueError(f"{field} is not a FieldInfo")
-    return extra["location"]
+def get_location(field: FieldInfo) -> HttpLocation:
+    extra = field.json_schema_extra
+    return extra["location"]  # type: ignore
 
 
 def get_value(v: Union[simpletypes, SecretStr, SecretBytes]) -> simpletypes:
