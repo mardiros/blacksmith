@@ -1,8 +1,8 @@
-import time
 from enum import Enum
 from multiprocessing import Process
 from typing import Dict, Iterable, List, Optional, Type
 
+import httpx
 import pytest
 import uvicorn  # type: ignore
 from fastapi import FastAPI, HTTPException
@@ -83,12 +83,19 @@ def run_server(port: int):
     uvicorn.run(app, port=port)
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def dummy_api_endpoint() -> Iterable[str]:
     port = 6556
     proc = Process(target=run_server, args=(port,), daemon=True)
     proc.start()
-    time.sleep(0.1)
+    for i in range(20):
+        timeout = 0.1 / (i + 1)
+        try:
+            httpx.get(f"http://localhost:{port}", timeout=httpx.Timeout(timeout))
+        except httpx.ConnectError:
+            pass
+        else:
+            break
     yield f"http://localhost:{port}"
     proc.kill()  # Cleanup after test
 
