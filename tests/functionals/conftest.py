@@ -4,7 +4,7 @@ from typing import Dict, Iterable, List, Optional, Type
 
 import httpx
 import pytest
-import uvicorn  # type: ignore
+import uvicorn
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from pydantic.fields import Field
