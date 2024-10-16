@@ -1,6 +1,6 @@
 import json
 from datetime import datetime
-from typing import Any, Dict, Mapping, Optional, Sequence, Union
+from typing import Any, ClassVar, Dict, Mapping, Optional, Sequence, Union
 
 import pytest
 from pydantic import HttpUrl, SecretStr
@@ -29,7 +29,7 @@ from blacksmith.service.http_body_serializer import (
     serialize_response,
     unregister_http_body_serializer,
 )
-from blacksmith.typing import Json
+from blacksmith.typing import HttpLocation, Json
 
 
 class GetRequest(Request): ...
@@ -104,15 +104,7 @@ def test_json_encoder() -> None:
 
 def test_get_location_from_pydantic_v2() -> None:
     class DummyFieldInfo:
-        json_schema_extra = {"location": QUERY}
-
-    assert get_location(DummyFieldInfo()) == QUERY
-
-
-def test_get_location_from_pydantic_v1() -> None:
-    class DummyFieldInfo:
-        class field_info:
-            extra = {"location": QUERY}
+        json_schema_extra: ClassVar[Mapping[str, HttpLocation]] = {"location": QUERY}
 
     assert get_location(DummyFieldInfo()) == QUERY
 
