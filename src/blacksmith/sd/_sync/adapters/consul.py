@@ -40,7 +40,7 @@ class Service(Response):
 
     node_address: str = Field(alias="Address")
     """IP address of the Consul node on which the service is registered."""
-    service_address: Optional[str] = Field(None, alias="ServiceAddress")
+    service_address: Optional[str] = Field(default=None, alias="ServiceAddress")
     """IP address of the service host. if empty, node address is used."""
     port: int = Field(alias="ServicePort")
     """TCP Port of an instance that host the service."""

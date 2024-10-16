@@ -191,8 +191,8 @@ async def test_cache_middleware(
         200, {"cache-control": "max-age=42, public"}, json="Cache Me"
     )
     assert (
-        fake_http_middleware_cache.val
-        == {  # type: ignore
+        fake_http_middleware_cache.val  # type: ignore
+        == {
             "dummy$/dummies/42?foo=bar": (42, "[]"),
             "dummy$/dummies/42?foo=bar$": (
                 42,
