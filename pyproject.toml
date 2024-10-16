@@ -89,7 +89,7 @@ select = [
     "B",   # bug bear security warning
     "I",   # isort import order
     "F",   # pyflakes
-    # "UP",  # alter when better syntax is available
+    "UP",  # alter when better syntax is available
     # "RUF", #  the ruff devleoper's own rules
 ]
 
