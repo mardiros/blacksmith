@@ -390,7 +390,6 @@ def test_circuit_breaker_listener(
     dummy_http_request: HTTPRequest,
     dummy_timeout: HTTPTimeout,
 ):
-
     evts = []
 
     def hook(name: str, evt_name: str, evt: Event):
@@ -453,7 +452,6 @@ def test_zipkin_middleware(
     dummy_timeout: HTTPTimeout,
     trace: Any,
 ):
-
     middleware = SyncZipkinMiddleware(trace)
     next = middleware(echo_middleware)
     next(dummy_http_request, "dummy", "/dummies/{name}", dummy_timeout)
@@ -473,7 +471,6 @@ def test_zipkin_middleware_tag_error(
     dummy_timeout: HTTPTimeout,
     trace: Any,
 ):
-
     middleware = SyncZipkinMiddleware(trace)
     next = middleware(boom_middleware)
     with pytest.raises(HTTPError):

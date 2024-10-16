@@ -1,9 +1,9 @@
 from typing import Any, Mapping
 
 from fastapi import Depends
-from notif.emailing import EmailSender
 
 from blacksmith import AsyncClientFactory, AsyncConsulDiscovery
+from notif.emailing import EmailSender
 
 
 class AppConfig:

@@ -64,7 +64,6 @@ class AsyncZipkinMiddleware(AsyncHTTPMiddleware):
             path: Path,
             timeout: HTTPTimeout,
         ) -> HTTPResponse:
-
             name = f"{req.method} {path.format(**req.path)}"
 
             with self.trace(name, "CLIENT") as child_span:

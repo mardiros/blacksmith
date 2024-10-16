@@ -187,7 +187,7 @@ def test_policy_get_vary_key(params: Tuple[str, str, HTTPRequest, str]):
     ],
 )
 def test_policy_get_response_cache_key(
-    params: Tuple[str, str, HTTPRequest, List[str], str]
+    params: Tuple[str, str, HTTPRequest, List[str], str],
 ):
     policy = CacheControlPolicy("$")
     assert (
@@ -233,7 +233,7 @@ def test_policy_get_response_cache_key(
     ],
 )
 def test_policy_get_cache_info_for_response(
-    params: Tuple[str, str, HTTPRequest, HTTPResponse, Tuple[int, str, List[str]]]
+    params: Tuple[str, str, HTTPRequest, HTTPResponse, Tuple[int, str, List[str]]],
 ):
     policy = CacheControlPolicy("$")
     assert (

@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
+
 from notif.config import AppConfig, FastConfig
 from notif.resources.user import User
 

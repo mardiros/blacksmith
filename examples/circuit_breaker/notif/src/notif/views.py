@@ -2,7 +2,6 @@ import email as emaillib
 import smtplib
 from textwrap import dedent
 
-from notif.resources.user import User
 from prometheus_client import CONTENT_TYPE_LATEST, REGISTRY, generate_latest
 from purgatory import AsyncRedisUnitOfWork
 from starlette.applications import Starlette
@@ -17,6 +16,7 @@ from blacksmith import (
     PrometheusMetrics,
     ResponseBox,
 )
+from notif.resources.user import User
 
 app = Starlette(debug=True)
 

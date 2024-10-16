@@ -190,15 +190,18 @@ def test_cache_middleware(
     assert resp == HTTPResponse(
         200, {"cache-control": "max-age=42, public"}, json="Cache Me"
     )
-    assert fake_http_middleware_cache.val == {  # type: ignore
-        "dummy$/dummies/42?foo=bar": (42, "[]"),
-        "dummy$/dummies/42?foo=bar$": (
-            42,
-            '{"status_code": 200, "headers": '
-            '{"cache-control": "max-age=42, public"}, '
-            '"json": "Cache Me"}',
-        ),
-    }
+    assert (
+        fake_http_middleware_cache.val
+        == {  # type: ignore
+            "dummy$/dummies/42?foo=bar": (42, "[]"),
+            "dummy$/dummies/42?foo=bar$": (
+                42,
+                '{"status_code": 200, "headers": '
+                '{"cache-control": "max-age=42, public"}, '
+                '"json": "Cache Me"}',
+            ),
+        }
+    )
 
     # get from the cache, not from the boom which raises
     next = caching(boom_middleware)

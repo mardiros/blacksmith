@@ -130,7 +130,7 @@ def get_location(field: Any) -> HttpLocation:
 
 def get_value(v: Union[simpletypes, SecretStr, SecretBytes]) -> simpletypes:
     if hasattr(v, "get_secret_value"):
-        return getattr(v, "get_secret_value")()
+        return v.get_secret_value()
     return v  # type: ignore
 
 

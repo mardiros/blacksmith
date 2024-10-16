@@ -9,7 +9,7 @@ from blacksmith import (
 
 class AsyncBasicAuthorization(AsyncHTTPAuthorizationMiddleware):
     def __init__(self, username, password):
-        userpass = f"{username}:{password}".encode("utf-8")
+        userpass = f"{username}:{password}".encode()
         b64head = base64.b64encode(userpass).decode("ascii")
         header = f"Basic {b64head}"
         return super().__init__("Basic", header)
