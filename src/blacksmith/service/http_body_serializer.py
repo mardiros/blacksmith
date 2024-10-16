@@ -103,7 +103,7 @@ class JSONEncoder(json.JSONEncoder):
         for typ, serializer in ENCODERS_BY_TYPE.items():
             if isinstance(o, typ):
                 return serializer(o)
-        return super(JSONEncoder, self).default(o)
+        return super().default(o)
 
 
 def get_fields(model: BaseModel) -> Mapping[str, FieldInfo]:
