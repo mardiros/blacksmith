@@ -40,7 +40,7 @@ class Service(Response):
 
     node_address: str = Field(alias="Address")
     """IP address of the Consul node on which the service is registered."""
-    service_address: Optional[str] = Field(None, alias="ServiceAddress")
+    service_address: Optional[str] = Field(default=None, alias="ServiceAddress")
     """IP address of the service host. if empty, node address is used."""
     port: int = Field(alias="ServicePort")
     """TCP Port of an instance that host the service."""
@@ -132,9 +132,9 @@ class AsyncConsulDiscovery(AsyncAbstractServiceDiscovery):
         """
         name = self.format_service_name(service, version)
         consul = await self.blacksmith_cli("consul")
-        rresp: Result[CollectionIterator[Service], HTTPError] = (
-            await consul.services.collection_get(ServiceRequest(name=name))
-        )
+        rresp: Result[
+            CollectionIterator[Service], HTTPError
+        ] = await consul.services.collection_get(ServiceRequest(name=name))
         if rresp.is_err():
             raise ConsulApiError(
                 rresp.unwrap_err()
