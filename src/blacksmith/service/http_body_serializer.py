@@ -112,6 +112,10 @@ def get_fields(model: BaseModel) -> Mapping[str, FieldInfo]:
 
 def get_location(field: FieldInfo) -> HttpLocation:
     extra = field.json_schema_extra
+    if extra is None or callable(extra) or "location" not in extra:
+        raise TypeError(
+            "not a PathInfoField | HeaderField | QueryStringField | PostBodyField"
+        )
     return extra["location"]  # type: ignore
 
 

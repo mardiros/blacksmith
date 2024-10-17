@@ -1,9 +1,9 @@
 import json
 from datetime import datetime
-from typing import Any, ClassVar, Dict, Mapping, Optional, Sequence, Union
+from typing import Any, Dict, Mapping, Optional, Sequence, Union
 
 import pytest
-from pydantic import HttpUrl, SecretStr
+from pydantic import BaseModel, Field, HttpUrl, SecretStr
 
 from blacksmith import (
     HeaderField,
@@ -15,8 +15,8 @@ from blacksmith import (
 )
 from blacksmith.domain.exceptions import UnregisteredContentTypeException
 from blacksmith.domain.model.http import HTTPRawResponse, HTTPResponse
+from blacksmith.domain.model.params import BODY
 from blacksmith.service.http_body_serializer import (
-    QUERY,
     AbstractHttpBodySerializer,
     JSONEncoder,
     JsonRequestSerializer,
@@ -29,7 +29,7 @@ from blacksmith.service.http_body_serializer import (
     serialize_response,
     unregister_http_body_serializer,
 )
-from blacksmith.typing import HttpLocation, Json
+from blacksmith.typing import Json
 
 
 class GetRequest(Request): ...
@@ -103,20 +103,48 @@ def test_json_encoder() -> None:
 
 
 def test_get_location_from_pydantic_v2() -> None:
-    class DummyFieldInfo:
-        json_schema_extra: ClassVar[Mapping[str, HttpLocation]] = {"location": QUERY}
+    class Dummy(BaseModel):
+        field: str = PostBodyField(default=None)
 
-    assert get_location(DummyFieldInfo()) == QUERY
+    assert get_location(Dummy.model_fields["field"]) == BODY
 
 
-def test_get_location_raises_value_error() -> None:
-    class Dummy:
-        def __str__(self):
-            return "dummy"
+def test_get_location_raises_type_error_if_no_json_schema_extra() -> None:
+    class Dummy(BaseModel):
+        field: str = Field(default=None)
 
-    with pytest.raises(ValueError) as ctx:
-        get_location(Dummy())
-    assert str(ctx.value) == "dummy is not a FieldInfo"
+    with pytest.raises(TypeError) as ctx:
+        get_location(Dummy.model_fields["field"])
+    assert (
+        str(ctx.value)
+        == "not a PathInfoField | HeaderField | QueryStringField | PostBodyField"
+    )
+
+
+def test_get_location_raises_type_error_if_no_location() -> None:
+    class Dummy(BaseModel):
+        field: str = Field(default=None, json_schema_extra={"foo": "bar"})
+
+    with pytest.raises(TypeError) as ctx:
+        get_location(Dummy.model_fields["field"])
+    assert (
+        str(ctx.value)
+        == "not a PathInfoField | HeaderField | QueryStringField | PostBodyField"
+    )
+
+
+def test_get_location_raises_type_error_if_callable() -> None:
+    def my_json_schema_extra(s: Any):
+        return s
+    class Dummy(BaseModel):
+        field: str = Field(default=None, json_schema_extra=my_json_schema_extra)
+
+    with pytest.raises(TypeError) as ctx:
+        get_location(Dummy.model_fields["field"])
+    assert (
+        str(ctx.value)
+        == "not a PathInfoField | HeaderField | QueryStringField | PostBodyField"
+    )
 
 
 def test_serialize_part() -> None:
