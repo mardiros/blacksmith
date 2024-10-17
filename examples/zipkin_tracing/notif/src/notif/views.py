@@ -2,7 +2,6 @@ import email as emaillib
 import smtplib
 from textwrap import dedent
 
-from notif.resources.user import User
 from starlette.applications import Starlette
 from starlette.responses import JSONResponse
 from starlette_zipkin import trace
@@ -13,6 +12,7 @@ from blacksmith.middleware._async.zipkin import (
     AbstractTraceContext,
     AsyncZipkinMiddleware,
 )
+from notif.resources.user import User
 
 AbstractTraceContext.register(trace)
 

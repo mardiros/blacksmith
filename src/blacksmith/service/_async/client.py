@@ -14,6 +14,8 @@ from blacksmith.typing import ClientName, Proxies, ResourceName, Url
 from .base import AsyncAbstractTransport
 from .route_proxy import AsyncRouteProxy, ClientTimeout, build_timeout
 
+default_timeout = HTTPTimeout()
+
 
 class AsyncClient(Generic[TError_co]):
     """
@@ -74,8 +76,8 @@ class AsyncClient(Generic[TError_co]):
                 self.error_parser,
                 self.middlewares,
             )
-        except KeyError:
-            raise UnregisteredResourceException(name, self.name)
+        except KeyError as exc:
+            raise UnregisteredResourceException(name, self.name) from exc
 
 
 class AsyncClientFactory(Generic[TError_co]):
@@ -107,7 +109,7 @@ class AsyncClientFactory(Generic[TError_co]):
         sd: AsyncAbstractServiceDiscovery,
         transport: Optional[AsyncAbstractTransport] = None,
         registry: Registry = default_registry,
-        timeout: ClientTimeout = HTTPTimeout(),
+        timeout: ClientTimeout = default_timeout,
         proxies: Optional[Proxies] = None,
         verify_certificate: bool = False,
         collection_parser: Type[AbstractCollectionParser] = CollectionParser,

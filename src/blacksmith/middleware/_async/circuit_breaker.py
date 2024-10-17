@@ -61,7 +61,6 @@ class AsyncCircuitBreakerMiddleware(AsyncHTTPMiddleware):
             path: Path,
             timeout: HTTPTimeout,
         ) -> HTTPResponse:
-
             async with await self.circuit_breaker.get_breaker(client_name):
                 resp = await next(req, client_name, path, timeout)
             return resp

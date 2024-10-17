@@ -2,10 +2,10 @@ import asyncio
 
 from hypercorn.asyncio import serve
 from hypercorn.config import Config
-from notif.config import FastConfig
-from notif.views import fastapi
 
 import blacksmith
+from notif.config import FastConfig
+from notif.views import fastapi
 
 DEFAULT_SETTINGS = {
     "service_url_fmt": "http://router/{service}-{version}/{version}",

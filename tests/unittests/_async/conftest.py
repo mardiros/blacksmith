@@ -1,5 +1,16 @@
 from datetime import timedelta
-from typing import Any, Dict, List, Mapping, Optional, Tuple, Type
+from typing import (
+    Any,
+    ClassVar,
+    Dict,
+    List,
+    Mapping,
+    Optional,
+    Sequence,
+    Tuple,
+    Type,
+    Union,
+)
 
 import pytest
 
@@ -27,7 +38,7 @@ def static_sd() -> AsyncStaticDiscovery:
 
 
 class FakeConsulTransport(AsyncAbstractTransport):
-    _body = [
+    _body: ClassVar[Sequence[Mapping[str, Union[str, int]]]] = [
         {
             "Address": "1.1.1.1",
             "ServiceAddress": "8.8.8.8",
@@ -153,7 +164,7 @@ def dummy_middleware() -> AsyncHTTPAddHeadersMiddleware:
 @pytest.fixture
 def consul_sd_with_body(body: Dict[str, Any]) -> AsyncConsulDiscovery:
     class FakeConsulTransportNoServiceAddr(FakeConsulTransport):
-        _body = [body]
+        _body: ClassVar[Sequence[Mapping[str, Union[str, int]]]] = [body]
 
     def cli(url: str, tok: str) -> AsyncClientFactory[HTTPError]:
         return AsyncClientFactory(
@@ -223,10 +234,10 @@ def fake_http_middleware_cache_with_data(
 
 
 class Trace(AbstractTraceContext):
-    name = ""
-    kind = ""
-    tags: Dict[str, str] = {}
-    annotations: List[Tuple[Optional[str], Optional[float]]] = []
+    name: str
+    kind: str
+    tags: Dict[str, str]
+    annotations: List[Tuple[Optional[str], Optional[float]]]
 
     def __init__(self, name: str, kind: str) -> None:
         Trace.name = name

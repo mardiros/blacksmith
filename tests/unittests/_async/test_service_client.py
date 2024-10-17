@@ -58,7 +58,6 @@ class FakeTransport(AsyncAbstractTransport):
         path: Path,
         timeout: HTTPTimeout,
     ) -> HTTPResponse:
-
         if self.resp.status_code >= 400:
             raise HTTPError(f"{self.resp.status_code} blah", req, self.resp)
         return self.resp
@@ -76,7 +75,6 @@ class FakeTimeoutTransport(AsyncAbstractTransport):
 
 
 async def test_client(static_sd: AsyncAbstractServiceDiscovery):
-
     resp = HTTPResponse(
         200,
         {},
@@ -113,7 +111,7 @@ async def test_client(static_sd: AsyncAbstractServiceDiscovery):
 
     ctx: ExceptionInfo[Any]
     with pytest.raises(UnregisteredResourceException) as ctx:
-        client.daemon
+        client.daemon  # noqa: B018
     assert str(ctx.value) == "Unregistered resource 'daemon' in client 'api'"
 
     with pytest.raises(NoContractException) as ctx:
@@ -140,7 +138,6 @@ async def test_client(static_sd: AsyncAbstractServiceDiscovery):
 
 
 async def test_client_timeout(static_sd: AsyncAbstractServiceDiscovery):
-
     routes = ApiRoutes(
         "/dummies/{name}", {"GET": (GetParam, GetResponse)}, None, None, None
     )

@@ -18,10 +18,10 @@ async def main():
     api = await cli("api")
 
     # user the default timeout
-    resp = await api.resource.collection_get()  # noqa
+    resp = await api.resource.collection_get()
 
     # force the timeout
-    resp = await api.resource.collection_get(timeout=42.0)  # noqa
+    resp = await api.resource.collection_get(timeout=42.0)
 
     # Or even with a connect timeout using the HTTPTimeout class
     resp = await api.resource.collection_get(timeout=HTTPTimeout(42.0, 7.0))  # noqa

@@ -61,7 +61,6 @@ class SyncCircuitBreakerMiddleware(SyncHTTPMiddleware):
             path: Path,
             timeout: HTTPTimeout,
         ) -> HTTPResponse:
-
             with self.circuit_breaker.get_breaker(client_name):
                 resp = next(req, client_name, path, timeout)
             return resp

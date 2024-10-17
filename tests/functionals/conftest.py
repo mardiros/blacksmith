@@ -1,10 +1,10 @@
-import time
 from enum import Enum
 from multiprocessing import Process
 from typing import Dict, Iterable, List, Optional, Type
 
+import httpx
 import pytest
-import uvicorn  # type: ignore
+import uvicorn
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from pydantic.fields import Field
@@ -52,8 +52,8 @@ def create_item(item: Item):
 def read_item(item_name: str, response_model: Type[BaseModel] = Item):
     try:
         return items_db[item_name]
-    except KeyError:
-        raise not_found
+    except KeyError as exc:
+        raise not_found from exc
 
 
 @app.patch("/items/{item_name}")
@@ -66,8 +66,8 @@ def update_item(item_name: str, item: PatchItem):
             cur.size = item.size
         items_db[cur.name] = cur
         return {"href": app.url_path_for("read_item", item_name=cur.name)}
-    except KeyError:
-        raise not_found
+    except KeyError as exc:
+        raise not_found from exc
 
 
 @app.delete("/items/{item_name}")
@@ -75,20 +75,27 @@ def delete_item(item_name: str):
     try:
         del items_db[item_name]
         return Response("", 204)
-    except KeyError:
-        raise not_found
+    except KeyError as exc:
+        raise not_found from exc
 
 
 def run_server(port: int):
     uvicorn.run(app, port=port)
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def dummy_api_endpoint() -> Iterable[str]:
     port = 6556
     proc = Process(target=run_server, args=(port,), daemon=True)
     proc.start()
-    time.sleep(0.1)
+    for i in range(20):
+        timeout = 0.1 / (i + 1)
+        try:
+            httpx.get(f"http://localhost:{port}", timeout=httpx.Timeout(timeout))
+        except httpx.ConnectError:
+            pass
+        else:
+            break
     yield f"http://localhost:{port}"
     proc.kill()  # Cleanup after test
 
