@@ -60,6 +60,7 @@ jobs:
           path: junit/test-results-${{ matrix.python-version }}.xml
 
       - name: Codecov
+        if: ${{ matrix.python-version }} == '3.12'
         uses: codecov/codecov-action@v3
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
