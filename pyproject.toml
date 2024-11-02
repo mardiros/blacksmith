@@ -1,20 +1,22 @@
 [project]
 authors = [{ name = "Guillaume Gauvrit", email = "guillaume@gauvr.it" }]
 classifiers = [
-    "Development Status :: Stable",
+    "Development Status :: 5 - Production/Stable",
     "Framework :: AsyncIO",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: BSD License",
-    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Intended Audience :: Information Technology",
+    "License :: OSI Approved :: MIT License",
     "Topic :: Internet :: WWW/HTTP",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: System :: Networking",
+    "Typing :: Typed",
 ]
 description = "REST API Client designed for microservices"
-license = { text = "BSD-derived" }
+license = { text = "MIT License" }
 name = "Blacksmith"
 readme = "README.rst"
 requires-python = ">=3.9"
 version = "3.1.1"
-
 
 dependencies = [
     "httpx>=0.24",
@@ -22,7 +24,6 @@ dependencies = [
     "pydantic>=2.6.0",
     "result>=0.11.0, <1",
 ]
-
 
 [project.urls]
 Homepage = "https://mardiros.github.io/blacksmith"
