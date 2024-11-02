@@ -1,11 +1,11 @@
 Blacksmith
 ==========
 
-.. image:: https://github.com/mardiros/blacksmith/actions/workflows/gh-pages.yml/badge.svg
+.. image:: https://github.com/mardiros/blacksmith/actions/workflows/publish-doc.yml/badge.svg
    :target: https://mardiros.github.io/blacksmith/user/introduction.html
    :alt: Documentation
 
-.. image:: https://github.com/mardiros/blacksmith/actions/workflows/main.yml/badge.svg
+.. image:: https://github.com/mardiros/blacksmith/actions/workflows/tests.yml/badge.svg
    :target: https://github.com/mardiros/blacksmith/actions/workflows/main.yml
    :alt: Continuous Integration
 
