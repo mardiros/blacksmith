@@ -1,66 +1,78 @@
-[tool.poetry]
-authors = ["Guillaume Gauvrit <guillaume@gauvr.it>"]
+[project]
+authors = [{ name = "Guillaume Gauvrit", email = "guillaume@gauvr.it" }]
 classifiers = [
-  "Development Status :: Stable",
-  "Framework :: AsyncIO",
-  "Intended Audience :: Developers",
-  "License :: OSI Approved :: BSD License",
-  "Topic :: Software Development :: Libraries :: Python Modules",
-  "Topic :: Internet :: WWW/HTTP",
+    "Development Status :: Stable",
+    "Framework :: AsyncIO",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: BSD License",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Internet :: WWW/HTTP",
 ]
 description = "REST API Client designed for microservices"
-homepage = "https://github.com/mardiros/blacksmith"
-license = "BSD-derived"
-name = "blacksmith"
-
+license = { text = "BSD-derived" }
+name = "Blacksmith"
 readme = "README.rst"
-repository = "https://github.com/mardiros/blacksmith"
+requires-python = ">=3.9"
 version = "3.1.1"
 
-[tool.poetry.dependencies]
-python = "^3.8.1"
-httpx = ">=0.24"
-prometheus-client = {version = ">=0.17.1 <1", optional = true}
-purgatory = "^2.0.0"
-pydantic = "^2.6.0"
-typing-extensions = "^4.7.0"
-result = ">=0.11.0, <1"
 
-[tool.poetry.extras]
-http_cache_async = ["redis"]
-http_cache_sync = ["redis"]
-prometheus = ["prometheus-client"]
+dependencies = [
+    "httpx>=0.24",
+    "purgatory>=2.0.0",
+    "pydantic>=2.6.0",
+    "result>=0.11.0, <1",
+]
 
-[tool.poetry.group.dev]
-optional = true
 
-[tool.poetry.group.dev.dependencies]
-aiohttp = "^3.9.5"
-coverage = {version = "^7.5.1", extras = ["toml"]}
-esbonio = "^0.16.4"
-fastapi = "^0.111.0"
-furo = "^2024.5.6"
-mypy = "^1.4.1"
-prometheus-client = ">=0.17.1 <1"
-pytest = "^7.4.0"
-pytest-asyncio = "^0.21.0"
-pytest-cov = "^4.1.0"
-redis = "^5.0.4"
-sphinx = "^7.0.1"
-sphinx-autodoc-typehints = "^1.12.0"
-starlette-zipkin = "^0.3.0"
-tomlkit = "^0.12.5"
-types-redis = "^4.6.0"
-unasync = "^0.6.0"
-uvicorn = "^0.29.0"
+[project.urls]
+Homepage = "https://mardiros.github.io/blacksmith"
+Documentation = "https://mardiros.github.io/blacksmith"
+Repository = "https://github.com/mardiros/blacksmith.git"
+Issues = "https://github.com/mardiros/blacksmith/issues"
+Changelog = "https://mardiros.github.io/blacksmith/user/changelog.html"
+
+[tool.pdm.build]
+includes = ["src", "CHANGELOG.rst"]
+excludes = ["tests"]
+
+[project.optional-dependencies]
+http_cache_async = ["redis >=5.0.4,<6"]
+http_cache_sync = ["redis >=5.0.4,<6"]
+prometheus = ["prometheus-client >= 0.19.0, <1"]
+docs = [
+    "sphinx>=7.0.0",
+    "sphinx-autodoc-typehints>=1.12.0,<2",
+    "furo>=2024.8.6",
+]
+
+[dependency-groups]
+dev = [
+    "aiohttp >=3.10.10,<4",
+    "fastapi >=0.114.0,<1",
+    "mypy >=1.4.1,<2",
+    "prometheus-client >=0.19.0,<1",
+    "pytest >=8.3.3,<9",
+    "pytest-asyncio >=0.24.0",
+    "pytest-cov >=6.0.0,<7",
+    "redis >=5.0.4,<6",
+    "starlette-zipkin >=0.3.0,<0.4.0",
+    "types-redis >=4.6.0,<6",
+    "unasync >=0.6.0,<0.7",
+    "uvicorn >=0.32.0",
+]
+
+doc = [
+    "esbonio>=0.16.1",
+    "sphinx>=7.0.0",
+    "sphinx-autodoc-typehints>=1.12.0,<2",
+    "furo>=2024.8.6",
+]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 norecursedirs = "tests/unittests/scanned_resources"
 testpaths = ["tests"]
-filterwarnings = [
-  "error",
-]
+filterwarnings = ["error"]
 
 [tool.pyright]
 ignore = ["examples"]
@@ -77,9 +89,6 @@ disallow_any_generics = true
 disallow_untyped_defs = true
 module = "blacksmith.*"
 
-[tool.isort]
-profile = "black"
-
 [tool.ruff]
 line-length = 88
 target-version = "py38"
@@ -95,12 +104,12 @@ select = [
 
 [tool.coverage.report]
 exclude_lines = [
-  "if TYPE_CHECKING:",
-  "except ImportError:",
-  "\\s+\\.\\.\\.$",
-  "# coverage: ignore",
+    "if TYPE_CHECKING:",
+    "except ImportError:",
+    "\\s+\\.\\.\\.$",
+    "# coverage: ignore",
 ]
 
 [build-system]
-build-backend = "poetry.core.masonry.api"
-requires = ["poetry-core>=1.2.0"]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
