@@ -1,7 +1,7 @@
 """Collect metrics based on prometheus."""
 
 from importlib import metadata
-from typing import TYPE_CHECKING, Any, List, Optional
+from typing import TYPE_CHECKING, Any, Optional
 
 if TYPE_CHECKING:
     try:
@@ -16,8 +16,8 @@ else:
 class PrometheusMetrics:
     def __init__(
         self,
-        buckets: Optional[List[float]] = None,
-        hit_cache_buckets: Optional[List[float]] = None,
+        buckets: Optional[list[float]] = None,
+        hit_cache_buckets: Optional[list[float]] = None,
         registry: Registry = None,
     ) -> None:
         from prometheus_client import REGISTRY, Counter, Gauge, Histogram

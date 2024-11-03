@@ -1,15 +1,12 @@
 import abc
+from collections.abc import Iterator
 from dataclasses import dataclass
 from functools import partial
 from typing import (
     Any,
     Callable,
-    Dict,
     Generic,
-    Iterator,
-    List,
     Optional,
-    Type,
     TypeVar,
     cast,
 )
@@ -98,7 +95,7 @@ class AbstractCollectionParser(abc.ABC):
 
     @property
     @abc.abstractmethod
-    def json(self) -> List[Any]:
+    def json(self) -> list[Any]:
         """
         Return the list part of the response the response.
 
@@ -135,7 +132,7 @@ class CollectionParser(AbstractCollectionParser):
         )
 
     @property
-    def json(self) -> List[Json]:
+    def json(self) -> list[Json]:
         return self.resp.json or []
 
 
@@ -158,7 +155,7 @@ class ResponseBox(Generic[TResponse, TError_co]):
     def __init__(
         self,
         result: Result[HTTPResponse, HTTPError],
-        response_schema: Optional[Type[Response]],
+        response_schema: Optional[type[Response]],
         method: HTTPMethod,
         path: Path,
         name: ResourceName,
@@ -188,7 +185,7 @@ class ResponseBox(Generic[TResponse, TError_co]):
         return cast(TResponse, schema_cls(**(resp.json or {})))
 
     @property
-    def json(self) -> Optional[Dict[str, Any]]:
+    def json(self) -> Optional[dict[str, Any]]:
         """
         Return the raw json response.
 
@@ -261,7 +258,7 @@ class ResponseBox(Generic[TResponse, TError_co]):
         """
         return self._result.unwrap_or_else(op)
 
-    def unwrap_or_raise(self, exc: Type[Exception]) -> TResponse:
+    def unwrap_or_raise(self, exc: type[Exception]) -> TResponse:
         """
         Return the response or raise the exception exc.
 
@@ -363,8 +360,8 @@ class CollectionIterator(Iterator[TResponse]):
     def __init__(
         self,
         response: HTTPResponse,
-        response_schema: Optional[Type[Response]],
-        collection_parser: Type[AbstractCollectionParser],
+        response_schema: Optional[type[Response]],
+        collection_parser: type[AbstractCollectionParser],
     ) -> None:
         self.pos = 0
         self.response_schema = response_schema

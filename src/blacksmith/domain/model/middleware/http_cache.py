@@ -2,7 +2,7 @@
 
 import abc
 import json
-from typing import Any, List, Tuple
+from typing import Any
 from urllib.parse import urlencode
 
 from httpx import Headers
@@ -35,7 +35,7 @@ class AbstractCachePolicy(abc.ABC):
         client_name: ClientName,
         path: Path,
         req: HTTPRequest,
-        vary: List[str],
+        vary: list[str],
     ) -> str:
         """Create a caching key for the http response."""
 
@@ -46,7 +46,7 @@ class AbstractCachePolicy(abc.ABC):
         path: Path,
         req: HTTPRequest,
         resp: HTTPResponse,
-    ) -> Tuple[int, str, List[str]]:
+    ) -> tuple[int, str, list[str]]:
         """Return caching info. Tuple (ttl in seconds, vary key, vary list)."""
 
 
@@ -86,14 +86,14 @@ def get_max_age(response: HTTPResponse) -> int:
     s_cache_control = response.headers.get("cache-control", "")
     cache_control = [c.strip() for c in s_cache_control.split(",")]
     if "public" in cache_control:
-        h_max_age: List[str] = [cc for cc in cache_control if cc.startswith("max-age=")]
+        h_max_age: list[str] = [cc for cc in cache_control if cc.startswith("max-age=")]
         if h_max_age:
             _hdr, value = h_max_age[0].split("=", 1)
             max_age = int_or_0(value)
     return max(max_age - age, 0)
 
 
-def get_vary_header_split(response: HTTPResponse) -> List[str]:
+def get_vary_header_split(response: HTTPResponse) -> list[str]:
     vary = response.headers.get("vary", "")
     fields = [field.strip().lower() for field in vary.split(",")] if vary else []
     return fields
@@ -130,7 +130,7 @@ class CacheControlPolicy(AbstractCachePolicy):
         client_name: ClientName,
         path: Path,
         req: HTTPRequest,
-        vary: List[str],
+        vary: list[str],
     ) -> str:
         headers = Headers(req.headers)
         vary_key = self.get_vary_key(client_name, path, req)
@@ -144,7 +144,7 @@ class CacheControlPolicy(AbstractCachePolicy):
         path: Path,
         req: HTTPRequest,
         resp: HTTPResponse,
-    ) -> Tuple[int, str, List[str]]:
+    ) -> tuple[int, str, list[str]]:
         max_age = get_max_age(resp)
         if max_age <= 0:
             return (max_age, "", [])

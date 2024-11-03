@@ -1,4 +1,4 @@
-from typing import Any, Dict, cast
+from typing import Any, cast
 
 import prometheus_client
 import pytest
@@ -63,7 +63,7 @@ async def test_empty_middleware(
     ],
 )
 async def test_headers_middleware(
-    params: Dict[str, Any],
+    params: dict[str, Any],
     echo_middleware: AsyncMiddleware,
     dummy_http_request: HTTPRequest,
     dummy_timeout: HTTPTimeout,

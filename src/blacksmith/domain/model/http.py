@@ -1,12 +1,8 @@
 import re
+from collections.abc import AsyncIterable, Iterable, Mapping
 from dataclasses import dataclass, field
 from typing import (
     Any,
-    AsyncIterable,
-    Dict,
-    Iterable,
-    List,
-    Mapping,
     Optional,
     Protocol,
     Union,
@@ -16,7 +12,7 @@ from typing import (
 from blacksmith.typing import HTTPMethod, Json, Url
 
 simpletypes = Union[str, int, float, bool]
-Links = Dict[Optional[str], Dict[str, str]]
+Links = dict[Optional[str], dict[str, str]]
 RequestBody = Union[str, bytes, Iterable[bytes], AsyncIterable[bytes]]
 
 
@@ -49,11 +45,11 @@ class HTTPRequest:
     method: HTTPMethod
     url_pattern: Url
     # the property match with the "location" of feaut
-    path: Dict[str, simpletypes] = field(default_factory=dict)
-    querystring: Dict[str, Union[simpletypes, List[simpletypes]]] = field(
+    path: dict[str, simpletypes] = field(default_factory=dict)
+    querystring: dict[str, Union[simpletypes, list[simpletypes]]] = field(
         default_factory=dict
     )
-    headers: Dict[str, str] = field(default_factory=dict)
+    headers: dict[str, str] = field(default_factory=dict)
     body: RequestBody = ""
 
     @property
@@ -61,7 +57,7 @@ class HTTPRequest:
         return self.url_pattern.format(**self.path)
 
 
-def parse_header_links(value: str) -> List[Dict[str, str]]:
+def parse_header_links(value: str) -> list[dict[str, str]]:
     """
     Returns a list of parsed link headers, for more info see:
     https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Link
@@ -92,7 +88,7 @@ def parse_header_links(value: str) -> List[Dict[str, str]]:
     :param value: HTTP Link entity-header field
     :return: list of parsed link headers
     """
-    links: List[Dict[str, str]] = []
+    links: list[dict[str, str]] = []
     replace_chars = " '\""
     value = value.strip(replace_chars)
     if not value:

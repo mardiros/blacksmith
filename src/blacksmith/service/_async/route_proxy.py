@@ -1,12 +1,8 @@
+from collections.abc import Mapping
 from typing import (
     Any,
-    Dict,
     Generic,
-    List,
-    Mapping,
     Optional,
-    Tuple,
-    Type,
     Union,
     get_origin,
 )
@@ -49,7 +45,7 @@ from blacksmith.typing import ClientName, HTTPMethod, Path, ResourceName, Url
 
 from .base import AsyncAbstractTransport
 
-ClientTimeout = Union[HTTPTimeout, float, Tuple[float, float]]
+ClientTimeout = Union[HTTPTimeout, float, tuple[float, float]]
 HTTPAuthentication = AsyncHTTPMiddleware
 
 
@@ -62,7 +58,7 @@ def build_timeout(timeout: ClientTimeout) -> HTTPTimeout:
     return timeout
 
 
-def is_union(typ: Type[Any]) -> bool:
+def is_union(typ: type[Any]) -> bool:
     type_origin = get_origin(typ)
     if type_origin:
         if type_origin is Union:  # Union[T, U] or even Optional[T]
@@ -73,7 +69,7 @@ def is_union(typ: Type[Any]) -> bool:
     return False
 
 
-def is_instance_with_union(val: Any, typ: Type[Any]) -> bool:
+def is_instance_with_union(val: Any, typ: type[Any]) -> bool:
     # isinstance does not support union type in old interpreter,
     if is_union(typ):
         r = [isinstance(val, t) for t in typ.__args__]  # type: ignore
@@ -81,7 +77,7 @@ def is_instance_with_union(val: Any, typ: Type[Any]) -> bool:
     return isinstance(val, typ)
 
 
-def build_request(typ: Type[Any], params: Mapping[str, Any]) -> Request:
+def build_request(typ: type[Any], params: Mapping[str, Any]) -> Request:
     if is_union(typ):
         err: Optional[Exception] = None
         for t in typ.__args__:  # type: ignore
@@ -103,9 +99,9 @@ class AsyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
     routes: ApiRoutes
     transport: AsyncAbstractTransport
     timeout: HTTPTimeout
-    collection_parser: Type[AbstractCollectionParser]
+    collection_parser: type[AbstractCollectionParser]
     error_parser: AbstractErrorParser[TError_co]
-    middlewares: List[AsyncHTTPMiddleware]
+    middlewares: list[AsyncHTTPMiddleware]
 
     def __init__(
         self,
@@ -115,9 +111,9 @@ class AsyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
         routes: ApiRoutes,
         transport: AsyncAbstractTransport,
         timeout: HTTPTimeout,
-        collection_parser: Type[AbstractCollectionParser],
+        collection_parser: type[AbstractCollectionParser],
         error_parser: AbstractErrorParser[TError_co],
-        middlewares: List[AsyncHTTPMiddleware],
+        middlewares: list[AsyncHTTPMiddleware],
     ) -> None:
         self.client_name = client_name
         self.name = name
@@ -132,9 +128,9 @@ class AsyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
     def _prepare_request(
         self,
         method: HTTPMethod,
-        params: Union[Optional[Request], Dict[Any, Any]],
+        params: Union[Optional[Request], dict[Any, Any]],
         resource: Optional[HttpResource],
-    ) -> Tuple[Path, HTTPRequest, Optional[Type[Response]]]:
+    ) -> tuple[Path, HTTPRequest, Optional[type[Response]]]:
         if resource is None:
             raise UnregisteredRouteException(method, self.name, self.client_name)
         if resource.contract is None or method not in resource.contract:
@@ -161,7 +157,7 @@ class AsyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
     def _prepare_response(
         self,
         result: Result[HTTPResponse, HTTPError],
-        response_schema: Optional[Type[Response]],
+        response_schema: Optional[type[Response]],
         method: HTTPMethod,
         path: Path,
     ) -> ResponseBox[TResponse, TError_co]:
@@ -178,8 +174,8 @@ class AsyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
     def _prepare_collection_response(
         self,
         result: Result[HTTPResponse, HTTPError],
-        response_schema: Optional[Type[Response]],
-        collection_parser: Optional[Type[AbstractCollectionParser]],
+        response_schema: Optional[type[Response]],
+        collection_parser: Optional[type[AbstractCollectionParser]],
     ) -> Result[CollectionIterator[TCollectionResponse], TError_co]:
         if result.is_err():
             return Err(self.error_parser(result.unwrap_err()))
@@ -208,7 +204,7 @@ class AsyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
     async def _yield_collection_request(
         self,
         method: HTTPMethod,
-        params: Union[Optional[Request], Dict[Any, Any]],
+        params: Union[Optional[Request], dict[Any, Any]],
         timeout: HTTPTimeout,
         collection: HttpCollection,
     ) -> Result[CollectionIterator[TCollectionResponse], TError_co]:
@@ -221,7 +217,7 @@ class AsyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
     async def _collection_request(
         self,
         method: HTTPMethod,
-        params: Union[Request, Dict[Any, Any]],
+        params: Union[Request, dict[Any, Any]],
         timeout: HTTPTimeout,
     ) -> ResponseBox[TResponse, TError_co]:
         path, req, resp_schema = self._prepare_request(
@@ -233,7 +229,7 @@ class AsyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
     async def _request(
         self,
         method: HTTPMethod,
-        params: Union[Request, Dict[Any, Any]],
+        params: Union[Request, dict[Any, Any]],
         timeout: HTTPTimeout,
     ) -> ResponseBox[TResponse, TError_co]:
         path, req, resp_schema = self._prepare_request(
@@ -244,7 +240,7 @@ class AsyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
 
     async def collection_head(
         self,
-        params: Union[Request, Dict[Any, Any]],
+        params: Union[Request, dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
     ) -> ResponseBox[TResponse, TError_co]:
         """
@@ -256,7 +252,7 @@ class AsyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
 
     async def collection_get(
         self,
-        params: Union[Optional[Request], Dict[Any, Any]] = None,
+        params: Union[Optional[Request], dict[Any, Any]] = None,
         timeout: Optional[ClientTimeout] = None,
     ) -> Result[CollectionIterator[TCollectionResponse], TError_co]:
         """
@@ -286,7 +282,7 @@ class AsyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
 
     async def collection_post(
         self,
-        params: Union[Request, Dict[Any, Any]],
+        params: Union[Request, dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
     ) -> ResponseBox[TResponse, TError_co]:
         """
@@ -298,7 +294,7 @@ class AsyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
 
     async def collection_put(
         self,
-        params: Union[Request, Dict[Any, Any]],
+        params: Union[Request, dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
     ) -> ResponseBox[TResponse, TError_co]:
         """
@@ -310,7 +306,7 @@ class AsyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
 
     async def collection_patch(
         self,
-        params: Union[Request, Dict[Any, Any]],
+        params: Union[Request, dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
     ) -> ResponseBox[TResponse, TError_co]:
         """
@@ -322,7 +318,7 @@ class AsyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
 
     async def collection_delete(
         self,
-        params: Union[Request, Dict[Any, Any]],
+        params: Union[Request, dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
     ) -> ResponseBox[TResponse, TError_co]:
         """
@@ -334,7 +330,7 @@ class AsyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
 
     async def collection_options(
         self,
-        params: Union[Request, Dict[Any, Any]],
+        params: Union[Request, dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
     ) -> ResponseBox[TResponse, TError_co]:
         """
@@ -346,7 +342,7 @@ class AsyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
 
     async def head(
         self,
-        params: Union[Request, Dict[Any, Any]],
+        params: Union[Request, dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
     ) -> ResponseBox[TResponse, TError_co]:
         """
@@ -358,7 +354,7 @@ class AsyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
 
     async def get(
         self,
-        params: Union[Request, Dict[Any, Any]],
+        params: Union[Request, dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
     ) -> ResponseBox[TResponse, TError_co]:
         """
@@ -371,7 +367,7 @@ class AsyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
 
     async def post(
         self,
-        params: Union[Request, Dict[Any, Any]],
+        params: Union[Request, dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
     ) -> ResponseBox[TResponse, TError_co]:
         """
@@ -383,7 +379,7 @@ class AsyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
 
     async def put(
         self,
-        params: Union[Request, Dict[Any, Any]],
+        params: Union[Request, dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
     ) -> ResponseBox[TResponse, TError_co]:
         """
@@ -395,7 +391,7 @@ class AsyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
 
     async def patch(
         self,
-        params: Union[Request, Dict[Any, Any]],
+        params: Union[Request, dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
     ) -> ResponseBox[TResponse, TError_co]:
         """
@@ -407,7 +403,7 @@ class AsyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
 
     async def delete(
         self,
-        params: Union[Request, Dict[Any, Any]],
+        params: Union[Request, dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
     ) -> ResponseBox[TResponse, TError_co]:
         """
@@ -419,7 +415,7 @@ class AsyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
 
     async def options(
         self,
-        params: Union[Request, Dict[Any, Any]],
+        params: Union[Request, dict[Any, Any]],
         timeout: Optional[ClientTimeout] = None,
     ) -> ResponseBox[TResponse, TError_co]:
         """

@@ -1,4 +1,4 @@
-from typing import Any, Literal, Optional, Tuple
+from typing import Any, Literal, Optional
 
 from httpx import _types  # type: ignore
 
@@ -7,7 +7,7 @@ ServiceName = str
 ClientName = str
 ResourceName = str
 Version = Optional[str]
-Service = Tuple[str, Version]
+Service = tuple[str, Version]
 
 Path = str
 Proxies = _types.ProxiesTypes

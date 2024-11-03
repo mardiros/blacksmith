@@ -1,6 +1,7 @@
+from collections.abc import Iterable
 from enum import Enum
 from multiprocessing import Process
-from typing import Dict, Iterable, List, Optional, Type
+from typing import Optional
 
 import httpx
 import pytest
@@ -29,11 +30,11 @@ class PatchItem(BaseModel):
     size: Optional[SizeEnum] = None
 
 
-items_db: Dict[str, Item] = {}
+items_db: dict[str, Item] = {}
 not_found = HTTPException(404, "Item not found")
 
 
-@app.get("/items", response_model=List[Item])
+@app.get("/items", response_model=list[Item])
 def list_items(name: Optional[str] = None):
     if name:
         return [item for item in items_db.values() if item.name.startswith(name)]
@@ -49,7 +50,7 @@ def create_item(item: Item):
 
 
 @app.get("/items/{item_name}")
-def read_item(item_name: str, response_model: Type[BaseModel] = Item):
+def read_item(item_name: str, response_model: type[BaseModel] = Item):
     try:
         return items_db[item_name]
     except KeyError as exc:

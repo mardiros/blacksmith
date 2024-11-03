@@ -1,15 +1,11 @@
 import abc
 import json
+from collections.abc import Mapping, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
-    Dict,
-    List,
-    Mapping,
     Optional,
-    Sequence,
-    Type,
     Union,
     cast,
 )
@@ -32,7 +28,7 @@ from blacksmith.domain.model.http import (
 from blacksmith.domain.model.params import Request
 from blacksmith.typing import HttpLocation, HTTPMethod, Json, Url
 
-ENCODERS_BY_TYPE: Mapping[Type[Any], Callable[[Any], Any]] = {
+ENCODERS_BY_TYPE: Mapping[type[Any], Callable[[Any], Any]] = {
     PydanticUrl: str,
     **BASE_TYPES,
 }
@@ -58,7 +54,7 @@ class AbstractHttpBodySerializer(abc.ABC):
         """Return true in case it can handle the request."""
 
     @abc.abstractmethod
-    def serialize(self, body: Union[Dict[str, Any], Sequence[Any]]) -> RequestBody:
+    def serialize(self, body: Union[dict[str, Any], Sequence[Any]]) -> RequestBody:
         """
         Serialize a python simple types to a python request body.
 
@@ -78,7 +74,7 @@ class JsonRequestSerializer(AbstractHttpBodySerializer):
     def accept(self, content_type: str) -> bool:
         return content_type.startswith("application/json")
 
-    def serialize(self, body: Union[Dict[str, Any], Sequence[Any]]) -> RequestBody:
+    def serialize(self, body: Union[dict[str, Any], Sequence[Any]]) -> RequestBody:
         return json.dumps(body, cls=JSONEncoder)
 
     def deserialize(self, body: bytes, encoding: Optional[str]) -> Json:
@@ -91,7 +87,7 @@ class UrlencodedRequestSerializer(AbstractHttpBodySerializer):
     def accept(self, content_type: str) -> bool:
         return content_type == "application/x-www-form-urlencoded"
 
-    def serialize(self, body: Union[Dict[str, Any], Sequence[Any]]) -> RequestBody:
+    def serialize(self, body: Union[dict[str, Any], Sequence[Any]]) -> RequestBody:
         return urlencode(body, doseq=True)
 
     def deserialize(self, body: bytes, encoding: Optional[str]) -> Json:
@@ -125,7 +121,7 @@ def get_value(v: Union[simpletypes, SecretStr, SecretBytes]) -> simpletypes:
     return v  # type: ignore
 
 
-def serialize_part(req: "Request", part: Dict[IntStr, Any]) -> Dict[str, simpletypes]:
+def serialize_part(req: "Request", part: dict[IntStr, Any]) -> dict[str, simpletypes]:
     return {
         **{
             k: get_value(v)
@@ -150,7 +146,7 @@ def serialize_part(req: "Request", part: Dict[IntStr, Any]) -> Dict[str, simplet
     }
 
 
-_SERIALIZERS: List[AbstractHttpBodySerializer] = [
+_SERIALIZERS: list[AbstractHttpBodySerializer] = [
     JsonRequestSerializer(),
     UrlencodedRequestSerializer(),
 ]
@@ -173,7 +169,7 @@ def unregister_http_body_serializer(
 
 
 def serialize_request_body(
-    req: "Request", body: Dict[str, str], content_type: Optional[str] = None
+    req: "Request", body: dict[str, str], content_type: Optional[str] = None
 ) -> RequestBody:
     """
     Serialize the body of the request.
@@ -207,7 +203,7 @@ def serialize_request(
     serialized by a registered serializer.
     """
     req = HTTPRequest(method=method, url_pattern=url_pattern)
-    fields_by_loc: Dict[HttpLocation, Dict[IntStr, Any]] = {
+    fields_by_loc: dict[HttpLocation, dict[IntStr, Any]] = {
         HEADER: {},
         PATH: {},
         QUERY: {},
@@ -221,7 +217,7 @@ def serialize_request(
     req.headers = {key: str(val) for key, val in headers.items()}
     req.path = serialize_part(request_model, fields_by_loc[PATH])
     req.querystring = cast(
-        Dict[str, Union[simpletypes, List[simpletypes]]],
+        dict[str, Union[simpletypes, list[simpletypes]]],
         serialize_part(request_model, fields_by_loc[QUERY]),
     )
 

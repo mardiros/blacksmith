@@ -1,5 +1,3 @@
-from typing import List, Tuple
-
 import pytest
 
 from blacksmith.domain.model.http import HTTPRequest, HTTPResponse
@@ -13,7 +11,7 @@ from blacksmith.typing import HTTPMethod
 
 
 @pytest.mark.parametrize("params", [("0", 0), ("42", 42), ("2.5", 0), ("xxx", 0)])
-def test_int_or_0(params: Tuple[str, int]):
+def test_int_or_0(params: tuple[str, int]):
     assert int_or_0(params[0]) == params[1]
 
 
@@ -39,7 +37,7 @@ def test_int_or_0(params: Tuple[str, int]):
         ),
     ],
 )
-def test_get_max_age(params: Tuple[HTTPResponse, int]):
+def test_get_max_age(params: tuple[HTTPResponse, int]):
     assert get_max_age(params[0]) == params[1]
 
 
@@ -54,7 +52,7 @@ def test_get_max_age(params: Tuple[HTTPResponse, int]):
         ),
     ],
 )
-def test_get_vary_header_split(params: Tuple[HTTPResponse, List[str]]):
+def test_get_vary_header_split(params: tuple[HTTPResponse, list[str]]):
     assert get_vary_header_split(params[0]) == params[1]
 
 
@@ -70,7 +68,7 @@ def test_get_vary_header_split(params: Tuple[HTTPResponse, List[str]]):
         ("OPTIONS", False),
     ],
 )
-def test_policy_handle_request(params: Tuple[HTTPMethod, bool]):
+def test_policy_handle_request(params: tuple[HTTPMethod, bool]):
     method, expected = params
     policy = CacheControlPolicy("$")
     req = HTTPRequest(method=method, url_pattern="/")
@@ -151,7 +149,7 @@ def test_policy_handle_request(params: Tuple[HTTPMethod, bool]):
         ),
     ],
 )
-def test_policy_get_vary_key(params: Tuple[str, str, HTTPRequest, str]):
+def test_policy_get_vary_key(params: tuple[str, str, HTTPRequest, str]):
     policy = CacheControlPolicy("$")
     assert policy.get_vary_key(params[0], params[1], params[2]) == params[3]
 
@@ -187,7 +185,7 @@ def test_policy_get_vary_key(params: Tuple[str, str, HTTPRequest, str]):
     ],
 )
 def test_policy_get_response_cache_key(
-    params: Tuple[str, str, HTTPRequest, List[str], str],
+    params: tuple[str, str, HTTPRequest, list[str], str],
 ):
     policy = CacheControlPolicy("$")
     assert (
@@ -233,7 +231,7 @@ def test_policy_get_response_cache_key(
     ],
 )
 def test_policy_get_cache_info_for_response(
-    params: Tuple[str, str, HTTPRequest, HTTPResponse, Tuple[int, str, List[str]]],
+    params: tuple[str, str, HTTPRequest, HTTPResponse, tuple[int, str, list[str]]],
 ):
     policy = CacheControlPolicy("$")
     assert (

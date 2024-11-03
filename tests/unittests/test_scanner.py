@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 import pytest
 
@@ -22,7 +22,7 @@ from blacksmith.domain.registry import Registry
         },
     ],
 )
-def test_scan(params: Dict[str, Any], registry: Registry):
+def test_scan(params: dict[str, Any], registry: Registry):
     blacksmith.scan(params["mod"])
     assert registry.client_service == params["expected"]
 
@@ -42,7 +42,7 @@ def test_scan(params: Dict[str, Any], registry: Registry):
         },
     ],
 )
-def test_scan_errors(params: Dict[str, Any], registry: Registry):
+def test_scan_errors(params: dict[str, Any], registry: Registry):
     with pytest.raises(params["expected_exception"]) as ctx:
         blacksmith.scan(params["mod"])
     assert str(ctx.value) == params["expected_message"]

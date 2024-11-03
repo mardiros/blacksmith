@@ -6,7 +6,7 @@ The static discovery strategy is a good start when you don't need a strategy.
 For instance, a short list of services with static endpoint.
 """
 
-from typing import Mapping
+from collections.abc import Mapping
 
 from blacksmith.domain.exceptions import UnregisteredServiceException
 from blacksmith.typing import Service, ServiceName, Version

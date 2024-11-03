@@ -1,7 +1,7 @@
 """Trace with zipkin of jaegger."""
 
 import abc
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 
 class AbstractTraceContext(abc.ABC):
@@ -13,7 +13,7 @@ class AbstractTraceContext(abc.ABC):
 
     @classmethod
     @abc.abstractmethod
-    def make_headers(cls) -> Dict[str, str]:
+    def make_headers(cls) -> dict[str, str]:
         """Build headers for the sub requests."""
 
     @abc.abstractmethod

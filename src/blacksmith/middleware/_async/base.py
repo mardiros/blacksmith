@@ -1,5 +1,3 @@
-from typing import Dict
-
 from blacksmith.domain.model.http import HTTPRequest, HTTPResponse, HTTPTimeout
 from blacksmith.domain.typing import AsyncMiddleware
 from blacksmith.typing import ClientName, Path
@@ -34,9 +32,9 @@ class AsyncHTTPAddHeadersMiddleware(AsyncHTTPMiddleware):
     :params: headers to inject in HTTP requests.
     """
 
-    headers: Dict[str, str]
+    headers: dict[str, str]
 
-    def __init__(self, headers: Dict[str, str]):
+    def __init__(self, headers: dict[str, str]):
         self.headers = headers
 
     def __call__(self, next: AsyncMiddleware) -> AsyncMiddleware:

@@ -1,8 +1,9 @@
 """Register resources on services."""
 
 from collections import defaultdict
+from collections.abc import Mapping, MutableMapping
 from dataclasses import dataclass
-from typing import Any, Mapping, MutableMapping, Optional, Tuple, Type, TypeVar
+from typing import Any, Optional, TypeVar
 
 from blacksmith.typing import (
     ClientName,
@@ -19,7 +20,7 @@ from .model import AbstractCollectionParser, Request, Response
 
 TRequest = TypeVar("TRequest", bound=Request)
 
-Schemas = Tuple[TRequest, Optional[Type[Response]]]
+Schemas = tuple[TRequest, Optional[type[Response]]]
 Contract = Mapping[HTTPMethod, Schemas[Any]]
 
 
@@ -35,7 +36,7 @@ class HttpResource:
 
 @dataclass(frozen=True)
 class HttpCollection(HttpResource):
-    collection_parser: Optional[Type[AbstractCollectionParser]]
+    collection_parser: Optional[type[AbstractCollectionParser]]
     """Override the default collection parlser for a given resource."""
 
 
@@ -58,7 +59,7 @@ class ApiRoutes:
         contract: Optional[Contract],
         collection_path: Optional[Path],
         collection_contract: Optional[Contract],
-        collection_parser: Optional[Type[AbstractCollectionParser]],
+        collection_parser: Optional[type[AbstractCollectionParser]],
     ) -> None:
         self.resource = HttpResource(path, contract) if path else None
         self.collection = (
@@ -91,7 +92,7 @@ class Registry:
         contract: Optional[Contract] = None,
         collection_path: Optional[Path] = None,
         collection_contract: Optional[Contract] = None,
-        collection_parser: Optional[Type[AbstractCollectionParser]] = None,
+        collection_parser: Optional[type[AbstractCollectionParser]] = None,
     ) -> None:
         """
         Register the resource in the registry.
@@ -125,7 +126,7 @@ class Registry:
             collection_parser,
         )
 
-    def get_service(self, client_name: ClientName) -> Tuple[Service, Resources]:
+    def get_service(self, client_name: ClientName) -> tuple[Service, Resources]:
         """
         Get the service associated for the client.
 
@@ -150,7 +151,7 @@ def register(
     contract: Optional[Contract] = None,
     collection_path: Optional[Path] = None,
     collection_contract: Optional[Contract] = None,
-    collection_parser: Optional[Type[AbstractCollectionParser]] = None,
+    collection_parser: Optional[type[AbstractCollectionParser]] = None,
 ) -> None:
     """
     Register a resource in a client in the default registry.
