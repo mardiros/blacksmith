@@ -1,3 +1,13 @@
+4.0.0 - Released on 2024-11-03
+------------------------------
+* Add :meth:`blacksmith.ResponseBox.inspect` method
+* Add :meth:`blacksmith.ResponseBox.inspect_err` method
+* Drop python 3.8 compatibility
+* Update the packaging (use uv and pdm instead of poetry)
+* Update the CI
+* Change the licence to MIT License
+
+
 3.1.1 - Released on 2024-10-10
 ------------------------------
 * Update the nomad service discovery for versionned service.
