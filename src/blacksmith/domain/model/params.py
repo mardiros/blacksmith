@@ -339,11 +339,17 @@ class ResponseBox(Generic[TResponse, TError_co]):
         return self._result.or_else(op)  # type: ignore
 
     def inspect(self, op: Callable[[TResponse], Any]) -> Result[TResponse, TError_co]:
+        """
+        Call op with the contained value if `Ok` and return the original result.
+        """
         return self._result.inspect(op)
 
     def inspect_err(
         self, op: Callable[[TError_co], Any]
     ) -> Result[TResponse, TError_co]:
+        """
+        Call op with the contained error if `Ok` and return the original result.
+        """
         return self._result.inspect_err(op)
 
 
