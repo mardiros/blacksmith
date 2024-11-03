@@ -84,6 +84,7 @@ reportUnknownParameterType = false
 reportUnknownVariableType = false
 reportShadowedImports = false
 typeCheckingMode = "strict"
+venvPath = ".venv"
 
 [[tool.mypy.overrides]]
 disallow_any_generics = true
