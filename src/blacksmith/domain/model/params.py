@@ -338,6 +338,14 @@ class ResponseBox(Generic[TResponse, TError_co]):
         """
         return self._result.or_else(op)  # type: ignore
 
+    def inspect(self, op: Callable[[TResponse], Any]) -> Result[TResponse, TError_co]:
+        return self._result.inspect(op)
+
+    def inspect_err(
+        self, op: Callable[[TError_co], Any]
+    ) -> Result[TResponse, TError_co]:
+        return self._result.inspect_err(op)
+
 
 class CollectionIterator(Iterator[TResponse]):
     """

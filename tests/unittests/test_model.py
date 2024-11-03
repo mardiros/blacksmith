@@ -139,6 +139,21 @@ def test_response_box() -> None:
     assert resp.or_else(lambda err: err.status_code) == Ok(alice)  # type: ignore
 
     assert resp.expect("To never fail") == alice
+
+    container = {}
+
+    def dummy_inspect(val: Any) -> None:
+        container["val"] = val
+
+    def dummy_inspect_err(val: Any) -> None:
+        container["err"] = val
+
+    assert resp.inspect_err(lambda x: dummy_inspect_err(x)) == Ok(alice)
+    assert container == {}
+
+    assert resp.inspect(lambda x: dummy_inspect(x)) == Ok(alice)
+    assert container == {"val": alice}
+
     with pytest.raises(UnwrapError):
         assert resp.expect_err("To always fail")
 
@@ -194,6 +209,20 @@ def test_response_box_err() -> None:
 
     assert resp.and_then(lambda x: x.name) == Err(my_parsed_error)  # type: ignore
     assert resp.or_else(lambda err: err.status_code) == 500  # type: ignore
+
+    container = {}
+
+    def dummy_inspect(val: Any) -> None:
+        container["val"] = val
+
+    def dummy_inspect_err(val: Any) -> None:
+        container["err"] = val
+
+    assert resp.inspect(lambda x: dummy_inspect(x)) == Err(my_parsed_error)
+    assert container == {}
+
+    assert resp.inspect_err(lambda x: dummy_inspect_err(x)) == Err(my_parsed_error)
+    assert container == {"err": my_parsed_error}
 
     with pytest.raises(UnwrapError):
         assert resp.expect("To never fail")
