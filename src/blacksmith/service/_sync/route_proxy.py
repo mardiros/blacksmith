@@ -14,7 +14,7 @@ from typing import (
 try:
     from types import UnionType  # type: ignore
 except ImportError:  # coverage: ignore
-    # python 3.7 compat
+    # python 3.9 compat
     UnionType = Union  # type: ignore
 
 from pydantic import ValidationError
