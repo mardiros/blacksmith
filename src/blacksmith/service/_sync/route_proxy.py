@@ -1,12 +1,15 @@
-from typing import Any, Dict, Generic, List, Mapping, Optional, Tuple, Type, Union
-
-try:
-    from types import UnionType  # type: ignore
-except ImportError:  # coverage: ignore
-    # python 3.7 compat
-    UnionType = Union  # type: ignore
-
-from typing import get_origin
+from typing import (
+    Any,
+    Dict,
+    Generic,
+    List,
+    Mapping,
+    Optional,
+    Tuple,
+    Type,
+    Union,
+    get_origin,
+)
 
 try:
     from types import UnionType  # type: ignore
