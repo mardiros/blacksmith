@@ -1,8 +1,6 @@
 """Parsing Errors"""
 
-from typing import Generic, TypeVar
-
-from typing_extensions import Protocol
+from typing import Generic, Protocol, TypeVar
 
 from .exceptions import HTTPError
 

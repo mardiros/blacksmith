@@ -1,7 +1,6 @@
-from typing import Any, Optional, Tuple
+from typing import Any, Literal, Optional, Tuple
 
 from httpx import _types  # type: ignore
-from typing_extensions import Literal
 
 Url = str
 ServiceName = str
