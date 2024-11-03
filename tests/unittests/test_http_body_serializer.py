@@ -136,6 +136,7 @@ def test_get_location_raises_type_error_if_no_location() -> None:
 def test_get_location_raises_type_error_if_callable() -> None:
     def my_json_schema_extra(s: Any):
         return s
+
     class Dummy(BaseModel):
         field: str = Field(default=None, json_schema_extra=my_json_schema_extra)
 
