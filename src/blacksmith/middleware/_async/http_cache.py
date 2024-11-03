@@ -4,7 +4,7 @@ import abc
 import time
 from dataclasses import asdict
 from datetime import timedelta
-from typing import Literal, Optional, Type
+from typing import Literal, Optional
 
 from blacksmith.domain.model.http import HTTPRequest, HTTPResponse, HTTPTimeout
 from blacksmith.domain.model.middleware.http_cache import (
@@ -56,7 +56,7 @@ class AsyncHTTPCacheMiddleware(AsyncHTTPMiddleware):
         cache: AsyncAbstractCache,
         metrics: Optional[PrometheusMetrics] = None,
         policy: AbstractCachePolicy = default_cache_control,
-        serializer: Type[AbstractSerializer] = JsonSerializer,
+        serializer: type[AbstractSerializer] = JsonSerializer,
     ) -> None:
         self._cache = cache
         self._policy = policy

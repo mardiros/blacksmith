@@ -1,6 +1,7 @@
 """Cut the circuit in case a service is down."""
 
-from typing import Any, Iterable, Optional
+from collections.abc import Iterable
+from typing import Any, Optional
 
 from purgatory.typing import Hook
 

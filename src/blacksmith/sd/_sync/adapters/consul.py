@@ -5,7 +5,7 @@ This driver implement a client side service discovery.
 """
 
 import random
-from typing import Any, Callable, List, Optional
+from typing import Any, Callable, Optional
 
 from pydantic.fields import Field
 from result import Result
@@ -140,7 +140,7 @@ class SyncConsulDiscovery(SyncAbstractServiceDiscovery):
                 rresp.unwrap_err()
             )  # rewrite the class to avoid confusion
         else:
-            resp: List[Service] = list(rresp.unwrap())
+            resp: list[Service] = list(rresp.unwrap())
             if not resp:
                 raise UnregisteredServiceException(service, version)
             return random.choice(resp)

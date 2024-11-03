@@ -3,7 +3,6 @@ import email as emaillib
 import smtplib
 from email.message import Message
 from textwrap import dedent
-from typing import Tuple
 
 from blacksmith.sd._async.adapters.consul import AsyncConsulDiscovery
 from notif.resources.user import User
@@ -33,7 +32,7 @@ class AbstractEmailSender(abc.ABC):
         s.quit()
 
     @abc.abstractmethod
-    async def get_endpoint(self) -> Tuple[str, int]:
+    async def get_endpoint(self) -> tuple[str, int]:
         pass
 
 
@@ -41,6 +40,6 @@ class EmailSender(AbstractEmailSender):
     def __init__(self, sd: AsyncConsulDiscovery):
         self.sd = sd
 
-    async def get_endpoint(self) -> Tuple[str, int]:
+    async def get_endpoint(self) -> tuple[str, int]:
         endpoint = await self.sd.resolve("smtp", None)
         return endpoint.address, endpoint.port

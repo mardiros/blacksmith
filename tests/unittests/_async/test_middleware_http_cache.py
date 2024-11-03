@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 import pytest
 from prometheus_client import CollectorRegistry  # type: ignore
@@ -58,7 +58,7 @@ from blacksmith.middleware._async.http_cache import (
     ],
 )
 async def test_get_from_cache(
-    params: Dict[str, Any], fake_http_middleware_cache_with_data: AsyncAbstractCache
+    params: dict[str, Any], fake_http_middleware_cache_with_data: AsyncAbstractCache
 ) -> None:
     middleware = AsyncHTTPCacheMiddleware(fake_http_middleware_cache_with_data)
     resp_from_cache = await middleware.get_from_cache(
@@ -155,7 +155,7 @@ async def test_get_from_cache(
     ],
 )
 async def test_http_cache_response(
-    params: Dict[str, Any], fake_http_middleware_cache: AsyncAbstractCache
+    params: dict[str, Any], fake_http_middleware_cache: AsyncAbstractCache
 ) -> None:
     middleware = AsyncHTTPCacheMiddleware(fake_http_middleware_cache)
 

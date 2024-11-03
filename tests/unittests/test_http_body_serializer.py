@@ -1,6 +1,7 @@
 import json
+from collections.abc import Mapping, Sequence
 from datetime import datetime
-from typing import Any, Dict, Mapping, Optional, Sequence, Union
+from typing import Any, Optional, Union
 
 import pytest
 from pydantic import BaseModel, Field, HttpUrl, SecretStr
@@ -79,7 +80,7 @@ class MySerializer(AbstractHttpBodySerializer):
     def accept(self, content_type: str) -> bool:
         return content_type == "text/xml"
 
-    def serialize(self, body: Union[Dict[str, Any], Sequence[Any]]) -> str:
+    def serialize(self, body: Union[dict[str, Any], Sequence[Any]]) -> str:
         return "<foo/>"
 
     def deserialize(self, body: bytes, encoding: Optional[str]) -> Json:

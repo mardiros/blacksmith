@@ -1,4 +1,4 @@
-from typing import Any, Generic, List, Optional, Type
+from typing import Any, Generic, Optional
 
 from blacksmith.domain.error import AbstractErrorParser, TError_co, default_error_parser
 from blacksmith.domain.exceptions import UnregisteredResourceException
@@ -29,8 +29,8 @@ class AsyncClient(Generic[TError_co]):
     resources: Resources
     transport: AsyncAbstractTransport
     timeout: HTTPTimeout
-    collection_parser: Type[AbstractCollectionParser]
-    middlewares: List[AsyncHTTPMiddleware]
+    collection_parser: type[AbstractCollectionParser]
+    middlewares: list[AsyncHTTPMiddleware]
 
     def __init__(
         self,
@@ -39,8 +39,8 @@ class AsyncClient(Generic[TError_co]):
         resources: Resources,
         transport: AsyncAbstractTransport,
         timeout: HTTPTimeout,
-        collection_parser: Type[AbstractCollectionParser],
-        middlewares: List[AsyncHTTPMiddleware],
+        collection_parser: type[AbstractCollectionParser],
+        middlewares: list[AsyncHTTPMiddleware],
         error_parser: AbstractErrorParser[TError_co],
     ) -> None:
         self.name = name
@@ -100,8 +100,8 @@ class AsyncClientFactory(Generic[TError_co]):
     registry: Registry
     transport: AsyncAbstractTransport
     timeout: HTTPTimeout
-    collection_parser: Type[AbstractCollectionParser]
-    middlewares: List[AsyncHTTPMiddleware]
+    collection_parser: type[AbstractCollectionParser]
+    middlewares: list[AsyncHTTPMiddleware]
     error_parser: AbstractErrorParser[TError_co]
 
     def __init__(
@@ -112,7 +112,7 @@ class AsyncClientFactory(Generic[TError_co]):
         timeout: ClientTimeout = default_timeout,
         proxies: Optional[Proxies] = None,
         verify_certificate: bool = False,
-        collection_parser: Type[AbstractCollectionParser] = CollectionParser,
+        collection_parser: type[AbstractCollectionParser] = CollectionParser,
         error_parser: Optional[AbstractErrorParser[TError_co]] = None,
     ) -> None:
         self.sd = sd

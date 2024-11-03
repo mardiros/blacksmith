@@ -1,7 +1,7 @@
 """Trace with zipkin of jaegger."""
 
 import abc
-from typing import Any, Dict, Optional, Type
+from typing import Any, Optional
 
 from blacksmith.domain.exceptions import HTTPError
 from blacksmith.domain.model.http import HTTPRequest, HTTPResponse, HTTPTimeout
@@ -19,7 +19,7 @@ class AbstractTraceContext(abc.ABC):
 
     @classmethod
     @abc.abstractmethod
-    def make_headers(cls) -> Dict[str, str]:
+    def make_headers(cls) -> dict[str, str]:
         """Build headers for the sub requests."""
 
     @abc.abstractmethod
@@ -54,7 +54,7 @@ class SyncZipkinMiddleware(SyncHTTPMiddleware):
     :param trace: A deferred context manager that manage the trace span stack.
     """
 
-    def __init__(self, trace: Type[AbstractTraceContext]) -> None:
+    def __init__(self, trace: type[AbstractTraceContext]) -> None:
         self.trace = trace
 
     def __call__(self, next: SyncMiddleware) -> SyncMiddleware:

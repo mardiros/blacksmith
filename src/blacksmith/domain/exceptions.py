@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, Type
+from typing import TYPE_CHECKING, Any
 
 from blacksmith.typing import (
     ClientName,
@@ -96,7 +96,7 @@ class NoResponseSchemaException(RuntimeError):
 class WrongRequestTypeException(TypeError):
     def __init__(
         self,
-        type: Type[Any],
+        type: type[Any],
         route: HTTPMethod,
         resource: ResourceName,
         client: ClientName,

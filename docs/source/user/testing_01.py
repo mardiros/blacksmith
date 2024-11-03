@@ -1,10 +1,9 @@
-from typing import Dict
 
 from blacksmith import AsyncAbstractTransport, HTTPRequest, HTTPResponse, HTTPTimeout
 
 
 class FakeTransport(AsyncAbstractTransport):
-    def __init__(self, responses: Dict[str, HTTPResponse]):
+    def __init__(self, responses: dict[str, HTTPResponse]):
         super().__init__()
         self.responses = responses
 

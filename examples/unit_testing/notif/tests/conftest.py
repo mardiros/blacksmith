@@ -1,5 +1,5 @@
 from email.message import Message
-from typing import ClassVar, Dict, List, Tuple
+from typing import ClassVar
 
 import pytest
 from fastapi.testclient import TestClient
@@ -17,7 +17,7 @@ from blacksmith import (
 
 
 class FakeTransport(AsyncAbstractTransport):
-    def __init__(self, responses: Dict[str, HTTPResponse]):
+    def __init__(self, responses: dict[str, HTTPResponse]):
         super().__init__()
         self.responses = responses
 
@@ -33,14 +33,14 @@ class FakeTransport(AsyncAbstractTransport):
 
 
 class Mailboxes:
-    boxes: ClassVar[List[str]] = []
+    boxes: ClassVar[list[str]] = []
 
 
 class FakeEmailSender(AbstractEmailSender):
     async def sendmail(self, addr: str, port: int, message: Message):
         Mailboxes.boxes.append(message.as_string())
 
-    async def get_endpoint(self) -> Tuple[str, int]:
+    async def get_endpoint(self) -> tuple[str, int]:
         return "smtp", 25
 
 

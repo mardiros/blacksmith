@@ -1,14 +1,9 @@
+from collections.abc import Mapping, Sequence
 from datetime import timedelta
 from typing import (
     Any,
     ClassVar,
-    Dict,
-    List,
-    Mapping,
     Optional,
-    Sequence,
-    Tuple,
-    Type,
     Union,
 )
 
@@ -162,7 +157,7 @@ def dummy_middleware() -> SyncHTTPAddHeadersMiddleware:
 
 
 @pytest.fixture
-def consul_sd_with_body(body: Dict[str, Any]) -> SyncConsulDiscovery:
+def consul_sd_with_body(body: dict[str, Any]) -> SyncConsulDiscovery:
     class FakeConsulTransportNoServiceAddr(FakeConsulTransport):
         _body: ClassVar[Sequence[Mapping[str, Union[str, int]]]] = [body]
 
@@ -201,9 +196,9 @@ def router_sd() -> SyncRouterDiscovery:
 class SyncFakeHttpMiddlewareCache(SyncAbstractCache):
     """Abstract Redis Client."""
 
-    def __init__(self, data: Optional[Dict[str, Tuple[int, str]]] = None) -> None:
+    def __init__(self, data: Optional[dict[str, tuple[int, str]]] = None) -> None:
         super().__init__()
-        self.val: Dict[str, Tuple[int, str]] = data or {}
+        self.val: dict[str, tuple[int, str]] = data or {}
         self.initialize_called = False
 
     def initialize(self) -> None:
@@ -236,8 +231,8 @@ def fake_http_middleware_cache_with_data(
 class Trace(AbstractTraceContext):
     name: str
     kind: str
-    tags: Dict[str, str]
-    annotations: List[Tuple[Optional[str], Optional[float]]]
+    tags: dict[str, str]
+    annotations: list[tuple[Optional[str], Optional[float]]]
 
     def __init__(self, name: str, kind: str) -> None:
         Trace.name = name
@@ -246,7 +241,7 @@ class Trace(AbstractTraceContext):
         Trace.annotations = []
 
     @classmethod
-    def make_headers(cls) -> Dict[str, str]:
+    def make_headers(cls) -> dict[str, str]:
         return {}
 
     def __enter__(self) -> "Trace":
@@ -265,5 +260,5 @@ class Trace(AbstractTraceContext):
 
 
 @pytest.fixture
-def trace() -> Type[AbstractTraceContext]:
+def trace() -> type[AbstractTraceContext]:
     return Trace
