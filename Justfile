@@ -11,10 +11,13 @@ doc:
 cleandoc:
     cd docs && uv run make clean
 
+gensync:  && fmt
+    uv run python scripts/gen_unasync.py
+
 lint:
     uv run ruff check .
 
-test: lint typecheck unittest functest
+test: gensync lint typecheck unittest functest
 
 unittest test_suite=default_test_suite:
     uv run pytest -sxv {{test_suite}}
