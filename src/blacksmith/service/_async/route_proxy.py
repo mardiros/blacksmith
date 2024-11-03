@@ -11,6 +11,12 @@ from typing import (
     get_origin,
 )
 
+try:
+    from types import UnionType  # type: ignore
+except ImportError:  # coverage: ignore
+    # python 3.9 compat
+    UnionType = Union  # type: ignore
+
 from pydantic import ValidationError
 from result import Err, Ok, Result
 
