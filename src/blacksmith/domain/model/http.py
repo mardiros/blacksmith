@@ -8,11 +8,10 @@ from typing import (
     List,
     Mapping,
     Optional,
+    Protocol,
     Union,
     cast,
 )
-
-from typing_extensions import Protocol
 
 from blacksmith.typing import HTTPMethod, Json, Url
 

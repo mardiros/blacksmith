@@ -1,6 +1,4 @@
-from typing import Any, Coroutine
-
-from typing_extensions import Protocol
+from typing import Any, Coroutine, Protocol
 
 from blacksmith.domain.model.http import HTTPRequest, HTTPResponse, HTTPTimeout
 from blacksmith.typing import ClientName, Path

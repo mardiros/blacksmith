@@ -4,9 +4,7 @@ import abc
 import time
 from dataclasses import asdict
 from datetime import timedelta
-from typing import Optional, Type
-
-from typing_extensions import Literal
+from typing import Literal, Optional, Type
 
 from blacksmith.domain.model.http import HTTPRequest, HTTPResponse, HTTPTimeout
 from blacksmith.domain.model.middleware.http_cache import (

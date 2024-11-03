@@ -6,9 +6,16 @@ except ImportError:  # coverage: ignore
     # python 3.7 compat
     UnionType = Union  # type: ignore
 
+from typing import get_origin
+
+try:
+    from types import UnionType  # type: ignore
+except ImportError:  # coverage: ignore
+    # python 3.7 compat
+    UnionType = Union  # type: ignore
+
 from pydantic import ValidationError
 from result import Err, Ok, Result
-from typing_extensions import get_origin
 
 from blacksmith.domain.error import AbstractErrorParser, TError_co
 from blacksmith.domain.exceptions import (
