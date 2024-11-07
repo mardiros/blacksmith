@@ -101,7 +101,7 @@ select = [
     "I",   # isort import order
     "F",   # pyflakes
     "UP",  # alter when better syntax is available
-    "RUF", #  the ruff devleoper's own rules
+    "RUF", # the ruff developper's own rules
 ]
 
 [tool.coverage.report]
