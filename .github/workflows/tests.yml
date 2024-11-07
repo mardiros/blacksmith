@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
     steps:
       - uses: actions/checkout@v4
       - uses: chartboost/ruff-action@v1
@@ -47,6 +47,13 @@ jobs:
         with:
           name: pytest-results-${{ matrix.python-version }}
           path: junit/test-results-${{ matrix.python-version }}.xml
+
+      - name: Upload test results to Codecov
+        if: ${{ !cancelled() }} && matrix.python-version == '3.12' && github.event_name != 'workflow_dispatch'
+        uses: codecov/test-results-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: junit/test-results-${{ matrix.python-version }}.xml
 
       - name: Codecov
         if: matrix.python-version == '3.12' && github.event_name != 'workflow_dispatch'
