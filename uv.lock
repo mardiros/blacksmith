@@ -270,7 +270,7 @@ dev = [
     { name = "aiohttp", specifier = ">=3.10.10,<4" },
     { name = "fastapi", specifier = ">=0.114.0,<1" },
     { name = "mypy", specifier = ">=1.4.1,<2" },
-    { name = "prometheus-client", specifier = ">=0.19.0,<1" },
+    { name = "prometheus-client", specifier = ">=0.17.0,<1" },
     { name = "pytest", specifier = ">=8.3.3,<9" },
     { name = "pytest-asyncio", specifier = ">=0.24.0" },
     { name = "pytest-cov", specifier = ">=6.0.0,<7" },
