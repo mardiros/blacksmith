@@ -35,7 +35,7 @@ def test_query_http(patch: Any) -> None:
     )
     assert resp.status_code == 200
     assert dict(resp.headers) == {
-        "content-length": "17",
+        "content-length": "16",
         "content-type": "application/json",
     }
     assert resp.json == dummy_json
