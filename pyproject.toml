@@ -19,7 +19,7 @@ requires-python = ">=3.9"
 version = "4.0.3"
 
 dependencies = [
-    "httpx>=0.24,<0.28",
+    "httpx>=0.28",
     "purgatory>=2.0.0",
     "pydantic>=2.6.0",
     "result>=0.11.0, <1",
