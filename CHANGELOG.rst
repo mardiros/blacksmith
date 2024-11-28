@@ -1,3 +1,7 @@
+4.0.2 - Released on 2024-11-28
+------------------------------
+* Release with httpx frozen to <0.28 due to Proxy update.
+
 4.0.1 - Released on 2024-11-14
 ------------------------------
 * Authorize older prometheus client library.
