@@ -16,7 +16,8 @@ from pydantic import BaseModel, SecretBytes, SecretStr
 # assume we can use deprecated stuff until we support both version
 from pydantic.deprecated.json import ENCODERS_BY_TYPE as BASE_TYPES  # type: ignore
 from pydantic.fields import FieldInfo
-from pydantic_core import Url as PydanticUrl
+from pydantic.networks import AnyUrl
+from pydantic_core import Url as PydantiCoreUrl
 
 from blacksmith.domain.exceptions import UnregisteredContentTypeException
 from blacksmith.domain.model.http import (
@@ -29,7 +30,8 @@ from blacksmith.domain.model.params import Request
 from blacksmith.typing import HttpLocation, HTTPMethod, Json, Url
 
 ENCODERS_BY_TYPE: Mapping[type[Any], Callable[[Any], Any]] = {
-    PydanticUrl: str,
+    AnyUrl: str,
+    PydantiCoreUrl: str,
     **BASE_TYPES,
 }
 
