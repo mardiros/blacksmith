@@ -1,3 +1,7 @@
+4.0.4 - Released on 2025-01-07
+------------------------------
+* Release with httpx unfrozen.
+
 4.0.3 - Released on 2025-01-07
 ------------------------------
 * Fix serialization of HttpUrl for pydantic >2.9
