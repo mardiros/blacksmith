@@ -1,5 +1,6 @@
 from typing import Any, cast
 
+import httpx
 import pytest
 from _pytest._code.code import ExceptionInfo  # type: ignore
 from prometheus_client import CollectorRegistry  # type: ignore
@@ -189,7 +190,11 @@ def test_client_factory_configure_proxies(static_sd: AsyncAbstractServiceDiscove
     client_factory: AsyncClientFactory[Any] = AsyncClientFactory(
         static_sd, proxies=proxies
     )
-    assert client_factory.transport.proxies is proxies
+    assert client_factory.transport.proxies is not None
+    assert set(client_factory.transport.proxies.keys()) == {"http://", "https://"}
+    assert isinstance(
+        client_factory.transport.proxies["https://"], httpx.AsyncHTTPTransport
+    )
 
 
 async def test_client_factory_add_middleware(

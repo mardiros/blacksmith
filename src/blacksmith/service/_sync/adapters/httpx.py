@@ -43,7 +43,7 @@ class SyncHttpxTransport(SyncAbstractTransport):
         headers = build_headers(req)
         with SyncClient(
             verify=self.verify_certificate,
-            mounts=self.proxies,  # type: ignore
+            mounts=self.proxies,
         ) as client:
             try:
                 r = client.request(  # type: ignore

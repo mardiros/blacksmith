@@ -43,7 +43,7 @@ class AsyncHttpxTransport(AsyncAbstractTransport):
         headers = build_headers(req)
         async with AsyncClient(
             verify=self.verify_certificate,
-            mounts=self.proxies,  # type: ignore
+            mounts=self.proxies,
         ) as client:
             try:
                 r = await client.request(  # type: ignore
