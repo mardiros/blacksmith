@@ -20,6 +20,7 @@ for path in DIRECTORIES:
                 additional_replacements={
                     "_async": "_sync",
                     "asyncio": "client",  # replace redis.asyncio -> redis.client
+                    "AsyncHTTPTransport": "HTTPTransport",
                 },
             ),
         ],
@@ -36,6 +37,7 @@ unasync.unasync_files(
                 "_async": "_sync",
                 "AsyncSleep": "SyncSleep",
                 "httpx._client.AsyncClient.request": "httpx._client.Client.request",
+                "AsyncHTTPTransport": "HTTPTransport",
             },
         ),
     ],
