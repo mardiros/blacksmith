@@ -1,3 +1,7 @@
+4.0.5 - Released on 2025-01-29
+------------------------------
+* Fix usage of proxy.
+
 4.0.4 - Released on 2025-01-07
 ------------------------------
 * Release with httpx unfrozen.
