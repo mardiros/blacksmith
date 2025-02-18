@@ -2,9 +2,10 @@ package := 'blacksmith'
 default_test_suite := 'tests/unittests'
 
 install:
-    uv sync --group dev --group doc
+    uv sync --group doc
 
 doc:
+    uv sync --group dev --group doc
     cd docs && uv run make html
     xdg-open docs/build/html/index.html
 
@@ -43,17 +44,8 @@ fmt:
 
 release major_minor_patch: test && changelog
     #! /bin/bash
-    # Try to bump the version first
-    if ! uvx pdm bump {{major_minor_patch}}; then
-        # If it fails, check if pdm-bump is installed
-        if ! uvx pdm self list | grep -q pdm-bump; then
-            # If not installed, add pdm-bump
-            uvx pdm self add pdm-bump
-        fi
-        # Attempt to bump the version again
-        uvx pdm bump {{major_minor_patch}}
-    fi
-    uv sync
+    uvx --with=pdm,pdm-bump --python-preference system pdm bump {{major_minor_patch}}
+    uv sync --group dev --frozen
 
 changelog:
     uv run python scripts/write_changelog.py
