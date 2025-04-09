@@ -9,6 +9,8 @@ from .domain.model import (
     AbstractCollectionParser,
     AbstractSerializer,
     AbstractTraceContext,
+    Attachment,
+    AttachmentField,
     CacheControlPolicy,
     CollectionIterator,
     CollectionParser,
@@ -87,6 +89,8 @@ __all__ = [
     "PathInfoField",
     "PostBodyField",
     "QueryStringField",
+    "Attachment",
+    "AttachmentField",
     # Request / Response Boxing
     "ResponseBox",
     "CollectionIterator",

@@ -9,6 +9,8 @@ from .middleware.prometheus import PrometheusMetrics
 from .middleware.zipkin import AbstractTraceContext
 from .params import (
     AbstractCollectionParser,
+    Attachment,
+    AttachmentField,
     CollectionIterator,
     CollectionParser,
     HeaderField,
@@ -31,6 +33,8 @@ __all__ = [
     "PathInfoField",
     "PostBodyField",
     "QueryStringField",
+    "Attachment",
+    "AttachmentField",
     "Request",
     "Response",
     "ResponseBox",
