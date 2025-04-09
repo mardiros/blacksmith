@@ -119,7 +119,13 @@ def get_location(field: FieldInfo) -> HttpLocation:
     return extra["location"]  # type: ignore
 
 
-def get_value(v: Union[simpletypes, SecretStr, SecretBytes]) -> simpletypes:
+def get_value(
+    v: Union[
+        simpletypes, SecretStr, SecretBytes, dict[str, simpletypes], list[simpletypes]
+    ],
+) -> simpletypes:
+    if isinstance(v, (dict, list)):
+        return json.dumps(v)
     if hasattr(v, "get_secret_value"):
         return v.get_secret_value()  # type: ignore
     return v  # type: ignore

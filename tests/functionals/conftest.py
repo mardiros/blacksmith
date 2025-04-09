@@ -94,6 +94,20 @@ async def upload(
     }
 
 
+@app.post("/upload-complex")
+async def upload_complex(
+    request: Request,
+    foobar: Annotated[str, Form()],
+    attachmt: Annotated[UploadFile, File()],
+):
+    content = await attachmt.read()
+    return {
+        "foobar": foobar,
+        "filename": attachmt.filename,
+        "content": content,
+    }
+
+
 def run_server(port: int):
     uvicorn.run(app, port=port)
 
