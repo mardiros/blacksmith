@@ -7,6 +7,7 @@ import pytest
 from pydantic import BaseModel, Field, HttpUrl, SecretStr
 
 from blacksmith import (
+    Attachment,
     HeaderField,
     HTTPRequest,
     PathInfoField,
@@ -16,7 +17,7 @@ from blacksmith import (
 )
 from blacksmith.domain.exceptions import UnregisteredContentTypeException
 from blacksmith.domain.model.http import HTTPRawResponse, HTTPResponse
-from blacksmith.domain.model.params import BODY
+from blacksmith.domain.model.params import BODY, AttachmentField
 from blacksmith.service.http_body_serializer import (
     AbstractHttpBodySerializer,
     JSONEncoder,
@@ -52,6 +53,11 @@ class DummyPostRequestTypes(Request):
 
 class DummyAliasRequestTypes(Request):
     for_: str = QueryStringField(alias="for")
+
+
+class DummyAttachement(Request):
+    foo: str = PostBodyField()
+    bar: Attachment = AttachmentField()
 
 
 class DummyHTTPRepsonse(HTTPRawResponse):
@@ -330,6 +336,25 @@ def test_serialize_request_body_pydantic_2(params: Mapping[str, Any]):
                 ),
             },
             id="querystring with alias",
+        ),
+        pytest.param(
+            {
+                "method": "POST",
+                "url_pattern": "/",
+                "request": DummyAttachement(
+                    foo="foo", bar=Attachment(filename="bar.csv", content=b"csv;bar")
+                ),
+                "expected": HTTPRequest(
+                    method="POST",
+                    headers={},
+                    path={},
+                    body={"foo": "foo"},
+                    querystring={},
+                    attachments={"bar": ("bar.csv", b"csv;bar", None, {})},
+                    url_pattern="/",
+                ),
+            },
+            id="querystring with attachment",
         ),
     ],
 )
