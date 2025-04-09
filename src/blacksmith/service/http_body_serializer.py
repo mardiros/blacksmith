@@ -24,9 +24,10 @@ from blacksmith.domain.model.http import (
     HTTPRawResponse,
     HTTPRequest,
     HTTPResponse,
+    RequestAttachments,
     RequestBody,
 )
-from blacksmith.domain.model.params import Request
+from blacksmith.domain.model.params import Attachment, Request
 from blacksmith.typing import HttpLocation, HTTPMethod, Json, Url
 
 ENCODERS_BY_TYPE: Mapping[type[Any], Callable[[Any], Any]] = {
@@ -45,6 +46,7 @@ PATH: HttpLocation = "path"
 HEADER: HttpLocation = "headers"
 QUERY: HttpLocation = "querystring"
 BODY: HttpLocation = "body"
+ATTACHMENT: HttpLocation = "attachment"
 simpletypes = Union[str, int, float, bool]
 
 
@@ -189,6 +191,24 @@ def serialize_request_body(
     raise UnregisteredContentTypeException(content_type, req)
 
 
+def serialize_request_attachment(
+    req: "Request",
+    attachments: dict[str, Attachment],
+    content_type: Optional[str] = None,
+) -> Optional[RequestAttachments]:
+    if not attachments:
+        return None
+    return {
+        key: (
+            getattr(req, key).filename,
+            getattr(req, key).content,
+            getattr(req, key).content_type,
+            getattr(req, key).headers,
+        )
+        for key in attachments
+    }
+
+
 def serialize_request(
     method: HTTPMethod,
     url_pattern: Url,
@@ -210,6 +230,7 @@ def serialize_request(
         PATH: {},
         QUERY: {},
         BODY: {},
+        ATTACHMENT: {},
     }
     for name, field in get_fields(request_model).items():
         loc = get_location(field)
@@ -223,11 +244,19 @@ def serialize_request(
         serialize_part(request_model, fields_by_loc[QUERY]),
     )
 
-    req.body = serialize_request_body(
+    req.attachments = serialize_request_attachment(
         request_model,
-        fields_by_loc[BODY],
-        cast(Optional[str], headers.get("Content-Type")),
+        fields_by_loc[ATTACHMENT],
     )
+    if req.attachments:
+        req.body = serialize_part(request_model, fields_by_loc[BODY])
+    else:
+        req.body = serialize_request_body(
+            request_model,
+            fields_by_loc[BODY],
+            cast(Optional[str], headers.get("Content-Type")),
+        )
+
     return req
 
 
