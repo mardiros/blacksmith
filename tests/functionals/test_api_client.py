@@ -7,6 +7,8 @@ from result import Result
 from blacksmith import (
     AsyncClientFactory,
     AsyncStaticDiscovery,
+    Attachment,
+    AttachmentField,
     CollectionIterator,
     HTTPError,
     PathInfoField,
@@ -14,10 +16,10 @@ from blacksmith import (
     QueryStringField,
     Request,
     Response,
+    ResponseBox,
     register,
 )
 from blacksmith.domain.exceptions import NoContractException
-from blacksmith.domain.model.params import ResponseBox
 
 
 class SizeEnum(str, Enum):
@@ -72,6 +74,29 @@ register(
         "GET": (GetItem, Item),
         "PATCH": (UpdateItem, None),
         "DELETE": (DeleteItem, None),
+    },
+)
+
+
+class UploadRequest(Request):
+    foobar: str = PostBodyField()
+    attachmt: Attachment = AttachmentField()
+
+
+class UploadedFile(Response):
+    foobar: str
+    filename: str
+    content: str
+
+
+register(
+    "api",
+    "upload",
+    "api",
+    None,
+    path="/upload",
+    contract={
+        "POST": (UploadRequest, UploadedFile),
     },
 )
 
@@ -182,4 +207,19 @@ async def test_crud(dummy_api_endpoint: str):
     assert (
         str(no_contract_exc.value)
         == "Unregistered route 'PUT' in resource 'item' in client 'api'"
+    )
+
+
+async def test_attachment(dummy_api_endpoint: str):
+    sd = AsyncStaticDiscovery({("api", None): dummy_api_endpoint})
+    cli: AsyncClientFactory[HTTPError] = AsyncClientFactory(sd)
+    api = await cli("api")
+    resp = await api.upload.post(
+        UploadRequest(
+            foobar="FooBar", attachmt=Attachment(filename="bar.xml", content=b"<ok/>")
+        )
+    )
+    assert resp.is_ok()
+    assert resp.unwrap() == UploadedFile(
+        foobar="FooBar", filename="bar.xml", content="<ok/>"
     )

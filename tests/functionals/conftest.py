@@ -1,12 +1,12 @@
 from collections.abc import Iterable
 from enum import Enum
 from multiprocessing import Process
-from typing import Optional
+from typing import Annotated, Optional
 
 import httpx
 import pytest
 import uvicorn
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
 from pydantic import BaseModel
 from pydantic.fields import Field
 from starlette.responses import Response
@@ -78,6 +78,20 @@ def delete_item(item_name: str):
         return Response("", 204)
     except KeyError as exc:
         raise not_found from exc
+
+
+@app.post("/upload")
+async def upload(
+    request: Request,
+    foobar: Annotated[str, Form()],
+    attachmt: Annotated[UploadFile, File()],
+):
+    content = await attachmt.read()
+    return {
+        "foobar": foobar,
+        "filename": attachmt.filename,
+        "content": content,
+    }
 
 
 def run_server(port: int):
