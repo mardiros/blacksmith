@@ -2,6 +2,7 @@ from enum import Enum
 from typing import Any, Optional, Union
 
 import pytest
+from pydantic import BaseModel
 from result import Result
 
 from blacksmith import (
@@ -83,6 +84,16 @@ class UploadRequest(Request):
     attachmt: Attachment = AttachmentField()
 
 
+class UploadQuery(BaseModel):
+    name: str
+    value: int
+
+
+class UploadComplexRequest(Request):
+    foobar: UploadQuery = PostBodyField()
+    attachmt: Attachment = AttachmentField()
+
+
 class UploadedFile(Response):
     foobar: str
     filename: str
@@ -97,6 +108,17 @@ register(
     path="/upload",
     contract={
         "POST": (UploadRequest, UploadedFile),
+    },
+)
+
+register(
+    "api",
+    "upload_complex",
+    "api",
+    None,
+    path="/upload-complex",
+    contract={
+        "POST": (UploadComplexRequest, UploadedFile),
     },
 )
 
@@ -222,4 +244,20 @@ async def test_attachment(dummy_api_endpoint: str):
     assert resp.is_ok()
     assert resp.unwrap() == UploadedFile(
         foobar="FooBar", filename="bar.xml", content="<ok/>"
+    )
+
+
+async def test_attachment_json(dummy_api_endpoint: str):
+    sd = AsyncStaticDiscovery({("api", None): dummy_api_endpoint})
+    cli: AsyncClientFactory[HTTPError] = AsyncClientFactory(sd)
+    api = await cli("api")
+    resp = await api.upload_complex.post(
+        UploadComplexRequest(
+            foobar=UploadQuery(name="foo", value=42),
+            attachmt=Attachment(filename="bar.xml", content=b"<ok/>"),
+        )
+    )
+    assert resp.is_ok()
+    assert resp.unwrap() == UploadedFile(
+        foobar='{"name": "foo", "value": 42}', filename="bar.xml", content="<ok/>"
     )

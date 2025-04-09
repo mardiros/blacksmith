@@ -60,6 +60,15 @@ class DummyAttachement(Request):
     bar: Attachment = AttachmentField()
 
 
+class DummyComplex(BaseModel):
+    name: str
+
+
+class DummyComplexAttachement(Request):
+    foo: DummyComplex = PostBodyField()
+    bar: Attachment = AttachmentField()
+
+
 class DummyHTTPRepsonse(HTTPRawResponse):
     status_code: int
     headers: Mapping[str, str]
@@ -355,6 +364,28 @@ def test_serialize_request_body_pydantic_2(params: Mapping[str, Any]):
                 ),
             },
             id="querystring with attachment",
+        ),
+        pytest.param(
+            {
+                "method": "POST",
+                "url_pattern": "/",
+                "request": DummyComplexAttachement(
+                    foo=DummyComplex(name="foobar"),
+                    bar=Attachment(filename="bar.csv", content=b"csv;bar"),
+                ),
+                "expected": HTTPRequest(
+                    method="POST",
+                    headers={},
+                    path={},
+                    body={
+                        "foo": '{"name": "foobar"}',
+                    },
+                    querystring={},
+                    attachments={"bar": ("bar.csv", b"csv;bar", None, {})},
+                    url_pattern="/",
+                ),
+            },
+            id="querystring with complex attachment",
         ),
     ],
 )
