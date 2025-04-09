@@ -1,5 +1,5 @@
 import abc
-from collections.abc import Iterator
+from collections.abc import Iterator, Mapping
 from dataclasses import dataclass
 from functools import partial
 from typing import (
@@ -25,6 +25,7 @@ PATH: HttpLocation = "path"
 HEADER: HttpLocation = "headers"
 QUERY: HttpLocation = "querystring"
 BODY: HttpLocation = "body"
+ATTACHMENT: HttpLocation = "attachment"
 
 
 PathInfoField = partial(Field, json_schema_extra={"location": PATH})
@@ -35,6 +36,21 @@ QueryStringField = partial(Field, json_schema_extra={"location": QUERY})
 """Declare field that are serialized in the http querystring."""
 PostBodyField = partial(Field, json_schema_extra={"location": BODY})
 """Declare field that are serialized in the json document."""
+AttachmentField = partial(Field, json_schema_extra={"location": ATTACHMENT})
+"""Declare field that are serialized in the json document."""
+
+
+class Attachment(BaseModel):
+    """Use to add an attachement to a multipart http query."""
+
+    filename: str = Field()
+    """The name of the file."""
+    content: bytes = Field()
+    """The content of the file."""
+    content_type: Optional[str] = Field(default=None)
+    """The content type of the field. Optional, it will be guessed from the filename."""
+    headers: Mapping[str, str] = Field(default_factory=dict)
+    """The content type of the field. Optional, it will be guessed from the filename."""
 
 
 class Request(BaseModel):
@@ -42,7 +58,8 @@ class Request(BaseModel):
     Request Params Model.
 
     Fields must use subclass :func:`.PathInfoField`, :func:`.HeaderField`,
-    :func:`.QueryStringField` or :func:`.PostBodyField` to declare each fields.
+    :func:`.QueryStringField` or :func:`.PostBodyField` or :class:`FileField`
+    to declare each fields.
     """
 
 

@@ -13,7 +13,18 @@ from blacksmith.typing import HTTPMethod, Json, Url
 
 simpletypes = Union[str, int, float, bool]
 Links = dict[Optional[str], dict[str, str]]
-RequestBody = Union[str, bytes, Iterable[bytes], AsyncIterable[bytes]]
+RequestBody = Union[
+    str,
+    bytes,
+    Iterable[bytes],
+    AsyncIterable[bytes],
+    # a mapping is passed if there is attachment.
+    Mapping[str, simpletypes],
+]
+RequestAttachments = dict[
+    str,
+    tuple[str, bytes, Optional[str], Mapping[str, str]],
+]
 
 
 class HTTPTimeout:
@@ -51,6 +62,7 @@ class HTTPRequest:
     )
     headers: dict[str, str] = field(default_factory=dict)
     body: RequestBody = ""
+    attachments: Optional[RequestAttachments] = field(default=None)
 
     @property
     def url(self) -> str:
