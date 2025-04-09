@@ -1,5 +1,5 @@
 from collections.abc import Mapping
-from typing import cast
+from typing import Any, cast
 
 from httpx import Timeout as HttpxTimeout
 from httpx import TimeoutException
@@ -20,7 +20,7 @@ from ..base import AsyncAbstractTransport
 
 def build_headers(req: HTTPRequest) -> Mapping[str, str]:
     headers = req.headers.copy()
-    if req.body and "Content-Type" not in headers:
+    if req.body and "Content-Type" not in headers and not req.attachments:
         headers["Content-Type"] = "application/json"
     return headers
 
@@ -46,13 +46,18 @@ class AsyncHttpxTransport(AsyncAbstractTransport):
             mounts=self.proxies,
         ) as client:
             try:
+                kwargs: dict[str, Any] = (
+                    {"data": req.body, "files": req.attachments}
+                    if req.attachments
+                    else {"content": req.body}
+                )
                 r = await client.request(  # type: ignore
                     req.method,
                     req.url,
                     params=req.querystring,
                     headers=headers,
-                    content=req.body,
                     timeout=HttpxTimeout(timeout.read, connect=timeout.connect),
+                    **kwargs,
                 )
             except TimeoutException as exc:
                 raise HTTPTimeoutError(
