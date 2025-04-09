@@ -67,8 +67,8 @@ TResponse = TypeVar("TResponse", bound="Optional[Response]")
 TCollectionResponse = TypeVar("TCollectionResponse", bound="Optional[Response]")
 
 
-class Response(BaseModel):
-    """Response Model."""
+Response = BaseModel
+"""Response Model."""
 
 
 @dataclass
