@@ -183,6 +183,7 @@ def test_serialize_part() -> None:
             "state": ...,
             "country": ...,
         },
+        "body",
     )
     assert obj == {
         "name": "Jane",
@@ -191,6 +192,28 @@ def test_serialize_part() -> None:
         "state": None,
         "country": "FR",
     }
+
+
+def test_serialize_nested_dict() -> None:
+    class Dummy(Request):
+        type: str = PostBodyField()
+        params: dict[str, Any] = PostBodyField()
+
+    dummy = Dummy(type="bar", params={"a": "A", "b": 1})
+    obj = serialize_part(dummy, {"type": "bar", "params": {"a": "A", "b": 1}}, "body")
+    assert obj == {"type": "bar", "params": {"a": "A", "b": 1}}
+
+
+def test_serialize_nested_dict_attached() -> None:
+    class Dummy(Request):
+        type: str = PostBodyField()
+        params: dict[str, Any] = PostBodyField()
+
+    dummy = Dummy(type="bar", params={"a": "A", "b": 1})
+    obj = serialize_part(
+        dummy, {"type": "bar", "params": {"a": "A", "b": 1}}, "attachment"
+    )
+    assert obj == {"type": "bar", "params": '{"a": "A", "b": 1}'}
 
 
 def test_serialize_part_default_with_none() -> None:
@@ -206,6 +229,7 @@ def test_serialize_part_default_with_none() -> None:
             "age": ...,
             "created_at": ...,
         },
+        "body",
     )
     assert obj == {
         "name": "Jane",
