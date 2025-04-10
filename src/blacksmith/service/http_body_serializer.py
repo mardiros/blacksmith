@@ -123,18 +123,22 @@ def get_value(
     v: Union[
         simpletypes, SecretStr, SecretBytes, dict[str, simpletypes], list[simpletypes]
     ],
+    is_body: bool,
 ) -> simpletypes:
-    if isinstance(v, (dict, list)):
+    if not is_body and isinstance(v, (dict, list)):
         return json.dumps(v)
     if hasattr(v, "get_secret_value"):
         return v.get_secret_value()  # type: ignore
     return v  # type: ignore
 
 
-def serialize_part(req: "Request", part: dict[IntStr, Any]) -> dict[str, simpletypes]:
+def serialize_part(
+    req: "Request", part: dict[IntStr, Any], loc: HttpLocation
+) -> dict[str, simpletypes]:
+    is_body = loc == "body"
     return {
         **{
-            k: get_value(v)
+            k: get_value(v, is_body)
             for k, v in req.model_dump(
                 include=part,
                 by_alias=True,
@@ -144,7 +148,7 @@ def serialize_part(req: "Request", part: dict[IntStr, Any]) -> dict[str, simplet
             if v is not None
         },
         **{
-            k: get_value(v)
+            k: get_value(v, is_body)
             for k, v in req.model_dump(
                 include=part,
                 by_alias=True,
@@ -193,7 +197,7 @@ def serialize_request_body(
     content_type = content_type or "application/json"
     for serializer in _SERIALIZERS:
         if serializer.accept(content_type):
-            return serializer.serialize(serialize_part(req, body))
+            return serializer.serialize(serialize_part(req, body, "body"))
     raise UnregisteredContentTypeException(content_type, req)
 
 
@@ -242,12 +246,12 @@ def serialize_request(
         loc = get_location(field)
         fields_by_loc[loc].update({name: ...})
 
-    headers = serialize_part(request_model, fields_by_loc[HEADER])
+    headers = serialize_part(request_model, fields_by_loc[HEADER], HEADER)
     req.headers = {key: str(val) for key, val in headers.items()}
-    req.path = serialize_part(request_model, fields_by_loc[PATH])
+    req.path = serialize_part(request_model, fields_by_loc[PATH], PATH)
     req.querystring = cast(
         dict[str, Union[simpletypes, list[simpletypes]]],
-        serialize_part(request_model, fields_by_loc[QUERY]),
+        serialize_part(request_model, fields_by_loc[QUERY], QUERY),
     )
 
     req.attachments = serialize_request_attachment(
@@ -255,7 +259,7 @@ def serialize_request(
         fields_by_loc[ATTACHMENT],
     )
     if req.attachments:
-        req.body = serialize_part(request_model, fields_by_loc[BODY])
+        req.body = serialize_part(request_model, fields_by_loc[BODY], ATTACHMENT)
     else:
         req.body = serialize_request_body(
             request_model,
