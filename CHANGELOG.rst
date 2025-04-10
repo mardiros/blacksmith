@@ -1,3 +1,9 @@
+4.1.0 - Released on 2025-04-10
+------------------------------
+* Implement multipart form with attachment.
+* Update the :class:`blacksmith.Response` model which is now
+  an alias of pydantic ``BaseModel``
+
 4.0.5 - Released on 2025-01-29
 ------------------------------
 * Fix usage of proxy.
