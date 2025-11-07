@@ -123,9 +123,9 @@ def get_value(
     v: Union[
         simpletypes, SecretStr, SecretBytes, dict[str, simpletypes], list[simpletypes]
     ],
-    is_body: bool,
+    dump_complex_to_json: bool,
 ) -> simpletypes:
-    if not is_body and isinstance(v, (dict, list)):
+    if dump_complex_to_json and isinstance(v, (dict, list)):
         return json.dumps(v)
     if hasattr(v, "get_secret_value"):
         return v.get_secret_value()  # type: ignore
@@ -135,10 +135,10 @@ def get_value(
 def serialize_part(
     req: "Request", part: dict[IntStr, Any], loc: HttpLocation
 ) -> dict[str, simpletypes]:
-    is_body = loc == "body"
+    dump_complex_to_json = loc not in (BODY, QUERY)
     return {
         **{
-            k: get_value(v, is_body)
+            k: get_value(v, dump_complex_to_json)
             for k, v in req.model_dump(
                 include=part,
                 by_alias=True,
@@ -148,7 +148,7 @@ def serialize_part(
             if v is not None
         },
         **{
-            k: get_value(v, is_body)
+            k: get_value(v, dump_complex_to_json)
             for k, v in req.model_dump(
                 include=part,
                 by_alias=True,
