@@ -204,6 +204,15 @@ def test_serialize_nested_dict() -> None:
     assert obj == {"type": "bar", "params": {"a": "A", "b": 1}}
 
 
+def test_serialize_query_string() -> None:
+    class Dummy(Request):
+        type: list[str] = QueryStringField()
+
+    dummy = Dummy(type=["foo", "bar"])
+    obj = serialize_part(dummy, {"type": ...}, "querystring")
+    assert obj == {"type": ["foo", "bar"]}
+
+
 def test_serialize_nested_dict_attached() -> None:
     class Dummy(Request):
         type: str = PostBodyField()
