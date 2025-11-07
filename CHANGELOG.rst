@@ -1,3 +1,7 @@
+4.1.2 - Released on 2025-11-07
+------------------------------
+* Fix usage of sequence in querystring, broken in 4.1.0.
+
 4.1.1 - Released on 2025-04-10
 ------------------------------
 * Fix complex type in post body field.
