@@ -107,7 +107,7 @@ class JSONEncoder(json.JSONEncoder):
 
 
 def get_fields(model: BaseModel) -> Mapping[str, FieldInfo]:
-    return model.model_fields
+    return model.__class__.model_fields
 
 
 def get_location(field: FieldInfo) -> HttpLocation:
