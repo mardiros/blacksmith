@@ -43,7 +43,6 @@ fmt:
     uv run ruff format src tests
 
 release major_minor_patch: test && changelog
-    #! /bin/bash
     uvx --with=pdm,pdm-bump --python-preference system pdm bump {{major_minor_patch}}
     uv sync --group dev --frozen
 
