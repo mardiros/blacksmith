@@ -4,7 +4,7 @@ from typing import (
     Any,
     Generic,
     Union,
-    get_origin,
+    cast,
 )
 
 from pydantic import ValidationError
@@ -28,6 +28,7 @@ from blacksmith.domain.model import (
 )
 from blacksmith.domain.model.params import (
     AbstractCollectionParser,
+    OptionalResponseSchema,
     TCollectionResponse,
     TResponse,
 )
@@ -35,6 +36,7 @@ from blacksmith.domain.registry import ApiRoutes, HttpCollection, HttpResource
 from blacksmith.domain.typing import AsyncMiddleware
 from blacksmith.middleware._async.base import AsyncHTTPMiddleware
 from blacksmith.service.http_body_serializer import serialize_request
+from blacksmith.shared_utils.introspection import is_instance_with_union, is_union
 from blacksmith.typing import ClientName, HTTPMethod, Path, ResourceName, Url
 
 from .base import AsyncAbstractTransport
@@ -50,25 +52,6 @@ def build_timeout(timeout: ClientTimeout) -> HTTPTimeout:
     elif isinstance(timeout, tuple):
         timeout = HTTPTimeout(*timeout)
     return timeout
-
-
-def is_union(typ: type[Any]) -> bool:
-    type_origin = get_origin(typ)
-    if type_origin:
-        if type_origin is Union:  # Union[T, U] or even Optional[T]
-            return True
-
-        if type_origin is UnionType:  # T | U
-            return True
-    return False
-
-
-def is_instance_with_union(val: Any, typ: type[Any]) -> bool:
-    # isinstance does not support union type in old interpreter,
-    if is_union(typ):
-        r = [isinstance(val, t) for t in typ.__args__]  # type: ignore
-        return any(r)
-    return isinstance(val, typ)
 
 
 def build_request(typ: type[Any], params: Mapping[str, Any]) -> Request:
@@ -122,9 +105,9 @@ class AsyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
     def _prepare_request(
         self,
         method: HTTPMethod,
-        params: Request | None | dict[Any, Any],
+        params: Request | dict[Any, Any] | None,
         resource: HttpResource | None,
-    ) -> tuple[Path, HTTPRequest, type[Response] | None]:
+    ) -> tuple[Path, HTTPRequest, OptionalResponseSchema[Response]]:
         if resource is None:
             raise UnregisteredRouteException(method, self.name, self.client_name)
         if resource.contract is None or method not in resource.contract:
@@ -151,13 +134,13 @@ class AsyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
     def _prepare_response(
         self,
         result: Result[HTTPResponse, HTTPError],
-        response_schema: type[Response] | None,
+        response_schema: OptionalResponseSchema[Response],
         method: HTTPMethod,
         path: Path,
     ) -> ResponseBox[TResponse, TError_co]:
         return ResponseBox[TResponse, TError_co](
             result,
-            response_schema,
+            cast(type[TResponse], response_schema),
             method,
             path,
             self.name,
@@ -168,7 +151,7 @@ class AsyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
     def _prepare_collection_response(
         self,
         result: Result[HTTPResponse, HTTPError],
-        response_schema: type[Response] | None,
+        response_schema: OptionalResponseSchema[Response],
         collection_parser: type[AbstractCollectionParser] | None,
     ) -> Result[CollectionIterator[TCollectionResponse], TError_co]:
         if result.is_err():
