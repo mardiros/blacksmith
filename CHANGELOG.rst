@@ -1,3 +1,9 @@
+5.0.0 - Released on 2025-12-13
+------------------------------
+* Drop support of python 3.9.
+* Add support of python 3.14 (tested in the CI).
+* Authorize union types in Response contract's schema.
+
 4.1.2 - Released on 2025-11-07
 ------------------------------
 * Fix usage of sequence in querystring, broken in 4.1.0.
