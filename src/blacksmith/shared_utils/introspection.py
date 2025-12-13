@@ -1,7 +1,6 @@
 from collections.abc import Mapping
 from typing import (
     Any,
-    Optional,
     Union,
     get_origin,
 )
@@ -36,7 +35,7 @@ def is_instance_with_union(val: Any, typ: type[Any]) -> bool:
 
 def build_pydantic_union(typ: Any, params: Mapping[str, Any]) -> Any:
     if is_union(typ):
-        err: Optional[Exception] = None
+        err: Exception | None = None
         for t in typ.__args__:  # type: ignore
             try:
                 return build_pydantic_union(t, params)  # type: ignore

@@ -16,12 +16,15 @@ from blacksmith.typing import (
 )
 
 from .exceptions import ConfigurationError, UnregisteredClientException
-from .model import AbstractCollectionParser, OptionalResponseSchema, Request, Response
+from .model import AbstractCollectionParser, Request, TCollectionResponse, TResponse
 
 TRequest = TypeVar("TRequest", bound=Request)
 
-Schemas = tuple[TRequest, OptionalResponseSchema[Response]]
-Contract = Mapping[HTTPMethod, Schemas[Any]]
+Schemas = tuple[TRequest, TResponse]
+Contract = Mapping[HTTPMethod, Schemas[Any, Any]]
+
+CollectionSchemas = tuple[TRequest, TCollectionResponse]
+CollectionContract = Mapping[HTTPMethod, Schemas[Any, Any]]
 
 
 @dataclass(frozen=True)
@@ -150,7 +153,7 @@ def register(
     path: Path | None = None,
     contract: Contract | None = None,
     collection_path: Path | None = None,
-    collection_contract: Contract | None = None,
+    collection_contract: CollectionContract | None = None,
     collection_parser: type[AbstractCollectionParser] | None = None,
 ) -> None:
     """

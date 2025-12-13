@@ -149,6 +149,43 @@ def test_registry_with_union_type() -> None:
     assert api["dummies"].resource.contract["GET"][1] is None
 
 
+def test_registry_with_response_union_type() -> None:
+    class FooRequest(Request): ...
+
+    class Foo(Response):
+        name: str
+        type: Literal["foo"]
+
+    class Bar(Response):
+        name: str
+        type: Literal["bar"]
+
+    registry = Registry()
+    registry.register(
+        "dummies_api",
+        "dummies",
+        "api",
+        "v5",
+        path="/dummies/{name}",
+        contract={
+            "GET": (FooRequest, Foo | Bar),
+        },
+    )
+
+    assert registry.client_service == {"dummies_api": ("api", "v5")}
+    assert set(registry.clients.keys()) == {"dummies_api"}
+
+    assert set(registry.clients["dummies_api"].keys()) == {"dummies"}
+
+    api = registry.clients["dummies_api"]
+    assert api["dummies"].resource is not None
+    assert api["dummies"].resource.contract is not None
+    assert api["dummies"].resource.path == "/dummies/{name}"
+    assert set(api["dummies"].resource.contract.keys()) == {"GET"}
+    assert api["dummies"].resource.contract["GET"][0] == FooRequest
+    assert api["dummies"].resource.contract["GET"][1] == Foo | Bar
+
+
 def test_registry_only_collection() -> None:
     class DummyRequest(Request):
         pass
