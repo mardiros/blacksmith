@@ -331,7 +331,7 @@ def test_response_box_no_schema() -> None:
 def test_response_box_union_schema(json: Mapping[str, Any], expected: Response) -> None:
     resp: ResponseBox[GetResponse, MyErrorFormat] = ResponseBox(
         Ok(HTTPResponse(200, {}, json)),
-        Banana | Vanilla,
+        Banana | Vanilla,  # type: ignore
         "GET",
         "/dummies",
         "Dummy",

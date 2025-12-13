@@ -2,7 +2,6 @@ import abc
 from collections.abc import Callable, Iterator, Mapping
 from dataclasses import dataclass
 from functools import partial
-from types import UnionType
 from typing import (
     Any,
     Generic,
@@ -67,9 +66,6 @@ class Request(BaseModel):
 
 TResponse = TypeVar("TResponse", bound="Response | None")
 TCollectionResponse = TypeVar("TCollectionResponse", bound="Response | None")
-
-OptionalResponseSchema = None | type[TResponse] | UnionType  # UnionType[TResponse] ?
-
 
 Response = BaseModel
 """Response Model."""
@@ -176,7 +172,7 @@ class ResponseBox(Generic[TResponse, TError_co]):
     def __init__(
         self,
         result: Result[HTTPResponse, HTTPError],
-        response_schema: OptionalResponseSchema[TResponse],
+        response_schema: type[TResponse] | None,
         method: HTTPMethod,
         path: Path,
         name: ResourceName,
@@ -383,7 +379,7 @@ class CollectionIterator(Iterator[TResponse]):
     def __init__(
         self,
         response: HTTPResponse,
-        response_schema: OptionalResponseSchema[Response],
+        response_schema: type[Response],
         collection_parser: type[AbstractCollectionParser],
     ) -> None:
         self.pos = 0

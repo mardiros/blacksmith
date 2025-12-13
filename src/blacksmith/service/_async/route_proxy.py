@@ -1,9 +1,7 @@
 from collections.abc import Mapping
-from types import UnionType
 from typing import (
     Any,
     Generic,
-    Union,
     cast,
 )
 
@@ -28,7 +26,6 @@ from blacksmith.domain.model import (
 )
 from blacksmith.domain.model.params import (
     AbstractCollectionParser,
-    OptionalResponseSchema,
     TCollectionResponse,
     TResponse,
 )
@@ -107,7 +104,7 @@ class AsyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
         method: HTTPMethod,
         params: Request | dict[Any, Any] | None,
         resource: HttpResource | None,
-    ) -> tuple[Path, HTTPRequest, OptionalResponseSchema[Response]]:
+    ) -> tuple[Path, HTTPRequest, type[Response]]:
         if resource is None:
             raise UnregisteredRouteException(method, self.name, self.client_name)
         if resource.contract is None or method not in resource.contract:
@@ -134,7 +131,7 @@ class AsyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
     def _prepare_response(
         self,
         result: Result[HTTPResponse, HTTPError],
-        response_schema: OptionalResponseSchema[Response],
+        response_schema: type[Response],
         method: HTTPMethod,
         path: Path,
     ) -> ResponseBox[TResponse, TError_co]:
@@ -151,7 +148,7 @@ class AsyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
     def _prepare_collection_response(
         self,
         result: Result[HTTPResponse, HTTPError],
-        response_schema: OptionalResponseSchema[Response],
+        response_schema: type[Response],
         collection_parser: type[AbstractCollectionParser] | None,
     ) -> Result[CollectionIterator[TCollectionResponse], TError_co]:
         if result.is_err():

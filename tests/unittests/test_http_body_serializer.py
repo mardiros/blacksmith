@@ -120,14 +120,14 @@ def test_json_encoder() -> None:
 
 def test_get_location_from_pydantic_v2() -> None:
     class Dummy(BaseModel):
-        field: str = PostBodyField(default=None)
+        field: str = PostBodyField(default="")
 
     assert get_location(Dummy.model_fields["field"]) == BODY
 
 
 def test_get_location_raises_type_error_if_no_json_schema_extra() -> None:
     class Dummy(BaseModel):
-        field: str = Field(default=None)
+        field: str = Field(default="")
 
     with pytest.raises(TypeError) as ctx:
         get_location(Dummy.model_fields["field"])
@@ -139,7 +139,7 @@ def test_get_location_raises_type_error_if_no_json_schema_extra() -> None:
 
 def test_get_location_raises_type_error_if_no_location() -> None:
     class Dummy(BaseModel):
-        field: str = Field(default=None, json_schema_extra={"foo": "bar"})
+        field: str = Field(default="", json_schema_extra={"foo": "bar"})
 
     with pytest.raises(TypeError) as ctx:
         get_location(Dummy.model_fields["field"])
@@ -154,7 +154,7 @@ def test_get_location_raises_type_error_if_callable() -> None:
         return s
 
     class Dummy(BaseModel):
-        field: str = Field(default=None, json_schema_extra=my_json_schema_extra)
+        field: str = Field(default="", json_schema_extra=my_json_schema_extra)
 
     with pytest.raises(TypeError) as ctx:
         get_location(Dummy.model_fields["field"])
