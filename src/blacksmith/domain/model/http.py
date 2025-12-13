@@ -9,10 +9,13 @@ from typing import (
 
 from blacksmith.typing import HTTPMethod, Json, Url
 
-simpletypes = str | int| float| bool
+simpletypes = str | int | float | bool
 Links = dict[str | None, dict[str, str]]
-RequestBody = ( 
-    str |    bytes | Iterable[bytes] | AsyncIterable[bytes]
+RequestBody = (
+    str
+    | bytes
+    | Iterable[bytes]
+    | AsyncIterable[bytes]
     # a mapping is passed if there is attachment.
     | Mapping[str, simpletypes]
 )

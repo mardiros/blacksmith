@@ -1,7 +1,7 @@
 """Collect metrics based on prometheus."""
 
 import time
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
 from blacksmith.domain.exceptions import HTTPError
 from blacksmith.domain.model.http import HTTPRequest, HTTPResponse, HTTPTimeout
@@ -14,8 +14,9 @@ if TYPE_CHECKING:
     try:
         import prometheus_client
     except ImportError:
-        pass
-    Registry = Optional["prometheus_client.CollectorRegistry"]
+        Regitry = Any
+    else:
+        Registry = prometheus_client.CollectorRegistry | None
 else:
     Registry = Any
 

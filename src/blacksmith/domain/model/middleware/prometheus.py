@@ -1,14 +1,15 @@
 """Collect metrics based on prometheus."""
 
 from importlib import metadata
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     try:
         import prometheus_client
     except ImportError:
-        pass
-    Registry = Optional["prometheus_client.CollectorRegistry"]
+        Regitry = Any
+    else:
+        Registry = prometheus_client.CollectorRegistry | None
 else:
     Registry = Any
 
