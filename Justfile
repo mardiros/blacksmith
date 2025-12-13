@@ -2,7 +2,13 @@ package := 'blacksmith'
 default_test_suite := 'tests/unittests'
 
 install:
-    uv sync --group doc
+    uv sync --group doc --frozen
+
+update:
+    uv sync --group dev
+
+upgrade:
+    uv sync --group dev --upgrade
 
 doc:
     uv sync --group dev --group doc
