@@ -1,5 +1,5 @@
 from collections.abc import Mapping
-from typing import Any, Literal, Union
+from typing import Any, Literal
 
 import pytest
 from pydantic import BaseModel, Field, ValidationError
@@ -74,7 +74,7 @@ def test_build_timeout() -> None:
     [
         pytest.param({"type": int, "expected": False}, id="int"),
         pytest.param({"type": str, "expected": False}, id="str"),
-        pytest.param({"type": Union[int, str], "expected": True}, id="Union[int, str]"),
+        pytest.param({"type": int | str, "expected": True}, id="int | str"),
     ],
 )
 def test_is_union(params: Mapping[str, Any]):
@@ -102,15 +102,15 @@ except TypeError:
         pytest.param({"type": str, "value": "bob", "expected": True}, id="str"),
         pytest.param({"type": str, "value": 0.42, "expected": False}, id="str / float"),
         pytest.param(
-            {"type": Union[int, str], "value": "bob", "expected": True},
+            {"type": int | str, "value": "bob", "expected": True},
             id="int | str / str",
         ),
         pytest.param(
-            {"type": Union[int, str], "value": 42, "expected": True},
+            {"type": int | str, "value": 42, "expected": True},
             id="int | str / int",
         ),
         pytest.param(
-            {"type": Union[int, str], "value": 0.42, "expected": False},
+            {"type": int | str, "value": 0.42, "expected": False},
             id="int | str / float",
         ),
     ],
@@ -137,7 +137,7 @@ class Bar(BaseModel):
         ),
         pytest.param(
             {
-                "type": Union[Foo, Bar],
+                "type": Foo | Bar,
                 "params": {"typ": "foo"},
                 "expected": Foo(typ="foo"),
             },
@@ -145,7 +145,7 @@ class Bar(BaseModel):
         ),
         pytest.param(
             {
-                "type": Union[Foo, Bar],
+                "type": Foo | Bar,
                 "params": {"typ": "bar"},
                 "expected": Bar(typ="bar"),
             },
@@ -167,7 +167,7 @@ def test_build_request(params: Mapping[str, Any]):
         ),
         pytest.param(
             {
-                "type": Union[Foo, Bar],
+                "type": Foo | Bar,
                 "params": {"typ": "baz"},
                 "err": "Input should be 'bar'",
             },
@@ -415,9 +415,7 @@ def test_route_proxy_collection_get() -> None:
         middlewares=[],
         error_parser=error_parser,
     )
-    result: Result[
-        CollectionIterator[Any], MyErrorFormat
-    ] = proxy.collection_get()
+    result: Result[CollectionIterator[Any], MyErrorFormat] = proxy.collection_get()
     assert result.is_ok()
     resp = result.unwrap()
     assert resp.meta.total_count == 10
@@ -452,9 +450,7 @@ def test_route_proxy_collection_get_with_parser() -> None:
         middlewares=[],
         error_parser=error_parser,
     )
-    result: Result[
-        CollectionIterator[Any], MyErrorFormat
-    ] = proxy.collection_get()
+    result: Result[CollectionIterator[Any], MyErrorFormat] = proxy.collection_get()
     assert result.is_ok()
     resp = result.unwrap()
     assert resp.meta.total_count == 10

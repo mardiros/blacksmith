@@ -4,7 +4,6 @@ from collections.abc import Callable, Mapping, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
-    Union,
     cast,
 )
 from urllib.parse import parse_qs, urlencode
@@ -45,7 +44,7 @@ HEADER: HttpLocation = "headers"
 QUERY: HttpLocation = "querystring"
 BODY: HttpLocation = "body"
 ATTACHMENT: HttpLocation = "attachment"
-simpletypes = Union[str, int, float, bool]
+simpletypes = str | int | float | bool
 
 
 class AbstractHttpBodySerializer(abc.ABC):
@@ -118,7 +117,11 @@ def get_location(field: FieldInfo) -> HttpLocation:
 
 
 def get_value(
-    v: simpletypes | SecretStr | SecretBytes | dict[str, simpletypes] | list[simpletypes],
+    v: simpletypes
+    | SecretStr
+    | SecretBytes
+    | dict[str, simpletypes]
+    | list[simpletypes],
     dump_complex_to_json: bool,
 ) -> simpletypes:
     if dump_complex_to_json and isinstance(v, (dict, list)):

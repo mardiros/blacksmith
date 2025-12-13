@@ -4,22 +4,18 @@ from dataclasses import dataclass, field
 from typing import (
     Any,
     Protocol,
-    Union,
     cast,
 )
 
 from blacksmith.typing import HTTPMethod, Json, Url
 
-simpletypes = Union[str, int, float, bool]
+simpletypes = str | int| float| bool
 Links = dict[str | None, dict[str, str]]
-RequestBody = Union[
-    str,
-    bytes,
-    Iterable[bytes],
-    AsyncIterable[bytes],
+RequestBody = ( 
+    str |    bytes | Iterable[bytes] | AsyncIterable[bytes]
     # a mapping is passed if there is attachment.
-    Mapping[str, simpletypes],
-]
+    | Mapping[str, simpletypes]
+)
 RequestAttachments = dict[
     str,
     tuple[str, bytes, str | None, Mapping[str, str]],

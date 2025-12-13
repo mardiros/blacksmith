@@ -1,4 +1,4 @@
-from typing import Literal, Union
+from typing import Literal
 
 import pytest
 
@@ -131,7 +131,7 @@ def test_registry_with_union_type() -> None:
         "v5",
         path="/dummies/{name}",
         contract={
-            "GET": (Union[FooRequest, BarRequest], None),
+            "GET": (FooRequest | BarRequest, None),
         },
     )
 
@@ -145,7 +145,7 @@ def test_registry_with_union_type() -> None:
     assert api["dummies"].resource.contract is not None
     assert api["dummies"].resource.path == "/dummies/{name}"
     assert set(api["dummies"].resource.contract.keys()) == {"GET"}
-    assert api["dummies"].resource.contract["GET"][0] == Union[FooRequest, BarRequest]
+    assert api["dummies"].resource.contract["GET"][0] == FooRequest | BarRequest
     assert api["dummies"].resource.contract["GET"][1] is None
 
 

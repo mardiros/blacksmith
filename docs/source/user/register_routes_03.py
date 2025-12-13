@@ -1,4 +1,3 @@
-from typing import Union
 
 import blacksmith
 
@@ -22,6 +21,6 @@ blacksmith.register(
     version="v1",
     path="/search",
     collection_contract={
-        "GET": (Union[SearchItem, SearchUser], Item),
+        "GET": (SearchItem | SearchUser, Item),
     },
 )

@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Any, Union
+from typing import Any
 
 import pytest
 from pydantic import BaseModel
@@ -68,7 +68,7 @@ register(
     collection_path="/items",
     collection_contract={
         "GET": (ListItem, Item),
-        "POST": (Union[CreateItem, CreateItemIntSize], None),
+        "POST": (CreateItem | CreateItemIntSize, None),
     },
     path="/items/{item_name}",
     contract={

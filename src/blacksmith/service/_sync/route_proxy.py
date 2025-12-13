@@ -44,7 +44,7 @@ from blacksmith.typing import ClientName, HTTPMethod, Path, ResourceName, Url
 
 from .base import SyncAbstractTransport
 
-ClientTimeout = Union[HTTPTimeout, float, tuple[float, float]]
+ClientTimeout = HTTPTimeout | float | tuple[float, float]
 HTTPAuthentication = SyncHTTPMiddleware
 
 
@@ -347,9 +347,7 @@ class SyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
         """
         Use to perform an http ``HEAD`` query on the path.
         """
-        return self._request(
-            "HEAD", params, build_timeout(timeout or self.timeout)
-        )
+        return self._request("HEAD", params, build_timeout(timeout or self.timeout))
 
     def get(
         self,
@@ -359,9 +357,7 @@ class SyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
         """
         Use to perform an http ``GET`` query on the path.
         """
-        resp = self._request(
-            "GET", params, build_timeout(timeout or self.timeout)
-        )
+        resp = self._request("GET", params, build_timeout(timeout or self.timeout))
         return resp
 
     def post(
@@ -372,9 +368,7 @@ class SyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
         """
         Use to perform an http ``POST`` query on the path.
         """
-        return self._request(
-            "POST", params, build_timeout(timeout or self.timeout)
-        )
+        return self._request("POST", params, build_timeout(timeout or self.timeout))
 
     def put(
         self,
@@ -384,9 +378,7 @@ class SyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
         """
         Use to perform an http ``PUT`` query on the path.
         """
-        return self._request(
-            "PUT", params, build_timeout(timeout or self.timeout)
-        )
+        return self._request("PUT", params, build_timeout(timeout or self.timeout))
 
     def patch(
         self,
@@ -396,9 +388,7 @@ class SyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
         """
         Use to perform an http ``PATCH`` query on the path.
         """
-        return self._request(
-            "PATCH", params, build_timeout(timeout or self.timeout)
-        )
+        return self._request("PATCH", params, build_timeout(timeout or self.timeout))
 
     def delete(
         self,
@@ -408,9 +398,7 @@ class SyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
         """
         Use to perform an http ``DELETE`` query on the path.
         """
-        return self._request(
-            "DELETE", params, build_timeout(timeout or self.timeout)
-        )
+        return self._request("DELETE", params, build_timeout(timeout or self.timeout))
 
     def options(
         self,
@@ -420,6 +408,4 @@ class SyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
         """
         Use to perform an http ``OPTIONS`` query on the path.
         """
-        return self._request(
-            "OPTIONS", params, build_timeout(timeout or self.timeout)
-        )
+        return self._request("OPTIONS", params, build_timeout(timeout or self.timeout))

@@ -1,16 +1,11 @@
 from collections.abc import Mapping
+from types import UnionType
 from typing import (
     Any,
     Generic,
     Union,
     get_origin,
 )
-
-try:
-    from types import UnionType  # type: ignore
-except ImportError:  # coverage: ignore
-    # python 3.9 compat
-    UnionType = Union  # type: ignore
 
 from pydantic import ValidationError
 from result import Err, Ok, Result
@@ -44,7 +39,7 @@ from blacksmith.typing import ClientName, HTTPMethod, Path, ResourceName, Url
 
 from .base import AsyncAbstractTransport
 
-ClientTimeout = Union[HTTPTimeout, float, tuple[float, float]]
+ClientTimeout = HTTPTimeout | float | tuple[float, float]
 HTTPAuthentication = AsyncHTTPMiddleware
 
 
