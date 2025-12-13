@@ -3,7 +3,6 @@ from collections.abc import AsyncIterable, Iterable, Mapping
 from dataclasses import dataclass, field
 from typing import (
     Any,
-    Optional,
     Protocol,
     Union,
     cast,
@@ -12,7 +11,7 @@ from typing import (
 from blacksmith.typing import HTTPMethod, Json, Url
 
 simpletypes = Union[str, int, float, bool]
-Links = dict[Optional[str], dict[str, str]]
+Links = dict[str | None, dict[str, str]]
 RequestBody = Union[
     str,
     bytes,
@@ -23,7 +22,7 @@ RequestBody = Union[
 ]
 RequestAttachments = dict[
     str,
-    tuple[str, bytes, Optional[str], Mapping[str, str]],
+    tuple[str, bytes, str | None, Mapping[str, str]],
 ]
 
 
@@ -57,12 +56,12 @@ class HTTPRequest:
     url_pattern: Url
     # the property match with the "location" of feaut
     path: dict[str, simpletypes] = field(default_factory=dict)
-    querystring: dict[str, Union[simpletypes, list[simpletypes]]] = field(
+    querystring: dict[str, simpletypes | list[simpletypes]] = field(
         default_factory=dict
     )
     headers: dict[str, str] = field(default_factory=dict)
     body: RequestBody = ""
-    attachments: Optional[RequestAttachments] = field(default=None)
+    attachments: RequestAttachments | None = field(default=None)
 
     @property
     def url(self) -> str:

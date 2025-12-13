@@ -1,7 +1,6 @@
-from typing import Union
+from typing import Literal, Union
 
 import pytest
-from typing_extensions import Literal
 
 import blacksmith
 from blacksmith.domain import registry

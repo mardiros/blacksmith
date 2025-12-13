@@ -16,8 +16,8 @@ else:
 class PrometheusMetrics:
     def __init__(
         self,
-        buckets: Optional[list[float]] = None,
-        hit_cache_buckets: Optional[list[float]] = None,
+        buckets: list[float] | None = None,
+        hit_cache_buckets: list[float] | None = None,
         registry: Registry = None,
     ) -> None:
         from prometheus_client import REGISTRY, Counter, Gauge, Histogram

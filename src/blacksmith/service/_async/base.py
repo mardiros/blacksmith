@@ -1,4 +1,3 @@
-from typing import Optional
 
 from httpx import AsyncHTTPTransport
 
@@ -8,10 +7,10 @@ from blacksmith.typing import Proxies
 
 class AsyncAbstractTransport(AsyncMiddleware):
     verify_certificate: bool
-    proxies: Optional[dict[str, AsyncHTTPTransport]]
+    proxies: dict[str, AsyncHTTPTransport] | None
 
     def __init__(
-        self, verify_certificate: bool = True, proxies: Optional[Proxies] = None
+        self, verify_certificate: bool = True, proxies: Proxies | None = None
     ):
         self.verify_certificate = verify_certificate
         self.proxies = (

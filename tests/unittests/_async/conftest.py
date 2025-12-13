@@ -3,8 +3,6 @@ from datetime import timedelta
 from typing import (
     Any,
     ClassVar,
-    Optional,
-    Union,
 )
 
 import pytest
@@ -33,7 +31,7 @@ def static_sd() -> AsyncStaticDiscovery:
 
 
 class FakeConsulTransport(AsyncAbstractTransport):
-    _body: ClassVar[Sequence[Mapping[str, Union[str, int]]]] = [
+    _body: ClassVar[Sequence[Mapping[str, str | int]]] = [
         {
             "Address": "1.1.1.1",
             "ServiceAddress": "8.8.8.8",
@@ -159,7 +157,7 @@ def dummy_middleware() -> AsyncHTTPAddHeadersMiddleware:
 @pytest.fixture
 def consul_sd_with_body(body: dict[str, Any]) -> AsyncConsulDiscovery:
     class FakeConsulTransportNoServiceAddr(FakeConsulTransport):
-        _body: ClassVar[Sequence[Mapping[str, Union[str, int]]]] = [body]
+        _body: ClassVar[Sequence[Mapping[str, str | int]]] = [body]
 
     def cli(url: str, tok: str) -> AsyncClientFactory[HTTPError]:
         return AsyncClientFactory(
@@ -196,7 +194,7 @@ def router_sd() -> AsyncRouterDiscovery:
 class AsyncFakeHttpMiddlewareCache(AsyncAbstractCache):
     """Abstract Redis Client."""
 
-    def __init__(self, data: Optional[dict[str, tuple[int, str]]] = None) -> None:
+    def __init__(self, data: dict[str, tuple[int, str]] | None = None) -> None:
         super().__init__()
         self.val: dict[str, tuple[int, str]] = data or {}
         self.initialize_called = False
@@ -204,7 +202,7 @@ class AsyncFakeHttpMiddlewareCache(AsyncAbstractCache):
     async def initialize(self) -> None:
         self.initialize_called = True
 
-    async def get(self, key: str) -> Optional[str]:
+    async def get(self, key: str) -> str | None:
         """Get a value from redis"""
         try:
             return self.val[key][1]
@@ -232,7 +230,7 @@ class Trace(AbstractTraceContext):
     name: str
     kind: str
     tags: dict[str, str]
-    annotations: list[tuple[Optional[str], Optional[float]]]
+    annotations: list[tuple[str | None, float | None]]
 
     def __init__(self, name: str, kind: str) -> None:
         Trace.name = name
@@ -254,7 +252,7 @@ class Trace(AbstractTraceContext):
         Trace.tags[key] = value
         return self
 
-    def annotate(self, value: Optional[str], ts: Optional[float] = None) -> "Trace":
+    def annotate(self, value: str | None, ts: float | None = None) -> "Trace":
         Trace.annotations.append((value, ts))
         return self
 

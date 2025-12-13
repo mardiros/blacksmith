@@ -15,7 +15,7 @@ description = "REST API Client designed for microservices"
 license = { text = "MIT License" }
 name = "Blacksmith"
 readme = "README.rst"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 version = "4.1.2"
 
 dependencies = [
@@ -94,7 +94,7 @@ module = "blacksmith.*"
 
 [tool.ruff]
 line-length = 88
-target-version = "py39"
+target-version = "py310"
 
 [tool.ruff.lint]
 select = [

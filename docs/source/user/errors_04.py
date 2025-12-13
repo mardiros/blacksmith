@@ -1,4 +1,3 @@
-from typing import Optional
 
 from pydantic import BaseModel, Field
 from result import Result
@@ -18,7 +17,7 @@ from .resources import Item, PartialItem
 class APIError(BaseModel):
     request: HTTPRequest = Field(...)
     message: str = Field(...)
-    detail: Optional[str] = Field(None)
+    detail: str | None = Field(None)
 
 
 def error_parser(error: HTTPError) -> APIError:

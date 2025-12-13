@@ -1,10 +1,9 @@
 from collections.abc import Mapping
-from typing import Any, Union
+from typing import Any, Literal, Union
 
 import pytest
 from pydantic import BaseModel, Field, ValidationError
 from result import Result
-from typing_extensions import Literal
 
 from blacksmith import Request
 from blacksmith.domain.exceptions import (
@@ -416,7 +415,9 @@ def test_route_proxy_collection_get() -> None:
         middlewares=[],
         error_parser=error_parser,
     )
-    result: Result[CollectionIterator[Any], MyErrorFormat] = proxy.collection_get()
+    result: Result[
+        CollectionIterator[Any], MyErrorFormat
+    ] = proxy.collection_get()
     assert result.is_ok()
     resp = result.unwrap()
     assert resp.meta.total_count == 10
@@ -451,7 +452,9 @@ def test_route_proxy_collection_get_with_parser() -> None:
         middlewares=[],
         error_parser=error_parser,
     )
-    result: Result[CollectionIterator[Any], MyErrorFormat] = proxy.collection_get()
+    result: Result[
+        CollectionIterator[Any], MyErrorFormat
+    ] = proxy.collection_get()
     assert result.is_ok()
     resp = result.unwrap()
     assert resp.meta.total_count == 10

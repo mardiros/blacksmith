@@ -1,7 +1,7 @@
 """Trace with zipkin of jaegger."""
 
 import abc
-from typing import Any, Optional
+from typing import Any
 
 
 class AbstractTraceContext(abc.ABC):
@@ -26,7 +26,7 @@ class AbstractTraceContext(abc.ABC):
 
     @abc.abstractmethod
     def annotate(
-        self, value: Optional[str], ts: Optional[float] = None
+        self, value: str | None, ts: float | None = None
     ) -> "AbstractTraceContext":
         """Annotate the span"""
 

@@ -5,7 +5,8 @@ This driver implement a client side service discovery.
 """
 
 import random
-from typing import Any, Callable, Optional
+from collections.abc import Callable
+from typing import Any
 
 from pydantic.fields import Field
 from result import Result
@@ -40,7 +41,7 @@ class Service(Response):
 
     node_address: str = Field(alias="Address")
     """IP address of the Consul node on which the service is registered."""
-    service_address: Optional[str] = Field(default=None, alias="ServiceAddress")
+    service_address: str | None = Field(default=None, alias="ServiceAddress")
     """IP address of the service host. if empty, node address is used."""
     port: int = Field(alias="ServicePort")
     """TCP Port of an instance that host the service."""

@@ -3,7 +3,7 @@
 from collections import defaultdict
 from collections.abc import Mapping, MutableMapping
 from dataclasses import dataclass
-from typing import Any, Optional, TypeVar
+from typing import Any, TypeVar
 
 from blacksmith.typing import (
     ClientName,
@@ -20,7 +20,7 @@ from .model import AbstractCollectionParser, Request, Response
 
 TRequest = TypeVar("TRequest", bound=Request)
 
-Schemas = tuple[TRequest, Optional[type[Response]]]
+Schemas = tuple[TRequest, type[Response] | None]
 Contract = Mapping[HTTPMethod, Schemas[Any]]
 
 
@@ -30,13 +30,13 @@ class HttpResource:
 
     path: Path
     """Path that identify the resource."""
-    contract: Optional[Contract]
+    contract: Contract | None
     """A contract is a serialization schema for the request and there response."""
 
 
 @dataclass(frozen=True)
 class HttpCollection(HttpResource):
-    collection_parser: Optional[type[AbstractCollectionParser]]
+    collection_parser: type[AbstractCollectionParser] | None
     """Override the default collection parlser for a given resource."""
 
 
@@ -48,18 +48,18 @@ class ApiRoutes:
     They both have distinct contract for every http method.
     """
 
-    resource: Optional[HttpResource]
+    resource: HttpResource | None
     """Resource endpoint"""
-    collection: Optional[HttpCollection]
+    collection: HttpCollection | None
     """Collection endpoint."""
 
     def __init__(
         self,
-        path: Optional[Path],
-        contract: Optional[Contract],
-        collection_path: Optional[Path],
-        collection_contract: Optional[Contract],
-        collection_parser: Optional[type[AbstractCollectionParser]],
+        path: Path | None,
+        contract: Contract | None,
+        collection_path: Path | None,
+        collection_contract: Contract | None,
+        collection_parser: type[AbstractCollectionParser] | None,
     ) -> None:
         self.resource = HttpResource(path, contract) if path else None
         self.collection = (
@@ -88,11 +88,11 @@ class Registry:
         resource: ResourceName,
         service: ServiceName,
         version: Version,
-        path: Optional[Path] = None,
-        contract: Optional[Contract] = None,
-        collection_path: Optional[Path] = None,
-        collection_contract: Optional[Contract] = None,
-        collection_parser: Optional[type[AbstractCollectionParser]] = None,
+        path: Path | None = None,
+        contract: Contract | None = None,
+        collection_path: Path | None = None,
+        collection_contract: Contract | None = None,
+        collection_parser: type[AbstractCollectionParser] | None = None,
     ) -> None:
         """
         Register the resource in the registry.
@@ -147,11 +147,11 @@ def register(
     resource: ResourceName,
     service: ServiceName,
     version: Version,
-    path: Optional[Path] = None,
-    contract: Optional[Contract] = None,
-    collection_path: Optional[Path] = None,
-    collection_contract: Optional[Contract] = None,
-    collection_parser: Optional[type[AbstractCollectionParser]] = None,
+    path: Path | None = None,
+    contract: Contract | None = None,
+    collection_path: Path | None = None,
+    collection_contract: Contract | None = None,
+    collection_parser: type[AbstractCollectionParser] | None = None,
 ) -> None:
     """
     Register a resource in a client in the default registry.

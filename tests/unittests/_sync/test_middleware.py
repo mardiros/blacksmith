@@ -314,7 +314,9 @@ def test_circuit_breaker_prometheus_metrics(
     with pytest.raises(HTTPError):
         boom_next(dummy_http_request, "dummy", "/dummies/{name}", dummy_timeout)
     with pytest.raises(HTTPError):
-        invalid_next(dummy_http_request, "dummy", "/dummies/{name}", dummy_timeout)
+        invalid_next(
+            dummy_http_request, "dummy", "/dummies/{name}", dummy_timeout
+        )
 
     assert (
         prometheus_registry.get_sample_value(

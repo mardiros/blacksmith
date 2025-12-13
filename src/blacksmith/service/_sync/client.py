@@ -1,4 +1,4 @@
-from typing import Any, Generic, Optional
+from typing import Any, Generic
 
 from blacksmith.domain.error import AbstractErrorParser, TError_co, default_error_parser
 from blacksmith.domain.exceptions import UnregisteredResourceException
@@ -52,7 +52,9 @@ class SyncClient(Generic[TError_co]):
         self.error_parser = error_parser
         self.middlewares = middlewares.copy()
 
-    def add_middleware(self, middleware: SyncHTTPMiddleware) -> "SyncClient[TError_co]":
+    def add_middleware(
+        self, middleware: SyncHTTPMiddleware
+    ) -> "SyncClient[TError_co]":
         self.middlewares.insert(0, middleware)
         return self
 
@@ -105,13 +107,13 @@ class SyncClientFactory(Generic[TError_co]):
     def __init__(
         self,
         sd: SyncAbstractServiceDiscovery,
-        transport: Optional[SyncAbstractTransport] = None,
+        transport: SyncAbstractTransport | None = None,
         registry: Registry = default_registry,
         timeout: ClientTimeout = default_timeout,
-        proxies: Optional[Proxies] = None,
+        proxies: Proxies | None = None,
         verify_certificate: bool = False,
         collection_parser: type[AbstractCollectionParser] = CollectionParser,
-        error_parser: Optional[AbstractErrorParser[TError_co]] = None,
+        error_parser: AbstractErrorParser[TError_co] | None = None,
     ) -> None:
         self.sd = sd
         self.registry = registry

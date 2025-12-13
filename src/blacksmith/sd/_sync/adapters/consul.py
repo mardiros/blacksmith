@@ -5,7 +5,8 @@ This driver implement a client side service discovery.
 """
 
 import random
-from typing import Any, Callable, Optional
+from collections.abc import Callable
+from typing import Any
 
 from pydantic.fields import Field
 from result import Result
@@ -40,7 +41,7 @@ class Service(Response):
 
     node_address: str = Field(alias="Address")
     """IP address of the Consul node on which the service is registered."""
-    service_address: Optional[str] = Field(default=None, alias="ServiceAddress")
+    service_address: str | None = Field(default=None, alias="ServiceAddress")
     """IP address of the service host. if empty, node address is used."""
     port: int = Field(alias="ServicePort")
     """TCP Port of an instance that host the service."""
@@ -132,9 +133,9 @@ class SyncConsulDiscovery(SyncAbstractServiceDiscovery):
         """
         name = self.format_service_name(service, version)
         consul = self.blacksmith_cli("consul")
-        rresp: Result[CollectionIterator[Service], HTTPError] = (
-            consul.services.collection_get(ServiceRequest(name=name))
-        )
+        rresp: Result[
+            CollectionIterator[Service], HTTPError
+        ] = consul.services.collection_get(ServiceRequest(name=name))
         if rresp.is_err():
             raise ConsulApiError(
                 rresp.unwrap_err()
