@@ -1,7 +1,7 @@
 import json
 from collections.abc import Mapping, Sequence
 from datetime import datetime
-from typing import Any, Optional, Union
+from typing import Any
 
 import pytest
 from pydantic import BaseModel, Field, HttpUrl, SecretStr
@@ -95,10 +95,10 @@ class MySerializer(AbstractHttpBodySerializer):
     def accept(self, content_type: str) -> bool:
         return content_type == "text/xml"
 
-    def serialize(self, body: Union[dict[str, Any], Sequence[Any]]) -> str:
+    def serialize(self, body: dict[str, Any] | Sequence[Any]) -> str:
         return "<foo/>"
 
-    def deserialize(self, body: bytes, encoding: Optional[str]) -> Json:
+    def deserialize(self, body: bytes, encoding: str | None) -> Json:
         return {"foo": "bar"}
 
 
@@ -169,8 +169,8 @@ def test_serialize_part() -> None:
         x_message_id: int = HeaderField(default=123, alias="X-Message-Id")
         name: str = PostBodyField()
         age: int = PostBodyField(default=10)
-        city: Optional[str] = PostBodyField(None)
-        state: Optional[str] = PostBodyField(None)
+        city: str | None = PostBodyField(None)
+        state: str | None = PostBodyField(None)
         country: str = PostBodyField()
 
     dummy = Dummy(name="Jane", country="FR", city="Saint Palais s/mer", state=None)
@@ -228,7 +228,7 @@ def test_serialize_nested_dict_attached() -> None:
 def test_serialize_part_default_with_none() -> None:
     class Dummy(Request):
         name: str = PostBodyField()
-        age: Optional[int] = PostBodyField(default=10)
+        age: int | None = PostBodyField(default=10)
 
     dummy = Dummy(name="Jane", age=None)
     obj = serialize_part(

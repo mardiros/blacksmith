@@ -37,8 +37,8 @@ class SyncCircuitBreakerMiddleware(SyncHTTPMiddleware):
         threshold: Threshold = 5,
         ttl: TTL = 30,
         listeners: Listeners = None,
-        uow: Optional[SyncAbstractUnitOfWork] = None,
-        metrics: Optional[PrometheusMetrics] = None,
+        uow: SyncAbstractUnitOfWork | None = None,
+        metrics: PrometheusMetrics | None = None,
     ):
         self.circuit_breaker = SyncCircuitBreakerFactory(
             default_threshold=threshold,

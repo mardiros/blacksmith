@@ -1,4 +1,4 @@
-from typing import Any, Generic, Optional
+from typing import Any, Generic
 
 from blacksmith.domain.error import AbstractErrorParser, TError_co, default_error_parser
 from blacksmith.domain.exceptions import UnregisteredResourceException
@@ -107,13 +107,13 @@ class AsyncClientFactory(Generic[TError_co]):
     def __init__(
         self,
         sd: AsyncAbstractServiceDiscovery,
-        transport: Optional[AsyncAbstractTransport] = None,
+        transport: AsyncAbstractTransport | None = None,
         registry: Registry = default_registry,
         timeout: ClientTimeout = default_timeout,
-        proxies: Optional[Proxies] = None,
+        proxies: Proxies | None = None,
         verify_certificate: bool = False,
         collection_parser: type[AbstractCollectionParser] = CollectionParser,
-        error_parser: Optional[AbstractErrorParser[TError_co]] = None,
+        error_parser: AbstractErrorParser[TError_co] | None = None,
     ) -> None:
         self.sd = sd
         self.registry = registry

@@ -1,10 +1,9 @@
 from collections.abc import Mapping
-from typing import Any, Union
+from typing import Any, Literal, Union
 
 import pytest
 from pydantic import BaseModel, Field, ValidationError
 from result import Result
-from typing_extensions import Literal
 
 from blacksmith import Request
 from blacksmith.domain.exceptions import (

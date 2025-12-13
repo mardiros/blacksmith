@@ -4,7 +4,7 @@ import abc
 import time
 from dataclasses import asdict
 from datetime import timedelta
-from typing import Literal, Optional
+from typing import Literal
 
 from blacksmith.domain.model.http import HTTPRequest, HTTPResponse, HTTPTimeout
 from blacksmith.domain.model.middleware.http_cache import (
@@ -30,7 +30,7 @@ class AsyncAbstractCache(abc.ABC):
         """Initialize the cache"""
 
     @abc.abstractmethod
-    async def get(self, key: str) -> Optional[str]:
+    async def get(self, key: str) -> str | None:
         """Get a value from redis"""
 
     @abc.abstractmethod
@@ -54,7 +54,7 @@ class AsyncHTTPCacheMiddleware(AsyncHTTPMiddleware):
     def __init__(
         self,
         cache: AsyncAbstractCache,
-        metrics: Optional[PrometheusMetrics] = None,
+        metrics: PrometheusMetrics | None = None,
         policy: AbstractCachePolicy = default_cache_control,
         serializer: type[AbstractSerializer] = JsonSerializer,
     ) -> None:
@@ -98,7 +98,7 @@ class AsyncHTTPCacheMiddleware(AsyncHTTPMiddleware):
 
     async def get_from_cache(
         self, client_name: ClientName, path: Path, req: HTTPRequest
-    ) -> Optional[HTTPResponse]:
+    ) -> HTTPResponse | None:
         vary_key = self._policy.get_vary_key(client_name, path, req)
         vary_val = await self._cache.get(vary_key)
         if not vary_val:

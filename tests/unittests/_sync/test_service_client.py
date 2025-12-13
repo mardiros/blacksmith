@@ -192,7 +192,9 @@ def test_client_factory_configure_proxies(static_sd: SyncAbstractServiceDiscover
     )
     assert client_factory.transport.proxies is not None
     assert set(client_factory.transport.proxies.keys()) == {"http://", "https://"}
-    assert isinstance(client_factory.transport.proxies["https://"], httpx.HTTPTransport)
+    assert isinstance(
+        client_factory.transport.proxies["https://"], httpx.HTTPTransport
+    )
 
 
 def test_client_factory_add_middleware(

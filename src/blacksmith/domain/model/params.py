@@ -1,12 +1,10 @@
 import abc
-from collections.abc import Iterator, Mapping
+from collections.abc import Callable, Iterator, Mapping
 from dataclasses import dataclass
 from functools import partial
 from typing import (
     Any,
-    Callable,
     Generic,
-    Optional,
     TypeVar,
     cast,
 )
@@ -47,7 +45,7 @@ class Attachment(BaseModel):
     """The name of the file."""
     content: bytes = Field()
     """The content of the file."""
-    content_type: Optional[str] = Field(default=None)
+    content_type: str | None = Field(default=None)
     """The content type of the field. Optional, it will be guessed from the filename."""
     headers: Mapping[str, str] = Field(default_factory=dict)
     """The content type of the field. Optional, it will be guessed from the filename."""
@@ -63,8 +61,8 @@ class Request(BaseModel):
     """
 
 
-TResponse = TypeVar("TResponse", bound="Optional[Response]")
-TCollectionResponse = TypeVar("TCollectionResponse", bound="Optional[Response]")
+TResponse = TypeVar("TResponse", bound="Response | None")
+TCollectionResponse = TypeVar("TCollectionResponse", bound="Response | None")
 
 
 Response = BaseModel
@@ -76,7 +74,7 @@ class Metadata:
     """Metadata of a collection response."""
 
     count: int
-    total_count: Optional[int]
+    total_count: int | None
     links: Links
 
 
@@ -172,7 +170,7 @@ class ResponseBox(Generic[TResponse, TError_co]):
     def __init__(
         self,
         result: Result[HTTPResponse, HTTPError],
-        response_schema: Optional[type[Response]],
+        response_schema: type[Response] | None,
         method: HTTPMethod,
         path: Path,
         name: ResourceName,
@@ -187,7 +185,7 @@ class ResponseBox(Generic[TResponse, TError_co]):
         self.client_name: ClientName = client_name
         self.error_parser = error_parser
 
-    def _cast_optional_resp(self, resp: HTTPResponse) -> Optional[TResponse]:
+    def _cast_optional_resp(self, resp: HTTPResponse) -> TResponse | None:
         if self.response_schema is None:
             return None
         schema_cls = self.response_schema
@@ -202,7 +200,7 @@ class ResponseBox(Generic[TResponse, TError_co]):
         return cast(TResponse, schema_cls(**(resp.json or {})))
 
     @property
-    def json(self) -> Optional[dict[str, Any]]:
+    def json(self) -> dict[str, Any] | None:
         """
         Return the raw json response.
 
@@ -226,7 +224,7 @@ class ResponseBox(Generic[TResponse, TError_co]):
         """
         return self._result
 
-    def as_optional(self) -> Result[Optional[TResponse], TError_co]:
+    def as_optional(self) -> Result[TResponse | None, TError_co]:
         """
         Expose the instance as an optional result.
 
@@ -377,7 +375,7 @@ class CollectionIterator(Iterator[TResponse]):
     def __init__(
         self,
         response: HTTPResponse,
-        response_schema: Optional[type[Response]],
+        response_schema: type[Response] | None,
         collection_parser: type[AbstractCollectionParser],
     ) -> None:
         self.pos = 0

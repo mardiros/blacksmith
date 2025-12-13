@@ -37,8 +37,8 @@ class AsyncCircuitBreakerMiddleware(AsyncHTTPMiddleware):
         threshold: Threshold = 5,
         ttl: TTL = 30,
         listeners: Listeners = None,
-        uow: Optional[AsyncAbstractUnitOfWork] = None,
-        metrics: Optional[PrometheusMetrics] = None,
+        uow: AsyncAbstractUnitOfWork | None = None,
+        metrics: PrometheusMetrics | None = None,
     ):
         self.circuit_breaker = AsyncCircuitBreakerFactory(
             default_threshold=threshold,

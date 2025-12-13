@@ -1,7 +1,7 @@
 from collections.abc import Iterable
 from enum import Enum
 from multiprocessing import Process
-from typing import Annotated, Optional
+from typing import Annotated
 
 import httpx
 import pytest
@@ -26,8 +26,8 @@ class Item(BaseModel):
 
 
 class PatchItem(BaseModel):
-    name: Optional[str] = None
-    size: Optional[SizeEnum] = None
+    name: str | None = None
+    size: SizeEnum | None = None
 
 
 items_db: dict[str, Item] = {}
@@ -35,7 +35,7 @@ not_found = HTTPException(404, "Item not found")
 
 
 @app.get("/items", response_model=list[Item])
-def list_items(name: Optional[str] = None):
+def list_items(name: str | None = None):
     if name:
         return [item for item in items_db.values() if item.name.startswith(name)]
     return sorted(items_db.values(), key=lambda item: item.name)

@@ -40,7 +40,7 @@ class SyncPrometheusMiddleware(SyncHTTPMiddleware):
 
     metrics: PrometheusMetrics
 
-    def __init__(self, metrics: Optional[PrometheusMetrics] = None) -> None:
+    def __init__(self, metrics: PrometheusMetrics | None = None) -> None:
         self.metrics = metrics or PrometheusMetrics()
 
     def __call__(self, next: SyncMiddleware) -> SyncMiddleware:

@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Any, Optional, Union
+from typing import Any, Union
 
 import pytest
 from pydantic import BaseModel
@@ -45,7 +45,7 @@ class CreateItemIntSize(Request):
 
 
 class ListItem(Request):
-    name: Optional[str] = QueryStringField(None)
+    name: str | None = QueryStringField(None)
 
 
 class GetItem(Request):
@@ -53,8 +53,8 @@ class GetItem(Request):
 
 
 class UpdateItem(GetItem):
-    name: Optional[str] = PostBodyField(None)
-    size: Optional[SizeEnum] = PostBodyField(None)
+    name: str | None = PostBodyField(None)
+    size: SizeEnum | None = PostBodyField(None)
 
 
 DeleteItem = GetItem
