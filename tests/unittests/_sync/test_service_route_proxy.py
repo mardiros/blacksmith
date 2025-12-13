@@ -1,8 +1,7 @@
-from collections.abc import Mapping
-from typing import Any, Literal
+from typing import Any
 
 import pytest
-from pydantic import BaseModel, Field, ValidationError
+from pydantic import BaseModel, Field
 from result import Result
 
 from blacksmith import Request
@@ -23,13 +22,7 @@ from blacksmith.domain.registry import ApiRoutes
 from blacksmith.middleware._sync.auth import SyncHTTPAuthorizationMiddleware
 from blacksmith.middleware._sync.base import SyncHTTPAddHeadersMiddleware
 from blacksmith.service._sync.base import SyncAbstractTransport
-from blacksmith.service._sync.route_proxy import (
-    SyncRouteProxy,
-    build_request,
-    build_timeout,
-    is_instance_with_union,
-    is_union,
-)
+from blacksmith.service._sync.route_proxy import SyncRouteProxy, build_timeout
 from blacksmith.typing import ClientName, Path
 from tests.unittests.dummy_registry import GetParam, GetResponse, PostParam
 
@@ -67,118 +60,6 @@ def test_build_timeout() -> None:
     assert timeout == HTTPTimeout(5.0, 15.0)
     timeout = build_timeout((5.0, 2.0))
     assert timeout == HTTPTimeout(5.0, 2.0)
-
-
-@pytest.mark.parametrize(
-    "params",
-    [
-        pytest.param({"type": int, "expected": False}, id="int"),
-        pytest.param({"type": str, "expected": False}, id="str"),
-        pytest.param({"type": int | str, "expected": True}, id="int | str"),
-    ],
-)
-def test_is_union(params: Mapping[str, Any]):
-    assert is_union(params["type"]) is params["expected"]
-
-
-try:
-
-    @pytest.mark.parametrize(
-        "params",
-        [
-            pytest.param({"type": int | str, "expected": True}, id="int | str"),
-        ],
-    )
-    def test_is_union_py310(params: Mapping[str, Any]):
-        assert is_union(params["type"]) is params["expected"]
-
-except TypeError:
-    ...
-
-
-@pytest.mark.parametrize(
-    "params",
-    [
-        pytest.param({"type": str, "value": "bob", "expected": True}, id="str"),
-        pytest.param({"type": str, "value": 0.42, "expected": False}, id="str / float"),
-        pytest.param(
-            {"type": int | str, "value": "bob", "expected": True},
-            id="int | str / str",
-        ),
-        pytest.param(
-            {"type": int | str, "value": 42, "expected": True},
-            id="int | str / int",
-        ),
-        pytest.param(
-            {"type": int | str, "value": 0.42, "expected": False},
-            id="int | str / float",
-        ),
-    ],
-)
-def test_is_instance_with_union(params: Mapping[str, Any]):
-    resp = is_instance_with_union(params["value"], params["type"])
-    assert resp == params["expected"]
-
-
-class Foo(BaseModel):
-    typ: Literal["foo"]
-
-
-class Bar(BaseModel):
-    typ: Literal["bar"]
-
-
-@pytest.mark.parametrize(
-    "params",
-    [
-        pytest.param(
-            {"type": Foo, "params": {"typ": "foo"}, "expected": Foo(typ="foo")},
-            id="simple",
-        ),
-        pytest.param(
-            {
-                "type": Foo | Bar,
-                "params": {"typ": "foo"},
-                "expected": Foo(typ="foo"),
-            },
-            id="union",
-        ),
-        pytest.param(
-            {
-                "type": Foo | Bar,
-                "params": {"typ": "bar"},
-                "expected": Bar(typ="bar"),
-            },
-            id="union",
-        ),
-    ],
-)
-def test_build_request(params: Mapping[str, Any]):
-    req = build_request(params["type"], params["params"])
-    assert req == params["expected"]
-
-
-@pytest.mark.parametrize(
-    "params",
-    [
-        pytest.param(
-            {"type": Foo, "params": {"typ": "bar"}, "err": "Input should be 'foo'"},
-            id="simple",
-        ),
-        pytest.param(
-            {
-                "type": Foo | Bar,
-                "params": {"typ": "baz"},
-                "err": "Input should be 'bar'",
-            },
-            id="union",
-        ),
-    ],
-)
-def test_build_request_error(params: Mapping[str, Any]):
-    with pytest.raises(ValidationError) as ctx:
-        build_request(params["type"], params["params"])
-    assert str(ctx.value.errors()[0]["msg"]) == params["err"]
 
 
 def test_route_proxy_prepare_middleware(

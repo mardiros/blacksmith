@@ -1,11 +1,9 @@
-from collections.abc import Mapping
 from typing import (
     Any,
     Generic,
     cast,
 )
 
-from pydantic import ValidationError
 from result import Err, Ok, Result
 
 from blacksmith.domain.error import AbstractErrorParser, TError_co
@@ -33,7 +31,10 @@ from blacksmith.domain.registry import ApiRoutes, HttpCollection, HttpResource
 from blacksmith.domain.typing import SyncMiddleware
 from blacksmith.middleware._sync.base import SyncHTTPMiddleware
 from blacksmith.service.http_body_serializer import serialize_request
-from blacksmith.shared_utils.introspection import is_instance_with_union, is_union
+from blacksmith.shared_utils.introspection import (
+    build_pydantic_union,
+    is_instance_with_union,
+)
 from blacksmith.typing import ClientName, HTTPMethod, Path, ResourceName, Url
 
 from .base import SyncAbstractTransport
@@ -49,19 +50,6 @@ def build_timeout(timeout: ClientTimeout) -> HTTPTimeout:
     elif isinstance(timeout, tuple):
         timeout = HTTPTimeout(*timeout)
     return timeout
-
-
-def build_request(typ: type[Any], params: Mapping[str, Any]) -> Request:
-    if is_union(typ):
-        err: Exception | None = None
-        for t in typ.__args__:  # type: ignore
-            try:
-                return build_request(t, params)  # type: ignore
-            except ValidationError as e:
-                err = e
-        if err:
-            raise err
-    return typ(**params)
 
 
 class SyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
@@ -113,7 +101,7 @@ class SyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
         param_schema, return_schema = resource.contract[method]
         build_params: Request
         if isinstance(params, dict):
-            build_params = build_request(param_schema, params)
+            build_params = cast(Request, build_pydantic_union(param_schema, params))
         elif params is None:
             build_params = param_schema()
         elif not is_instance_with_union(params, param_schema):
