@@ -2,6 +2,7 @@ import abc
 from collections.abc import Callable, Iterator, Mapping
 from dataclasses import dataclass
 from functools import partial
+from types import UnionType
 from typing import (
     Any,
     Generic,
@@ -14,6 +15,9 @@ from result import Result
 from result.result import F, U
 
 from blacksmith.domain.error import AbstractErrorParser, TError_co
+from blacksmith.shared_utils.introspection import (
+    build_pydantic_union,
+)
 
 from ...domain.exceptions import HTTPError, NoResponseSchemaException
 from ...typing import ClientName, HttpLocation, HTTPMethod, Json, Path, ResourceName
@@ -63,6 +67,8 @@ class Request(BaseModel):
 
 TResponse = TypeVar("TResponse", bound="Response | None")
 TCollectionResponse = TypeVar("TCollectionResponse", bound="Response | None")
+
+OptionalResponseSchema = None | type[TResponse] | UnionType  # UnionType[TResponse] ?
 
 
 Response = BaseModel
@@ -170,7 +176,7 @@ class ResponseBox(Generic[TResponse, TError_co]):
     def __init__(
         self,
         result: Result[HTTPResponse, HTTPError],
-        response_schema: type[Response] | None,
+        response_schema: OptionalResponseSchema[TResponse],
         method: HTTPMethod,
         path: Path,
         name: ResourceName,
@@ -188,16 +194,18 @@ class ResponseBox(Generic[TResponse, TError_co]):
     def _cast_optional_resp(self, resp: HTTPResponse) -> TResponse | None:
         if self.response_schema is None:
             return None
-        schema_cls = self.response_schema
-        return cast(TResponse, schema_cls(**(resp.json or {})))
+        return cast(
+            TResponse, build_pydantic_union(self.response_schema, (resp.json or {}))
+        )
 
     def _cast_resp(self, resp: HTTPResponse) -> TResponse:
         if self.response_schema is None:
             raise NoResponseSchemaException(
                 self.method, self.path, self.name, self.client_name
             )
-        schema_cls = self.response_schema
-        return cast(TResponse, schema_cls(**(resp.json or {})))
+        return cast(
+            TResponse, build_pydantic_union(self.response_schema, (resp.json or {}))
+        )
 
     @property
     def json(self) -> dict[str, Any] | None:
@@ -375,7 +383,7 @@ class CollectionIterator(Iterator[TResponse]):
     def __init__(
         self,
         response: HTTPResponse,
-        response_schema: type[Response] | None,
+        response_schema: OptionalResponseSchema[Response],
         collection_parser: type[AbstractCollectionParser],
     ) -> None:
         self.pos = 0
@@ -396,7 +404,7 @@ class CollectionIterator(Iterator[TResponse]):
         try:
             resp = self.json_resp[self.pos]
             if self.response_schema:
-                resp = self.response_schema(**resp)
+                resp = build_pydantic_union(self.response_schema, resp)
         except IndexError as exc:
             raise StopIteration() from exc
 

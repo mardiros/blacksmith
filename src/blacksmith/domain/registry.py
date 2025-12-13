@@ -16,11 +16,11 @@ from blacksmith.typing import (
 )
 
 from .exceptions import ConfigurationError, UnregisteredClientException
-from .model import AbstractCollectionParser, Request, Response
+from .model import AbstractCollectionParser, OptionalResponseSchema, Request, Response
 
 TRequest = TypeVar("TRequest", bound=Request)
 
-Schemas = tuple[TRequest, type[Response] | None]
+Schemas = tuple[TRequest, OptionalResponseSchema[Response]]
 Contract = Mapping[HTTPMethod, Schemas[Any]]
 
 

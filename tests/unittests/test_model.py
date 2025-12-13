@@ -1,7 +1,8 @@
-from typing import Any
+from collections.abc import Mapping
+from typing import Any, Literal
 
 import pytest
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from result import Err, Ok, UnwrapError
 
 from blacksmith.domain.error import default_error_parser
@@ -19,10 +20,22 @@ from blacksmith.domain.model import (
 from blacksmith.domain.model.http import HTTPTimeout, parse_header_links
 
 
+class Vanilla(BaseModel):
+    type: Literal["vanilla"]
+    sweetness: int
+    flavour_intensity: int
+
+
+class Banana(BaseModel):
+    type: Literal["banana"]
+    ripeness: int
+    flavour_intensity: int
+
+
 class MyErrorFormat(BaseModel):
-    status_code: int = Field(...)
-    message: str = Field(...)
-    detail: str = Field(...)
+    status_code: int
+    message: str
+    detail: str
 
 
 def error_parser(error: HTTPError) -> MyErrorFormat:
@@ -290,6 +303,42 @@ def test_response_box_no_schema() -> None:
 
     with pytest.raises(NoResponseSchemaException) as ctx:
         assert resp.unwrap()
+
+
+@pytest.mark.parametrize(
+    "json,expected",
+    [
+        pytest.param(
+            {
+                "type": "banana",
+                "ripeness": 2,
+                "flavour_intensity": 5,
+            },
+            Banana(type="banana", ripeness=2, flavour_intensity=5),
+            id="banana",
+        ),
+        pytest.param(
+            {
+                "type": "vanilla",
+                "sweetness": 6,
+                "flavour_intensity": 5,
+            },
+            Vanilla(type="vanilla", sweetness=6, flavour_intensity=5),
+            id="vanilla",
+        ),
+    ],
+)
+def test_response_box_union_schema(json: Mapping[str, Any], expected: Response) -> None:
+    resp: ResponseBox[GetResponse, MyErrorFormat] = ResponseBox(
+        Ok(HTTPResponse(200, {}, json)),
+        Banana | Vanilla,
+        "GET",
+        "/dummies",
+        "Dummy",
+        "api",
+        error_parser=error_parser,
+    )
+    assert resp.as_result() == Ok(expected)
 
 
 def test_collection_iterator() -> None:
