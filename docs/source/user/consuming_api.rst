@@ -59,8 +59,8 @@ See example below:
 
    class PatchDummy(Request):
       name: str = PathInfoField()
-      state: Optional[str] = PostBodyField(None)
-      country: Optional[str] = PostBodyField(None)
+      state: str | None = PostBodyField(None)
+      country: str | None = PostBodyField(None)
 
    blacksmith.register(
       client_name="api",
@@ -91,8 +91,8 @@ See example below:
 
       class PatchDummy(Request):
          name: str = PathInfoField()
-         state: Optional[str] = PostBodyField()
-         country: Optional[str] = PostBodyField(default="FR")
+         state: str | None = PostBodyField()
+         country: str | None = PostBodyField(default="FR")
 
    In that case, the **PATCH** will always sent a default country.
 

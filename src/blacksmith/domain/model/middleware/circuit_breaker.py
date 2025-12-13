@@ -1,14 +1,14 @@
 """Cut the circuit in case a service is down."""
 
 from collections.abc import Iterable
-from typing import Any, Optional
+from typing import Any
 
 from purgatory.typing import Hook
 
 from blacksmith.domain.exceptions import HTTPError
 from blacksmith.domain.model.middleware.prometheus import PrometheusMetrics
 
-Listeners = Optional[Iterable[Hook]]
+Listeners = Iterable[Hook] | None
 
 
 def exclude_httpx_4xx(exc: HTTPError) -> bool:

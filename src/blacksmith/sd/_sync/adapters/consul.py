@@ -133,9 +133,9 @@ class SyncConsulDiscovery(SyncAbstractServiceDiscovery):
         """
         name = self.format_service_name(service, version)
         consul = self.blacksmith_cli("consul")
-        rresp: Result[
-            CollectionIterator[Service], HTTPError
-        ] = consul.services.collection_get(ServiceRequest(name=name))
+        rresp: Result[CollectionIterator[Service], HTTPError] = (
+            consul.services.collection_get(ServiceRequest(name=name))
+        )
         if rresp.is_err():
             raise ConsulApiError(
                 rresp.unwrap_err()

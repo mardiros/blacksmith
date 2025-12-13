@@ -52,9 +52,7 @@ class SyncClient(Generic[TError_co]):
         self.error_parser = error_parser
         self.middlewares = middlewares.copy()
 
-    def add_middleware(
-        self, middleware: SyncHTTPMiddleware
-    ) -> "SyncClient[TError_co]":
+    def add_middleware(self, middleware: SyncHTTPMiddleware) -> "SyncClient[TError_co]":
         self.middlewares.insert(0, middleware)
         return self
 

@@ -1,7 +1,6 @@
 """Cut the circuit in case a service is down."""
 
 from collections.abc import Iterable
-from typing import Optional
 
 from purgatory import AsyncAbstractUnitOfWork, AsyncCircuitBreakerFactory
 from purgatory.typing import TTL, Hook, Threshold
@@ -17,7 +16,7 @@ from blacksmith.typing import ClientName, Path
 
 from .base import AsyncHTTPMiddleware, AsyncMiddleware
 
-Listeners = Optional[Iterable[Hook]]
+Listeners = Iterable[Hook] | None
 
 
 class AsyncCircuitBreakerMiddleware(AsyncHTTPMiddleware):
