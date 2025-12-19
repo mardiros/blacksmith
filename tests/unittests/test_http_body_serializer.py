@@ -209,7 +209,7 @@ def test_serialize_query_string() -> None:
         type: list[str] = QueryStringField()
 
     dummy = Dummy(type=["foo", "bar"])
-    obj = serialize_part(dummy, {"type": ...}, "querystring")
+    obj = serialize_part(dummy, {"type": ...}, "query")
     assert obj == {"type": ["foo", "bar"]}
 
 

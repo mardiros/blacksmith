@@ -23,8 +23,8 @@ from ...typing import ClientName, HttpLocation, HTTPMethod, Json, Path, Resource
 from .http import HTTPResponse, Links
 
 PATH: HttpLocation = "path"
-HEADER: HttpLocation = "headers"
-QUERY: HttpLocation = "querystring"
+HEADER: HttpLocation = "header"
+QUERY: HttpLocation = "query"
 BODY: HttpLocation = "body"
 ATTACHMENT: HttpLocation = "attachment"
 
