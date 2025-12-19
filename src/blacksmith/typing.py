@@ -10,7 +10,7 @@ Service = tuple[str, Version]
 Path = str
 Proxies = dict[str, str]
 
-HttpLocation = Literal["path", "headers", "querystring", "body", "attachment"]
+HttpLocation = Literal["path", "header", "query", "body", "attachment"]
 HTTPMethod = Literal["HEAD", "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
 
 Json = Any
