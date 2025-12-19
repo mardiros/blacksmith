@@ -27,7 +27,15 @@ from blacksmith.domain.model.http import (
     RequestAttachments,
     RequestBody,
 )
-from blacksmith.domain.model.params import Attachment, Request
+from blacksmith.domain.model.params import (
+    ATTACHMENT,
+    BODY,
+    HEADER,
+    PATH,
+    QUERY,
+    Attachment,
+    Request,
+)
 from blacksmith.typing import HttpLocation, HTTPMethod, Json, Url
 
 ENCODERS_BY_TYPE: Mapping[type[Any], Callable[[Any], Any]] = {
@@ -42,11 +50,6 @@ else:
     IntStr = str
 
 
-PATH: HttpLocation = "path"
-HEADER: HttpLocation = "headers"
-QUERY: HttpLocation = "querystring"
-BODY: HttpLocation = "body"
-ATTACHMENT: HttpLocation = "attachment"
 simpletypes = Union[str, int, float, bool]
 
 

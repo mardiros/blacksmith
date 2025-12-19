@@ -17,7 +17,7 @@ from blacksmith import (
 )
 from blacksmith.domain.exceptions import UnregisteredContentTypeException
 from blacksmith.domain.model.http import HTTPRawResponse, HTTPResponse
-from blacksmith.domain.model.params import BODY, AttachmentField
+from blacksmith.domain.model.params import BODY, QUERY, AttachmentField
 from blacksmith.service.http_body_serializer import (
     AbstractHttpBodySerializer,
     JSONEncoder,
@@ -209,7 +209,7 @@ def test_serialize_query_string() -> None:
         type: list[str] = QueryStringField()
 
     dummy = Dummy(type=["foo", "bar"])
-    obj = serialize_part(dummy, {"type": ...}, "querystring")
+    obj = serialize_part(dummy, {"type": ...}, QUERY)
     assert obj == {"type": ["foo", "bar"]}
 
 
