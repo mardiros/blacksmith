@@ -1,3 +1,7 @@
+5.0.1 - Released on 2025-12-19
+------------------------------
+* Internal http location has been updated to get swagger values.
+
 5.0.0 - Released on 2025-12-13
 ------------------------------
 * Drop support of python 3.9.
@@ -16,7 +20,7 @@
 ------------------------------
 * Implement multipart form with attachment.
 * Update the :class:`blacksmith.Response` model which is now
-  an alias of pydantic ``BaseModel``
+  an alias of pydantic ``BaseModel``.
 
 4.0.5 - Released on 2025-01-29
 ------------------------------
