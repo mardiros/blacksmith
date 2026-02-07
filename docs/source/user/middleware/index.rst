@@ -1,7 +1,7 @@
 Middlewares
 ===========
 
-Blacksmith is extensible by adding middleware between the resource 
+Blacksmith is extensible by adding middleware between the resource
 contracts and the real http query.
 
 For example, requests may share a security secret that make not parts
@@ -25,6 +25,7 @@ to add credentials per users.
 
    prometheus_middleware
    circuit_breaker_middleware
+   logging_middleware
    zipkin_middleware
    cache_middleware
    authorization
