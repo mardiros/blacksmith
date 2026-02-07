@@ -3,7 +3,7 @@ OAuth2.0 refresh token middleware.
 """
 
 import logging
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import TYPE_CHECKING, Any, Literal
 from urllib.parse import urlparse
 from uuid import UUID
@@ -56,8 +56,7 @@ class SyncOAuth2RefreshTokenMiddlewareFactory(SyncHTTPMiddleware):
     :param client_id: OAuth2.0 client id.
     :param client_secret: OAuth2.0 client secret.
     :param refresh_token: OAuth2.0 refresh token.
-    :param oauth2authorization_server_origin: OAUth2 authorization server origin.
-    :param oauth2authorization_token_pathinfo: OAUth2 authorization server path.
+    :param token_url: OAUth2 authorization server token url.
     :param transport: Blacksmith transport to use.
     :param timeout: HTTP timeout for the authorization server to retrieve token.
     :param middlewares: List of blacksmith middleware to the token http call.
@@ -141,7 +140,7 @@ class SyncOAuth2RefreshTokenMiddlewareFactory(SyncHTTPMiddleware):
         )
         if rtoken.is_ok():
             token = rtoken.unwrap()
-            self.expires_at = datetime.now(UTC) + timedelta(
+            self.expires_at = datetime.now(timezone.utc) + timedelta(
                 seconds=(token.expires_in - self.token_drift_seconds)
             )
             self.error = None
@@ -154,7 +153,7 @@ class SyncOAuth2RefreshTokenMiddlewareFactory(SyncHTTPMiddleware):
 
     def get_access_token(self) -> SecretStr | None:
         """Return an access token from the refresh_token"""
-        if not self.expires_at or self.expires_at < datetime.now(UTC):
+        if not self.expires_at or self.expires_at < datetime.now(timezone.utc):
             self.get_new_token()
         return self.access_token
 
