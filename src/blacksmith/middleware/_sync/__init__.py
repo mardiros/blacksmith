@@ -3,6 +3,7 @@ from .base import SyncHTTPAddHeadersMiddleware, SyncHTTPMiddleware, SyncMiddlewa
 from .circuit_breaker import SyncCircuitBreakerMiddleware
 from .http_cache import SyncAbstractCache, SyncHTTPCacheMiddleware
 from .logging import SyncLoggingMiddleware
+from .oauth2_token import SyncOAuth2RefreshTokenMiddlewareFactory
 from .prometheus import SyncPrometheusMiddleware
 from .zipkin import SyncZipkinMiddleware
 
@@ -14,6 +15,7 @@ __all__ = [
     "SyncHTTPBearerMiddleware",
     "SyncHTTPCacheMiddleware",
     "SyncHTTPMiddleware",
+    "SyncOAuth2RefreshTokenMiddlewareFactory",
     "SyncMiddleware",
     "SyncLoggingMiddleware",
     "SyncPrometheusMiddleware",

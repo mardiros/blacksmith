@@ -3,6 +3,7 @@ from .base import AsyncHTTPAddHeadersMiddleware, AsyncHTTPMiddleware, AsyncMiddl
 from .circuit_breaker import AsyncCircuitBreakerMiddleware
 from .http_cache import AsyncAbstractCache, AsyncHTTPCacheMiddleware
 from .logging import AsyncLoggingMiddleware
+from .oauth2_token import AsyncOAuth2RefreshTokenMiddlewareFactory
 from .prometheus import AsyncPrometheusMiddleware
 from .zipkin import AsyncZipkinMiddleware
 
@@ -14,6 +15,7 @@ __all__ = [
     "AsyncHTTPBearerMiddleware",
     "AsyncHTTPCacheMiddleware",
     "AsyncHTTPMiddleware",
+    "AsyncOAuth2RefreshTokenMiddlewareFactory",
     "AsyncMiddleware",
     "AsyncLoggingMiddleware",
     "AsyncPrometheusMiddleware",

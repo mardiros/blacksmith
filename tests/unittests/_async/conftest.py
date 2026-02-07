@@ -156,6 +156,21 @@ def broken_middleware() -> AsyncMiddleware:
     return next
 
 
+@pytest.fixture
+def authenticated_bearer_middleware() -> AsyncMiddleware:
+    async def next(
+        req: HTTPRequest,
+        client_name: ClientName,
+        path: Path,
+        timeout: HTTPTimeout,
+    ) -> HTTPResponse:
+        if req.headers.get("Authorization") != "Bearer abc":
+            return HTTPResponse(403, req.headers, json={"detail": "forbidden"})
+        return HTTPResponse(200, req.headers, json=json.loads(str(req.body)))
+
+    return next
+
+
 class AsyncDummyMiddleware(AsyncHTTPAddHeadersMiddleware):
     def __init__(self) -> None:
         super().__init__(headers={"x-dummy": "test"})

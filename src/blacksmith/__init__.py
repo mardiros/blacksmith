@@ -40,6 +40,7 @@ from .middleware._async import (
     AsyncHTTPMiddleware,
     AsyncLoggingMiddleware,
     AsyncMiddleware,
+    AsyncOAuth2RefreshTokenMiddlewareFactory,
     AsyncPrometheusMiddleware,
     AsyncZipkinMiddleware,
 )
@@ -52,6 +53,7 @@ from .middleware._sync import (
     SyncHTTPMiddleware,
     SyncLoggingMiddleware,
     SyncMiddleware,
+    SyncOAuth2RefreshTokenMiddlewareFactory,
     SyncPrometheusMiddleware,
     SyncZipkinMiddleware,
 )
@@ -140,6 +142,9 @@ __all__ = [
     "SyncHTTPAuthorizationMiddleware",
     "AsyncHTTPBearerMiddleware",
     "SyncHTTPBearerMiddleware",
+    # OAuth2
+    "AsyncOAuth2RefreshTokenMiddlewareFactory",
+    "SyncOAuth2RefreshTokenMiddlewareFactory",
     # Advanced Middlewares
     "AsyncCircuitBreakerMiddleware",
     "SyncCircuitBreakerMiddleware",
