@@ -110,13 +110,7 @@ class AsyncOAuth2RefreshTokenMiddlewareFactory(AsyncHTTPMiddleware):
             error_parser=default_error_parser,
         )
 
-    async def get_secrets(self) -> tuple[SecretStr, SecretStr]:
-        """
-        Override this method to get a client secret and refresh token lazy loaded.
-
-        By using the client_id, and a secret storage backend, those secrets
-        can be fetched asynchronously before getting the access token.
-        """
+    async def get_new_token(self) -> None:
         assert self.client_secret is not None
         assert self.refresh_token is not None
         rtoken: ResponseBox[Token, HTTPError] = await self.bmclient.tokens.post(
