@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
 import pytest
 from pydantic import SecretStr
@@ -115,7 +115,7 @@ async def test_refresh_token_renew(
     echo_next = oauth2middleware(authenticated_bearer_middleware)
     res = await echo_next(dummy_http_request, "dummy", "/dummies/{name}", dummy_timeout)
     assert res.json == {"detail": "forbidden"}
-    oauth2middleware.expires_at = datetime.now(UTC)
+    oauth2middleware.expires_at = datetime.now(timezone.utc)
     assert oauth2middleware.bmclient
     oauth2middleware.bmclient.transport = AsyncDummyTransport(
         HTTPResponse(

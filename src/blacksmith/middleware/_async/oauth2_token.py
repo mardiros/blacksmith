@@ -3,7 +3,7 @@ OAuth2.0 refresh token middleware.
 """
 
 import logging
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import TYPE_CHECKING, Any, Literal
 from urllib.parse import urlparse
 from uuid import UUID
@@ -140,7 +140,7 @@ class AsyncOAuth2RefreshTokenMiddlewareFactory(AsyncHTTPMiddleware):
         )
         if rtoken.is_ok():
             token = rtoken.unwrap()
-            self.expires_at = datetime.now(UTC) + timedelta(
+            self.expires_at = datetime.now(timezone.utc) + timedelta(
                 seconds=(token.expires_in - self.token_drift_seconds)
             )
             self.error = None
@@ -153,7 +153,7 @@ class AsyncOAuth2RefreshTokenMiddlewareFactory(AsyncHTTPMiddleware):
 
     async def get_access_token(self) -> SecretStr | None:
         """Return an access token from the refresh_token"""
-        if not self.expires_at or self.expires_at < datetime.now(UTC):
+        if not self.expires_at or self.expires_at < datetime.now(timezone.utc):
             await self.get_new_token()
         return self.access_token
 
