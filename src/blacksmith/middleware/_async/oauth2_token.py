@@ -4,7 +4,8 @@ OAuth2.0 refresh token middleware.
 
 import logging
 from datetime import UTC, datetime, timedelta
-from typing import Literal
+from typing import TYPE_CHECKING, Any, Literal
+from urllib.parse import urlparse
 from uuid import UUID
 
 from pydantic import SecretStr
@@ -24,6 +25,9 @@ from blacksmith.domain.registry import ApiRoutes
 from blacksmith.domain.typing import AsyncMiddleware
 from blacksmith.middleware._async import AsyncHTTPMiddleware
 from blacksmith.service._async.base import AsyncAbstractTransport
+
+if TYPE_CHECKING:
+    from blacksmith.service._async.client import AsyncClient
 from blacksmith.typing import ClientName, Path
 
 log = logging.getLogger(__name__)
@@ -52,8 +56,7 @@ class AsyncOAuth2RefreshTokenMiddlewareFactory(AsyncHTTPMiddleware):
     :param client_id: OAuth2.0 client id.
     :param client_secret: OAuth2.0 client secret.
     :param refresh_token: OAuth2.0 refresh token.
-    :param oauth2authorization_server_origin: OAUth2 authorization server origin.
-    :param oauth2authorization_token_pathinfo: OAUth2 authorization server path.
+    :param token_url: OAUth2 authorization server token url.
     :param transport: Blacksmith transport to use.
     :param timeout: HTTP timeout for the authorization server to retrieve token.
     :param middlewares: List of blacksmith middleware to the token http call.
@@ -73,16 +76,13 @@ class AsyncOAuth2RefreshTokenMiddlewareFactory(AsyncHTTPMiddleware):
         client_id: str | UUID,
         client_secret: SecretStr | None = None,
         refresh_token: SecretStr | None = None,
-        oauth2authorization_server_origin: str,
-        oauth2authorization_token_pathinfo: str = "/token",
+        token_url: str,
         transport: AsyncAbstractTransport,
         timeout: HTTPTimeout | None = None,
         middlewares: list[AsyncHTTPMiddleware] | None = None,
         token_drift_seconds: int = 30,
         raise_oauth2_error: bool = True,
     ) -> None:
-        from blacksmith import AsyncClient  # avoid circular import
-
         self.client_id = client_id
         self.client_secret = client_secret
         self.refresh_token = refresh_token
@@ -91,29 +91,46 @@ class AsyncOAuth2RefreshTokenMiddlewareFactory(AsyncHTTPMiddleware):
         self.token_drift_seconds = token_drift_seconds
         self.raise_oauth2_error = raise_oauth2_error
 
-        self.bmclient = AsyncClient(
-            name="oauth2",
-            endpoint=oauth2authorization_server_origin,
-            resources={
-                "tokens": ApiRoutes(
-                    path=oauth2authorization_token_pathinfo,
-                    contract={"POST": (GetToken, Token)},
-                    collection_path=None,
-                    collection_contract=None,
-                    collection_parser=None,
-                )
-            },
-            transport=transport,
-            timeout=timeout or HTTPTimeout(),
-            collection_parser=CollectionParser,
-            middlewares=middlewares or [],
-            error_parser=default_error_parser,
-        )
+        self.token_url = token_url
+        self.transport = transport
+        self.timeout = timeout
+        self.middlewares = middlewares
+        self.bmclient: Any = None
+
+    def get_client(self) -> "AsyncClient[HTTPError]":
+        if self.bmclient is None:
+            from blacksmith import AsyncClient  # avoid circular import
+
+            assert self.token_url, "token url not initilized."
+            token_url = urlparse(self.token_url)
+            authz_server_url = f"{token_url.scheme}://{token_url.netloc}"
+
+            self.bmclient = AsyncClient(
+                name="oauth2",
+                endpoint=authz_server_url,
+                resources={
+                    "tokens": ApiRoutes(
+                        path=token_url.path,
+                        contract={"POST": (GetToken, Token)},
+                        collection_path=None,
+                        collection_contract=None,
+                        collection_parser=None,
+                    )
+                },
+                transport=self.transport,
+                timeout=self.timeout or HTTPTimeout(),
+                collection_parser=CollectionParser,
+                middlewares=self.middlewares or [],
+                error_parser=default_error_parser,
+            )
+        assert self.bmclient is not None
+        return self.bmclient
 
     async def get_new_token(self) -> None:
         assert self.client_secret is not None
         assert self.refresh_token is not None
-        rtoken: ResponseBox[Token, HTTPError] = await self.bmclient.tokens.post(
+        cli = self.get_client()
+        rtoken: ResponseBox[Token, HTTPError] = await cli.tokens.post(
             GetToken(
                 client_id=self.client_id,
                 client_secret=self.client_secret,

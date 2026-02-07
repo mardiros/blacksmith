@@ -45,7 +45,7 @@ async def test_refresh_token(
         client_id="client",
         client_secret=SecretStr("xxx-xx"),
         refresh_token=SecretStr("fresh"),
-        oauth2authorization_server_origin="https://example.net",
+        token_url="https://example.net/token",
         transport=AsyncDummyTransport(
             HTTPResponse(
                 status_code=200,
@@ -70,7 +70,7 @@ async def test_refresh_token_invalid(
         client_id="client",
         client_secret=SecretStr("xxx-xx"),
         refresh_token=SecretStr("fresh"),
-        oauth2authorization_server_origin="https://example.net",
+        token_url="https://example.net/token",
         transport=AsyncDummyTransport(
             HTTPResponse(
                 status_code=200,
@@ -99,7 +99,7 @@ async def test_refresh_token_renew(
         client_id="client",
         client_secret=SecretStr("xxx-xx"),
         refresh_token=SecretStr("fresh"),
-        oauth2authorization_server_origin="https://example.net",
+        token_url="https://example.net/token",
         transport=AsyncDummyTransport(
             HTTPResponse(
                 status_code=200,
@@ -116,6 +116,7 @@ async def test_refresh_token_renew(
     res = await echo_next(dummy_http_request, "dummy", "/dummies/{name}", dummy_timeout)
     assert res.json == {"detail": "forbidden"}
     oauth2middleware.expires_at = datetime.now(UTC)
+    assert oauth2middleware.bmclient
     oauth2middleware.bmclient.transport = AsyncDummyTransport(
         HTTPResponse(
             status_code=200,
@@ -141,7 +142,7 @@ async def test_no_token_given(
         client_id="client",
         client_secret=SecretStr("xxx-xx"),
         refresh_token=SecretStr("fresh"),
-        oauth2authorization_server_origin="https://example.net",
+        token_url="https://example.net/token",
         transport=AsyncDummyTransport(
             HTTPResponse(
                 status_code=500,
