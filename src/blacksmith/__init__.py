@@ -38,6 +38,7 @@ from .middleware._async import (
     AsyncHTTPBearerMiddleware,
     AsyncHTTPCacheMiddleware,
     AsyncHTTPMiddleware,
+    AsyncLoggingMiddleware,
     AsyncMiddleware,
     AsyncPrometheusMiddleware,
     AsyncZipkinMiddleware,
@@ -49,8 +50,10 @@ from .middleware._sync import (
     SyncHTTPBearerMiddleware,
     SyncHTTPCacheMiddleware,
     SyncHTTPMiddleware,
+    SyncLoggingMiddleware,
     SyncMiddleware,
     SyncPrometheusMiddleware,
+    SyncZipkinMiddleware,
 )
 from .sd._async import (
     AsyncAbstractServiceDiscovery,
@@ -150,8 +153,11 @@ __all__ = [
     "AsyncAbstractCache",
     "AsyncHTTPCacheMiddleware",
     "SyncHTTPCacheMiddleware",
+    "AsyncLoggingMiddleware",
+    "SyncLoggingMiddleware",
     "AbstractTraceContext",
     "AsyncZipkinMiddleware",
+    "SyncZipkinMiddleware",
     # Transport
     "AsyncAbstractTransport",
     "SyncAbstractTransport",

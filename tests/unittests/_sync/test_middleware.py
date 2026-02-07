@@ -1,3 +1,4 @@
+import logging
 from typing import Any, cast
 
 import prometheus_client
@@ -13,7 +14,7 @@ from purgatory.domain.messages.events import (
 from purgatory.domain.model import OpenedState
 from purgatory.service._sync.circuitbreaker import SyncCircuitBreakerFactory
 
-from blacksmith import __version__
+from blacksmith import SyncLoggingMiddleware, __version__
 from blacksmith.domain.exceptions import HTTPError
 from blacksmith.domain.model.http import HTTPRequest, HTTPResponse, HTTPTimeout
 from blacksmith.domain.model.middleware.circuit_breaker import exclude_httpx_4xx
@@ -484,3 +485,201 @@ def test_zipkin_middleware_tag_error(
         "http.status_code": "500",
         "error": "true",
     }
+
+
+@pytest.mark.parametrize(
+    "req,level,expected_logs",
+    [
+        pytest.param(
+            HTTPRequest(
+                method="POST",
+                url_pattern="http://localhost:8000/dummy/{name}",
+                path={"name": 42},
+                querystring={"foo": "bar"},
+                body='{"bandi_manchot": "777"}',
+            ),
+            logging.INFO,
+            [
+                (
+                    "info",
+                    "%s %s - %s %s - %s %.3fs",
+                    (
+                        "dummy",
+                        "http://localhost:8000",
+                        "POST",
+                        "/dummies/42?foo=bar",
+                        "200",
+                    ),
+                ),
+            ],
+            id="info",
+        ),
+        pytest.param(
+            HTTPRequest(
+                method="POST",
+                url_pattern="http://localhost:8000/dummy/{name}",
+                path={"name": 42},
+                querystring={"foo": "bar"},
+                body='{"bandi_manchot": "777"}',
+            ),
+            logging.ERROR,
+            [],
+            id="error",
+        ),
+        pytest.param(
+            HTTPRequest(
+                method="POST",
+                url_pattern="http://localhost:8000/dummy/{name}",
+                path={"name": 42},
+                querystring={"foo": "bar"},
+                body='{"bandi_manchot": "777"}',
+            ),
+            logging.DEBUG,
+            [
+                (
+                    "info",
+                    "%s %s - %s %s - %s %.3fs",
+                    (
+                        "dummy",
+                        "http://localhost:8000",
+                        "POST",
+                        "/dummies/42?foo=bar",
+                        "200",
+                    ),
+                ),
+                ("debug", {"bandi_manchot": "777"}, ()),
+            ],
+            id="debug",
+        ),
+    ],
+)
+def test_logging_middleware_no_errors(
+    echo_middleware: SyncMiddleware,
+    req: HTTPRequest,
+    dummy_timeout: HTTPTimeout,
+    logger: type[logging.Logger],
+    level: int,
+    expected_logs: tuple[str, Any],
+):
+    log = logger("", level=level)
+    middleware = SyncLoggingMiddleware(log)
+    next = middleware(echo_middleware)
+    next(req, "dummy", "/dummies/{name}", dummy_timeout)
+
+    assert log.logs == expected_logs  # type: ignore
+
+
+@pytest.mark.parametrize(
+    "req,level,expected_logs",
+    [
+        pytest.param(
+            HTTPRequest(
+                method="POST",
+                url_pattern="http://localhost:8000/dummy/{name}",
+                path={"name": 42},
+                querystring={"foo": "bar"},
+                body='{"bandi_manchot": "777"}',
+            ),
+            logging.DEBUG,
+            [
+                (
+                    "info",
+                    "%s %s - %s %s - %s %.3fs",
+                    (
+                        "dummy",
+                        "http://localhost:8000",
+                        "POST",
+                        "/dummies/42?foo=bar",
+                        "200",
+                    ),
+                ),
+            ],
+            id="debug, disable-log-response",
+        ),
+    ],
+)
+def test_logging_middleware_log_response_disabled(
+    echo_middleware: SyncMiddleware,
+    req: HTTPRequest,
+    dummy_timeout: HTTPTimeout,
+    logger: type[logging.Logger],
+    level: int,
+    expected_logs: tuple[str, Any],
+):
+    log = logger("", level=level)
+    middleware = SyncLoggingMiddleware(log, log_response=False)
+    next = middleware(echo_middleware)
+    next(req, "dummy", "/dummies/{name}", dummy_timeout)
+
+    assert log.logs == expected_logs  # type: ignore
+
+
+@pytest.mark.parametrize(
+    "req,level,expected_logs",
+    [
+        pytest.param(
+            HTTPRequest(method="GET", url_pattern="http://localhost:8000/"),
+            logging.DEBUG,
+            [
+                (
+                    "info",
+                    "%s %s - %s %s - %s %.3fs",
+                    ("dummy", "http://localhost:8000", "GET", "/", "422"),
+                ),
+                ("error", "Boom", ()),
+                ("error", {"detail": "What are you talking about?"}, ()),
+            ],
+            id="debug",
+        ),
+    ],
+)
+def test_logging_middleware_errors(
+    invalid_middleware: SyncMiddleware,
+    req: HTTPRequest,
+    dummy_timeout: HTTPTimeout,
+    logger: type[logging.Logger],
+    level: int,
+    expected_logs: tuple[str, Any],
+):
+    log = logger("", level=level)
+    middleware = SyncLoggingMiddleware(log)
+    next = middleware(invalid_middleware)
+    with pytest.raises(HTTPError):
+        next(req, "dummy", "/", dummy_timeout)
+
+    assert log.logs == expected_logs  # type: ignore
+
+
+@pytest.mark.parametrize(
+    "req,level,expected_logs",
+    [
+        pytest.param(
+            HTTPRequest(method="GET", url_pattern="http://localhost:8000/"),
+            logging.DEBUG,
+            [
+                (
+                    "info",
+                    "%s %s - %s %s - %s %.3fs",
+                    ("dummy", "http://localhost:8000", "GET", "/", "None"),
+                ),
+                ("error", "Foo instance has no attibutes bar", ()),
+            ],
+            id="debug",
+        ),
+    ],
+)
+def test_logging_middleware_broken(
+    broken_middleware: SyncMiddleware,
+    req: HTTPRequest,
+    dummy_timeout: HTTPTimeout,
+    logger: type[logging.Logger],
+    level: int,
+    expected_logs: tuple[str, Any],
+):
+    log = logger("", level=level)
+    middleware = SyncLoggingMiddleware(log)
+    next = middleware(broken_middleware)
+    with pytest.raises(TypeError):
+        next(req, "dummy", "/", dummy_timeout)
+
+    assert log.logs == expected_logs  # type: ignore
