@@ -29,4 +29,5 @@ to add credentials per users.
    zipkin_middleware
    cache_middleware
    authorization
+   oauth2_token
    generic_middleware

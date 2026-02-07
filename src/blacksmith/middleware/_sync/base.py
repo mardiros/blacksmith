@@ -8,7 +8,7 @@ class SyncHTTPMiddleware:
 
     def initialize(self) -> None:
         """
-        Asynchronous initialization of a middleware.
+        Lazy initialization of a middleware.
 
         For instance, used to initialize connection to storage backend.
         """
