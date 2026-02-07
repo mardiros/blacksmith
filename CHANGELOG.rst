@@ -1,3 +1,9 @@
+5.1.0 - Released on 2026-02-07
+------------------------------
+* Implement a python logigng middleware to log http traffic
+* Implment an oauth2 middleware to fetch access token and consume it,
+  based on OAuth2 refresh token workflow.
+
 5.0.1 - Released on 2025-12-19
 ------------------------------
 * Internal http location has been updated to get swagger values.
