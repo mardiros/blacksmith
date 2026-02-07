@@ -1,8 +1,11 @@
+import json
+import logging
 from collections.abc import Mapping, Sequence
 from datetime import timedelta
 from typing import (
     Any,
     ClassVar,
+    Literal,
 )
 
 import pytest
@@ -71,7 +74,7 @@ def echo_middleware() -> SyncMiddleware:
         path: Path,
         timeout: HTTPTimeout,
     ) -> HTTPResponse:
-        return HTTPResponse(200, req.headers, json=req)
+        return HTTPResponse(200, req.headers, json=json.loads(str(req.body)))
 
     return next
 
@@ -136,6 +139,19 @@ def invalid_middleware() -> SyncMiddleware:
             req,
             HTTPResponse(422, {}, json={"detail": "What are you talking about?"}),
         )
+
+    return next
+
+
+@pytest.fixture
+def broken_middleware() -> SyncMiddleware:
+    def next(
+        req: HTTPRequest,
+        client_name: ClientName,
+        path: Path,
+        timeout: HTTPTimeout,
+    ) -> HTTPResponse:
+        raise TypeError("Foo instance has no attibutes bar")
 
     return next
 
@@ -260,3 +276,31 @@ class Trace(AbstractTraceContext):
 @pytest.fixture
 def trace() -> type[AbstractTraceContext]:
     return Trace
+
+
+class FakeLogger:
+    logs: list[tuple[Literal["debug", "info", "error"], str, Any]]
+
+    def __init__(self, name: str, *, level: int = logging.INFO) -> None:
+        self.level = level
+        self.logs = []
+
+    def isEnabledFor(self, level: int) -> bool:
+        return level >= self.level
+
+    def debug(self, logline: Any, *args: Any) -> None:
+        if self.isEnabledFor(logging.DEBUG):
+            self.logs.append(("debug", logline, args[:-1]))  # drop the time
+
+    def info(self, logline: Any, *args: Any) -> None:
+        if self.isEnabledFor(logging.INFO):
+            self.logs.append(("info", logline, args[:-1]))  # drop the time
+
+    def error(self, logline: Any, *args: Any) -> None:
+        if self.isEnabledFor(logging.ERROR):
+            self.logs.append(("error", logline, args[:-1]))  # drop the time
+
+
+@pytest.fixture
+def logger() -> type[FakeLogger]:
+    return FakeLogger

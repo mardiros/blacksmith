@@ -1,4 +1,4 @@
-"""Trace with zipkin of jaegger."""
+"""Trace with zipkin or jaegger."""
 
 import abc
 from typing import Any
