@@ -61,18 +61,18 @@ class SyncOAuth2RefreshTokenMiddlewareFactory(SyncHTTPMiddleware):
         an expired access token.
     """
 
-    expires_at: datetime | None
-    access_token: SecretStr | None
     client_id: str | UUID
-    client_secret: SecretStr
-    refresh_token: SecretStr
+    client_secret: SecretStr | None
+    refresh_token: SecretStr | None
+    access_token: SecretStr | None
+    expires_at: datetime | None
 
     def __init__(
         self,
         *,
         client_id: str | UUID,
-        client_secret: SecretStr,
-        refresh_token: SecretStr,
+        client_secret: SecretStr | None = None,
+        refresh_token: SecretStr | None = None,
         oauth2authorization_server_origin: str,
         oauth2authorization_token_pathinfo: str = "/token",
         transport: SyncAbstractTransport,
@@ -81,7 +81,7 @@ class SyncOAuth2RefreshTokenMiddlewareFactory(SyncHTTPMiddleware):
         token_drift_seconds: int = 30,
         raise_oauth2_error: bool = True,
     ) -> None:
-        from blacksmith import SyncClient
+        from blacksmith import SyncClient  # avoid circular import
 
         self.client_id = client_id
         self.client_secret = client_secret
@@ -112,6 +112,8 @@ class SyncOAuth2RefreshTokenMiddlewareFactory(SyncHTTPMiddleware):
         )
 
     def get_new_token(self) -> None:
+        assert self.client_secret is not None
+        assert self.refresh_token is not None
         rtoken: ResponseBox[Token, HTTPError] = self.bmclient.tokens.post(
             GetToken(
                 client_id=self.client_id,

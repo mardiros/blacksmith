@@ -61,18 +61,18 @@ class AsyncOAuth2RefreshTokenMiddlewareFactory(AsyncHTTPMiddleware):
         an expired access token.
     """
 
-    expires_at: datetime | None
-    access_token: SecretStr | None
     client_id: str | UUID
-    client_secret: SecretStr
-    refresh_token: SecretStr
+    client_secret: SecretStr | None
+    refresh_token: SecretStr | None
+    access_token: SecretStr | None
+    expires_at: datetime | None
 
     def __init__(
         self,
         *,
         client_id: str | UUID,
-        client_secret: SecretStr,
-        refresh_token: SecretStr,
+        client_secret: SecretStr | None = None,
+        refresh_token: SecretStr | None = None,
         oauth2authorization_server_origin: str,
         oauth2authorization_token_pathinfo: str = "/token",
         transport: AsyncAbstractTransport,
@@ -110,7 +110,15 @@ class AsyncOAuth2RefreshTokenMiddlewareFactory(AsyncHTTPMiddleware):
             error_parser=default_error_parser,
         )
 
-    async def get_new_token(self) -> None:
+    async def get_secrets(self) -> tuple[SecretStr, SecretStr]:
+        """
+        Override this method to get a client secret and refresh token lazy loaded.
+
+        By using the client_id, and a secret storage backend, those secrets
+        can be fetched asynchronously before getting the access token.
+        """
+        assert self.client_secret is not None
+        assert self.refresh_token is not None
         rtoken: ResponseBox[Token, HTTPError] = await self.bmclient.tokens.post(
             GetToken(
                 client_id=self.client_id,
