@@ -15,12 +15,33 @@ else:
 
 
 class PrometheusMetrics:
+    """
+    Handle prometheus metrics.
+
+    This class handle prometheus metrics in a given registry or the default registry.
+    To avoid conflict ( Duplicated timeseries in CollectorRegistry ) this class
+    is a singleton.
+    """
+    _instance = None
+
+    def __new__(
+        cls,
+        buckets: list[float] | None = None,
+        hit_cache_buckets: list[float] | None = None,
+        registry: Registry = None,
+    ) -> "PrometheusMetrics":
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
+
     def __init__(
         self,
         buckets: list[float] | None = None,
         hit_cache_buckets: list[float] | None = None,
         registry: Registry = None,
     ) -> None:
+        if self._instance:
+            return
         from prometheus_client import REGISTRY, Counter, Gauge, Histogram
 
         if registry is None:
