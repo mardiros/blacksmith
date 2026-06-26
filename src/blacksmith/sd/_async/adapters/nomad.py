@@ -29,11 +29,27 @@ class AsyncNomadDiscovery(AsyncAbstractServiceDiscovery):
         self.service_env_fmt = service_env_fmt
         self.unversioned_service_url_fmt = unversioned_service_url_fmt
         self.unversioned_service_env_fmt = unversioned_service_env_fmt
+        # External services discovery
+        self.service_real_addr_fmt: str = "UPSTREAM_REAL_ADDR_{service}_{version}"
+        self.service_real_scheme_fmt: str = "UPSTREAM_REAL_SCHEME_{service}_{version}"
 
     async def get_endpoint(self, service: ServiceName, version: Version = None) -> Url:
         """
         Retrieve endpoint using the given parameters from `endpoints`.
         """
+        real_upstream_addr = os.getenv(
+            self.service_real_addr_fmt.format(service=service, version=version)
+        )
+        if real_upstream_addr:
+            lookup_scheme = self.service_real_scheme_fmt.format(
+                service=service, version=version
+            )
+            real_upstream_scheme = os.getenv(lookup_scheme, 'http')
+            return "{scheme}://{addr}/{version}".format(
+                scheme=real_upstream_scheme,
+                addr=real_upstream_addr,
+                version=version
+            )
         env_fmt = self.service_env_fmt if version else self.unversioned_service_env_fmt
         nomad_upstream_addr = os.getenv(
             env_fmt.format(service=service, version=version)
