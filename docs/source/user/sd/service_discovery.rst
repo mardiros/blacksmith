@@ -79,6 +79,13 @@ When using Consul Connect in a Nomad cluster, upstreams declared in a jobspec
 make available a mTLS connection on a `local_bind_port`. Addresses of these
 services are injected as environment variables during deployment of the job.
 
+For services behind a reverse proxy or with a strict TLS connection it's
+possible to force use of a different value than the Nomad generated one. Define
+`UPSTREAM_REAL_ADDR_<service>[_<version>]` and `UPSTREAM_REAL_SCHEME_<service>[_<version>]`
+environment variables to force these values to be used. Rewrite of /etc/hosts inside
+container permit to solve invalid certificate or virtual host for an endpoint
+routed thru mTLS connection on 127.0.0.1:<local_bind_port>.
+
 Async
 ~~~~~
 
