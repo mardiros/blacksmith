@@ -1,3 +1,4 @@
+import contextlib
 from collections.abc import Mapping
 from typing import Any, cast
 
@@ -13,9 +14,11 @@ from blacksmith.domain.model import (
 )
 from blacksmith.service.http_body_serializer import serialize_response
 from blacksmith.service.ports import SyncClient
-from blacksmith.typing import ClientName, Path
+from blacksmith.typing import ClientName, Path, Proxies
 
 from ..base import SyncAbstractTransport
+
+SyncClientKey = tuple[bool, tuple[tuple[str, str], ...]]
 
 
 def build_headers(req: HTTPRequest) -> Mapping[str, str]:
@@ -33,6 +36,24 @@ class SyncHttpxTransport(SyncAbstractTransport):
 
     """
 
+    _clients: dict[SyncClientKey, SyncClient] = {}  # shared
+    _client_key: SyncClientKey  # for our instance
+
+    def __init__(self, verify_certificate: bool = True, proxies: Proxies | None = None):
+        super().__init__(verify_certificate, proxies)
+
+        if proxies is None:
+            self._client_key = (verify_certificate, ())
+        else:
+            self._client_key = (verify_certificate, tuple(sorted(proxies.items())))
+
+    def _get_client(self) -> SyncClient:
+        if self._client_key not in self._clients:
+            self._clients[self._client_key] = SyncClient(
+                verify=self.verify_certificate, mounts=self.proxies
+            )
+        return self._clients[self._client_key]
+
     def __call__(
         self,
         req: HTTPRequest,
@@ -41,10 +62,9 @@ class SyncHttpxTransport(SyncAbstractTransport):
         timeout: HTTPTimeout,
     ) -> HTTPResponse:
         headers = build_headers(req)
-        with SyncClient(
-            verify=self.verify_certificate,
-            mounts=self.proxies,
-        ) as client:
+
+        client = self._get_client()
+        with contextlib.nullcontext():
             try:
                 kwargs: dict[str, Any] = (
                     {"data": req.body, "files": req.attachments}
