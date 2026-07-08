@@ -1,3 +1,4 @@
+import asyncio
 from collections.abc import Mapping
 from typing import Any, cast
 
@@ -13,9 +14,11 @@ from blacksmith.domain.model import (
 )
 from blacksmith.service.http_body_serializer import serialize_response
 from blacksmith.service.ports import SyncClient
-from blacksmith.typing import ClientName, Path
+from blacksmith.typing import ClientName, Path, Proxies
 
 from ..base import SyncAbstractTransport
+
+ClientKey = tuple[asyncio.AbstractEventLoop | None, bool, tuple[tuple[str, str], ...]]
 
 
 def build_headers(req: HTTPRequest) -> Mapping[str, str]:
@@ -33,6 +36,13 @@ class SyncHttpxTransport(SyncAbstractTransport):
 
     """
 
+    client: SyncClient
+
+    def __init__(self, verify_certificate: bool = True, proxies: Proxies | None = None):
+        super().__init__(verify_certificate, proxies)
+
+        self.client = SyncClient(verify=self.verify_certificate, mounts=self.proxies)
+
     def __call__(
         self,
         req: HTTPRequest,
@@ -41,29 +51,26 @@ class SyncHttpxTransport(SyncAbstractTransport):
         timeout: HTTPTimeout,
     ) -> HTTPResponse:
         headers = build_headers(req)
-        with SyncClient(
-            verify=self.verify_certificate,
-            mounts=self.proxies,
-        ) as client:
-            try:
-                kwargs: dict[str, Any] = (
-                    {"data": req.body, "files": req.attachments}
-                    if req.attachments
-                    else {"content": req.body}
-                )
-                r = client.request(  # type: ignore
-                    req.method,
-                    req.url,
-                    params=req.querystring,
-                    headers=headers,
-                    timeout=HttpxTimeout(timeout.read, connect=timeout.connect),
-                    **kwargs,
-                )
-            except TimeoutException as exc:
-                raise HTTPTimeoutError(
-                    f"{client_name} - {req.method} {path} - "
-                    f"{exc.__class__.__name__} while calling {req.method} {req.url}"
-                ) from exc
+
+        try:
+            kwargs: dict[str, Any] = (
+                {"data": req.body, "files": req.attachments}
+                if req.attachments
+                else {"content": req.body}
+            )
+            r = self.client.request(  # type: ignore
+                req.method,
+                req.url,
+                params=req.querystring,
+                headers=headers,
+                timeout=HttpxTimeout(timeout.read, connect=timeout.connect),
+                **kwargs,
+            )
+        except TimeoutException as exc:
+            raise HTTPTimeoutError(
+                f"{client_name} - {req.method} {path} - "
+                f"{exc.__class__.__name__} while calling {req.method} {req.url}"
+            ) from exc
 
         resp = serialize_response(cast(HTTPRawResponse, r))
         if not r.is_success:
@@ -74,3 +81,6 @@ class SyncHttpxTransport(SyncAbstractTransport):
                 resp,
             )
         return resp
+
+    def close(self) -> None:
+        self.client.close()

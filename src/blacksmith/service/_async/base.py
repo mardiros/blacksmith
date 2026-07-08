@@ -15,3 +15,5 @@ class AsyncAbstractTransport(AsyncMiddleware):
             if proxies
             else None
         )
+
+    async def aclose(self) -> None: ...
