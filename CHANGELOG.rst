@@ -1,6 +1,6 @@
 5.1.0 - Released on 2026-02-07
 ------------------------------
-* Implement a python logigng middleware to log http traffic
+* Implement a python logging middleware to log http traffic.
 * Implment an oauth2 middleware to fetch access token and consume it,
   based on OAuth2 refresh token workflow.
 
