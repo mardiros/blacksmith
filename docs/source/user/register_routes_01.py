@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import StrEnum
 
 from blacksmith import (
     PathInfoField,
@@ -10,7 +10,7 @@ from blacksmith import (
 )
 
 
-class SizeEnum(str, Enum):
+class SizeEnum(StrEnum):
     s = "S"
     m = "M"
     l = "L"

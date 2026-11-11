@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 import pytest
@@ -23,7 +23,7 @@ from blacksmith import (
 from blacksmith.domain.exceptions import NoContractException
 
 
-class SizeEnum(str, Enum):
+class SizeEnum(StrEnum):
     s = "S"
     m = "M"
     l = "L"
