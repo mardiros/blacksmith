@@ -1,5 +1,5 @@
 from collections.abc import Iterable
-from enum import Enum
+from enum import StrEnum
 from multiprocessing import Process
 from typing import Annotated
 
@@ -14,7 +14,7 @@ from starlette.responses import Response
 app = FastAPI()
 
 
-class SizeEnum(str, Enum):
+class SizeEnum(StrEnum):
     s = "S"
     m = "M"
     l = "L"

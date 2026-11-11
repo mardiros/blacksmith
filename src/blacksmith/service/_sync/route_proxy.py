@@ -166,7 +166,7 @@ class SyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
     def _yield_collection_request(
         self,
         method: HTTPMethod,
-        params: Request | None | dict[Any, Any],
+        params: Request | dict[Any, Any] | None,
         timeout: HTTPTimeout,
         collection: HttpCollection,
     ) -> Result[CollectionIterator[TCollectionResponse], TError_co]:
@@ -214,7 +214,7 @@ class SyncRouteProxy(Generic[TCollectionResponse, TResponse, TError_co]):
 
     def collection_get(
         self,
-        params: Request | None | dict[Any, Any] = None,
+        params: Request | dict[Any, Any] | None = None,
         timeout: ClientTimeout | None = None,
     ) -> Result[CollectionIterator[TCollectionResponse], TError_co]:
         """
