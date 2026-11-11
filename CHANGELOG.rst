@@ -1,3 +1,8 @@
+5.2.0 - Released on 2026-11-11
+------------------------------
+* Add support of python 3.15.
+* Drop support of python 3.10.
+
 5.1.0 - Released on 2026-02-07
 ------------------------------
 * Implement a python logging middleware to log http traffic.
