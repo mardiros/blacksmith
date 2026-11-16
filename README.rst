@@ -18,7 +18,7 @@ Blacksmith is a library to build a solid microservices architecture based on RES
 
 Todays, developers have lots of choices to create microservices,
 plenty of framework are available, but when it comes to consume them,
-there is a lack of clients.
+there is a lack of API clients, not HTTP clients.
 
 Consuming an API is not just about doing HTTP requests, it has to be designed
 for failure, monitoring, and service discovery with an elegant abstraction.
@@ -29,7 +29,7 @@ and for ops to monitor api calls also on the client side.
 What is Blacksmith
 ------------------
 
-Blacksmith is a declarative tool for consuming REST Api.
+Blacksmith is a declarative tool for consuming REST APIs.
 
 In a REST API, resources are declared under HTTP routes, and every http verb
 has its own definition.
