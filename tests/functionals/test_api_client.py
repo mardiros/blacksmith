@@ -231,20 +231,25 @@ async def test_crud(dummy_api_endpoint: str):
         == "Unregistered route 'PUT' in resource 'item' in client 'api'"
     )
 
+    await api.transport.aclose()
+
 
 async def test_attachment(dummy_api_endpoint: str):
     sd = AsyncStaticDiscovery({("api", None): dummy_api_endpoint})
     cli: AsyncClientFactory[HTTPError] = AsyncClientFactory(sd)
     api = await cli("api")
+
     resp = await api.upload.post(
         UploadRequest(
             foobar="FooBar", attachmt=Attachment(filename="bar.xml", content=b"<ok/>")
         )
     )
+
     assert resp.is_ok()
     assert resp.unwrap() == UploadedFile(
         foobar="FooBar", filename="bar.xml", content="<ok/>"
     )
+    await api.transport.aclose()
 
 
 async def test_attachment_json(dummy_api_endpoint: str):
@@ -261,3 +266,4 @@ async def test_attachment_json(dummy_api_endpoint: str):
     assert resp.unwrap() == UploadedFile(
         foobar='{"name": "foo", "value": 42}', filename="bar.xml", content="<ok/>"
     )
+    await api.transport.aclose()

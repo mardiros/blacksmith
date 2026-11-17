@@ -127,7 +127,7 @@ def get_value(
     | list[simpletypes],
     dump_complex_to_json: bool,
 ) -> simpletypes:
-    if dump_complex_to_json and isinstance(v, (dict, list)):
+    if dump_complex_to_json and isinstance(v, dict | list):
         return json.dumps(v)
     if hasattr(v, "get_secret_value"):
         return v.get_secret_value()  # type: ignore

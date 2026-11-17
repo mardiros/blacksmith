@@ -15,3 +15,5 @@ class SyncAbstractTransport(SyncMiddleware):
             if proxies
             else None
         )
+
+    def close(self) -> None: ...

@@ -41,6 +41,28 @@ def test_query_http(patch: Any) -> None:
     assert resp.json == dummy_json
 
 
+@mock.patch(
+    "httpx._client.Client.request",
+    return_value=dummy_response,
+)
+def test_query_http_with_proxy(patch: Any) -> None:
+    # Test that using a proxy will set the proper cache key (also, coverage)
+    transport = SyncHttpxTransport(proxies={"http://": "http://proxy.mock"})
+    resp = transport(
+        HTTPRequest(method="GET", url_pattern="/"),
+        "cli",
+        "/",
+        HTTPTimeout(),
+    )
+
+    assert resp.status_code == 200
+    assert dict(resp.headers) == {
+        "content-length": "16",
+        "content-type": "application/json",
+    }
+    assert resp.json == dummy_json
+
+
 def test_build_headers_default() -> None:
     req = HTTPRequest(method="GET", url_pattern="/", headers={}, body="{}")
     assert build_headers(req) == {"Content-Type": "application/json"}
