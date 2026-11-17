@@ -6,20 +6,18 @@ This driver implement a client side service discovery.
 
 import random
 from collections.abc import Callable
-from typing import Any
 
 from pydantic.fields import Field
-from result import Result
 
 from blacksmith.domain.exceptions import HTTPError, UnregisteredServiceException
 from blacksmith.domain.model import PathInfoField, Request, Response
-from blacksmith.domain.model.params import CollectionIterator
 from blacksmith.domain.registry import Registry
 from blacksmith.middleware._async.auth import AsyncHTTPBearerMiddleware
 from blacksmith.sd._async.adapters.static import AsyncStaticDiscovery
-from blacksmith.sd._async.base import AsyncAbstractServiceDiscovery, Url
-from blacksmith.service._async.client import AsyncClientFactory
-from blacksmith.typing import ServiceName, Version
+from blacksmith.sd._async.base import AsyncAbstractServiceDiscovery
+from blacksmith.service._async.client import AsyncClient, AsyncClientFactory
+from blacksmith.service._async.route_proxy import AsyncRouteProxy
+from blacksmith.typing import ServiceName, Url, Version
 
 
 class ConsulApiError(HTTPError):
@@ -62,9 +60,16 @@ _registry.register(
 )
 
 
-def blacksmith_cli(endpoint: Url, consul_token: str) -> AsyncClientFactory[HTTPError]:
+class ConsulAPI(AsyncClient[HTTPError]):
+    services: AsyncRouteProxy[Service, None, HTTPError]
+
+
+ConsulClientFactory = AsyncClientFactory[ConsulAPI]
+
+
+def blacksmith_cli(endpoint: Url, consul_token: str) -> ConsulClientFactory:
     sd = AsyncStaticDiscovery({("consul", "v1"): endpoint})
-    fact: AsyncClientFactory[HTTPError] = AsyncClientFactory(sd, registry=_registry)
+    fact = ConsulClientFactory(sd, registry=_registry)
     if consul_token:
         fact.add_middleware(AsyncHTTPBearerMiddleware(consul_token))
     return fact
@@ -97,7 +102,7 @@ class AsyncConsulDiscovery(AsyncAbstractServiceDiscovery):
         unversioned_service_name_fmt: str = "{service}",
         unversioned_service_url_fmt: str = "http://{address}:{port}",
         consul_token: str = "",
-        _client_factory: Callable[[Url, str], AsyncClientFactory[Any]] = blacksmith_cli,
+        _client_factory: Callable[[Url, str], ConsulClientFactory] = blacksmith_cli,
     ) -> None:
         self.blacksmith_cli = _client_factory(addr, consul_token)
         self.service_name_fmt = service_name_fmt
@@ -133,15 +138,13 @@ class AsyncConsulDiscovery(AsyncAbstractServiceDiscovery):
         """
         name = self.format_service_name(service, version)
         consul = await self.blacksmith_cli("consul")
-        rresp: Result[
-            CollectionIterator[Service], HTTPError
-        ] = await consul.services.collection_get(ServiceRequest(name=name))
+        rresp = await consul.services.collection_get(ServiceRequest(name=name))
         if rresp.is_err():
             raise ConsulApiError(
                 rresp.unwrap_err()
             )  # rewrite the class to avoid confusion
         else:
-            resp: list[Service] = list(rresp.unwrap())
+            resp = list(rresp.unwrap())
             if not resp:
                 raise UnregisteredServiceException(service, version)
             return random.choice(resp)

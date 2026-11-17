@@ -190,7 +190,7 @@ def consul_sd_with_body(body: dict[str, Any]) -> AsyncConsulDiscovery:
     class FakeConsulTransportNoServiceAddr(FakeConsulTransport):
         _body: ClassVar[Sequence[Mapping[str, str | int]]] = [body]
 
-    def cli(url: str, tok: str) -> AsyncClientFactory[HTTPError]:
+    def cli(url: str, tok: str) -> AsyncClientFactory[Any]:
         return AsyncClientFactory(
             sd=AsyncStaticDiscovery({("consul", "v1"): url}),
             registry=_registry,
@@ -202,7 +202,7 @@ def consul_sd_with_body(body: dict[str, Any]) -> AsyncConsulDiscovery:
 
 @pytest.fixture
 def consul_sd() -> AsyncConsulDiscovery:
-    def cli(url: str, tok: str) -> AsyncClientFactory[HTTPError]:
+    def cli(url: str, tok: str) -> AsyncClientFactory[Any]:
         return AsyncClientFactory(
             sd=AsyncStaticDiscovery({("consul", "v1"): url}),
             registry=_registry,

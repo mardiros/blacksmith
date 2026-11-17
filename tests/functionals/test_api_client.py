@@ -1,23 +1,21 @@
 from enum import StrEnum
-from typing import Any
 
 import pytest
 from pydantic import BaseModel
-from result import Result
 
 from blacksmith import (
+    AsyncClient,
     AsyncClientFactory,
+    AsyncRouteProxy,
     AsyncStaticDiscovery,
     Attachment,
     AttachmentField,
-    CollectionIterator,
     HTTPError,
     PathInfoField,
     PostBodyField,
     QueryStringField,
     Request,
     Response,
-    ResponseBox,
     register,
 )
 from blacksmith.domain.exceptions import NoContractException
@@ -123,12 +121,21 @@ register(
 )
 
 
+class APIClient(AsyncClient[HTTPError]):
+    item: AsyncRouteProxy[Item, Item, HTTPError]
+    api: AsyncRouteProxy[None, UploadedFile, HTTPError]
+    upload_complex: AsyncRouteProxy[None, UploadedFile, HTTPError]
+
+
+ClientFactory = AsyncClientFactory[APIClient]
+
+
 async def test_crud(dummy_api_endpoint: str):
     sd = AsyncStaticDiscovery({("api", None): dummy_api_endpoint})
-    cli: AsyncClientFactory[HTTPError] = AsyncClientFactory(sd)
+    cli = ClientFactory(sd)
     api = await cli("api")
 
-    items: Result[CollectionIterator[Any], HTTPError] = await api.item.collection_get()
+    items = await api.item.collection_get()
     assert items.is_ok()
     llitems = list(items.unwrap())
     assert llitems == []
@@ -178,7 +185,7 @@ async def test_crud(dummy_api_endpoint: str):
     ]
 
     # Test get
-    item: ResponseBox[Item, Any] = await api.item.get(GetItem(item_name="zdummy"))
+    item = await api.item.get(GetItem(item_name="zdummy"))
     assert item.is_ok()
     assert item.unwrap() == Item(name="zdummy", size=SizeEnum.l)
 
@@ -234,7 +241,7 @@ async def test_crud(dummy_api_endpoint: str):
 
 async def test_attachment(dummy_api_endpoint: str):
     sd = AsyncStaticDiscovery({("api", None): dummy_api_endpoint})
-    cli: AsyncClientFactory[HTTPError] = AsyncClientFactory(sd)
+    cli = ClientFactory(sd)
     api = await cli("api")
     resp = await api.upload.post(
         UploadRequest(
@@ -249,7 +256,7 @@ async def test_attachment(dummy_api_endpoint: str):
 
 async def test_attachment_json(dummy_api_endpoint: str):
     sd = AsyncStaticDiscovery({("api", None): dummy_api_endpoint})
-    cli: AsyncClientFactory[HTTPError] = AsyncClientFactory(sd)
+    cli = ClientFactory(sd)
     api = await cli("api")
     resp = await api.upload_complex.post(
         UploadComplexRequest(

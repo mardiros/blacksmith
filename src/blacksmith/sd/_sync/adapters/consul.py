@@ -6,20 +6,18 @@ This driver implement a client side service discovery.
 
 import random
 from collections.abc import Callable
-from typing import Any
 
 from pydantic.fields import Field
-from result import Result
 
 from blacksmith.domain.exceptions import HTTPError, UnregisteredServiceException
 from blacksmith.domain.model import PathInfoField, Request, Response
-from blacksmith.domain.model.params import CollectionIterator
 from blacksmith.domain.registry import Registry
 from blacksmith.middleware._sync.auth import SyncHTTPBearerMiddleware
 from blacksmith.sd._sync.adapters.static import SyncStaticDiscovery
-from blacksmith.sd._sync.base import SyncAbstractServiceDiscovery, Url
-from blacksmith.service._sync.client import SyncClientFactory
-from blacksmith.typing import ServiceName, Version
+from blacksmith.sd._sync.base import SyncAbstractServiceDiscovery
+from blacksmith.service._sync.client import SyncClient, SyncClientFactory
+from blacksmith.service._sync.route_proxy import SyncRouteProxy
+from blacksmith.typing import ServiceName, Url, Version
 
 
 class ConsulApiError(HTTPError):
@@ -62,9 +60,16 @@ _registry.register(
 )
 
 
-def blacksmith_cli(endpoint: Url, consul_token: str) -> SyncClientFactory[HTTPError]:
+class ConsulAPI(SyncClient[HTTPError]):
+    services: SyncRouteProxy[Service, None, HTTPError]
+
+
+ConsulClientFactory = SyncClientFactory[ConsulAPI]
+
+
+def blacksmith_cli(endpoint: Url, consul_token: str) -> ConsulClientFactory:
     sd = SyncStaticDiscovery({("consul", "v1"): endpoint})
-    fact: SyncClientFactory[HTTPError] = SyncClientFactory(sd, registry=_registry)
+    fact = ConsulClientFactory(sd, registry=_registry)
     if consul_token:
         fact.add_middleware(SyncHTTPBearerMiddleware(consul_token))
     return fact
@@ -97,7 +102,7 @@ class SyncConsulDiscovery(SyncAbstractServiceDiscovery):
         unversioned_service_name_fmt: str = "{service}",
         unversioned_service_url_fmt: str = "http://{address}:{port}",
         consul_token: str = "",
-        _client_factory: Callable[[Url, str], SyncClientFactory[Any]] = blacksmith_cli,
+        _client_factory: Callable[[Url, str], ConsulClientFactory] = blacksmith_cli,
     ) -> None:
         self.blacksmith_cli = _client_factory(addr, consul_token)
         self.service_name_fmt = service_name_fmt
@@ -133,15 +138,13 @@ class SyncConsulDiscovery(SyncAbstractServiceDiscovery):
         """
         name = self.format_service_name(service, version)
         consul = self.blacksmith_cli("consul")
-        rresp: Result[CollectionIterator[Service], HTTPError] = (
-            consul.services.collection_get(ServiceRequest(name=name))
-        )
+        rresp = consul.services.collection_get(ServiceRequest(name=name))
         if rresp.is_err():
             raise ConsulApiError(
                 rresp.unwrap_err()
             )  # rewrite the class to avoid confusion
         else:
-            resp: list[Service] = list(rresp.unwrap())
+            resp = list(rresp.unwrap())
             if not resp:
                 raise UnregisteredServiceException(service, version)
             return random.choice(resp)

@@ -1,4 +1,4 @@
-from typing import Any, Generic
+from typing import Any, Generic, TypeVar, cast
 
 from blacksmith.domain.error import AbstractErrorParser, TError_co, default_error_parser
 from blacksmith.domain.exceptions import UnregisteredResourceException
@@ -80,7 +80,10 @@ class AsyncClient(Generic[TError_co]):
             raise UnregisteredResourceException(name, self.name) from exc
 
 
-class AsyncClientFactory(Generic[TError_co]):
+TClient = TypeVar("TClient", bound=AsyncClient[Any])
+
+
+class AsyncClientFactory(Generic[TClient]):
     """
     Client creator, for the given configuration.
 
@@ -102,7 +105,7 @@ class AsyncClientFactory(Generic[TError_co]):
     timeout: HTTPTimeout
     collection_parser: type[AbstractCollectionParser]
     middlewares: list[AsyncHTTPMiddleware]
-    error_parser: AbstractErrorParser[TError_co]
+    error_parser: AbstractErrorParser[Any]
 
     def __init__(
         self,
@@ -113,7 +116,7 @@ class AsyncClientFactory(Generic[TError_co]):
         proxies: Proxies | None = None,
         verify_certificate: bool = False,
         collection_parser: type[AbstractCollectionParser] = CollectionParser,
-        error_parser: AbstractErrorParser[TError_co] | None = None,
+        error_parser: AbstractErrorParser[Any] | None = None,
     ) -> None:
         self.sd = sd
         self.registry = registry
@@ -130,7 +133,7 @@ class AsyncClientFactory(Generic[TError_co]):
 
     def add_middleware(
         self, middleware: AsyncHTTPMiddleware
-    ) -> "AsyncClientFactory[TError_co]":
+    ) -> "AsyncClientFactory[TClient]":
         """
         Add a middleware to the client factory and return the client for chaining.
 
@@ -144,16 +147,19 @@ class AsyncClientFactory(Generic[TError_co]):
         for middleware in self.middlewares:
             await middleware.initialize()
 
-    async def __call__(self, client_name: ClientName) -> AsyncClient[TError_co]:
+    async def __call__(self, client_name: ClientName) -> TClient:
         srv, resources = self.registry.get_service(client_name)
         endpoint = await self.sd.get_endpoint(srv[0], srv[1])
-        return AsyncClient(
-            client_name,
-            endpoint,
-            resources,
-            self.transport,
-            self.timeout,
-            self.collection_parser,
-            self.middlewares,
-            self.error_parser,
+        return cast(
+            TClient,
+            AsyncClient[Any](
+                client_name,
+                endpoint,
+                resources,
+                self.transport,
+                self.timeout,
+                self.collection_parser,
+                self.middlewares,
+                self.error_parser,
+            ),
         )

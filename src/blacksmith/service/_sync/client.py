@@ -1,4 +1,4 @@
-from typing import Any, Generic
+from typing import Any, Generic, TypeVar, cast
 
 from blacksmith.domain.error import AbstractErrorParser, TError_co, default_error_parser
 from blacksmith.domain.exceptions import UnregisteredResourceException
@@ -78,7 +78,10 @@ class SyncClient(Generic[TError_co]):
             raise UnregisteredResourceException(name, self.name) from exc
 
 
-class SyncClientFactory(Generic[TError_co]):
+TClient = TypeVar("TClient", bound=SyncClient[Any])
+
+
+class SyncClientFactory(Generic[TClient]):
     """
     Client creator, for the given configuration.
 
@@ -100,7 +103,7 @@ class SyncClientFactory(Generic[TError_co]):
     timeout: HTTPTimeout
     collection_parser: type[AbstractCollectionParser]
     middlewares: list[SyncHTTPMiddleware]
-    error_parser: AbstractErrorParser[TError_co]
+    error_parser: AbstractErrorParser[Any]
 
     def __init__(
         self,
@@ -111,7 +114,7 @@ class SyncClientFactory(Generic[TError_co]):
         proxies: Proxies | None = None,
         verify_certificate: bool = False,
         collection_parser: type[AbstractCollectionParser] = CollectionParser,
-        error_parser: AbstractErrorParser[TError_co] | None = None,
+        error_parser: AbstractErrorParser[Any] | None = None,
     ) -> None:
         self.sd = sd
         self.registry = registry
@@ -128,7 +131,7 @@ class SyncClientFactory(Generic[TError_co]):
 
     def add_middleware(
         self, middleware: SyncHTTPMiddleware
-    ) -> "SyncClientFactory[TError_co]":
+    ) -> "SyncClientFactory[TClient]":
         """
         Add a middleware to the client factory and return the client for chaining.
 
@@ -142,16 +145,19 @@ class SyncClientFactory(Generic[TError_co]):
         for middleware in self.middlewares:
             middleware.initialize()
 
-    def __call__(self, client_name: ClientName) -> SyncClient[TError_co]:
+    def __call__(self, client_name: ClientName) -> TClient:
         srv, resources = self.registry.get_service(client_name)
         endpoint = self.sd.get_endpoint(srv[0], srv[1])
-        return SyncClient(
-            client_name,
-            endpoint,
-            resources,
-            self.transport,
-            self.timeout,
-            self.collection_parser,
-            self.middlewares,
-            self.error_parser,
+        return cast(
+            TClient,
+            SyncClient[Any](
+                client_name,
+                endpoint,
+                resources,
+                self.transport,
+                self.timeout,
+                self.collection_parser,
+                self.middlewares,
+                self.error_parser,
+            ),
         )
