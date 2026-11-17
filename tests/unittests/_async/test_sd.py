@@ -148,6 +148,35 @@ async def test_nomad_resolve_dummy_nover(
     assert endpoint == "http://127.0.0.1:8000"
 
 
+async def test_nomad_resolve_real_upstream_dummy(
+    nomad_sd: AsyncNomadDiscovery, monkeypatch: Any
+):
+    monkeypatch.setenv("UPSTREAM_REAL_ADDR_dummy_v1", "example.com")
+    monkeypatch.setenv("NOMAD_UPSTREAM_ADDR_dummy_v1", "127.0.0.1:8000")
+    endpoint: str = await nomad_sd.get_endpoint("dummy", "v1")
+    assert endpoint == "http://example.com/v1"
+
+
+async def test_nomad_resolve_real_upstream_with_scheme(
+    nomad_sd: AsyncNomadDiscovery, monkeypatch: Any
+):
+    monkeypatch.setenv("UPSTREAM_REAL_ADDR_dummy_v1", "example.com:4443")
+    monkeypatch.setenv("UPSTREAM_REAL_SCHEME_dummy_v1", "https")
+    monkeypatch.setenv("NOMAD_UPSTREAM_ADDR_dummy_v1", "127.0.0.1:8000")
+    endpoint: str = await nomad_sd.get_endpoint("dummy", "v1")
+    assert endpoint == "https://example.com:4443/v1"
+
+
+async def test_nomad_resolve_real_upstream_with_scheme_nover(
+    nomad_sd: AsyncNomadDiscovery, monkeypatch: Any
+):
+    monkeypatch.setenv("UPSTREAM_REAL_ADDR_dummy", "example.com:4443")
+    monkeypatch.setenv("UPSTREAM_REAL_SCHEME_dummy", "https")
+    monkeypatch.setenv("NOMAD_UPSTREAM_ADDR_dummy", "127.0.0.1:8000")
+    endpoint: str = await nomad_sd.get_endpoint("dummy")
+    assert endpoint == "https://example.com:4443"
+
+
 async def test_nomad_resolve_unregistered(nomad_sd: AsyncNomadDiscovery):
     with pytest.raises(UnregisteredServiceException) as ctx:
         await nomad_sd.get_endpoint("dummy", "v2")
