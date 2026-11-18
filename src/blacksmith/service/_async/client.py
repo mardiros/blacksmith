@@ -1,4 +1,4 @@
-from typing import Any, Generic, TypeVar, cast
+from typing import Any, Generic, Protocol, TypeVar, cast
 
 from blacksmith.domain.error import AbstractErrorParser, TError_co, default_error_parser
 from blacksmith.domain.exceptions import UnregisteredResourceException
@@ -15,6 +15,13 @@ from .base import AsyncAbstractTransport
 from .route_proxy import AsyncRouteProxy, ClientTimeout, build_timeout
 
 default_timeout = HTTPTimeout()
+
+
+class AsyncClientProtocol(Protocol[TError_co]):
+    """Used to define the client interface."""
+
+
+TAsyncClient = TypeVar("TAsyncClient", bound=AsyncClientProtocol[Any])
 
 
 class AsyncClient(Generic[TError_co]):
@@ -80,10 +87,7 @@ class AsyncClient(Generic[TError_co]):
             raise UnregisteredResourceException(name, self.name) from exc
 
 
-TClient = TypeVar("TClient", bound=AsyncClient[Any])
-
-
-class AsyncClientFactory(Generic[TClient]):
+class AsyncClientFactory(Generic[TAsyncClient]):
     """
     Client creator, for the given configuration.
 
@@ -133,7 +137,7 @@ class AsyncClientFactory(Generic[TClient]):
 
     def add_middleware(
         self, middleware: AsyncHTTPMiddleware
-    ) -> "AsyncClientFactory[TClient]":
+    ) -> "AsyncClientFactory[TAsyncClient]":
         """
         Add a middleware to the client factory and return the client for chaining.
 
@@ -147,11 +151,11 @@ class AsyncClientFactory(Generic[TClient]):
         for middleware in self.middlewares:
             await middleware.initialize()
 
-    async def __call__(self, client_name: ClientName) -> TClient:
+    async def __call__(self, client_name: ClientName) -> TAsyncClient:
         srv, resources = self.registry.get_service(client_name)
         endpoint = await self.sd.get_endpoint(srv[0], srv[1])
         return cast(
-            TClient,
+            TAsyncClient,
             AsyncClient[Any](
                 client_name,
                 endpoint,

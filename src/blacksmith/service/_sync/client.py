@@ -1,4 +1,4 @@
-from typing import Any, Generic, TypeVar, cast
+from typing import Any, Generic, Protocol, TypeVar, cast
 
 from blacksmith.domain.error import AbstractErrorParser, TError_co, default_error_parser
 from blacksmith.domain.exceptions import UnregisteredResourceException
@@ -15,6 +15,13 @@ from .base import SyncAbstractTransport
 from .route_proxy import ClientTimeout, SyncRouteProxy, build_timeout
 
 default_timeout = HTTPTimeout()
+
+
+class SyncClientProtocol(Protocol[TError_co]):
+    """Used to define the client interface."""
+
+
+TSyncClient = TypeVar("TSyncClient", bound=SyncClientProtocol[Any])
 
 
 class SyncClient(Generic[TError_co]):
@@ -78,10 +85,7 @@ class SyncClient(Generic[TError_co]):
             raise UnregisteredResourceException(name, self.name) from exc
 
 
-TClient = TypeVar("TClient", bound=SyncClient[Any])
-
-
-class SyncClientFactory(Generic[TClient]):
+class SyncClientFactory(Generic[TSyncClient]):
     """
     Client creator, for the given configuration.
 
@@ -131,7 +135,7 @@ class SyncClientFactory(Generic[TClient]):
 
     def add_middleware(
         self, middleware: SyncHTTPMiddleware
-    ) -> "SyncClientFactory[TClient]":
+    ) -> "SyncClientFactory[TSyncClient]":
         """
         Add a middleware to the client factory and return the client for chaining.
 
@@ -145,11 +149,11 @@ class SyncClientFactory(Generic[TClient]):
         for middleware in self.middlewares:
             middleware.initialize()
 
-    def __call__(self, client_name: ClientName) -> TClient:
+    def __call__(self, client_name: ClientName) -> TSyncClient:
         srv, resources = self.registry.get_service(client_name)
         endpoint = self.sd.get_endpoint(srv[0], srv[1])
         return cast(
-            TClient,
+            TSyncClient,
             SyncClient[Any](
                 client_name,
                 endpoint,

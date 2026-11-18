@@ -15,7 +15,10 @@ from blacksmith.domain.registry import Registry
 from blacksmith.middleware._async.auth import AsyncHTTPBearerMiddleware
 from blacksmith.sd._async.adapters.static import AsyncStaticDiscovery
 from blacksmith.sd._async.base import AsyncAbstractServiceDiscovery
-from blacksmith.service._async.client import AsyncClient, AsyncClientFactory
+from blacksmith.service._async.client import (
+    AsyncClientFactory,
+    AsyncClientProtocol,
+)
 from blacksmith.service._async.route_proxy import AsyncRouteProxy
 from blacksmith.typing import ServiceName, Url, Version
 
@@ -60,7 +63,7 @@ _registry.register(
 )
 
 
-class ConsulAPI(AsyncClient[HTTPError]):
+class ConsulAPI(AsyncClientProtocol[HTTPError]):
     services: AsyncRouteProxy[Service, None, HTTPError]
 
 

@@ -123,7 +123,7 @@ register(
 
 class APIClient(AsyncClient[HTTPError]):
     item: AsyncRouteProxy[Item, Item, HTTPError]
-    api: AsyncRouteProxy[None, UploadedFile, HTTPError]
+    upload: AsyncRouteProxy[None, UploadedFile, HTTPError]
     upload_complex: AsyncRouteProxy[None, UploadedFile, HTTPError]
 
 

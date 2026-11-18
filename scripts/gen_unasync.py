@@ -19,6 +19,8 @@ for path in DIRECTORIES:
                 path.replace("_async", "_sync"),
                 additional_replacements={
                     "_async": "_sync",
+                    "TAsyncClient": "TSyncClient",
+                    "AsyncClientFactory[TAsyncClient]": "SyncClientFactory[TSyncClient]",
                     "asyncio": "client",  # replace redis.asyncio -> redis.client
                     "AsyncHTTPTransport": "HTTPTransport",
                 },
@@ -35,6 +37,7 @@ unasync.unasync_files(
             "tests/unittests/_sync",
             additional_replacements={
                 "_async": "_sync",
+                "TAsyncClient": "TSyncClient",
                 "AsyncSleep": "SyncSleep",
                 "httpx._client.AsyncClient.request": "httpx._client.Client.request",
                 "AsyncHTTPTransport": "HTTPTransport",

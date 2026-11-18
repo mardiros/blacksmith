@@ -72,7 +72,7 @@ from .sd._sync import (
     SyncStaticDiscovery,
 )
 from .service._async.base import AsyncAbstractTransport
-from .service._async.client import AsyncClient, AsyncClientFactory
+from .service._async.client import AsyncClient, AsyncClientFactory, AsyncClientProtocol
 from .service._async.route_proxy import AsyncRouteProxy
 from .service._sync.base import SyncAbstractTransport
 from .service._sync.client import SyncClient, SyncClientFactory
@@ -114,6 +114,7 @@ __all__ = [
     "HTTPTimeout",
     # Client
     "AsyncClientFactory",
+    "AsyncClientProtocol",
     "SyncClientFactory",
     "AsyncClient",
     "SyncClient",
