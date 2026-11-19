@@ -1,126 +1,38 @@
-from enum import StrEnum
 from typing import Any
 
 import pytest
-from pydantic import BaseModel
 from result import Result
 
 from blacksmith import (
     AsyncClientFactory,
     AsyncStaticDiscovery,
     Attachment,
-    AttachmentField,
     CollectionIterator,
     HTTPError,
-    PathInfoField,
-    PostBodyField,
-    QueryStringField,
-    Request,
-    Response,
     ResponseBox,
-    register,
+    scan,
 )
 from blacksmith.domain.exceptions import NoContractException
-
-
-class SizeEnum(StrEnum):
-    s = "S"
-    m = "M"
-    l = "L"
-
-
-class Item(Response):
-    name: str = ""
-    size: SizeEnum = SizeEnum.m
-
-
-class CreateItem(Request):
-    name: str = PostBodyField()
-    size: SizeEnum = PostBodyField(SizeEnum.m)
-
-
-class CreateItemIntSize(Request):
-    name: str = PostBodyField()
-    size: int = PostBodyField(2)
-
-
-class ListItem(Request):
-    name: str | None = QueryStringField(None)
-
-
-class GetItem(Request):
-    item_name: str = PathInfoField()
-
-
-class UpdateItem(GetItem):
-    name: str | None = PostBodyField(None)
-    size: SizeEnum | None = PostBodyField(None)
-
-
-DeleteItem = GetItem
-
-
-register(
-    "api",
-    "item",
-    "api",
-    None,
-    collection_path="/items",
-    collection_contract={
-        "GET": (ListItem, Item),
-        "POST": (CreateItem | CreateItemIntSize, None),
-    },
-    path="/items/{item_name}",
-    contract={
-        "GET": (GetItem, Item),
-        "PATCH": (UpdateItem, None),
-        "DELETE": (DeleteItem, None),
-    },
+from tests.functionals.resources.api.items import (
+    CreateItem,
+    GetItem,
+    Item,
+    ListItem,
+    SizeEnum,
+)
+from tests.functionals.resources.api.upload import (
+    UploadComplexRequest,
+    UploadedFile,
+    UploadQuery,
+    UploadRequest,
 )
 
-
-class UploadRequest(Request):
-    foobar: str = PostBodyField()
-    attachmt: Attachment = AttachmentField()
+ClientFactory = AsyncClientFactory[Any]
 
 
-class UploadQuery(BaseModel):
-    name: str
-    value: int
-
-
-class UploadComplexRequest(Request):
-    foobar: UploadQuery = PostBodyField()
-    attachmt: Attachment = AttachmentField()
-
-
-class UploadedFile(Response):
-    foobar: str
-    filename: str
-    content: str
-
-
-register(
-    "api",
-    "upload",
-    "api",
-    None,
-    path="/upload",
-    contract={
-        "POST": (UploadRequest, UploadedFile),
-    },
-)
-
-register(
-    "api",
-    "upload_complex",
-    "api",
-    None,
-    path="/upload-complex",
-    contract={
-        "POST": (UploadComplexRequest, UploadedFile),
-    },
-)
+@pytest.fixture(autouse=True, scope="module")
+def blacksmith_scan():
+    scan("tests.functionals.resources")
 
 
 async def test_crud(dummy_api_endpoint: str):
