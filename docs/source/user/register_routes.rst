@@ -8,8 +8,8 @@ The example below, that has been copy paste from the test suite show
 how to register a resource.
 
 
-Full example of blacksmith regitration
---------------------------------------
+Full example of blacksmith registration
+---------------------------------------
 
 .. literalinclude:: register_routes_01.py
 
