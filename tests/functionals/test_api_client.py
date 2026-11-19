@@ -1,15 +1,12 @@
-from enum import StrEnum
 from typing import Any
 
 import pytest
-from pydantic import BaseModel
 from result import Result
 
 from blacksmith import (
     AsyncClientFactory,
     AsyncStaticDiscovery,
     Attachment,
-    AttachmentField,
     CollectionIterator,
     HTTPError,
     PathInfoField,
@@ -17,10 +14,11 @@ from blacksmith import (
     QueryStringField,
     Request,
     Response,
-    ResponseBox,
     register,
 )
 from blacksmith.domain.exceptions import NoContractException
+from blacksmith.service._async.client import AsyncClientBase
+from blacksmith.service._async.route_proxy import AsyncRouteProxy
 
 
 class SizeEnum(StrEnum):
@@ -121,6 +119,13 @@ register(
         "POST": (UploadComplexRequest, UploadedFile),
     },
 )
+
+ClientFactory = AsyncClientFactory[Any]
+
+
+class AsyncAppClientFactory(AsyncClientFactory[HTTPError, Literal["api"]]):
+    async def __call__(self, client_name: Literal["api"]) -> AsyncApiClient:
+        return cast(AsyncApiClient, await super().__call__(client_name))
 
 
 async def test_crud(dummy_api_endpoint: str):
