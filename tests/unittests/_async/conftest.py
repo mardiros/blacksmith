@@ -17,12 +17,15 @@ from blacksmith.middleware._async import AsyncMiddleware
 from blacksmith.middleware._async.auth import AsyncHTTPAuthorizationMiddleware
 from blacksmith.middleware._async.base import AsyncHTTPAddHeadersMiddleware
 from blacksmith.middleware._async.http_cache import AsyncAbstractCache
-from blacksmith.sd._async.adapters.consul import AsyncConsulDiscovery, _registry
+from blacksmith.sd._async.adapters.consul import (
+    AsyncConsulClientFactory,
+    AsyncConsulDiscovery,
+    _registry,
+)
 from blacksmith.sd._async.adapters.nomad import AsyncNomadDiscovery
 from blacksmith.sd._async.adapters.router import AsyncRouterDiscovery
 from blacksmith.sd._async.adapters.static import AsyncStaticDiscovery, Endpoints
 from blacksmith.service._async.base import AsyncAbstractTransport
-from blacksmith.service._async.client import AsyncClientFactory
 from blacksmith.typing import ClientName, Path
 from tests.unittests.time import AsyncSleep
 
@@ -190,8 +193,8 @@ def consul_sd_with_body(body: dict[str, Any]) -> AsyncConsulDiscovery:
     class FakeConsulTransportNoServiceAddr(FakeConsulTransport):
         _body: ClassVar[Sequence[Mapping[str, str | int]]] = [body]
 
-    def cli(url: str, tok: str) -> AsyncClientFactory[HTTPError]:
-        return AsyncClientFactory(
+    def cli(url: str, tok: str) -> AsyncConsulClientFactory:
+        return AsyncConsulClientFactory(
             sd=AsyncStaticDiscovery({("consul", "v1"): url}),
             registry=_registry,
             transport=FakeConsulTransportNoServiceAddr(),
@@ -202,8 +205,8 @@ def consul_sd_with_body(body: dict[str, Any]) -> AsyncConsulDiscovery:
 
 @pytest.fixture
 def consul_sd() -> AsyncConsulDiscovery:
-    def cli(url: str, tok: str) -> AsyncClientFactory[HTTPError]:
-        return AsyncClientFactory(
+    def cli(url: str, tok: str) -> AsyncConsulClientFactory:
+        return AsyncConsulClientFactory(
             sd=AsyncStaticDiscovery({("consul", "v1"): url}),
             registry=_registry,
             transport=FakeConsulTransport(),

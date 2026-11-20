@@ -1,13 +1,15 @@
-from typing import Any
+from enum import StrEnum
+from typing import Literal, cast
 
 import pytest
-from result import Result
+from pydantic import BaseModel
 
 from blacksmith import (
     AsyncClientFactory,
+    AsyncClientProtocol,
     AsyncStaticDiscovery,
     Attachment,
-    CollectionIterator,
+    AttachmentField,
     HTTPError,
     PathInfoField,
     PostBodyField,
@@ -120,7 +122,16 @@ register(
     },
 )
 
-ClientFactory = AsyncClientFactory[Any]
+
+class AsyncApiClient(AsyncClientBase[HTTPError]):
+    item: AsyncRouteProxy[ListItem, GetItem, HTTPError]
+
+    upload: AsyncRouteProxy[None, None, HTTPError]
+
+    async def __call__(
+        self, client_name: Literal["api", "extra"]
+    ) -> AsyncClientProtocol[HTTPError]:
+        return await super().__call__(client_name)
 
 
 class AsyncAppClientFactory(AsyncClientFactory[HTTPError, Literal["api"]]):
@@ -130,10 +141,10 @@ class AsyncAppClientFactory(AsyncClientFactory[HTTPError, Literal["api"]]):
 
 async def test_crud(dummy_api_endpoint: str):
     sd = AsyncStaticDiscovery({("api", None): dummy_api_endpoint})
-    cli: AsyncClientFactory[HTTPError] = AsyncClientFactory(sd)
+    cli = AsyncAppClientFactory(sd)
     api = await cli("api")
 
-    items: Result[CollectionIterator[Any], HTTPError] = await api.item.collection_get()
+    items = await api.item.collection_get()
     assert items.is_ok()
     llitems = list(items.unwrap())
     assert llitems == []
@@ -239,7 +250,7 @@ async def test_crud(dummy_api_endpoint: str):
 
 async def test_attachment(dummy_api_endpoint: str):
     sd = AsyncStaticDiscovery({("api", None): dummy_api_endpoint})
-    cli: AsyncClientFactory[HTTPError] = AsyncClientFactory(sd)
+    cli = AsyncAppClientFactory(sd)
     api = await cli("api")
     resp = await api.upload.post(
         UploadRequest(
@@ -254,7 +265,7 @@ async def test_attachment(dummy_api_endpoint: str):
 
 async def test_attachment_json(dummy_api_endpoint: str):
     sd = AsyncStaticDiscovery({("api", None): dummy_api_endpoint})
-    cli: AsyncClientFactory[HTTPError] = AsyncClientFactory(sd)
+    cli = AsyncAppClientFactory(sd)
     api = await cli("api")
     resp = await api.upload_complex.post(
         UploadComplexRequest(

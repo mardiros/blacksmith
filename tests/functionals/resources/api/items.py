@@ -1,6 +1,8 @@
 from enum import StrEnum
 
 from blacksmith import (
+    AsyncRouteProxy,
+    HTTPError,
     PathInfoField,
     PostBodyField,
     QueryStringField,
@@ -64,3 +66,6 @@ register(
         "DELETE": (DeleteItem, None),
     },
 )
+
+
+ItemRoutes = AsyncRouteProxy[Item, Item, HTTPError]
