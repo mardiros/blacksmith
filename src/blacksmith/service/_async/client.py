@@ -1,4 +1,4 @@
-from typing import Any, Generic
+from typing import Any, Generic, Protocol, Self
 
 from blacksmith.domain.error import AbstractErrorParser, TError_co, default_error_parser
 from blacksmith.domain.exceptions import UnregisteredResourceException
@@ -52,9 +52,7 @@ class AsyncClient(Generic[TError_co]):
         self.error_parser = error_parser
         self.middlewares = middlewares.copy()
 
-    def add_middleware(
-        self, middleware: AsyncHTTPMiddleware
-    ) -> "AsyncClient[TError_co]":
+    def add_middleware(self, middleware: AsyncHTTPMiddleware) -> Self:
         self.middlewares.insert(0, middleware)
         return self
 
@@ -128,9 +126,7 @@ class AsyncClientFactory(Generic[TError_co]):
         self.error_parser = error_parser or default_error_parser  # type: ignore
         self.middlewares = []
 
-    def add_middleware(
-        self, middleware: AsyncHTTPMiddleware
-    ) -> "AsyncClientFactory[TError_co]":
+    def add_middleware(self, middleware: AsyncHTTPMiddleware) -> Self:
         """
         Add a middleware to the client factory and return the client for chaining.
 
