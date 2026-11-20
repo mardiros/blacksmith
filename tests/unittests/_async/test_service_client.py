@@ -163,7 +163,7 @@ async def test_client_timeout(static_sd: AsyncAbstractServiceDiscovery):
 
 async def test_client_factory_config(static_sd: AsyncAbstractServiceDiscovery):
     tp = FakeTimeoutTransport()
-    client_factory: AsyncClientFactory[Any] = AsyncClientFactory(
+    client_factory: AsyncClientFactory[Any, Any] = AsyncClientFactory(
         static_sd, tp, registry=dummy_registry
     )
 
@@ -176,7 +176,7 @@ async def test_client_factory_config(static_sd: AsyncAbstractServiceDiscovery):
 
 
 def test_client_factory_configure_transport(static_sd: AsyncAbstractServiceDiscovery):
-    client_factory: AsyncClientFactory[Any] = AsyncClientFactory(
+    client_factory: AsyncClientFactory[Any, Any] = AsyncClientFactory(
         static_sd, verify_certificate=False
     )
     assert client_factory.transport.verify_certificate is False
@@ -187,7 +187,7 @@ def test_client_factory_configure_proxies(static_sd: AsyncAbstractServiceDiscove
         "http://": "http://localhost:8030",
         "https://": "http://localhost:8031",
     }
-    client_factory: AsyncClientFactory[Any] = AsyncClientFactory(
+    client_factory: AsyncClientFactory[Any, Any] = AsyncClientFactory(
         static_sd, proxies=proxies
     )
     assert client_factory.transport.proxies is not None
@@ -204,7 +204,7 @@ async def test_client_factory_add_middleware(
     auth = AsyncHTTPAuthorizationMiddleware("Bearer", "abc")
     metrics = PrometheusMetrics(registry=CollectorRegistry())
     prom = AsyncPrometheusMiddleware(metrics=metrics)
-    client_factory: AsyncClientFactory[Any] = (
+    client_factory: AsyncClientFactory[Any, Any] = (
         AsyncClientFactory(static_sd, tp, registry=dummy_registry)
         .add_middleware(prom)
         .add_middleware(auth)
@@ -235,7 +235,7 @@ async def test_client_add_middleware(
     metrics = PrometheusMetrics(registry=CollectorRegistry())
     prom = AsyncPrometheusMiddleware(metrics)
     auth = AsyncHTTPAuthorizationMiddleware("Bearer", "abc")
-    client_factory: AsyncClientFactory[Any] = AsyncClientFactory(
+    client_factory: AsyncClientFactory[Any, Any] = AsyncClientFactory(
         static_sd, tp, registry=dummy_registry
     ).add_middleware(prom)
 
@@ -257,7 +257,7 @@ async def test_client_factory_initialize_middlewares(
     static_sd: AsyncAbstractServiceDiscovery,
     dummy_middleware: Any,
 ):
-    client_factory: AsyncClientFactory[Any] = AsyncClientFactory(
+    client_factory: AsyncClientFactory[Any, Any] = AsyncClientFactory(
         static_sd, echo_middleware, registry=dummy_registry
     ).add_middleware(dummy_middleware)
     assert dummy_middleware.initialized == 0

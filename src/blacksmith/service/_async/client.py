@@ -9,7 +9,7 @@ from blacksmith.domain.registry import registry as default_registry
 from blacksmith.middleware._async.base import AsyncHTTPMiddleware
 from blacksmith.sd._async.base import AsyncAbstractServiceDiscovery
 from blacksmith.service._async.adapters.httpx import AsyncHttpxTransport
-from blacksmith.typing import ClientName, Proxies, ResourceName, Url
+from blacksmith.typing import ClientName, Proxies, ResourceName, TClientName, Url
 
 from .base import AsyncAbstractTransport
 from .route_proxy import AsyncRouteProxy, ClientTimeout, build_timeout
@@ -94,7 +94,7 @@ class AsyncClient(AsyncClientProtocol[TError_co]):
             raise UnregisteredResourceException(name, self.name) from exc
 
 
-class AsyncClientFactory(Generic[TError_co]):
+class AsyncClientFactory(Generic[TError_co, TClientName]):
     """
     Client creator, for the given configuration.
 
@@ -157,7 +157,7 @@ class AsyncClientFactory(Generic[TError_co]):
             await middleware.initialize()
 
     async def __call__(
-        self, client_name: ClientName
+        self, client_name: TClientName
     ) -> AsyncClientProtocol[TError_co]:
         srv, resources = self.registry.get_service(client_name)
         endpoint = await self.sd.get_endpoint(srv[0], srv[1])

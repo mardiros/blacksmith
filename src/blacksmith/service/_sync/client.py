@@ -9,7 +9,7 @@ from blacksmith.domain.registry import registry as default_registry
 from blacksmith.middleware._sync.base import SyncHTTPMiddleware
 from blacksmith.sd._sync.base import SyncAbstractServiceDiscovery
 from blacksmith.service._sync.adapters.httpx import SyncHttpxTransport
-from blacksmith.typing import ClientName, Proxies, ResourceName, Url
+from blacksmith.typing import ClientName, Proxies, ResourceName, TClientName, Url
 
 from .base import SyncAbstractTransport
 from .route_proxy import ClientTimeout, SyncRouteProxy, build_timeout
@@ -94,7 +94,7 @@ class SyncClient(SyncClientProtocol[TError_co]):
             raise UnregisteredResourceException(name, self.name) from exc
 
 
-class SyncClientFactory(Generic[TError_co]):
+class SyncClientFactory(Generic[TError_co, TClientName]):
     """
     Client creator, for the given configuration.
 
@@ -156,7 +156,7 @@ class SyncClientFactory(Generic[TError_co]):
         for middleware in self.middlewares:
             middleware.initialize()
 
-    def __call__(self, client_name: ClientName) -> SyncClientProtocol[TError_co]:
+    def __call__(self, client_name: TClientName) -> SyncClientProtocol[TError_co]:
         srv, resources = self.registry.get_service(client_name)
         endpoint = self.sd.get_endpoint(srv[0], srv[1])
         return SyncClient(
