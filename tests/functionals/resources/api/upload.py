@@ -1,8 +1,10 @@
 from pydantic import BaseModel
 
 from blacksmith import (
+    AsyncRouteProxy,
     Attachment,
     AttachmentField,
+    HTTPError,
     PostBodyField,
     Request,
     Response,
@@ -52,3 +54,6 @@ register(
         "POST": (UploadComplexRequest, UploadedFile),
     },
 )
+
+UploadRoutes = AsyncRouteProxy[None, UploadedFile, HTTPError]
+UploadComplexRoutes = AsyncRouteProxy[None, UploadedFile, HTTPError]

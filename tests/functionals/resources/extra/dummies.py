@@ -1,4 +1,6 @@
 from blacksmith import (
+    AsyncRouteProxy,
+    HTTPError,
     PathInfoField,
     PostBodyField,
     QueryStringField,
@@ -52,3 +54,6 @@ register(
         "DELETE": (DeleteItem, None),
     },
 )
+
+
+DummiesRoutes = AsyncRouteProxy[Item, Item, HTTPError]

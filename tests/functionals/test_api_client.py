@@ -1,13 +1,12 @@
-from typing import Any
+from typing import Any, Literal, overload
 
 import pytest
-from result import Result
 
 from blacksmith import (
     AsyncClientFactory,
+    AsyncClientProtocol,
     AsyncStaticDiscovery,
     Attachment,
-    CollectionIterator,
     HTTPError,
     ResponseBox,
     scan,
@@ -26,8 +25,20 @@ from tests.functionals.resources.api.upload import (
     UploadQuery,
     UploadRequest,
 )
+from tests.functionals.resources.typing import APIClient, ExtraClient
 
-ClientFactory = AsyncClientFactory[Any]
+
+class AppClientFactory(AsyncClientFactory[HTTPError, Literal["api", "extra"]]):
+    @overload
+    async def __call__(self, client_name: Literal["api"]) -> APIClient: ...
+
+    @overload
+    async def __call__(self, client_name: Literal["extra"]) -> ExtraClient: ...
+
+    async def __call__(
+        self, client_name: Literal["api", "extra"]
+    ) -> AsyncClientProtocol[HTTPError]:
+        return await super().__call__(client_name)
 
 
 @pytest.fixture(autouse=True, scope="module")
@@ -37,10 +48,10 @@ def blacksmith_scan():
 
 async def test_crud(dummy_api_endpoint: str):
     sd = AsyncStaticDiscovery({("api", None): dummy_api_endpoint})
-    cli: AsyncClientFactory[HTTPError] = AsyncClientFactory(sd)
+    cli = AppClientFactory(sd)
     api = await cli("api")
 
-    items: Result[CollectionIterator[Any], HTTPError] = await api.item.collection_get()
+    items = await api.item.collection_get()
     assert items.is_ok()
     llitems = list(items.unwrap())
     assert llitems == []
@@ -146,7 +157,7 @@ async def test_crud(dummy_api_endpoint: str):
 
 async def test_attachment(dummy_api_endpoint: str):
     sd = AsyncStaticDiscovery({("api", None): dummy_api_endpoint})
-    cli: AsyncClientFactory[HTTPError] = AsyncClientFactory(sd)
+    cli = AppClientFactory(sd)
     api = await cli("api")
     resp = await api.upload.post(
         UploadRequest(
@@ -161,7 +172,7 @@ async def test_attachment(dummy_api_endpoint: str):
 
 async def test_attachment_json(dummy_api_endpoint: str):
     sd = AsyncStaticDiscovery({("api", None): dummy_api_endpoint})
-    cli: AsyncClientFactory[HTTPError] = AsyncClientFactory(sd)
+    cli = AppClientFactory(sd)
     api = await cli("api")
     resp = await api.upload_complex.post(
         UploadComplexRequest(
