@@ -1,8 +1,10 @@
-from typing import Any, Literal
+from typing import Any, Literal, TypeVar
 
 Url = str
 ServiceName = str
 ClientName = str
+TClientName = TypeVar("TClientName", bound=str)
+
 ResourceName = str
 Version = str | None
 Service = tuple[str, Version]
