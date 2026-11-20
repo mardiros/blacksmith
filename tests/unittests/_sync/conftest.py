@@ -17,12 +17,15 @@ from blacksmith.middleware._sync import SyncMiddleware
 from blacksmith.middleware._sync.auth import SyncHTTPAuthorizationMiddleware
 from blacksmith.middleware._sync.base import SyncHTTPAddHeadersMiddleware
 from blacksmith.middleware._sync.http_cache import SyncAbstractCache
-from blacksmith.sd._sync.adapters.consul import SyncConsulDiscovery, _registry
+from blacksmith.sd._sync.adapters.consul import (
+    SyncConsulClientFactory,
+    SyncConsulDiscovery,
+    _registry,
+)
 from blacksmith.sd._sync.adapters.nomad import SyncNomadDiscovery
 from blacksmith.sd._sync.adapters.router import SyncRouterDiscovery
 from blacksmith.sd._sync.adapters.static import Endpoints, SyncStaticDiscovery
 from blacksmith.service._sync.base import SyncAbstractTransport
-from blacksmith.service._sync.client import SyncClientFactory
 from blacksmith.typing import ClientName, Path
 from tests.unittests.time import SyncSleep
 
@@ -190,8 +193,8 @@ def consul_sd_with_body(body: dict[str, Any]) -> SyncConsulDiscovery:
     class FakeConsulTransportNoServiceAddr(FakeConsulTransport):
         _body: ClassVar[Sequence[Mapping[str, str | int]]] = [body]
 
-    def cli(url: str, tok: str) -> SyncClientFactory[HTTPError]:
-        return SyncClientFactory(
+    def cli(url: str, tok: str) -> SyncConsulClientFactory:
+        return SyncConsulClientFactory(
             sd=SyncStaticDiscovery({("consul", "v1"): url}),
             registry=_registry,
             transport=FakeConsulTransportNoServiceAddr(),
@@ -202,8 +205,8 @@ def consul_sd_with_body(body: dict[str, Any]) -> SyncConsulDiscovery:
 
 @pytest.fixture
 def consul_sd() -> SyncConsulDiscovery:
-    def cli(url: str, tok: str) -> SyncClientFactory[HTTPError]:
-        return SyncClientFactory(
+    def cli(url: str, tok: str) -> SyncConsulClientFactory:
+        return SyncConsulClientFactory(
             sd=SyncStaticDiscovery({("consul", "v1"): url}),
             registry=_registry,
             transport=FakeConsulTransport(),
