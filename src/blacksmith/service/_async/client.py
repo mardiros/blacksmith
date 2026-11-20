@@ -1,4 +1,4 @@
-from typing import Any, Generic, Protocol, Self
+from typing import Any, Generic, Self
 
 from blacksmith.domain.error import AbstractErrorParser, TError_co, default_error_parser
 from blacksmith.domain.exceptions import UnregisteredResourceException
@@ -17,7 +17,7 @@ from .route_proxy import AsyncRouteProxy, ClientTimeout, build_timeout
 default_timeout = HTTPTimeout()
 
 
-class AsyncClientProtocol(Protocol[TError_co]):
+class AsyncClientBase(Generic[TError_co]):
     """Used to define the client interface."""
 
     name: ClientName
@@ -27,26 +27,7 @@ class AsyncClientProtocol(Protocol[TError_co]):
     timeout: HTTPTimeout
     collection_parser: type[AbstractCollectionParser]
     middlewares: list[AsyncHTTPMiddleware]
-
-    def add_middleware(
-        self, middleware: AsyncHTTPMiddleware
-    ) -> "AsyncClientProtocol[TError_co]": ...
-
-
-class AsyncClient(AsyncClientProtocol[TError_co]):
-    """
-    Client representation for the client name.
-
-    A client will have dymanic property, based on the registered resources.
-    """
-
-    name: ClientName
-    endpoint: Url
-    resources: Resources
-    transport: AsyncAbstractTransport
-    timeout: HTTPTimeout
-    collection_parser: type[AbstractCollectionParser]
-    middlewares: list[AsyncHTTPMiddleware]
+    error_parser: AbstractErrorParser[TError_co]
 
     def __init__(
         self,
@@ -71,6 +52,14 @@ class AsyncClient(AsyncClientProtocol[TError_co]):
     def add_middleware(self, middleware: AsyncHTTPMiddleware) -> Self:
         self.middlewares.insert(0, middleware)
         return self
+
+
+class AsyncClient(AsyncClientBase[TError_co]):
+    """
+    Client representation for the client name.
+
+    A client will have dymanic property, based on the registered resources.
+    """
 
     def __getattr__(self, name: ResourceName) -> AsyncRouteProxy[Any, Any, TError_co]:
         """
@@ -156,9 +145,7 @@ class AsyncClientFactory(Generic[TError_co, TClientName]):
         for middleware in self.middlewares:
             await middleware.initialize()
 
-    async def __call__(
-        self, client_name: TClientName
-    ) -> AsyncClientProtocol[TError_co]:
+    async def __call__(self, client_name: TClientName) -> AsyncClientBase[TError_co]:
         srv, resources = self.registry.get_service(client_name)
         endpoint = await self.sd.get_endpoint(srv[0], srv[1])
         return AsyncClient(

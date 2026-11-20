@@ -3,8 +3,8 @@ from typing import Any, Literal, overload
 import pytest
 
 from blacksmith import (
+    AsyncClientBase,
     AsyncClientFactory,
-    AsyncClientProtocol,
     AsyncStaticDiscovery,
     Attachment,
     HTTPError,
@@ -37,7 +37,7 @@ class AppClientFactory(AsyncClientFactory[HTTPError, Literal["api", "extra"]]):
 
     async def __call__(
         self, client_name: Literal["api", "extra"]
-    ) -> AsyncClientProtocol[HTTPError]:
+    ) -> AsyncClientBase[HTTPError]:
         return await super().__call__(client_name)
 
 

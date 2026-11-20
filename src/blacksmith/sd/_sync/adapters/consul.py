@@ -16,7 +16,7 @@ from blacksmith.domain.registry import Registry
 from blacksmith.middleware._sync.auth import SyncHTTPBearerMiddleware
 from blacksmith.sd._sync.adapters.static import SyncStaticDiscovery
 from blacksmith.sd._sync.base import SyncAbstractServiceDiscovery
-from blacksmith.service._sync.client import SyncClientFactory, SyncClientProtocol
+from blacksmith.service._sync.client import SyncClientBase, SyncClientFactory
 from blacksmith.service._sync.route_proxy import SyncRouteProxy
 from blacksmith.typing import ServiceName, Url, Version
 
@@ -61,7 +61,7 @@ _registry.register(
 )
 
 
-class SyncConsulClient(SyncClientProtocol[HTTPError]):
+class SyncConsulClient(SyncClientBase[HTTPError]):
     services: SyncRouteProxy[Service, None, HTTPError]
 
 
