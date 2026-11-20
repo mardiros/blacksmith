@@ -72,10 +72,10 @@ from .sd._sync import (
     SyncStaticDiscovery,
 )
 from .service._async.base import AsyncAbstractTransport
-from .service._async.client import AsyncClient, AsyncClientFactory, AsyncClientProtocol
+from .service._async.client import AsyncClient, AsyncClientBase, AsyncClientFactory
 from .service._async.route_proxy import AsyncRouteProxy
 from .service._sync.base import SyncAbstractTransport
-from .service._sync.client import SyncClient, SyncClientFactory, SyncClientProtocol
+from .service._sync.client import SyncClient, SyncClientBase, SyncClientFactory
 from .service._sync.route_proxy import SyncRouteProxy
 from .service.http_body_serializer import (
     AbstractHttpBodySerializer,
@@ -115,8 +115,8 @@ __all__ = [
     # Client
     "AsyncClientFactory",
     "SyncClientFactory",
-    "AsyncClientProtocol",
-    "SyncClientProtocol",
+    "AsyncClientBase",
+    "SyncClientBase",
     "AsyncClient",
     "SyncClient",
     "AsyncRouteProxy",

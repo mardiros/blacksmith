@@ -1,4 +1,4 @@
-from typing import Any, Generic, Protocol, Self
+from typing import Any, Generic, Self
 
 from blacksmith.domain.error import AbstractErrorParser, TError_co, default_error_parser
 from blacksmith.domain.exceptions import UnregisteredResourceException
@@ -17,7 +17,7 @@ from .route_proxy import ClientTimeout, SyncRouteProxy, build_timeout
 default_timeout = HTTPTimeout()
 
 
-class SyncClientProtocol(Protocol[TError_co]):
+class SyncClientBase(Generic[TError_co]):
     """Used to define the client interface."""
 
     name: ClientName
@@ -27,26 +27,7 @@ class SyncClientProtocol(Protocol[TError_co]):
     timeout: HTTPTimeout
     collection_parser: type[AbstractCollectionParser]
     middlewares: list[SyncHTTPMiddleware]
-
-    def add_middleware(
-        self, middleware: SyncHTTPMiddleware
-    ) -> "SyncClientProtocol[TError_co]": ...
-
-
-class SyncClient(SyncClientProtocol[TError_co]):
-    """
-    Client representation for the client name.
-
-    A client will have dymanic property, based on the registered resources.
-    """
-
-    name: ClientName
-    endpoint: Url
-    resources: Resources
-    transport: SyncAbstractTransport
-    timeout: HTTPTimeout
-    collection_parser: type[AbstractCollectionParser]
-    middlewares: list[SyncHTTPMiddleware]
+    error_parser: AbstractErrorParser[TError_co]
 
     def __init__(
         self,
@@ -71,6 +52,14 @@ class SyncClient(SyncClientProtocol[TError_co]):
     def add_middleware(self, middleware: SyncHTTPMiddleware) -> Self:
         self.middlewares.insert(0, middleware)
         return self
+
+
+class SyncClient(SyncClientBase[TError_co]):
+    """
+    Client representation for the client name.
+
+    A client will have dymanic property, based on the registered resources.
+    """
 
     def __getattr__(self, name: ResourceName) -> SyncRouteProxy[Any, Any, TError_co]:
         """
@@ -156,7 +145,7 @@ class SyncClientFactory(Generic[TError_co, TClientName]):
         for middleware in self.middlewares:
             middleware.initialize()
 
-    def __call__(self, client_name: TClientName) -> SyncClientProtocol[TError_co]:
+    def __call__(self, client_name: TClientName) -> SyncClientBase[TError_co]:
         srv, resources = self.registry.get_service(client_name)
         endpoint = self.sd.get_endpoint(srv[0], srv[1])
         return SyncClient(
