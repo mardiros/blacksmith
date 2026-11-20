@@ -1,4 +1,4 @@
-from typing import Any, Generic
+from typing import Any, Generic, Self
 
 from blacksmith.domain.error import AbstractErrorParser, TError_co, default_error_parser
 from blacksmith.domain.exceptions import UnregisteredResourceException
@@ -9,7 +9,7 @@ from blacksmith.domain.registry import registry as default_registry
 from blacksmith.middleware._sync.base import SyncHTTPMiddleware
 from blacksmith.sd._sync.base import SyncAbstractServiceDiscovery
 from blacksmith.service._sync.adapters.httpx import SyncHttpxTransport
-from blacksmith.typing import ClientName, Proxies, ResourceName, Url
+from blacksmith.typing import ClientName, Proxies, ResourceName, TClientName, Url
 
 from .base import SyncAbstractTransport
 from .route_proxy import ClientTimeout, SyncRouteProxy, build_timeout
@@ -17,12 +17,8 @@ from .route_proxy import ClientTimeout, SyncRouteProxy, build_timeout
 default_timeout = HTTPTimeout()
 
 
-class SyncClient(Generic[TError_co]):
-    """
-    Client representation for the client name.
-
-    A client will have dymanic property, based on the registered resources.
-    """
+class SyncClientBase(Generic[TError_co]):
+    """Used to define the client interface."""
 
     name: ClientName
     endpoint: Url
@@ -31,6 +27,7 @@ class SyncClient(Generic[TError_co]):
     timeout: HTTPTimeout
     collection_parser: type[AbstractCollectionParser]
     middlewares: list[SyncHTTPMiddleware]
+    error_parser: AbstractErrorParser[TError_co]
 
     def __init__(
         self,
@@ -52,9 +49,17 @@ class SyncClient(Generic[TError_co]):
         self.error_parser = error_parser
         self.middlewares = middlewares.copy()
 
-    def add_middleware(self, middleware: SyncHTTPMiddleware) -> "SyncClient[TError_co]":
+    def add_middleware(self, middleware: SyncHTTPMiddleware) -> Self:
         self.middlewares.insert(0, middleware)
         return self
+
+
+class SyncClient(SyncClientBase[TError_co]):
+    """
+    Client representation for the client name.
+
+    A client will have dymanic property, based on the registered resources.
+    """
 
     def __getattr__(self, name: ResourceName) -> SyncRouteProxy[Any, Any, TError_co]:
         """
@@ -78,7 +83,7 @@ class SyncClient(Generic[TError_co]):
             raise UnregisteredResourceException(name, self.name) from exc
 
 
-class SyncClientFactory(Generic[TError_co]):
+class SyncClientFactory(Generic[TError_co, TClientName]):
     """
     Client creator, for the given configuration.
 
@@ -126,9 +131,7 @@ class SyncClientFactory(Generic[TError_co]):
         self.error_parser = error_parser or default_error_parser  # type: ignore
         self.middlewares = []
 
-    def add_middleware(
-        self, middleware: SyncHTTPMiddleware
-    ) -> "SyncClientFactory[TError_co]":
+    def add_middleware(self, middleware: SyncHTTPMiddleware) -> Self:
         """
         Add a middleware to the client factory and return the client for chaining.
 
@@ -142,7 +145,7 @@ class SyncClientFactory(Generic[TError_co]):
         for middleware in self.middlewares:
             middleware.initialize()
 
-    def __call__(self, client_name: ClientName) -> SyncClient[TError_co]:
+    def __call__(self, client_name: TClientName) -> SyncClientBase[TError_co]:
         srv, resources = self.registry.get_service(client_name)
         endpoint = self.sd.get_endpoint(srv[0], srv[1])
         return SyncClient(

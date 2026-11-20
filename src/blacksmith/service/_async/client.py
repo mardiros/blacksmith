@@ -1,4 +1,4 @@
-from typing import Any, Generic
+from typing import Any, Generic, Self
 
 from blacksmith.domain.error import AbstractErrorParser, TError_co, default_error_parser
 from blacksmith.domain.exceptions import UnregisteredResourceException
@@ -9,7 +9,7 @@ from blacksmith.domain.registry import registry as default_registry
 from blacksmith.middleware._async.base import AsyncHTTPMiddleware
 from blacksmith.sd._async.base import AsyncAbstractServiceDiscovery
 from blacksmith.service._async.adapters.httpx import AsyncHttpxTransport
-from blacksmith.typing import ClientName, Proxies, ResourceName, Url
+from blacksmith.typing import ClientName, Proxies, ResourceName, TClientName, Url
 
 from .base import AsyncAbstractTransport
 from .route_proxy import AsyncRouteProxy, ClientTimeout, build_timeout
@@ -17,12 +17,8 @@ from .route_proxy import AsyncRouteProxy, ClientTimeout, build_timeout
 default_timeout = HTTPTimeout()
 
 
-class AsyncClient(Generic[TError_co]):
-    """
-    Client representation for the client name.
-
-    A client will have dymanic property, based on the registered resources.
-    """
+class AsyncClientBase(Generic[TError_co]):
+    """Used to define the client interface."""
 
     name: ClientName
     endpoint: Url
@@ -31,6 +27,7 @@ class AsyncClient(Generic[TError_co]):
     timeout: HTTPTimeout
     collection_parser: type[AbstractCollectionParser]
     middlewares: list[AsyncHTTPMiddleware]
+    error_parser: AbstractErrorParser[TError_co]
 
     def __init__(
         self,
@@ -52,11 +49,17 @@ class AsyncClient(Generic[TError_co]):
         self.error_parser = error_parser
         self.middlewares = middlewares.copy()
 
-    def add_middleware(
-        self, middleware: AsyncHTTPMiddleware
-    ) -> "AsyncClient[TError_co]":
+    def add_middleware(self, middleware: AsyncHTTPMiddleware) -> Self:
         self.middlewares.insert(0, middleware)
         return self
+
+
+class AsyncClient(AsyncClientBase[TError_co]):
+    """
+    Client representation for the client name.
+
+    A client will have dymanic property, based on the registered resources.
+    """
 
     def __getattr__(self, name: ResourceName) -> AsyncRouteProxy[Any, Any, TError_co]:
         """
@@ -80,7 +83,7 @@ class AsyncClient(Generic[TError_co]):
             raise UnregisteredResourceException(name, self.name) from exc
 
 
-class AsyncClientFactory(Generic[TError_co]):
+class AsyncClientFactory(Generic[TError_co, TClientName]):
     """
     Client creator, for the given configuration.
 
@@ -128,9 +131,7 @@ class AsyncClientFactory(Generic[TError_co]):
         self.error_parser = error_parser or default_error_parser  # type: ignore
         self.middlewares = []
 
-    def add_middleware(
-        self, middleware: AsyncHTTPMiddleware
-    ) -> "AsyncClientFactory[TError_co]":
+    def add_middleware(self, middleware: AsyncHTTPMiddleware) -> Self:
         """
         Add a middleware to the client factory and return the client for chaining.
 
@@ -144,7 +145,7 @@ class AsyncClientFactory(Generic[TError_co]):
         for middleware in self.middlewares:
             await middleware.initialize()
 
-    async def __call__(self, client_name: ClientName) -> AsyncClient[TError_co]:
+    async def __call__(self, client_name: TClientName) -> AsyncClientBase[TError_co]:
         srv, resources = self.registry.get_service(client_name)
         endpoint = await self.sd.get_endpoint(srv[0], srv[1])
         return AsyncClient(

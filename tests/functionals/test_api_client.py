@@ -1,134 +1,57 @@
-from enum import StrEnum
-from typing import Any
+from typing import Any, Literal, overload
 
 import pytest
-from pydantic import BaseModel
-from result import Result
 
 from blacksmith import (
+    AsyncClientBase,
     AsyncClientFactory,
     AsyncStaticDiscovery,
     Attachment,
-    AttachmentField,
-    CollectionIterator,
     HTTPError,
-    PathInfoField,
-    PostBodyField,
-    QueryStringField,
-    Request,
-    Response,
     ResponseBox,
-    register,
+    scan,
 )
 from blacksmith.domain.exceptions import NoContractException
-
-
-class SizeEnum(StrEnum):
-    s = "S"
-    m = "M"
-    l = "L"
-
-
-class Item(Response):
-    name: str = ""
-    size: SizeEnum = SizeEnum.m
-
-
-class CreateItem(Request):
-    name: str = PostBodyField()
-    size: SizeEnum = PostBodyField(SizeEnum.m)
-
-
-class CreateItemIntSize(Request):
-    name: str = PostBodyField()
-    size: int = PostBodyField(2)
-
-
-class ListItem(Request):
-    name: str | None = QueryStringField(None)
-
-
-class GetItem(Request):
-    item_name: str = PathInfoField()
-
-
-class UpdateItem(GetItem):
-    name: str | None = PostBodyField(None)
-    size: SizeEnum | None = PostBodyField(None)
-
-
-DeleteItem = GetItem
-
-
-register(
-    "api",
-    "item",
-    "api",
-    None,
-    collection_path="/items",
-    collection_contract={
-        "GET": (ListItem, Item),
-        "POST": (CreateItem | CreateItemIntSize, None),
-    },
-    path="/items/{item_name}",
-    contract={
-        "GET": (GetItem, Item),
-        "PATCH": (UpdateItem, None),
-        "DELETE": (DeleteItem, None),
-    },
+from tests.functionals.resources.api.items import (
+    CreateItem,
+    GetItem,
+    Item,
+    ListItem,
+    SizeEnum,
 )
-
-
-class UploadRequest(Request):
-    foobar: str = PostBodyField()
-    attachmt: Attachment = AttachmentField()
-
-
-class UploadQuery(BaseModel):
-    name: str
-    value: int
-
-
-class UploadComplexRequest(Request):
-    foobar: UploadQuery = PostBodyField()
-    attachmt: Attachment = AttachmentField()
-
-
-class UploadedFile(Response):
-    foobar: str
-    filename: str
-    content: str
-
-
-register(
-    "api",
-    "upload",
-    "api",
-    None,
-    path="/upload",
-    contract={
-        "POST": (UploadRequest, UploadedFile),
-    },
+from tests.functionals.resources.api.upload import (
+    UploadComplexRequest,
+    UploadedFile,
+    UploadQuery,
+    UploadRequest,
 )
+from tests.functionals.resources.typing import APIClient, ExtraClient
 
-register(
-    "api",
-    "upload_complex",
-    "api",
-    None,
-    path="/upload-complex",
-    contract={
-        "POST": (UploadComplexRequest, UploadedFile),
-    },
-)
+
+class AppClientFactory(AsyncClientFactory[HTTPError, Literal["api", "extra"]]):
+    @overload
+    async def __call__(self, client_name: Literal["api"]) -> APIClient: ...
+
+    @overload
+    async def __call__(self, client_name: Literal["extra"]) -> ExtraClient: ...
+
+    async def __call__(
+        self, client_name: Literal["api", "extra"]
+    ) -> AsyncClientBase[HTTPError]:
+        return await super().__call__(client_name)
+
+
+@pytest.fixture(autouse=True, scope="module")
+def blacksmith_scan():
+    scan("tests.functionals.resources")
 
 
 async def test_crud(dummy_api_endpoint: str):
     sd = AsyncStaticDiscovery({("api", None): dummy_api_endpoint})
-    cli: AsyncClientFactory[HTTPError] = AsyncClientFactory(sd)
+    cli = AppClientFactory(sd)
     api = await cli("api")
 
-    items: Result[CollectionIterator[Any], HTTPError] = await api.item.collection_get()
+    items = await api.item.collection_get()
     assert items.is_ok()
     llitems = list(items.unwrap())
     assert llitems == []
@@ -234,7 +157,7 @@ async def test_crud(dummy_api_endpoint: str):
 
 async def test_attachment(dummy_api_endpoint: str):
     sd = AsyncStaticDiscovery({("api", None): dummy_api_endpoint})
-    cli: AsyncClientFactory[HTTPError] = AsyncClientFactory(sd)
+    cli = AppClientFactory(sd)
     api = await cli("api")
     resp = await api.upload.post(
         UploadRequest(
@@ -249,7 +172,7 @@ async def test_attachment(dummy_api_endpoint: str):
 
 async def test_attachment_json(dummy_api_endpoint: str):
     sd = AsyncStaticDiscovery({("api", None): dummy_api_endpoint})
-    cli: AsyncClientFactory[HTTPError] = AsyncClientFactory(sd)
+    cli = AppClientFactory(sd)
     api = await cli("api")
     resp = await api.upload_complex.post(
         UploadComplexRequest(
