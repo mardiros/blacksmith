@@ -6,7 +6,6 @@ from pydantic import BaseModel
 
 from blacksmith import (
     AsyncClientFactory,
-    AsyncClientProtocol,
     AsyncStaticDiscovery,
     Attachment,
     AttachmentField,
@@ -128,10 +127,7 @@ class AsyncApiClient(AsyncClientBase[HTTPError]):
 
     upload: AsyncRouteProxy[None, None, HTTPError]
 
-    async def __call__(
-        self, client_name: Literal["api", "extra"]
-    ) -> AsyncClientProtocol[HTTPError]:
-        return await super().__call__(client_name)
+    upload_complex: AsyncRouteProxy[None, None, HTTPError]
 
 
 class AsyncAppClientFactory(AsyncClientFactory[HTTPError, Literal["api"]]):
@@ -194,7 +190,7 @@ async def test_crud(dummy_api_endpoint: str):
     ]
 
     # Test get
-    item: ResponseBox[Item, Any] = await api.item.get(GetItem(item_name="zdummy"))
+    item = await api.item.get(GetItem(item_name="zdummy"))
     assert item.is_ok()
     assert item.unwrap() == Item(name="zdummy", size=SizeEnum.l)
 
