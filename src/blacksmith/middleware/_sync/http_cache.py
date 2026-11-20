@@ -149,7 +149,12 @@ class SyncHTTPCacheMiddleware(SyncHTTPMiddleware):
         return handle
 
     def observe_cache_hit(
-        self, client_name: str, method: str, path: str, status_code: int, latency: float
+        self,
+        client_name: ClientName,
+        method: str,
+        path: str,
+        status_code: int,
+        latency: float,
     ) -> None:
         if self._metrics:
             self._metrics.blacksmith_cache_hit.labels(
@@ -167,7 +172,7 @@ class SyncHTTPCacheMiddleware(SyncHTTPMiddleware):
 
     def inc_cache_miss(
         self,
-        client_name: str,
+        client_name: ClientName,
         cachable_state: CachableState,
         method: HTTPMethod,
         path: str,

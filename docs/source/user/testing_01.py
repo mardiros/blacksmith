@@ -1,5 +1,5 @@
-
 from blacksmith import AsyncAbstractTransport, HTTPRequest, HTTPResponse, HTTPTimeout
+from blacksmith.typing import ClientName
 
 
 class FakeTransport(AsyncAbstractTransport):
@@ -10,7 +10,7 @@ class FakeTransport(AsyncAbstractTransport):
     async def __call__(
         self,
         req: HTTPRequest,
-        client_name: str,
+        client_name: ClientName,
         path: str,
         timeout: HTTPTimeout,
     ) -> HTTPResponse:
