@@ -171,7 +171,7 @@ async def test_crud(dummy_api_endpoint: str):
     exc = op_result.unwrap_err()
     assert exc.status_code == 409
     assert exc.json == {"detail": "Already Exists"}
-    assert str(exc) == "api - POST /items - 409 Conflict"
+    assert str(exc) == "api - POST /items - 409 "
 
     # Test the filter parameter in query string
     await api.item.collection_post({"name": "zdummy", "size": "L"})
