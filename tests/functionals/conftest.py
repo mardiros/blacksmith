@@ -120,12 +120,12 @@ def dummy_api_endpoint() -> Iterable[str]:
     for i in range(20):
         timeout = 0.1 / (i + 1)
         try:
-            httpx.get(f"http://localhost:{port}", timeout=httpx.Timeout(timeout))
+            httpx.get(f"http://127.0.0.1:{port}", timeout=httpx.Timeout(timeout))
         except httpx.ConnectError:
             pass
         else:
             break
-    yield f"http://localhost:{port}"
+    yield f"http://127.0.0.1:{port}"
     proc.kill()  # Cleanup after test
 
 
