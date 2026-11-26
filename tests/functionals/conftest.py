@@ -1,15 +1,46 @@
-from collections.abc import Iterable
+import asyncio
+import signal
+import socket
+from collections.abc import AsyncIterator
 from enum import StrEnum
-from multiprocessing import Process
-from typing import Annotated
+from typing import Annotated, Any, cast
 
-import httpx
 import pytest
-import uvicorn
 from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
+from hypercorn.asyncio import serve
+from hypercorn.config import Config as HypercornConfig
+from hypercorn.typing import ASGIFramework
 from pydantic import BaseModel
 from pydantic.fields import Field
 from starlette.responses import Response
+
+
+async def wait_for_socket(
+    host: str, port: int, timeout: int = 5, poll_time: float = 0.05
+):
+    """Wait until the socket is open before proceeding."""
+    for _ in range(timeout * int(1 / poll_time)):
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            if sock.connect_ex((host, port)) == 0:
+                break
+        await asyncio.sleep(poll_time)
+    else:
+        raise RuntimeError(f"Server on {host}:{port} did not start in time.")
+
+
+async def wait_for_socket_free(
+    host: str, port: int, timeout: int = 5, poll_time: float = 0.05
+):
+    """Wait until the socket is open before proceeding."""
+    for _ in range(timeout * int(1 / poll_time)):
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            if sock.connect_ex((host, port)) == 0:
+                await asyncio.sleep(poll_time)
+            else:
+                break
+    else:
+        raise RuntimeError(f"Server on {host}:{port} did not start in time.")
+
 
 app = FastAPI()
 
@@ -35,14 +66,14 @@ not_found = HTTPException(404, "Item not found")
 
 
 @app.get("/items", response_model=list[Item])
-def list_items(name: str | None = None):
+async def list_items(name: str | None = None):
     if name:
         return [item for item in items_db.values() if item.name.startswith(name)]
     return sorted(items_db.values(), key=lambda item: item.name)
 
 
 @app.post("/items")
-def create_item(item: Item):
+async def create_item(item: Item):
     if item.name in items_db:
         raise HTTPException(409, "Already Exists")
     items_db[item.name] = item
@@ -50,7 +81,7 @@ def create_item(item: Item):
 
 
 @app.get("/items/{item_name}")
-def read_item(item_name: str, response_model: type[BaseModel] = Item):
+async def read_item(item_name: str, response_model: type[BaseModel] = Item):
     try:
         return items_db[item_name]
     except KeyError as exc:
@@ -58,7 +89,7 @@ def read_item(item_name: str, response_model: type[BaseModel] = Item):
 
 
 @app.patch("/items/{item_name}")
-def update_item(item_name: str, item: PatchItem):
+async def update_item(item_name: str, item: PatchItem):
     try:
         cur = items_db.pop(item_name)
         if item.name is not None:
@@ -72,7 +103,7 @@ def update_item(item_name: str, item: PatchItem):
 
 
 @app.delete("/items/{item_name}")
-def delete_item(item_name: str):
+async def delete_item(item_name: str):
     try:
         del items_db[item_name]
         return Response("", 204)
@@ -108,26 +139,32 @@ async def upload_complex(
     }
 
 
-def run_server(port: int):
-    uvicorn.run(app, port=port)
-
-
 @pytest.fixture(scope="session")
-def dummy_api_endpoint() -> Iterable[str]:
-    port = 6556
-    proc = Process(target=run_server, args=(port,), daemon=True)
-    proc.start()
-    for i in range(20):
-        timeout = 0.1 / (i + 1)
-        try:
-            httpx.get(f"http://127.0.0.1:{port}", timeout=httpx.Timeout(timeout))
-        except httpx.ConnectError:
-            pass
-        else:
-            break
-    yield f"http://127.0.0.1:{port}"
-    proc.kill()  # Cleanup after test
+async def dummy_api_endpoint() -> AsyncIterator[str]:
+    host, port = "127.0.0.1", 6556
 
+    shutdown_event = asyncio.Event()
 
-if __name__ == "__main__":
-    run_server(6556)
+    def _signal_handler(*_: Any) -> None:
+        shutdown_event.set()
+
+    config = HypercornConfig()
+    config.bind = [f"{host}:{port}"]
+    config.worker_class = "asyncio"
+    config.loglevel = "error"
+
+    loop = asyncio.get_running_loop()
+    loop.add_signal_handler(signal.SIGTERM, _signal_handler)
+
+    server_task = asyncio.create_task(
+        serve(
+            cast(ASGIFramework, app),
+            config,
+            shutdown_trigger=shutdown_event.wait,
+        )
+    )
+    await wait_for_socket(host, port)
+    yield f"http://{host}:{port}"
+
+    server_task.cancel()  # Cleanup after test
+    await wait_for_socket_free(host, port)
