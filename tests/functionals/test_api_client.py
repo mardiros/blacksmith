@@ -18,7 +18,7 @@ from blacksmith import (
     register,
 )
 from blacksmith.domain.exceptions import NoContractException
-from blacksmith.service._async.client import AsyncClientBase
+from blacksmith.service._async.client import AsyncBaseClient
 from blacksmith.service._async.route_proxy import AsyncRouteProxy
 
 
@@ -122,7 +122,7 @@ register(
 )
 
 
-class AsyncApiClient(AsyncClientBase[HTTPError]):
+class AsyncApiClient(AsyncBaseClient[HTTPError]):
     item: AsyncRouteProxy[ListItem, GetItem, HTTPError]
 
     upload: AsyncRouteProxy[None, None, HTTPError]

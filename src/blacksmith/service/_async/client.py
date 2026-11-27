@@ -17,7 +17,7 @@ from .route_proxy import AsyncRouteProxy, ClientTimeout, build_timeout
 default_timeout = HTTPTimeout()
 
 
-class AsyncClientBase(Generic[TError_co]):
+class AsyncBaseClient(Generic[TError_co]):
     """Used to define the client interface."""
 
     name: ClientName
@@ -54,7 +54,7 @@ class AsyncClientBase(Generic[TError_co]):
         return self
 
 
-class AsyncClient(AsyncClientBase[TError_co]):
+class AsyncClient(AsyncBaseClient[TError_co]):
     """
     Client representation for the client name.
 
@@ -145,7 +145,7 @@ class AsyncClientFactory(Generic[TClientName, TError_co]):
         for middleware in self.middlewares:
             await middleware.initialize()
 
-    async def __call__(self, client_name: TClientName) -> AsyncClientBase[TError_co]:
+    async def __call__(self, client_name: TClientName) -> AsyncBaseClient[TError_co]:
         srv, resources = self.registry.get_service(client_name)
         endpoint = await self.sd.get_endpoint(srv[0], srv[1])
         return AsyncClient(

@@ -17,7 +17,7 @@ from .route_proxy import ClientTimeout, SyncRouteProxy, build_timeout
 default_timeout = HTTPTimeout()
 
 
-class SyncClientBase(Generic[TError_co]):
+class SyncBaseClient(Generic[TError_co]):
     """Used to define the client interface."""
 
     name: ClientName
@@ -54,7 +54,7 @@ class SyncClientBase(Generic[TError_co]):
         return self
 
 
-class SyncClient(SyncClientBase[TError_co]):
+class SyncClient(SyncBaseClient[TError_co]):
     """
     Client representation for the client name.
 
@@ -145,7 +145,7 @@ class SyncClientFactory(Generic[TClientName, TError_co]):
         for middleware in self.middlewares:
             middleware.initialize()
 
-    def __call__(self, client_name: TClientName) -> SyncClientBase[TError_co]:
+    def __call__(self, client_name: TClientName) -> SyncBaseClient[TError_co]:
         srv, resources = self.registry.get_service(client_name)
         endpoint = self.sd.get_endpoint(srv[0], srv[1])
         return SyncClient(
