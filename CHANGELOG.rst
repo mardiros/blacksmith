@@ -1,3 +1,13 @@
+6.0.0 - Released on 2026-11-27
+------------------------------
+* APIBreak (Typing only): Update the generic types of :class:`blacksmith.AsyncClientFactory`
+  and :class:`blacksmith.SyncClientFactory`. New types (class:`blacksmith.AsyncBaseClient`,
+  class:`blacksmith.SyncBaseClient` and :class:`blacksmith.typing.TClientName`) added for
+  typing purpose.
+
+  Now, it is possible to create a fully static clients definitions.
+
+
 5.2.0 - Released on 2026-11-11
 ------------------------------
 * Add support of python 3.15.
