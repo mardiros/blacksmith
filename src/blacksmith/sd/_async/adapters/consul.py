@@ -65,7 +65,7 @@ class AsyncConsulClient(AsyncClientBase[HTTPError]):
     services: AsyncRouteProxy[Service, None, HTTPError]
 
 
-class AsyncConsulClientFactory(AsyncClientFactory[HTTPError, Literal["consul"]]):
+class AsyncConsulClientFactory(AsyncClientFactory[Literal["consul"], HTTPError]):
     async def __call__(self, client_name: Literal["consul"]) -> AsyncConsulClient:
         return cast(AsyncConsulClient, await super().__call__(client_name))
 

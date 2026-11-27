@@ -130,7 +130,7 @@ class AsyncApiClient(AsyncClientBase[HTTPError]):
     upload_complex: AsyncRouteProxy[None, None, HTTPError]
 
 
-class AsyncAppClientFactory(AsyncClientFactory[HTTPError, Literal["api"]]):
+class AsyncAppClientFactory(AsyncClientFactory[Literal["api"], HTTPError]):
     async def __call__(self, client_name: Literal["api"]) -> AsyncApiClient:
         return cast(AsyncApiClient, await super().__call__(client_name))
 
