@@ -65,7 +65,7 @@ class SyncConsulClient(SyncClientBase[HTTPError]):
     services: SyncRouteProxy[Service, None, HTTPError]
 
 
-class SyncConsulClientFactory(SyncClientFactory[HTTPError, Literal["consul"]]):
+class SyncConsulClientFactory(SyncClientFactory[Literal["consul"], HTTPError]):
     def __call__(self, client_name: Literal["consul"]) -> SyncConsulClient:
         return cast(SyncConsulClient, super().__call__(client_name))
 

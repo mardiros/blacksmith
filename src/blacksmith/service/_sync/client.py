@@ -83,7 +83,7 @@ class SyncClient(SyncClientBase[TError_co]):
             raise UnregisteredResourceException(name, self.name) from exc
 
 
-class SyncClientFactory(Generic[TError_co, TClientName]):
+class SyncClientFactory(Generic[TClientName, TError_co]):
     """
     Client creator, for the given configuration.
 

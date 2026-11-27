@@ -66,7 +66,7 @@ async def main():
     apikey = os.environ["GANDIV5_API_KEY"]
     sd = AsyncStaticDiscovery({("gandi", "v5"): "https://api.gandi.net/v5"})
     auth = AsyncHTTPAuthorizationMiddleware("Apikey", apikey)
-    cli: AsyncClientFactory[Any, TLDResponse, APIError] = AsyncClientFactory(
+    cli: AsyncClientFactory[Any, APIError] = AsyncClientFactory(
         sd, error_parser=error_parser
     ).add_middleware(auth)
     api = await cli("gandi")

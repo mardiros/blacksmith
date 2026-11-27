@@ -83,7 +83,7 @@ class AsyncClient(AsyncClientBase[TError_co]):
             raise UnregisteredResourceException(name, self.name) from exc
 
 
-class AsyncClientFactory(Generic[TError_co, TClientName]):
+class AsyncClientFactory(Generic[TClientName, TError_co]):
     """
     Client creator, for the given configuration.
 
