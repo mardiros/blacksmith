@@ -1,10 +1,9 @@
 """Collect metrics based on prometheus."""
 
-import abc
 import time
 from dataclasses import asdict
 from datetime import timedelta
-from typing import Literal
+from typing import Any, Literal, Protocol
 
 from blacksmith.domain.model.http import HTTPRequest, HTTPResponse, HTTPTimeout
 from blacksmith.domain.model.middleware.http_cache import (
@@ -14,36 +13,26 @@ from blacksmith.domain.model.middleware.http_cache import (
     JsonSerializer,
 )
 from blacksmith.domain.model.middleware.prometheus import PrometheusMetrics
+from blacksmith.domain.typing import SyncMiddleware
 from blacksmith.typing import ClientName, HTTPMethod, Path
 
-from .base import SyncHTTPMiddleware, SyncMiddleware
+from .base import SyncHTTPMiddleware
 
 CachableState = Literal["uncachable_request", "uncachable_response", "cached"]
 default_cache_control = CacheControlPolicy()
 
 
-class SyncAbstractCache(abc.ABC):
+class SyncAbstractCache(Protocol):
     """Abstract Redis Client."""
 
-    @abc.abstractmethod
-    def initialize(self) -> None:
+    def initialize(self) -> Any:
         """Initialize the cache"""
 
-    @abc.abstractmethod
-    def get(self, key: str) -> str | None:
-        """Get a value from redis"""
+    def get(self, name: str) -> Any | None:
+        """Get a value from cache"""
 
-    @abc.abstractmethod
-    def set(self, key: str, val: str, ex: timedelta) -> None:
-        """Get a value from redis"""
-
-
-try:
-    from redis.client import Redis
-
-    SyncAbstractCache.register(Redis)
-except ImportError:
-    pass
+    def set(self, name: str, value: Any, ex: timedelta) -> bool | None:
+        """Get a value from cache"""
 
 
 class SyncHTTPCacheMiddleware(SyncHTTPMiddleware):
