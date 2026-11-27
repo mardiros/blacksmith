@@ -412,7 +412,6 @@ dev = [
     { name = "python-multipart" },
     { name = "redis" },
     { name = "starlette-zipkin" },
-    { name = "tamahagane" },
     { name = "types-redis" },
     { name = "unasync" },
     { name = "uvicorn" },
@@ -455,7 +454,6 @@ dev = [
     { name = "python-multipart", specifier = ">=0.0.20" },
     { name = "redis", specifier = ">=5.0.4,<6" },
     { name = "starlette-zipkin", specifier = ">=0.3.0,<0.4.0" },
-    { name = "tamahagane", specifier = ">=1.0.1,<2" },
     { name = "types-redis", specifier = ">=4.6.0,<6" },
     { name = "unasync", specifier = ">=0.6.0,<0.7" },
     { name = "uvicorn", specifier = ">=0.32.0" },
@@ -2477,15 +2475,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/82/02/48cb903e2ee36b3eb5e78c0a5c8589a6150bf6656f096335c5addd149999/starlette-zipkin-0.3.0.tar.gz", hash = "sha256:3c8270d2de79fb07e97b7ab1649550e3dfa9fd27c63a62f971cbe0cf24f4c1cc", size = 10396, upload-time = "2022-09-08T19:13:33.413Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/6e/a5/329f1e88c69494451a4f8305767518a6160536db83beae294f4b0f94cb0f/starlette_zipkin-0.3.0-py3-none-any.whl", hash = "sha256:36144dbb6e358961861f2e9f2dc6d27a94f6d9980ad22a04fb7ea82f584a25b1", size = 10407, upload-time = "2022-09-08T19:13:31.972Z" },
-]
-
-[[package]]
-name = "tamahagane"
-version = "1.0.1"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/3f/70/fe66cfe68c6b46ce7796f7a51b06aa7127dc394d06bec6857bbc19b875c1/tamahagane-1.0.1.tar.gz", hash = "sha256:8a3661731afc0385ad2172595a0142abee8d45279b3a9c9430edb5e33a637b7a", size = 6693, upload-time = "2026-11-11T11:20:55.971Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/68/56/047a363d5ef3b7f9f378e790a21b9ab29e9450a79d66e1b3ba11eb350c96/tamahagane-1.0.1-py3-none-any.whl", hash = "sha256:27f3746136ca45ebcbc4372cd4a692f8d136106cd74aabd9c24df96ba94bfe81", size = 7683, upload-time = "2026-11-11T11:20:55.015Z" },
 ]
 
 [[package]]

@@ -67,7 +67,6 @@ dev = [
     "python-multipart>=0.0.20",
     "redis >=5.0.4,<6",
     "starlette-zipkin >=0.3.0,<0.4.0",
-    "tamahagane >=1.0.1,<2",
     "types-redis >=4.6.0,<6",
     "unasync >=0.6.0,<0.7",
     "uvicorn >=0.32.0",
